@@ -2,18 +2,9 @@
    
    Changes have been made in support of compiling a new
    compiler using obnc and the Oberon-07 from Niklaus Wirth
+   and Jürg Gutknecht.
 
-   Other modifications to allow compilation using OBNC compiler 
-   Strict Oberon-07 definition:
-
-   - LONGINT translated to INTEGER
-   - LONGREAL translated to REAL
-   - Null statements (semicolon before END) removed
-   - Files.Read requires BYTE, not CHAR. Replace Files.Read(f, ch) with
-     Files.Read(f, byte)
-   - Files.Write requires BYTE, not CHAR. Replace Files.Write(f, ch) with
-     Files.Write(f, ORD(ch))
- 
+   See README.md for further details.
  *)
 
 MODULE Texts; (*JG 21.11.90 / NW 11.7.90 / 24.12.95 / 22.11.10 / 20.3.2017*)
