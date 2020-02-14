@@ -1,5 +1,5 @@
 MODULE ORP; (*N. Wirth 1.7.97 / 17.9.2018  Oberon compiler for RISC in Oberon-07*)
-  IMPORT Texts, Oberon, ORS, ORB, ORG;
+  IMPORT Texts, Logger, ORS, ORB, ORG;
   (*Author: Niklaus Wirth, 2014.
     Parser of Oberon-RISC compiler. Uses Scanner ORS to obtain symbols (tokens),
     ORB for definition of data structures and for handling import and export, and
@@ -960,6 +960,7 @@ MODULE ORP; (*N. Wirth 1.7.97 / 17.9.2018  Oberon compiler for RISC in Oberon-07
     END
   END Module;
 
+  (*
   PROCEDURE Option(VAR S: Texts.Scanner);
   BEGIN newSF := FALSE;
     IF S.nextCh = "/" THEN
@@ -967,12 +968,28 @@ MODULE ORP; (*N. Wirth 1.7.97 / 17.9.2018  Oberon compiler for RISC in Oberon-07
       IF (S.class = Texts.Name) & (S.s[0] = "s") THEN newSF := TRUE END
     END
   END Option;
+  *)
 
-  PROCEDURE Compile*;
+  PROCEDURE Compile*(filename : ARRAY OF CHAR; overrideSymbolFile : BOOLEAN);
     VAR beg, end, time : INTEGER;
       T: Texts.Text;
       S: Texts.Scanner;
   BEGIN 
+    newSF := overrideSymbolFile;
+
+    NEW(T);
+    Texts.Open(T, filename);
+    IF T.len > 0 THEN 
+      ORS.Init(T, 0);
+      Module
+    ELSE
+      Texts.WriteString(W, filename); 
+      Texts.WriteString(W, " not found");
+      Texts.WriteLn(W); 
+      Texts.Append(Logger.Log, W.buf)
+    END
+     
+    (*
     Texts.OpenScanner(S, Oberon.Par.text, Oberon.Par.pos); 
     Texts.Scan(S);
     IF S.class = Texts.Char THEN
@@ -1000,6 +1017,7 @@ MODULE ORP; (*N. Wirth 1.7.97 / 17.9.2018  Oberon compiler for RISC in Oberon-07
       END
     END ;
     Oberon.Collect(0)
+    *)
   END Compile;
 
 BEGIN 
