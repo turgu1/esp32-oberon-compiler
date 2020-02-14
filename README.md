@@ -1,6 +1,6 @@
 # esp32-oberon-compiler
 
-This is an ongoing effort to build an ESP32 Oberon Compiler, using the Oberon-07 Compiler from http://www.projectoberon.com by Niklaus Wirth and Jürg Gutknecht. 
+This is an ongoing effort to build an ESP32 Oberon Compiler, using the Oberon-07 Compiler from <http://www.projectoberon.com> by Niklaus Wirth and Jürg Gutknecht.
 
 The code is being ported to obnc and will generate ELF compatible object code to be used with the ESP-IDF framework.
 
@@ -20,7 +20,8 @@ In a Nutshell, the steps to get a working compiler are the following:
 10. Cleanup ORG in preparation of machine code translation
 11. Build the translation
 12. Test the results
-13. Enjoy
+13. Develop standard modules for ESP32
+14. Enjoy
 
 I'm now at step 6
 
@@ -50,7 +51,7 @@ The Oberon.Log has been replaced with a new Logger Module. Very basic for now.
 ## Texts.Mod
 
 Many procedures have been deleted, not usefull for the compiler execution.
-All code related to fonts and graphics geometry deleted. 
+All code related to fonts and graphics geometry deleted.
 
 Some potential bugs corrected:
 
@@ -63,6 +64,6 @@ There is a simple Makefile that will automate the creation of the Oberon executa
 
 The OBNC Oberon-07 compiler is required with the extension libraries to parse command line arguments. It is available at the following location:
 
-    https://miasap.se/obnc/
+    <https://miasap.se/obnc/>
 
 Guy

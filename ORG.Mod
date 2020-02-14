@@ -1144,7 +1144,8 @@ MODULE ORG; (* N.Wirth, 16.4.2016 / 4.4.2017 / 17.9.2018  Oberon compiler; code 
     Files.WriteInt(R, fixorgD); 
     Files.WriteInt(R, fixorgT); 
     Files.WriteInt(R, entry);
-    Files.Write(R, ORD("O")); Files.Register(F)
+    Files.Write(R, ORD("O")); 
+    Files.Register(F)
   END Close;
 
 BEGIN relmap[0] := 1; relmap[1] := 9; relmap[2] := 5; relmap[3] := 6; relmap[4] := 14; relmap[5] := 13;

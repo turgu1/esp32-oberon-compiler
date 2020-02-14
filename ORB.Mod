@@ -391,6 +391,7 @@ BEGIN
   (*initialize universe with data types and in-line procedures;
     LONGINT is synonym to INTEGER, LONGREAL to REAL.
     LED, ADC, SBC; LDPSR, LDREG, REG, COND are not in language definition*)
+    
   system := NIL;  (*n = procno*10 + nofpar*)
 
   enter("UML",      SFunc, intType, 132);  (*functions*)

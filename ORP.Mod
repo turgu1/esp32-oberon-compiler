@@ -971,9 +971,10 @@ MODULE ORP; (*N. Wirth 1.7.97 / 17.9.2018  Oberon compiler for RISC in Oberon-07
   *)
 
   PROCEDURE Compile*(filename : ARRAY OF CHAR; overrideSymbolFile : BOOLEAN);
-    VAR beg, end, time : INTEGER;
+    VAR 
+      (* beg, end, time : INTEGER; *)
       T: Texts.Text;
-      S: Texts.Scanner;
+      (* S: Texts.Scanner; *)
   BEGIN 
     newSF := overrideSymbolFile;
 
