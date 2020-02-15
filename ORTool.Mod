@@ -1,18 +1,15 @@
 MODULE ORTool;  (*NW 18.2.2013*)
   IMPORT SYSTEM, Strings, extArgs, Files, Texts, Logger, ORB;
-  VAR 
+  VAR W: Texts.Writer;
+    Form: INTEGER;  (*result of ReadType*)
+    mnemo0, mnemo1: ARRAY 16, 4 OF CHAR;  (*mnemonics*)
     filename : ARRAY 255 OF CHAR;
     ext      : ARRAY 4 OF CHAR;
     res      : INTEGER;
-    W        : Texts.Writer;
-    Form     : INTEGER;  (*result of ReadType*)
-    mnemo0, 
-    mnemo1   : ARRAY 16, 4 OF CHAR;  (*mnemonics*)
 
   PROCEDURE Read(VAR R: Files.Rider; VAR n: INTEGER);
     VAR b: BYTE;
-  BEGIN 
-    Files.Read(R, b);
+  BEGIN Files.Read(R, b);
     IF b < 80H THEN n := b ELSE n := b - 100H END
   END Read;
 
@@ -20,8 +17,7 @@ MODULE ORTool;  (*NW 18.2.2013*)
     VAR key, len, lev, size, off: INTEGER;
       ref, mno, class, form, readonly: INTEGER;
       name, modname: ARRAY 32 OF CHAR;
-  BEGIN 
-    Read(R, ref); Texts.Write(W, " "); Texts.Write(W, "[");
+  BEGIN Read(R, ref); Texts.Write(W, " "); Texts.Write(W, "[");
     IF ref < 0 THEN Texts.Write(W, "^"); Texts.WriteInt(W, -ref, 1)
     ELSE Texts.WriteInt(W, ref, 1);
       Read(R, form); Texts.WriteString(W, "  form = "); Texts.WriteInt(W, form, 1);
@@ -69,35 +65,38 @@ MODULE ORTool;  (*NW 18.2.2013*)
       F: Files.File; R: Files.Rider;
       S: Texts.Scanner;
   BEGIN 
-    Texts.WriteString(W, "OR-decode "); Texts.WriteString(W, filename);
-    Texts.WriteLn(W); Texts.Append(Logger.Log, W.buf);
-    F := Files.Old(filename);
-    IF F # NIL THEN
-      Files.Set(R, F, 0); Files.ReadInt(R, k); Files.ReadInt(R, k);
-      Files.ReadString(R, name); Texts.WriteString(W, name); Texts.WriteHex(W, k);
-      Read(R, class); Texts.WriteInt(W, class, 3); (*sym file version*)
-      IF class = ORB.versionkey THEN
-        Texts.WriteLn(W); Read(R, class);
-        WHILE class # 0 DO
-          Texts.WriteInt(W, class, 4); Files.ReadString(R, name); Texts.Write(W, " "); Texts.WriteString(W, name);
-          ReadType(R);
-          IF class = ORB.Typ THEN
-            Texts.Write(W, "("); Read(R, class);
-            WHILE class # 0 DO  (*pointer base fixup*)
-              Texts.WriteString(W, " ->"); Texts.WriteInt(W, class, 4); Read(R, class)
+    (*Texts.OpenScanner(S, Oberon.Par.text, Oberon.Par.pos); Texts.Scan(S);
+    IF S.class = Texts.Name THEN *)
+      Texts.WriteString(W, "OR-decode "); Texts.WriteString(W, filename);
+      Texts.WriteLn(W); Texts.Append(Logger.Log, W.buf);
+      F := Files.Old(filename);
+      IF F # NIL THEN
+        Files.Set(R, F, 0); Files.ReadInt(R, k); Files.ReadInt(R, k);
+        Files.ReadString(R, name); Texts.WriteString(W, name); Texts.WriteHex(W, k);
+        Read(R, class); Texts.WriteInt(W, class, 3); (*sym file version*)
+        IF class = ORB.versionkey THEN
+          Texts.WriteLn(W); Read(R, class);
+          WHILE class # 0 DO
+            Texts.WriteInt(W, class, 4); Files.ReadString(R, name); Texts.Write(W, " "); Texts.WriteString(W, name);
+            ReadType(R);
+            IF class = ORB.Typ THEN
+              Texts.Write(W, "("); Read(R, class);
+              WHILE class # 0 DO  (*pointer base fixup*)
+                Texts.WriteString(W, " ->"); Texts.WriteInt(W, class, 4); Read(R, class)
+              END ;
+              Texts.Write(W, ")")
+            ELSIF (class = ORB.Const) OR (class = ORB.Var) THEN
+              Files.ReadNum(R, k); Texts.WriteInt(W, k, 5);  (*Reals, Strings!*)
             END ;
-            Texts.Write(W, ")")
-          ELSIF (class = ORB.Const) OR (class = ORB.Var) THEN
-            Files.ReadNum(R, k); Texts.WriteInt(W, k, 5);  (*Reals, Strings!*)
-          END ;
-          Texts.WriteLn(W); Texts.Append(Logger.Log, W.buf);
-          Read(R, class)
+            Texts.WriteLn(W); Texts.Append(Logger.Log, W.buf);
+            Read(R, class)
+          END
+        ELSE Texts.WriteString(W, " bad symfile version")
         END
-      ELSE Texts.WriteString(W, " bad symfile version")
-      END
-    ELSE Texts.WriteString(W, " not found")
-    END ;
-    Texts.WriteLn(W); Texts.Append(Logger.Log, W.buf)
+      ELSE Texts.WriteString(W, " not found")
+      END ;
+      Texts.WriteLn(W); Texts.Append(Logger.Log, W.buf)
+    (* END *)
   END DecSym;
   
 (* ---------------------------------------------------*)
@@ -148,8 +147,7 @@ MODULE ORTool;  (*NW 18.2.2013*)
   END opcode;
 
   PROCEDURE Sync(VAR R: Files.Rider);
-    VAR 
-      b : BYTE;
+    VAR b: BYTE;
   BEGIN Files.Read(R, b); Texts.WriteString(W, "Sync "); Texts.Write(W, CHR(b)); Texts.WriteLn(W)
   END Sync;
   
@@ -159,78 +157,74 @@ MODULE ORTool;  (*NW 18.2.2013*)
 
   PROCEDURE DecObj*(VAR filename : ARRAY OF CHAR);   (*decode object file*)
     VAR class, i, n, key, size, fix, adr, data, len: INTEGER;
-      ch: CHAR;
-      b : BYTE;
+      ch: CHAR; b: BYTE;
       name: ARRAY 32 OF CHAR;
       F: Files.File; R: Files.Rider;
       S: Texts.Scanner;
-  BEGIN 
-    Texts.WriteString(W, "decode "); Texts.WriteString(W, filename); 
-    F := Files.Old(filename);
-    IF F # NIL THEN
-      Files.Set(R, F, 0); Files.ReadString(R, name); Texts.WriteLn(W); Texts.WriteString(W, name);
-      Files.ReadInt(R, key); Texts.WriteHex(W, key); Read(R, class); Texts.WriteInt(W, class, 4); (*version*)
-      Files.ReadInt(R, size); Texts.WriteInt(W, size, 6); Texts.WriteLn(W);
-      Texts.WriteString(W, "imports:"); Texts.WriteLn(W); Files.ReadString(R, name);
-      WHILE name[0] # 0X DO
-        Texts.Write(W, 9X); Texts.WriteString(W, name);
-        Files.ReadInt(R, key); Texts.WriteHex(W, key); Texts.WriteLn(W);
-        Files.ReadString(R, name)
+  BEGIN (* Texts.OpenScanner(S, Oberon.Par.text, Oberon.Par.pos); Texts.Scan(S);
+    IF S.class = Texts.Name THEN *)
+      Texts.WriteString(W, "decode "); Texts.WriteString(W, filename); F := Files.Old(filename);
+      IF F # NIL THEN
+        Files.Set(R, F, 0); Files.ReadString(R, name); Texts.WriteLn(W); Texts.WriteString(W, name);
+        Files.ReadInt(R, key); Texts.WriteHex(W, key); Read(R, class); Texts.WriteInt(W, class, 4); (*version*)
+        Files.ReadInt(R, size); Texts.WriteInt(W, size, 6); Texts.WriteLn(W);
+        Texts.WriteString(W, "imports:"); Texts.WriteLn(W); Files.ReadString(R, name);
+        WHILE name[0] # 0X DO
+          Texts.Write(W, 9X); Texts.WriteString(W, name);
+          Files.ReadInt(R, key); Texts.WriteHex(W, key); Texts.WriteLn(W);
+          Files.ReadString(R, name)
+        END ;
+      (* Sync(R); *)
+        Texts.WriteString(W, "type descriptors"); Texts.WriteLn(W);
+        Files.ReadInt(R, n); n := n DIV 4; i := 0;
+        WHILE i < n DO Files.ReadInt(R, data); Texts.WriteHex(W, data); INC(i) END ;
+        Texts.WriteLn(W);
+        Texts.WriteString(W, "data"); Files.ReadInt(R, data); Texts.WriteInt(W, data, 6); Texts.WriteLn(W);
+        Texts.WriteString(W, "strings"); Texts.WriteLn(W);
+        Files.ReadInt(R, n); i := 0;
+        WHILE i < n DO Files.Read(R, b); Texts.Write(W, CHR(b)); INC(i) END ;
+        Texts.WriteLn(W);
+        Texts.WriteString(W, "code"); Texts.WriteLn(W);
+        Files.ReadInt(R, n); i := 0;
+        WHILE i < n DO
+          Files.ReadInt(R, data); Texts.WriteInt(W, i, 4); Texts.Write(W, 9X); Texts.WriteHex(W, data);
+          Texts.Write(W, 9X); opcode(data); Texts.WriteLn(W); INC(i)
+        END ;
+      (* Sync(R); *)
+        Texts.WriteString(W, "commands:"); Texts.WriteLn(W);
+        Files.ReadString(R, name);
+        WHILE name[0] # 0X DO
+          Texts.Write(W, 9X); Texts.WriteString(W, name);
+          Files.ReadInt(R, adr); Texts.WriteInt(W, adr, 5); Texts.WriteLn(W);
+          Files.ReadString(R, name)
+        END ;
+      (* Sync(R); *)
+        Texts.WriteString(W, "entries"); Texts.WriteLn(W);
+        Files.ReadInt(R, n); i := 0;
+        WHILE i < n DO
+          Files.ReadInt(R, adr); Texts.WriteInt(W, adr, 6); INC(i)
+        END ;
+        Texts.WriteLn(W);
+      (* Sync(R); *)
+        Texts.WriteString(W, "pointer refs"); Texts.WriteLn(W); Files.ReadInt(R, adr);
+        WHILE adr # -1 DO Texts.WriteInt(W, adr, 6); Files.ReadInt(R, adr) END ;
+        Texts.WriteLn(W);
+      (* Sync(R); *)
+        Files.ReadInt(R, data); Texts.WriteString(W, "fixP = "); Texts.WriteInt(W, data, 8); Texts.WriteLn(W);
+        Files.ReadInt(R, data); Texts.WriteString(W, "fixD = "); Texts.WriteInt(W, data, 8); Texts.WriteLn(W);
+        Files.ReadInt(R, data); Texts.WriteString(W, "fixT = "); Texts.WriteInt(W, data, 8); Texts.WriteLn(W);
+        Files.ReadInt(R, data); Texts.WriteString(W, "entry = "); Texts.WriteInt(W, data, 8); Texts.WriteLn(W);
+        Files.Read(R, b);
+        IF CHR(b) # "O" THEN Texts.WriteString(W, "format eror"); Texts.WriteLn(W) END
+      (* Sync(R); *)
+      ELSE Texts.WriteString(W, " not found"); Texts.WriteLn(W)
       END ;
-    (* Sync(R); *)
-      Texts.WriteString(W, "type descriptors"); Texts.WriteLn(W);
-      Files.ReadInt(R, n); n := n DIV 4; i := 0;
-      WHILE i < n DO Files.ReadInt(R, data); Texts.WriteHex(W, data); INC(i) END ;
-      Texts.WriteLn(W);
-      Texts.WriteString(W, "data"); Files.ReadInt(R, data); Texts.WriteInt(W, data, 6); Texts.WriteLn(W);
-      Texts.WriteString(W, "strings"); Texts.WriteLn(W);
-      Files.ReadInt(R, n); i := 0;
-      WHILE i < n DO Files.Read(R, b); Texts.Write(W, CHR(b)); INC(i) END ;
-      Texts.WriteLn(W);
-      Texts.WriteString(W, "code"); Texts.WriteLn(W);
-      Files.ReadInt(R, n); i := 0;
-      WHILE i < n DO
-        Files.ReadInt(R, data); Texts.WriteInt(W, i, 4); Texts.Write(W, 9X); Texts.WriteHex(W, data);
-        Texts.Write(W, 9X); opcode(data); Texts.WriteLn(W); INC(i)
-      END ;
-    (* Sync(R); *)
-      Texts.WriteString(W, "commands:"); Texts.WriteLn(W);
-      Files.ReadString(R, name);
-      WHILE name[0] # 0X DO
-        Texts.Write(W, 9X); Texts.WriteString(W, name);
-        Files.ReadInt(R, adr); Texts.WriteInt(W, adr, 5); Texts.WriteLn(W);
-        Files.ReadString(R, name)
-      END ;
-    (* Sync(R); *)
-      Texts.WriteString(W, "entries"); Texts.WriteLn(W);
-      Files.ReadInt(R, n); i := 0;
-      WHILE i < n DO
-        Files.ReadInt(R, adr); Texts.WriteInt(W, adr, 6); INC(i)
-      END ;
-      Texts.WriteLn(W);
-    (* Sync(R); *)
-      Texts.WriteString(W, "pointer refs"); Texts.WriteLn(W); Files.ReadInt(R, adr);
-      WHILE adr # -1 DO Texts.WriteInt(W, adr, 6); Files.ReadInt(R, adr) END ;
-      Texts.WriteLn(W);
-    (* Sync(R); *)
-      Files.ReadInt(R, data); Texts.WriteString(W, "fixP = "); Texts.WriteInt(W, data, 8); Texts.WriteLn(W);
-      Files.ReadInt(R, data); Texts.WriteString(W, "fixD = "); Texts.WriteInt(W, data, 8); Texts.WriteLn(W);
-      Files.ReadInt(R, data); Texts.WriteString(W, "fixT = "); Texts.WriteInt(W, data, 8); Texts.WriteLn(W);
-      Files.ReadInt(R, data); Texts.WriteString(W, "entry = "); Texts.WriteInt(W, data, 8); Texts.WriteLn(W);
-      Files.Read(R, b);
-      IF b # ORD("O") THEN Texts.WriteString(W, "format eror"); Texts.WriteLn(W) END
-    (* Sync(R); *)
-    ELSE Texts.WriteString(W, " not found"); Texts.WriteLn(W)
-    END ;
-    Texts.Append(Logger.Log, W.buf)
+      Texts.Append(Logger.Log, W.buf)
+    (* END *)
   END DecObj;
 
-BEGIN 
-  Texts.OpenWriter(W); 
-  Texts.WriteString(W, "ORTool 18.2.2013");
-  Texts.WriteLn(W); 
-  Texts.Append(Logger.Log, W.buf);
-  
+BEGIN Texts.OpenWriter(W); Texts.WriteString(W, "ORTool 18.2.2013");
+  Texts.WriteLn(W); Texts.Append(Logger.Log, W.buf);
   mnemo0[0] := "MOV";
   mnemo0[1] := "LSL";
   mnemo0[2] := "ASR";
@@ -258,7 +252,7 @@ BEGIN
   mnemo1[6] := "LE ";
   mnemo1[14] := "GT ";
   mnemo1[15] := "NO ";
-
+  
   IF extArgs.count = 1 THEN
     extArgs.Get(0, filename, res);
     Strings.Extract(filename, Strings.Length(filename) - 3, 3, ext);
@@ -267,5 +261,5 @@ BEGIN
     ELSE
       DecSym(filename)
     END
-  END
+  END  
 END ORTool.

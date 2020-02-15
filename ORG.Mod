@@ -1,79 +1,53 @@
-MODULE ORG; (* N.Wirth, 16.4.2016 / 4.4.2017 / 17.9.2018  Oberon compiler; code generator for RISC*)
+MODULE ORG; (* N.Wirth, 16.4.2016 / 4.4.2017 / 31.5.2019  Oberon compiler; code generator for RISC*)
   IMPORT SYSTEM, Files, ORS, ORB;
   (*Code generator for Oberon compiler for RISC processor.
      Procedural interface to Parser OSAP; result in array "code".
      Procedure Close writes code-files*)
 
-  CONST 
-    WordSize* =   4;
-    StkOrg0   = -64; 
-    VarOrg0   =   0;  (*for RISC-0 only*)
-    
-    MT      =       12; 
-    SP      =       14; 
-    LNK     =       15;   (*dedicated registers*)
-    maxCode =     8000; 
-    maxStrx =     2400; 
-    maxTD   =      160; 
-    C24     = 1000000H;
-    Reg     =       10; 
-    RegI    =       11; 
-    Cond    =       12;  (*internal item modes*)
+  CONST WordSize* = 4;
+    StkOrg0 = -64; VarOrg0 = 0;  (*for RISC-0 only*)
+    MT = 12; SP = 14; LNK = 15;   (*dedicated registers*)
+    maxCode = 8000; maxStrx = 2400; maxTD = 160; C24 = 1000000H;
+    Reg = 10; RegI = 11; Cond = 12;  (*internal item modes*)
 
-  (*frequently used opcodes*)  
-
-    U = 2000H; 
-    V = 1000H;
-
-    Mov =  0; Lsl =  1; Asr =  2; Ror =  3; 
-    And =  4; Ann =  5; Ior =  6; Xor =  7;
-    Add =  8; Sub =  9; Cmp =  9; Mul = 10; 
-    Div = 11;
+  (*frequently used opcodes*)  U = 2000H; V = 1000H;
+    Mov = 0; Lsl = 1; Asr = 2; Ror= 3; And = 4; Ann = 5; Ior = 6; Xor = 7;
+    Add = 8; Sub = 9; Cmp = 9; Mul = 10; Div = 11;
     Fad = 12; Fsb = 13; Fml = 14; Fdv = 15;
-    Ldr =  8; Str = 10;
-    BR  =  0; BLR =  1; BC  =  2; BL  =  3;
-    MI  =  0; PL  =  8; EQ  =  1; NE  =  9; 
-    LT  =  5; GE  = 13; LE  =  6; GT  = 14;
+    Ldr = 8; Str = 10;
+    BR = 0; BLR = 1; BC = 2; BL = 3;
+    MI = 0; PL = 8; EQ = 1; NE = 9; LT = 5; GE = 13; LE = 6; GT = 14;
 
     TYPE Item* = RECORD
-      mode* : INTEGER;
-      type* : ORB.Type;
-      a*, 
-      b*, 
-      r     : INTEGER;
-      rdo*  : BOOLEAN  (*read only*)
-    END;
+      mode*: INTEGER;
+      type*: ORB.Type;
+      a*, b*, r: INTEGER;
+      rdo*: BOOLEAN  (*read only*)
+    END ;
 
-  (* 
-    Item forms and meaning of fields:
-    mode     r      a       b
+  (* Item forms and meaning of fields:
+    mode    r      a       b
     --------------------------------
-    Const    -    value (proc adr)  (immediate value)
-    Var     base   off     -             (direct adr)
-    Par      -     off0   off1         (indirect adr)
+    Const   -     value (proc adr)  (immediate value)
+    Var     base   off     -               (direct adr)
+    Par      -     off0     off1         (indirect adr)
     Reg    regno
     RegI   regno   off     -
-    Cond   cond   Fchain  Tchain  
-  *)
+    Cond  cond   Fchain  Tchain  *)
 
-  VAR 
-    pc*      : INTEGER;  (* program counter *)
-    varsize  : INTEGER;  (* data index *)
-    tdx, 
-    strx     : INTEGER;
-    entry    : INTEGER;  (* main entry point *)
-    RH       : INTEGER;  (* available registers R[0] ... R[H-1] *)
-    frame    : INTEGER;  (* frame offset changed in SaveRegs and RestoreRegs *)
-    fixorgP, 
-    fixorgD, 
-    fixorgT  : INTEGER;  (* origins of lists of locations to be fixed up by loader *)
-    check    : BOOLEAN;  (* emit run-time checks   *)
-    version  : INTEGER;  (* 0 = RISC-0, 1 = RISC-5 *)
+  VAR pc*, varsize: INTEGER;   (*program counter, data index*)
+    tdx, strx: INTEGER;
+    entry: INTEGER;   (*main entry point*)
+    RH: INTEGER;  (*available registers R[0] ... R[H-1]*)
+    frame: INTEGER;  (*frame offset changed in SaveRegs and RestoreRegs*)
+    fixorgP, fixorgD, fixorgT: INTEGER;   (*origins of lists of locations to be fixed up by loader*)
+    check: BOOLEAN;  (*emit run-time checks*)
+    version: INTEGER;  (* 0 = RISC-0, 1 = RISC-5 *)
     
-    relmap : ARRAY 6       OF INTEGER;  (*condition codes for relations*)
-    code   : ARRAY maxCode OF INTEGER;
-    data   : ARRAY maxTD   OF INTEGER;  (*type descriptors*)
-    str    : ARRAY maxStrx OF CHAR;
+    relmap: ARRAY 6 OF INTEGER;  (*condition codes for relations*)
+    code: ARRAY maxCode OF INTEGER;
+    data: ARRAY maxTD OF INTEGER;  (*type descriptors*)
+    str: ARRAY maxStrx OF CHAR;
 
   (*instruction assemblers according to formats*)
 
@@ -85,8 +59,7 @@ MODULE ORG; (* N.Wirth, 16.4.2016 / 4.4.2017 / 17.9.2018  Oberon compiler; code 
   PROCEDURE Put1(op, a, b, im: INTEGER);
   BEGIN (*emit format-1 instruction,  -10000H <= im < 10000H*)
     IF im < 0 THEN INC(op, V) END ;
-    code[pc] := (((a+40H) * 10H + b) * 10H + op) * 10000H + (im MOD 10000H); 
-    INC(pc)
+    code[pc] := (((a+40H) * 10H + b) * 10H + op) * 10000H + (im MOD 10000H); INC(pc)
   END Put1;
 
   PROCEDURE Put1a(op, a, b, im: INTEGER);
@@ -100,19 +73,17 @@ MODULE ORG; (* N.Wirth, 16.4.2016 / 4.4.2017 / 17.9.2018  Oberon compiler; code 
 
   PROCEDURE Put2(op, a, b, off: INTEGER);
   BEGIN (*emit load/store instruction*)
-    code[pc] := ((op * 10H + a) * 10H + b) * 100000H + (off MOD 100000H); 
-    INC(pc)
+    code[pc] := ((op * 10H + a) * 10H + b) * 100000H + (off MOD 100000H); INC(pc)
   END Put2;
 
   PROCEDURE Put3(op, cond, off: INTEGER);
   BEGIN (*emit branch instruction*)
-    code[pc] := ((op + 12) * 10H + cond) * 1000000H + (off MOD 1000000H); 
-    INC(pc)
+    code[pc] := ((op+12) * 10H + cond) * 1000000H + (off MOD 1000000H); INC(pc)
   END Put3;
 
   PROCEDURE incR;
   BEGIN
-    IF RH < MT - 1 THEN INC(RH) ELSE ORS.Mark("register stack overflow") END
+    IF RH < MT-1 THEN INC(RH) ELSE ORS.Mark("register stack overflow") END
   END incR;
 
   PROCEDURE CheckRegs*;
@@ -127,14 +98,14 @@ MODULE ORG; (* N.Wirth, 16.4.2016 / 4.4.2017 / 17.9.2018  Oberon compiler; code 
   END SetCC;
 
   PROCEDURE Trap(cond, num: INTEGER);
-  BEGIN Put3(BLR, cond, ORS.Pos() * 100H + num * 10H + MT)
+  BEGIN Put3(BLR, cond, ORS.Pos()*100H + num*10H + MT)
   END Trap;
 
   (*handling of forward reference, fixups of branch addresses and constant tables*)
 
   PROCEDURE negated(cond: INTEGER): INTEGER;
   BEGIN
-    IF cond < 8 THEN cond := cond + 8 ELSE cond := cond - 8 END ;
+    IF cond < 8 THEN cond := cond+8 ELSE cond := cond-8 END ;
     RETURN cond
   END negated;
 
@@ -143,13 +114,13 @@ MODULE ORG; (* N.Wirth, 16.4.2016 / 4.4.2017 / 17.9.2018  Oberon compiler; code 
   END fix;
 
   PROCEDURE FixOne*(at: INTEGER);
-  BEGIN fix(at, pc - at - 1)
+  BEGIN fix(at, pc-at-1)
   END FixOne;
 
   PROCEDURE FixLink*(L: INTEGER);
     VAR L1: INTEGER;
   BEGIN
-    WHILE L # 0 DO L1 := code[L] MOD 40000H; fix(L, pc - L - 1); L := L1 END
+    WHILE L # 0 DO L1 := code[L] MOD 40000H; fix(L, pc-L-1); L := L1 END
   END FixLink;
 
   PROCEDURE FixLinkWith(L0, dst: INTEGER);
@@ -176,7 +147,7 @@ MODULE ORG; (* N.Wirth, 16.4.2016 / 4.4.2017 / 17.9.2018  Oberon compiler; code 
   PROCEDURE GetSB(base: INTEGER);
   BEGIN
     IF version = 0 THEN Put1(Mov, RH, 0, VarOrg0)
-    ELSE Put2(Ldr, RH, -base, pc - fixorgD); fixorgD := pc - 1
+    ELSE Put2(Ldr, RH, -base, pc-fixorgD); fixorgD := pc-1
     END
   END GetSB;
 
@@ -187,16 +158,16 @@ MODULE ORG; (* N.Wirth, 16.4.2016 / 4.4.2017 / 17.9.2018  Oberon compiler; code 
   PROCEDURE load(VAR x: Item);
     VAR op: INTEGER;
   BEGIN
-    IF x.type.size = 1 THEN op := Ldr + 1 ELSE op := Ldr END ;
+    IF x.type.size = 1 THEN op := Ldr+1 ELSE op := Ldr END ;
     IF x.mode # Reg THEN
       IF x.mode = ORB.Const THEN
         IF x.type.form = ORB.Proc THEN
           IF x.r > 0 THEN ORS.Mark("not allowed")
-          ELSIF x.r = 0 THEN Put3(BL, 7, 0); Put1a(Sub, RH, LNK, pc * 4 - x.a)
+          ELSIF x.r = 0 THEN Put3(BL, 7, 0); Put1a(Sub, RH, LNK, pc*4 - x.a)
           ELSE GetSB(x.r); Put1(Add, RH, RH, x.a + 100H) (*mark as progbase-relative*)
           END
         ELSIF (x.a <= 0FFFFH) & (x.a >= -10000H) THEN Put1(Mov, RH, 0, x.a)
-        ELSE Put1(Mov + U, RH, 0, x.a DIV 10000H MOD 10000H);
+        ELSE Put1(Mov+U, RH, 0, x.a DIV 10000H MOD 10000H);
           IF x.a MOD 10000H # 0 THEN Put1(Ior, RH, RH, x.a MOD 10000H) END
         END ;
         x.r := RH; incR
@@ -384,20 +355,25 @@ MODULE ORG; (* N.Wirth, 16.4.2016 / 4.4.2017 / 17.9.2018  Oberon compiler; code 
 
   PROCEDURE TypeTest*(VAR x: Item; T: ORB.Type; varpar, isguard: BOOLEAN);
     VAR pc0: INTEGER;
-  BEGIN (*fetch tag into RH*)
-    IF varpar THEN Put2(Ldr, RH, SP, x.a+4+frame)
-    ELSE load(x);
-      pc0 := pc; Put3(BC, EQ, 0);  (*NIL belongs to every pointer type*)
-      Put2(Ldr, RH, x.r, -8)
-    END ;
-    Put2(Ldr, RH, RH, T.nofpar*4); incR;
-    loadTypTagAdr(T);  (*tag of T*)
-    Put0(Cmp, RH-1, RH-1, RH-2); DEC(RH, 2);
-    IF ~varpar THEN fix(pc0, pc - pc0 - 1) END ;
-    IF isguard THEN
-      IF check THEN Trap(NE, 2) END
-    ELSE SetCC(x, EQ);
-      IF ~varpar THEN DEC(RH) END
+  BEGIN
+    IF T = NIL THEN
+      IF x.mode >= Reg THEN DEC(RH) END ;
+      SetCC(x, 7)
+    ELSE (*fetch tag into RH*)
+      IF varpar THEN Put2(Ldr, RH, SP, x.a+4+frame)
+      ELSE load(x);
+        pc0 := pc; Put3(BC, EQ, 0);  (*NIL belongs to every pointer type*)
+        Put2(Ldr, RH, x.r, -8)
+      END ;
+      Put2(Ldr, RH, RH, T.nofpar*4); incR;
+      loadTypTagAdr(T);  (*tag of T*)
+      Put0(Cmp, RH-1, RH-1, RH-2); DEC(RH, 2);
+      IF ~varpar THEN fix(pc0, pc - pc0 - 1) END ;
+      IF isguard THEN
+        IF check THEN Trap(NE, 2) END
+      ELSE SetCC(x, EQ);
+        IF ~varpar THEN DEC(RH) END
+      END
     END
   END TypeTest;
 
@@ -425,7 +401,7 @@ MODULE ORG; (* N.Wirth, 16.4.2016 / 4.4.2017 / 17.9.2018  Oberon compiler; code 
   PROCEDURE Or1*(VAR x: Item);   (* x := x OR *)
   BEGIN
     IF x.mode # Cond THEN loadCond(x) END ;
-    Put3(BC, x.r, x.b);  x.b := pc - 1; FixLink(x.a); x.a := 0
+    Put3(BC, x.r, x.b);  x.b := pc-1; FixLink(x.a); x.a := 0
   END Or1;
 
   PROCEDURE Or2*(VAR x, y: Item);
@@ -481,9 +457,9 @@ MODULE ORG; (* N.Wirth, 16.4.2016 / 4.4.2017 / 17.9.2018  Oberon compiler; code 
   BEGIN
     IF (x.mode = ORB.Const) & (y.mode = ORB.Const) THEN x.a := x.a * y.a
     ELSIF (y.mode = ORB.Const) & (y.a >= 2) & (log2(y.a, e) = 1) THEN load(x); Put1(Lsl, x.r, x.r, e)
-    ELSIF  y.mode = ORB.Const THEN load(x); Put1a(Mul, x.r, x.r, y.a)
+    ELSIF y.mode = ORB.Const THEN load(x); Put1a(Mul, x.r, x.r, y.a)
     ELSIF (x.mode = ORB.Const) & (x.a >= 2) & (log2(x.a, e) = 1) THEN load(y); Put1(Lsl, y.r, y.r, e); x.mode := Reg; x.r := y.r
-    ELSIF  x.mode = ORB.Const THEN load(y); Put1a(Mul, y.r, y.r, x.a); x.mode := Reg; x.r := y.r
+    ELSIF x.mode = ORB.Const THEN load(y); Put1a(Mul, y.r, y.r, x.a); x.mode := Reg; x.r := y.r
     ELSE load(x); load(y); Put0(Mul, RH-2, x.r, y.r); DEC(RH); x.r := RH-1
     END
   END MulOp;
@@ -518,15 +494,13 @@ MODULE ORG; (* N.Wirth, 16.4.2016 / 4.4.2017 / 17.9.2018  Oberon compiler; code 
   (* Code generation for REAL operators *)
 
   PROCEDURE RealOp*(op: INTEGER; VAR x, y: Item);   (* x := x op y *)
-  BEGIN 
-    load(x); 
-    load(y);
-    IF    op = ORS.plus  THEN Put0(Fad, RH - 2, x.r, y.r)
-    ELSIF op = ORS.minus THEN Put0(Fsb, RH - 2, x.r, y.r)
-    ELSIF op = ORS.times THEN Put0(Fml, RH - 2, x.r, y.r)
-    ELSIF op = ORS.rdiv  THEN Put0(Fdv, RH - 2, x.r, y.r)
+  BEGIN load(x); load(y);
+    IF op = ORS.plus THEN Put0(Fad, RH-2, x.r, y.r)
+    ELSIF op = ORS.minus THEN Put0(Fsb, RH-2, x.r, y.r)
+    ELSIF op = ORS.times THEN Put0(Fml, RH-2, x.r, y.r)
+    ELSIF op = ORS.rdiv THEN Put0(Fdv, RH-2, x.r, y.r)
     END ;
-    DEC(RH); x.r := RH - 1
+    DEC(RH); x.r := RH-1
   END RealOp;
 
   (* Code generation for set operators *)
@@ -1092,11 +1066,7 @@ MODULE ORG; (* N.Wirth, 16.4.2016 / 4.4.2017 / 17.9.2018  Oberon compiler; code 
     size := varsize + strx + comsize + (pc + nofimps + nofent + nofptrs + 1)*4;  (*varsize includes type descriptors*)
     
     ORB.MakeFileName(name, modid, ".rsc"); (*write code file*)
-    F := Files.New(name); 
-    Files.Set(R, F, 0); 
-    Files.WriteString(R, modid); 
-    Files.WriteInt(R, key); 
-    Files.Write(R, version);
+    F := Files.New(name); Files.Set(R, F, 0); Files.WriteString(R, modid); Files.WriteInt(R, key); Files.Write(R, version);
     Files.WriteInt(R, size);
     obj := ORB.topScope.next;
     WHILE (obj # NIL) & (obj.class = ORB.Mod) DO  (*imports*)
@@ -1142,12 +1112,8 @@ MODULE ORG; (* N.Wirth, 16.4.2016 / 4.4.2017 / 17.9.2018  Oberon compiler; code 
       obj := obj.next
     END ;
     Files.WriteInt(R, -1);
-    Files.WriteInt(R, fixorgP); 
-    Files.WriteInt(R, fixorgD); 
-    Files.WriteInt(R, fixorgT); 
-    Files.WriteInt(R, entry);
-    Files.Write(R, ORD("O")); 
-    Files.Register(F)
+    Files.WriteInt(R, fixorgP); Files.WriteInt(R, fixorgD); Files.WriteInt(R, fixorgT); Files.WriteInt(R, entry);
+    Files.Write(R, ORD("O")); Files.Register(F)
   END Close;
 
 BEGIN relmap[0] := 1; relmap[1] := 9; relmap[2] := 5; relmap[3] := 6; relmap[4] := 14; relmap[5] := 13;

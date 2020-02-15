@@ -1,4 +1,4 @@
-MODULE ORP; (*N. Wirth 1.7.97 / 17.9.2018  Oberon compiler for RISC in Oberon-07*)
+MODULE ORP; (*N. Wirth 1.7.97 / 8.2.2020  Oberon compiler for RISC in Oberon-07*)
   IMPORT Texts, Logger, ORS, ORB, ORG;
   (*Author: Niklaus Wirth, 2014.
     Parser of Oberon-RISC compiler. Uses Scanner ORS to obtain symbols (tokens),
@@ -9,22 +9,19 @@ MODULE ORP; (*N. Wirth 1.7.97 / 17.9.2018  Oberon compiler for RISC in Oberon-07
   TYPE PtrBase = POINTER TO PtrBaseDesc;
     PtrBaseDesc = RECORD  (*list of names of pointer base types*)
       name: ORS.Ident; type: ORB.Type; next: PtrBase
-    END;
+    END ;
   
-  VAR 
-    sym        : INTEGER;  (*last symbol read*)
-    dc         : INTEGER;  (*data counter*)
-    level, 
-    exno, 
-    version    : INTEGER;
-    newSF      : BOOLEAN;  (*option flag*)
-    expression : PROCEDURE (VAR x:    ORG.Item);  (*to avoid forward reference*)
-    Type       : PROCEDURE (VAR type: ORB.Type);
-    FormalType : PROCEDURE (VAR typ:  ORB.Type; dim: INTEGER);
-    modid      : ORS.Ident;
-    pbsList    : PtrBase;  (*list of names of pointer base types*)
-    dummy      : ORB.Object;
-    W          : Texts.Writer;
+  VAR sym: INTEGER;   (*last symbol read*)
+    dc: INTEGER;    (*data counter*)
+    level, exno, version: INTEGER;
+    newSF: BOOLEAN;  (*option flag*)
+    expression: PROCEDURE (VAR x: ORG.Item);  (*to avoid forward reference*)
+    Type: PROCEDURE (VAR type: ORB.Type);
+    FormalType: PROCEDURE (VAR typ: ORB.Type; dim: INTEGER);
+    modid: ORS.Ident;
+    pbsList: PtrBase;   (*list of names of pointer base types*)
+    dummy: ORB.Object;
+    W: Texts.Writer;
 
   PROCEDURE Check(s: INTEGER; msg: ARRAY OF CHAR);
   BEGIN
@@ -32,25 +29,13 @@ MODULE ORP; (*N. Wirth 1.7.97 / 17.9.2018  Oberon compiler for RISC in Oberon-07
   END Check;
 
   PROCEDURE qualident(VAR obj: ORB.Object);
-  BEGIN 
-    obj := ORB.thisObj(); 
-    ORS.Get(sym);
-    IF obj = NIL THEN 
-      ORS.Mark("undef"); 
-      obj := dummy 
-    END;
+  BEGIN obj := ORB.thisObj(); ORS.Get(sym);
+    IF obj = NIL THEN ORS.Mark("undef"); obj := dummy END ;
     IF (sym = ORS.period) & (obj.class = ORB.Mod) THEN
       ORS.Get(sym);
-      IF sym = ORS.ident THEN 
-        obj := ORB.thisimport(obj); 
-        ORS.Get(sym);
-        IF obj = NIL THEN 
-          ORS.Mark("undef"); 
-          obj := dummy 
-        END
-      ELSE 
-        ORS.Mark("identifier expected"); 
-        obj := dummy
+      IF sym = ORS.ident THEN obj := ORB.thisimport(obj); ORS.Get(sym);
+        IF obj = NIL THEN ORS.Mark("undef"); obj := dummy END
+      ELSE ORS.Mark("identifier expected"); obj := dummy
       END
     END
   END qualident;
@@ -125,7 +110,7 @@ MODULE ORP; (*N. Wirth 1.7.97 / 17.9.2018  Oberon compiler for RISC in Oberon-07
           END
         ELSE ORS.Mark("incompatible types")
         END
-      ELSIF ~guard THEN ORG.MakeConstItem(x, ORB.boolType, 1)
+      ELSIF ~guard THEN ORG.TypeTest(x, NIL, FALSE, FALSE)
       END
     ELSE ORS.Mark("type mismatch")
     END ;
@@ -904,40 +889,44 @@ MODULE ORP; (*N. Wirth 1.7.97 / 17.9.2018  Oberon compiler for RISC in Oberon-07
         ORS.Get(sym)
       ELSE ORS.Mark("no proc id")
       END
+    ELSE ORS.Mark("proc id expected")
     END
   END ProcedureDecl;
 
+  PROCEDURE Import;
+    VAR impid, impid1: ORS.Ident;
+  BEGIN
+    IF sym = ORS.ident THEN
+      ORS.CopyId(impid); ORS.Get(sym);
+      IF sym = ORS.becomes THEN
+        ORS.Get(sym);
+        IF sym = ORS.ident THEN ORS.CopyId(impid1); ORS.Get(sym)
+        ELSE ORS.Mark("id expected"); impid1 := impid
+        END
+      ELSE impid1 := impid
+      END ;
+      ORB.Import(impid, impid1)
+    ELSE ORS.Mark("id expected")
+    END
+  END Import;
+
   PROCEDURE Module;
     VAR key: INTEGER;
-      impid, impid1: ORS.Ident;
   BEGIN Texts.WriteString(W, "  compiling "); ORS.Get(sym);
     IF sym = ORS.module THEN
       ORS.Get(sym);
-      IF sym = ORS.times THEN version := 0; Texts.Write(W, "*"); ORS.Get(sym) ELSE version := 1 END ;
+      IF sym = ORS.times THEN version := 0; dc := 8; Texts.Write(W, "*"); ORS.Get(sym) ELSE dc := 0; version := 1 END ;
       ORB.Init; ORB.OpenScope;
       IF sym = ORS.ident THEN
         ORS.CopyId(modid); ORS.Get(sym);
         Texts.WriteString(W, modid); Texts.Append(Logger.Log, W.buf)
       ELSE ORS.Mark("identifier expected")
       END ;
-      Check(ORS.semicolon, "no ;"); level := 0; dc := 0; exno := 1; key := 0;
+      Check(ORS.semicolon, "no ;"); level := 0; exno := 1; key := 0;
       IF sym = ORS.import THEN
-        ORS.Get(sym);
-        WHILE sym = ORS.ident DO
-          ORS.CopyId(impid); ORS.Get(sym);
-          IF sym = ORS.becomes THEN
-            ORS.Get(sym);
-            IF sym = ORS.ident THEN ORS.CopyId(impid1); ORS.Get(sym)
-            ELSE ORS.Mark("id expected")
-            END
-          ELSE impid1 := impid
-          END ;
-          ORB.Import(impid, impid1);
-          IF sym = ORS.comma THEN ORS.Get(sym)
-          ELSIF sym = ORS.ident THEN ORS.Mark("comma missing")
-          END
-        END ;
-        Check(ORS.semicolon, "no ;")
+        ORS.Get(sym); Import;
+        WHILE sym = ORS.comma DO ORS.Get(sym); Import END ;
+        Check(ORS.semicolon, "; missing")
       END ;
       ORG.Open(version); Declarations(dc); ORG.SetDataSize((dc + 3) DIV 4 * 4);
       WHILE sym = ORS.procedure DO ProcedureDecl; Check(ORS.semicolon, "no ;") END ;
@@ -956,19 +945,12 @@ MODULE ORP; (*N. Wirth 1.7.97 / 17.9.2018  Oberon compiler for RISC in Oberon-07
       END ;
       IF ORS.errcnt = 0 THEN
         ORG.Close(modid, key, exno);
-        Texts.WriteInt(W, ORG.pc, 6); 
-        Texts.WriteInt(W, dc, 6); 
-        Texts.WriteHex(W, key)
-      ELSE 
-        Texts.WriteLn(W); 
-        Texts.WriteString(W, "compilation FAILED")
+        Texts.WriteInt(W, ORG.pc, 6); Texts.WriteInt(W, dc, 6); Texts.WriteHex(W, key)
+      ELSE Texts.WriteLn(W); Texts.WriteString(W, "compilation FAILED")
       END ;
-      Texts.WriteLn(W); 
-      Texts.Append(Logger.Log, W.buf);
-      ORB.CloseScope; 
-      pbsList := NIL
-    ELSE 
-      ORS.Mark("must start with MODULE")
+      Texts.WriteLn(W); Texts.Append(Logger.Log, W.buf);
+      ORB.CloseScope; pbsList := NIL
+    ELSE ORS.Mark("must start with MODULE")
     END
   END Module;
 
@@ -983,10 +965,9 @@ MODULE ORP; (*N. Wirth 1.7.97 / 17.9.2018  Oberon compiler for RISC in Oberon-07
   *)
 
   PROCEDURE Compile*(filename : ARRAY OF CHAR; overrideSymbolFile : BOOLEAN);
-    VAR 
-      (* beg, end, time : INTEGER; *)
+    VAR (* beg, end, time: INTEGER; *)
       T: Texts.Text;
-      (* S: Texts.Scanner; *)
+      (*S: Texts.Scanner; *)
   BEGIN 
     newSF := overrideSymbolFile;
 
@@ -1001,10 +982,7 @@ MODULE ORP; (*N. Wirth 1.7.97 / 17.9.2018  Oberon compiler for RISC in Oberon-07
       Texts.WriteLn(W); 
       Texts.Append(Logger.Log, W.buf)
     END
-     
-    (*
-    Texts.OpenScanner(S, Oberon.Par.text, Oberon.Par.pos); 
-    Texts.Scan(S);
+  (*Texts.OpenScanner(S, Oberon.Par.text, Oberon.Par.pos); Texts.Scan(S);
     IF S.class = Texts.Char THEN
       IF S.c = "@" THEN
         Option(S); Oberon.GetSelection(T, beg, end, time);
@@ -1033,12 +1011,8 @@ MODULE ORP; (*N. Wirth 1.7.97 / 17.9.2018  Oberon compiler for RISC in Oberon-07
     *)
   END Compile;
 
-BEGIN 
-  Texts.OpenWriter(W); 
-  Texts.WriteString(W, "OR ESP32 Compiler  2020.02.12");
-  Texts.WriteLn(W); 
-  Texts.Append(Logger.Log, W.buf);
-
+BEGIN Texts.OpenWriter(W); Texts.WriteString(W, "OR Compiler  8.2.2020");
+  Texts.WriteLn(W); Texts.Append(Logger.Log, W.buf);
   NEW(dummy); dummy.class := ORB.Var; dummy.type := ORB.intType;
   expression := expression0; Type := Type0; FormalType := FormalType0
 END ORP.

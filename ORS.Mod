@@ -10,46 +10,41 @@ MODULE ORS; (* NW 19.9.93 / 15.3.2017  Scanner in Oberon-07*)
   If Get delivers ident, then the identifier (a string) is in variable id, if int or char
   in ival, if real in rval, and if string in str (and slen) *)
   
-  CONST 
-    IdLen*        = 32;
-    NKW           = 34;  (*nof keywords*)
-    maxExp        = 38; 
-    stringBufSize = 256;
+  CONST IdLen* = 32;
+    NKW = 34;  (*nof keywords*)
+    maxExp = 38; stringBufSize = 256;
   
     (*lexical symbols*)
-    null    =  0; times*     =  1; rdiv*      =  2; div*    =  3; mod*    =  4;
-    and*    =  5; plus*      =  6; minus*     =  7; or*     =  8; eql*    =  9;
-    neq*    = 10; lss*       = 11; leq*       = 12; gtr*    = 13; geq*    = 14;
-    in*     = 15; is*        = 16; arrow*     = 17; period* = 18;
-    char*   = 20; int*       = 21; real*      = 22; false*  = 23; true*   = 24;
-    nil*    = 25; string*    = 26; not*       = 27; lparen* = 28; lbrak*  = 29;
-    lbrace* = 30; ident*     = 31;
-    if*     = 32; while*     = 34; repeat*    = 35; case*   = 36; for*    = 37;
-    comma*  = 40; colon*     = 41; becomes*   = 42; upto*   = 43; rparen* = 44;
-    rbrak*  = 45; rbrace*    = 46; then*      = 47; of*     = 48; do*     = 49;
-    to*     = 50; by*        = 51; semicolon* = 52; end*    = 53; bar*    = 54;
-    else*   = 55; elsif*     = 56; until*     = 57; return* = 58;
-    array*  = 60; record*    = 61; pointer*   = 62; const*  = 63; type*   = 64;
-    var*    = 65; procedure* = 66; begin*     = 67; import* = 68; module* = 69;
-    eot     = 70;
+    null = 0; times* = 1; rdiv* = 2; div* = 3; mod* = 4;
+    and* = 5; plus* = 6; minus* = 7; or* = 8; eql* = 9;
+    neq* = 10; lss* = 11; leq* = 12; gtr* = 13; geq* = 14;
+    in* = 15; is* = 16; arrow* = 17; period* = 18;
+    char* = 20; int* = 21; real* = 22; false* = 23; true* = 24;
+    nil* = 25; string* = 26; not* = 27; lparen* = 28; lbrak* = 29;
+    lbrace* = 30; ident* = 31;
+    if* = 32; while* = 34; repeat* = 35; case* = 36; for* = 37;
+    comma* = 40; colon* = 41; becomes* = 42; upto* = 43; rparen* = 44;
+    rbrak* = 45; rbrace* = 46; then* = 47; of* = 48; do* = 49;
+    to* = 50; by* = 51; semicolon* = 52; end* = 53; bar* = 54;
+    else* = 55; elsif* = 56; until* = 57; return* = 58;
+    array* = 60; record* = 61; pointer* = 62; const* = 63; type* = 64;
+    var* = 65; procedure* = 66; begin* = 67; import* = 68; module* = 69; eot = 70;
 
   TYPE Ident* = ARRAY IdLen OF CHAR;
 
-  VAR 
-    ival*, 
-    slen*   : INTEGER;  (*results of Get*)
-    rval*   : REAL;
-    id*     : Ident;  (*for identifiers*)
-    str*    : ARRAY stringBufSize OF CHAR;
-    errcnt* : INTEGER;
+  VAR ival*, slen*: INTEGER;  (*results of Get*)
+    rval*: REAL;
+    id*: Ident;  (*for identifiers*)
+    str*: ARRAY stringBufSize OF CHAR;
+    errcnt*: INTEGER;
 
-    ch      : CHAR;  (*last character read*)
-    errpos  : INTEGER;
-    R       : Texts.Reader;
-    W       : Texts.Writer;
-    k       : INTEGER;
-    KWX     : ARRAY 10 OF INTEGER;
-    keyTab  : ARRAY NKW OF
+    ch: CHAR;  (*last character read*)
+    errpos: INTEGER;
+    R: Texts.Reader;
+    W: Texts.Writer;
+    k: INTEGER;
+    KWX: ARRAY 10 OF INTEGER;
+    keyTab: ARRAY NKW OF
         RECORD sym: INTEGER; id: ARRAY 12 OF CHAR END;
   
   PROCEDURE CopyId*(VAR ident: Ident);
@@ -64,15 +59,10 @@ MODULE ORS; (* NW 19.9.93 / 15.3.2017  Scanner in Oberon-07*)
     VAR p: INTEGER;
   BEGIN p := Pos();
     IF (p > errpos) & (errcnt < 25) THEN
-      Texts.WriteLn(W); 
-      Texts.WriteString(W, "  pos "); 
-      Texts.WriteInt(W, p, 1); 
-      Texts.Write(W, " ");
-      Texts.WriteString(W, msg); 
-      Texts.Append(Logger.Log, W.buf)
-    END;
-    INC(errcnt); 
-    errpos := p + 4
+      Texts.WriteLn(W); Texts.WriteString(W, "  pos "); Texts.WriteInt(W, p, 1); Texts.Write(W, " ");
+      Texts.WriteString(W, msg); Texts.Append(Logger.Log, W.buf)
+    END ;
+    INC(errcnt); errpos := p + 4
   END Mark;
 
   PROCEDURE Identifier(VAR sym: INTEGER);
@@ -122,8 +112,8 @@ MODULE ORS; (* NW 19.9.93 / 15.3.2017  Scanner in Oberon-07*)
     Texts.Read(R, ch); slen := i  (*no 0X appended!*)
   END HexString;
 
-  PROCEDURE Ten(e: INTEGER) : REAL;
-    VAR x, t : REAL;
+  PROCEDURE Ten(e: INTEGER): REAL;
+    VAR x, t: REAL;
   BEGIN x := 1.0; t := 10.0;
     WHILE e > 0 DO
       IF ODD(e) THEN x := t * x END ;
@@ -132,11 +122,9 @@ MODULE ORS; (* NW 19.9.93 / 15.3.2017  Scanner in Oberon-07*)
     RETURN x
   END Ten;
 
-  PROCEDURE Number(VAR sym : INTEGER);
+  PROCEDURE Number(VAR sym: INTEGER);
     CONST max = 2147483647 (*2^31 - 1*);
-    VAR 
-      i, k, e, n, s, h: INTEGER; 
-      x: REAL;
+    VAR i, k, e, n, s, h: INTEGER; x: REAL;
       d: ARRAY 16 OF INTEGER;
       negE: BOOLEAN;
   BEGIN ival := 0; i := 0; n := 0; k := 0;
@@ -146,8 +134,8 @@ MODULE ORS; (* NW 19.9.93 / 15.3.2017  Scanner in Oberon-07*)
     UNTIL (ch < "0") OR (ch > "9") & (ch < "A") OR (ch > "F");
     IF (ch = "H") OR (ch = "R") OR (ch = "X") THEN  (*hex*)
       REPEAT h := d[i];
-        IF h >= 10 THEN h := h - 7 END ;
-        k := k * 10H + h; INC(i) (*no overflow check*)
+        IF h >= 10 THEN h := h-7 END ;
+        k := k*10H + h; INC(i) (*no overflow check*)
       UNTIL i = n;
       IF ch = "X" THEN sym := char;
         IF k < 100H THEN ival := k ELSE Mark("illegal value"); ival := 0 END

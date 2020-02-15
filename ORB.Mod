@@ -1,4 +1,4 @@
-MODULE ORB;   (*NW 25.6.2014  / 17.9.2018  in Oberon-07*)
+MODULE ORB;   (*NW 25.6.2014  / 1.3.2019  in Oberon-07*)
   IMPORT Files, ORS;
   (*Definition of data types Object and Type, which together form the data structure
     called "symbol table". Contains procedures for creation of Objects, and for search:
@@ -7,38 +7,28 @@ MODULE ORB;   (*NW 25.6.2014  / 17.9.2018  in Oberon-07*)
     Import and Export. This module contains the list of standard identifiers, with which
     the symbol table (universe), and that of the pseudo-module SYSTEM are initialized. *)
 
-  CONST 
-    versionkey* = 1; 
-    maxTypTab   = 64;
-
-    (* class values*) 
-      Head*  = 0;
-      Const* = 1; Var*   = 2; Par* = 3; 
-      Fld*   = 4; Typ*   = 5;
+  CONST versionkey* = 1; maxTypTab = 64;
+    (* class values*) Head* = 0;
+      Const* = 1; Var* = 2; Par* = 3; Fld* = 4; Typ* = 5;
       SProc* = 6; SFunc* = 7; Mod* = 8;
 
     (* form values*)
-      Byte*    =  1; Bool*   =  2; Char*   =  3; Int* = 4; 
-      Real*    =  5; Set*    =  6;
-      Pointer* =  7; NilTyp* =  8; NoTyp*  =  9; Proc* = 10;
-      String*  = 11; Array*  = 12; Record* = 13;
+      Byte* = 1; Bool* = 2; Char* = 3; Int* = 4; Real* = 5; Set* = 6;
+      Pointer* = 7; NilTyp* = 8; NoTyp* = 9; Proc* = 10;
+      String* = 11; Array* = 12; Record* = 13;
       
-  TYPE 
-    Object* = POINTER TO ObjDesc;
+  TYPE Object* = POINTER TO ObjDesc;
     Module* = POINTER TO ModDesc;
-    Type*   = POINTER TO TypeDesc;
+    Type* = POINTER TO TypeDesc;
 
-    ObjDesc* = RECORD
-      class*, 
-      exno*  : BYTE;
-      expo*, 
-      rdo*   : BOOLEAN;   (*exported / read-only*)
-      lev*   : INTEGER;
-      next*, 
-      dsc*   : Object;
-      type*  : Type;
-      name*  : ORS.Ident;
-      val*   : INTEGER
+    ObjDesc*= RECORD
+      class*, exno*: BYTE;
+      expo*, rdo*: BOOLEAN;   (*exported / read-only*)
+      lev*: INTEGER;
+      next*, dsc*: Object;
+      type*: Type;
+      name*: ORS.Ident;
+      val*: INTEGER
     END ;
 
     ModDesc* = RECORD (ObjDesc) orgname*: ORS.Ident END ;
@@ -163,7 +153,7 @@ MODULE ORB;   (*NW 25.6.2014  / 17.9.2018  in Oberon-07*)
   PROCEDURE InType(VAR R: Files.Rider; thismod: Object; VAR T: Type);
     VAR key: INTEGER;
       ref, class, form, np, readonly: INTEGER;
-      fld, par, obj, mod: Object;
+      fld, par, obj, mod, last: Object;
       t: Type;
       name, modname: ORS.Ident;
   BEGIN Read(R, ref);
@@ -179,13 +169,15 @@ MODULE ORB;   (*NW 25.6.2014  / 17.9.2018  in Oberon-07*)
         Files.ReadNum(R, t.len); (*TD adr/exno*)
         Files.ReadNum(R, t.nofpar);  (*ext level*)
         Files.ReadNum(R, t.size);
-        Read(R, class);
+        Read(R, class); last := NIL;
         WHILE class # 0 DO  (*fields*)
           NEW(fld); fld.class := class; Files.ReadString(R, fld.name);
+          IF last = NIL THEN t.dsc := fld ELSE last.next := fld END ;
+          last := fld;
           IF fld.name[0] # 0X THEN fld.expo := TRUE; InType(R, thismod, fld.type) ELSE fld.expo := FALSE; fld.type := nilType END ;
-          Files.ReadNum(R, fld.val); fld.next := obj; obj := fld; Read(R, class)
+          Files.ReadNum(R, fld.val); Read(R, class)
         END ;
-        t.dsc := obj
+        IF last = NIL THEN t.dsc := obj ELSE last.next := obj END
       ELSIF form = Proc THEN
         InType(R, thismod, t.base);
         obj := NIL; np := 0; Read(R, class);
@@ -254,7 +246,7 @@ MODULE ORB;   (*NW 25.6.2014  / 17.9.2018  in Oberon-07*)
   END Write;
 
   PROCEDURE OutType(VAR R: Files.Rider; t: Type);
-    VAR obj, mod, fld: Object;
+    VAR obj, mod, fld, bot: Object;
 
     PROCEDURE OutPar(VAR R: Files.Rider; par: Object; n: INTEGER);
       VAR cl: INTEGER;
@@ -286,11 +278,11 @@ MODULE ORB;   (*NW 25.6.2014  / 17.9.2018  in Oberon-07*)
       IF t.form = Pointer THEN OutType(R, t.base)
       ELSIF t.form = Array THEN OutType(R, t.base); Files.WriteNum(R, t.len); Files.WriteNum(R, t.size)
       ELSIF t.form = Record THEN
-        IF t.base # NIL THEN OutType(R, t.base) ELSE OutType(R, noType) END ;
+        IF t.base # NIL THEN OutType(R, t.base); bot := t.base.dsc ELSE OutType(R, noType); bot := NIL END ;
         IF obj # NIL THEN Files.WriteNum(R, obj.exno) ELSE Write(R, 0) END ;
         Files.WriteNum(R, t.nofpar); Files.WriteNum(R, t.size);
         fld := t.dsc;
-        WHILE fld # NIL DO  (*fields*)
+        WHILE fld # bot DO  (*fields*)
           IF fld.expo THEN
             Write(R, Fld); Files.WriteString(R, fld.name); OutType(R, fld.type); Files.WriteNum(R, fld.val)  (*offset*)
           ELSE FindHiddenPointers(R, fld.type, fld.val)
@@ -378,70 +370,63 @@ MODULE ORB;   (*NW 25.6.2014  / 17.9.2018  in Oberon-07*)
   END enter;
   
 BEGIN
-  byteType := type(Byte,   Int,    1);
-  boolType := type(Bool,   Bool,   1);
-  charType := type(Char,   Char,   1);
-  intType  := type(Int,    Int,    4);
-  realType := type(Real,   Real,   4);
-  setType  := type(Set,    Set,    4);
-  nilType  := type(NilTyp, NilTyp, 4);
-  noType   := type(NoTyp,  NoTyp,  4);
-  strType  := type(String, String, 8);
+  byteType := type(Byte, Int, 1);
+  boolType := type(Bool, Bool, 1);
+  charType := type(Char, Char,1);
+  intType := type(Int, Int, 4);
+  realType := type(Real, Real, 4);
+  setType := type(Set, Set,4);
+  nilType := type(NilTyp, NilTyp, 4);
+  noType := type(NoTyp, NoTyp, 4);
+  strType := type(String, String, 8);
     
   (*initialize universe with data types and in-line procedures;
     LONGINT is synonym to INTEGER, LONGREAL to REAL.
     LED, ADC, SBC; LDPSR, LDREG, REG, COND are not in language definition*)
-    
   system := NIL;  (*n = procno*10 + nofpar*)
-
-  enter("UML",      SFunc, intType, 132);  (*functions*)
-  enter("SBC",      SFunc, intType, 122);
-  enter("ADC",      SFunc, intType, 112);
-  enter("ROR",      SFunc, intType,  92);
-  enter("ASR",      SFunc, intType,  82);
-  enter("LSL",      SFunc, intType,  72);
-  enter("LEN",      SFunc, intType,  61);
-  enter("CHR",      SFunc, charType, 51);
-  enter("ORD",      SFunc, intType,  41);
-  enter("FLT",      SFunc, realType, 31);
-  enter("FLOOR",    SFunc, intType,  21);
-  enter("ODD",      SFunc, boolType, 11);
-  enter("ABS",      SFunc, intType,   1);
-  enter("LED",      SProc, noType,   81);  (*procedures*)
-  enter("UNPK",     SProc, noType,   72);
-  enter("PACK",     SProc, noType,   62);
-  enter("NEW",      SProc, noType,   51);
-  enter("ASSERT",   SProc, noType,   41);
-  enter("EXCL",     SProc, noType,   32);
-  enter("INCL",     SProc, noType,   22);
-  enter("DEC",      SProc, noType,   11);
-  enter("INC",      SProc, noType,    1);
-  enter("SET",      Typ,   setType,   0);   (*types*)
-  enter("BOOLEAN",  Typ,   boolType,  0);
-  enter("BYTE",     Typ,   byteType,  0);
-  enter("CHAR",     Typ,   charType,  0);
-  enter("LONGREAL", Typ,   realType,  0);
-  enter("REAL",     Typ,   realType,  0);
-  enter("LONGINT",  Typ,   intType,   0);
-  enter("INTEGER",  Typ,   intType,   0);
-
-  topScope := NIL; 
-  OpenScope; 
-  topScope.next := system; 
-  universe := topScope;
+  enter("UML", SFunc, intType, 132);  (*functions*)
+  enter("SBC", SFunc, intType, 122);
+  enter("ADC", SFunc, intType, 112);
+  enter("ROR", SFunc, intType, 92);
+  enter("ASR", SFunc, intType, 82);
+  enter("LSL", SFunc, intType, 72);
+  enter("LEN", SFunc, intType, 61);
+  enter("CHR", SFunc, charType, 51);
+  enter("ORD", SFunc, intType, 41);
+  enter("FLT", SFunc, realType, 31);
+  enter("FLOOR", SFunc, intType, 21);
+  enter("ODD", SFunc, boolType, 11);
+  enter("ABS", SFunc, intType, 1);
+  enter("LED", SProc, noType, 81);  (*procedures*)
+  enter("UNPK", SProc, noType, 72);
+  enter("PACK", SProc, noType, 62);
+  enter("NEW", SProc, noType, 51);
+  enter("ASSERT", SProc, noType, 41);
+  enter("EXCL", SProc, noType, 32);
+  enter("INCL", SProc, noType, 22);
+  enter("DEC", SProc, noType, 11);
+  enter("INC", SProc, noType, 1);
+  enter("SET", Typ, setType, 0);   (*types*)
+  enter("BOOLEAN", Typ, boolType, 0);
+  enter("BYTE", Typ, byteType, 0);
+  enter("CHAR", Typ, charType, 0);
+  enter("LONGREAL", Typ, realType, 0);
+  enter("REAL", Typ, realType, 0);
+  enter("INTEGER", Typ, intType, 0);
+  enter("LONGINT", Typ, intType, 0);
+  topScope := NIL; OpenScope; topScope.next := system; universe := topScope;
   
   system := NIL;  (* initialize "unsafe" pseudo-module SYSTEM*)
-
-  enter("H",     SFunc, intType,  201);     (*functions*)
-  enter("COND",  SFunc, boolType, 191);
-  enter("SIZE",  SFunc, intType,  181);
-  enter("ADR",   SFunc, intType,  171);
-  enter("VAL",   SFunc, intType,  162);
-  enter("REG",   SFunc, intType,  151);
-  enter("BIT",   SFunc, boolType, 142);
-  enter("LDREG", SProc, noType,   142);  (*procedures*)
-  enter("LDPSR", SProc, noType,   131);
-  enter("COPY",  SProc, noType,   123);
-  enter("PUT",   SProc, noType,   112);
-  enter("GET",   SProc, noType,   102);
+  enter("H", SFunc, intType, 201);     (*functions*)
+  enter("COND", SFunc, boolType, 191);
+  enter("SIZE", SFunc, intType, 181);
+  enter("ADR", SFunc, intType, 171);
+  enter("VAL", SFunc, intType, 162);
+  enter("REG", SFunc, intType, 151);
+  enter("BIT", SFunc, boolType, 142);
+  enter("LDREG", SProc, noType, 142);  (*procedures*)
+  enter("LDPSR", SProc, noType, 131);
+  enter("COPY", SProc, noType, 123);
+  enter("PUT", SProc, noType, 112);
+  enter("GET", SProc, noType, 102);
 END ORB.
