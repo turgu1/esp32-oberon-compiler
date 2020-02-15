@@ -17,6 +17,9 @@ $(ODIR)/%.sym: %.Mod
 Oberon: $(SIMS) Oberon.Mod
 	$(LINK) Oberon.Mod
 
+ORTool: ORTool.Mod $(ODIR)/ORB.sym $(ODIR)/Texts.sym $(ODIR)/Logger.sym
+	$(LINK) ORTool.Mod
+
 $(ODIR)/Texts.sym: Texts.Mod
 
 $(ODIR)/Logger.sym: Logger.Mod $(ODIR)/Texts.sym

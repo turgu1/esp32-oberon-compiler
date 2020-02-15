@@ -32,13 +32,25 @@ MODULE ORP; (*N. Wirth 1.7.97 / 17.9.2018  Oberon compiler for RISC in Oberon-07
   END Check;
 
   PROCEDURE qualident(VAR obj: ORB.Object);
-  BEGIN obj := ORB.thisObj(); ORS.Get(sym);
-    IF obj = NIL THEN ORS.Mark("undef"); obj := dummy END ;
+  BEGIN 
+    obj := ORB.thisObj(); 
+    ORS.Get(sym);
+    IF obj = NIL THEN 
+      ORS.Mark("undef"); 
+      obj := dummy 
+    END;
     IF (sym = ORS.period) & (obj.class = ORB.Mod) THEN
       ORS.Get(sym);
-      IF sym = ORS.ident THEN obj := ORB.thisimport(obj); ORS.Get(sym);
-        IF obj = NIL THEN ORS.Mark("undef"); obj := dummy END
-      ELSE ORS.Mark("identifier expected"); obj := dummy
+      IF sym = ORS.ident THEN 
+        obj := ORB.thisimport(obj); 
+        ORS.Get(sym);
+        IF obj = NIL THEN 
+          ORS.Mark("undef"); 
+          obj := dummy 
+        END
+      ELSE 
+        ORS.Mark("identifier expected"); 
+        obj := dummy
       END
     END
   END qualident;

@@ -70,8 +70,9 @@ MODULE ORS; (* NW 19.9.93 / 15.3.2017  Scanner in Oberon-07*)
       Texts.Write(W, " ");
       Texts.WriteString(W, msg); 
       Texts.Append(Logger.Log, W.buf)
-    END ;
-    INC(errcnt); errpos := p + 4
+    END;
+    INC(errcnt); 
+    errpos := p + 4
   END Mark;
 
   PROCEDURE Identifier(VAR sym: INTEGER);

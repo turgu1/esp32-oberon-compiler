@@ -5,20 +5,20 @@ MODULE ORG; (* N.Wirth, 16.4.2016 / 4.4.2017 / 17.9.2018  Oberon compiler; code 
      Procedure Close writes code-files*)
 
   CONST 
-    WordSize* = 4;
+    WordSize* =   4;
     StkOrg0   = -64; 
     VarOrg0   =   0;  (*for RISC-0 only*)
     
-    MT  = 12; 
-    SP  = 14; 
-    LNK = 15;   (*dedicated registers*)
-    maxCode = 8000; 
-    maxStrx = 2400; 
-    maxTD   =  160; 
+    MT      =       12; 
+    SP      =       14; 
+    LNK     =       15;   (*dedicated registers*)
+    maxCode =     8000; 
+    maxStrx =     2400; 
+    maxTD   =      160; 
     C24     = 1000000H;
-    Reg  = 10; 
-    RegI = 11; 
-    Cond = 12;  (*internal item modes*)
+    Reg     =       10; 
+    RegI    =       11; 
+    Cond    =       12;  (*internal item modes*)
 
   (*frequently used opcodes*)  
 
@@ -44,15 +44,17 @@ MODULE ORG; (* N.Wirth, 16.4.2016 / 4.4.2017 / 17.9.2018  Oberon compiler; code 
       rdo*  : BOOLEAN  (*read only*)
     END;
 
-  (* Item forms and meaning of fields:
-    mode    r      a       b
+  (* 
+    Item forms and meaning of fields:
+    mode     r      a       b
     --------------------------------
-    Const   -     value (proc adr)  (immediate value)
-    Var     base   off     -               (direct adr)
-    Par      -     off0     off1         (indirect adr)
+    Const    -    value (proc adr)  (immediate value)
+    Var     base   off     -             (direct adr)
+    Par      -     off0   off1         (indirect adr)
     Reg    regno
     RegI   regno   off     -
-    Cond  cond   Fchain  Tchain  *)
+    Cond   cond   Fchain  Tchain  
+  *)
 
   VAR 
     pc*      : INTEGER;  (* program counter *)
@@ -423,7 +425,7 @@ MODULE ORG; (* N.Wirth, 16.4.2016 / 4.4.2017 / 17.9.2018  Oberon compiler; code 
   PROCEDURE Or1*(VAR x: Item);   (* x := x OR *)
   BEGIN
     IF x.mode # Cond THEN loadCond(x) END ;
-    Put3(BC, x.r, x.b);  x.b := pc-1; FixLink(x.a); x.a := 0
+    Put3(BC, x.r, x.b);  x.b := pc - 1; FixLink(x.a); x.a := 0
   END Or1;
 
   PROCEDURE Or2*(VAR x, y: Item);

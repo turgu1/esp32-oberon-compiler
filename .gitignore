@@ -6,3 +6,5 @@ Oberon
 ORTool
 Test
 ORP
+patterns/*.rsc
+patterns/*.smb
