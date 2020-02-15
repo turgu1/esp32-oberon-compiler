@@ -1,0 +1,13 @@
+MODULE Pattern9;
+VAR
+  x: REAL;
+  
+  PROCEDURE F(x: REAL): REAL;
+  BEGIN
+    IF x >= 1.0 THEN
+      x := F(F(x))
+    END;
+    RETURN x
+  END F;
+  
+END Pattern9.

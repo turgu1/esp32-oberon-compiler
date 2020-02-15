@@ -1,0 +1,13 @@
+MODULE Pattern6;
+VAR
+  i: INTEGER;
+
+BEGIN 
+  i := 0;
+  WHILE i < 10 DO
+    i := i + 2
+  END;
+  REPEAT
+    i := i - 1
+  UNTIL i = 0
+END Pattern6.

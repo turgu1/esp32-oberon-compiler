@@ -1,0 +1,9 @@
+MODULE Pattern7;
+VAR 
+  i, m, n: INTEGER;
+  
+BEGIN
+  FOR i := 0 TO n - 1 DO
+    m := 2 * m
+  END
+END Pattern7.

@@ -1,0 +1,9 @@
+MODULE Pattern12a;
+VAR
+  k*: INTEGER;
+
+  PROCEDURE P*;
+  BEGIN
+    k := 1
+  END P;
+END Pattern12a.

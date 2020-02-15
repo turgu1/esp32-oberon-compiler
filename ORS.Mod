@@ -83,7 +83,7 @@ MODULE ORS; (* NW 19.9.93 / 15.3.2017  Scanner in Oberon-07*)
   PROCEDURE String;
     VAR i: INTEGER;
   BEGIN i := 0; Texts.Read(R, ch);
-    WHILE ~R.eot & (ch # 22X) DO
+    WHILE ~R.eot & (ch # 22X) DO (* 22X = " *)
       IF ch >= " " THEN
         IF i < stringBufSize-1 THEN str[i] := ch; INC(i) ELSE Mark("string too long") END ;
       END ;
