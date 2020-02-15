@@ -15,9 +15,9 @@ MODULE ORP; (*N. Wirth 1.7.97 / 8.2.2020  Oberon compiler for RISC in Oberon-07*
     dc: INTEGER;    (*data counter*)
     level, exno, version: INTEGER;
     newSF: BOOLEAN;  (*option flag*)
-    expression: PROCEDURE (VAR x: ORG.Item);  (*to avoid forward reference*)
-    Type: PROCEDURE (VAR type: ORB.Type);
-    FormalType: PROCEDURE (VAR typ: ORB.Type; dim: INTEGER);
+    expression: PROCEDURE (VAR x:    ORG.Item);  (*to avoid forward reference*)
+    Type:       PROCEDURE (VAR type: ORB.Type);
+    FormalType: PROCEDURE (VAR typ:  ORB.Type; dim: INTEGER);
     modid: ORS.Ident;
     pbsList: PtrBase;   (*list of names of pointer base types*)
     dummy: ORB.Object;

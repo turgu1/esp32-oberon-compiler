@@ -10,10 +10,22 @@ MODULE ORS; (* NW 19.9.93 / 15.3.2017  Scanner in Oberon-07*)
   If Get delivers ident, then the identifier (a string) is in variable id, if int or char
   in ival, if real in rval, and if string in str (and slen) *)
   
+  (* GT 14.02.2020 
+     Added GetCh() to maintain current line and column number. This to get addditional
+     information on the location of an error. Used when displaying error messages. Works fine
+     with the lexical analyser, but is off almost all the time with the parser. 
+     
+     ToDo: Implement a new procedure that will produce an error message using line/column
+     previously saved by the parser. Sort of...
+   *)
+
   CONST IdLen* = 32;
     NKW = 34;  (*nof keywords*)
     maxExp = 38; stringBufSize = 256;
   
+    EOL = 0AX;
+    TAB = 07X;
+
     (*lexical symbols*)
     null = 0; times* = 1; rdiv* = 2; div* = 3; mod* = 4;
     and* = 5; plus* = 6; minus* = 7; or* = 8; eql* = 9;
@@ -39,6 +51,7 @@ MODULE ORS; (* NW 19.9.93 / 15.3.2017  Scanner in Oberon-07*)
     errcnt*: INTEGER;
 
     ch: CHAR;  (*last character read*)
+    lineNbr, columnNbr: INTEGER;
     errpos: INTEGER;
     R: Texts.Reader;
     W: Texts.Writer;
@@ -55,12 +68,30 @@ MODULE ORS; (* NW 19.9.93 / 15.3.2017  Scanner in Oberon-07*)
   BEGIN RETURN Texts.Pos(R) - 1
   END Pos;
 
+  PROCEDURE GetCh();
+  BEGIN
+    Texts.Read(R, ch);
+    IF ch = EOL THEN
+      INC(lineNbr); columnNbr := 1 
+    ELSIF (ch >= " ") OR (ch = TAB) THEN
+      INC(columnNbr)
+    END
+  END GetCh;
+
   PROCEDURE Mark*(msg: ARRAY OF CHAR);
     VAR p: INTEGER;
   BEGIN p := Pos();
     IF (p > errpos) & (errcnt < 25) THEN
-      Texts.WriteLn(W); Texts.WriteString(W, "  pos "); Texts.WriteInt(W, p, 1); Texts.Write(W, " ");
-      Texts.WriteString(W, msg); Texts.Append(Logger.Log, W.buf)
+      Texts.WriteLn(W); 
+      Texts.WriteString(W, "  pos "); 
+      Texts.WriteInt(W, p, 1); 
+      Texts.WriteString(W, " [line ");
+      Texts.WriteInt(W, lineNbr, 1);
+      Texts.Write(W, ":");
+      Texts.WriteInt(W, columnNbr, 1);
+      Texts.WriteString(W, "] ");
+      Texts.WriteString(W, msg); 
+      Texts.Append(Logger.Log, W.buf)
     END ;
     INC(errcnt); errpos := p + 4
   END Mark;
@@ -70,7 +101,7 @@ MODULE ORS; (* NW 19.9.93 / 15.3.2017  Scanner in Oberon-07*)
   BEGIN i := 0;
     REPEAT
       IF i < IdLen-1 THEN id[i] := ch; INC(i) END ;
-      Texts.Read(R, ch)
+      GetCh()
     UNTIL (ch < "0") OR (ch > "9") & (ch < "A") OR (ch > "Z") & (ch < "a") OR (ch > "z");
     id[i] := 0X; 
     IF i < 10 THEN k := KWX[i-1];  (*search for keyword*)
@@ -82,34 +113,34 @@ MODULE ORS; (* NW 19.9.93 / 15.3.2017  Scanner in Oberon-07*)
 
   PROCEDURE String;
     VAR i: INTEGER;
-  BEGIN i := 0; Texts.Read(R, ch);
+  BEGIN i := 0; GetCh();
     WHILE ~R.eot & (ch # 22X) DO (* 22X = " *)
       IF ch >= " " THEN
         IF i < stringBufSize-1 THEN str[i] := ch; INC(i) ELSE Mark("string too long") END ;
       END ;
-      Texts.Read(R, ch)
+      GetCh()
     END ;
-    str[i] := 0X; INC(i); Texts.Read(R, ch); slen := i
+    str[i] := 0X; INC(i); GetCh(); slen := i
   END String;
 
   PROCEDURE HexString;
     VAR i, m, n: INTEGER;
-  BEGIN i := 0; Texts.Read(R, ch);
+  BEGIN i := 0; GetCh();
     WHILE ~R.eot & (ch # "$") DO
-      WHILE ~R.eot  & (ch <= " ") DO Texts.Read(R, ch) END ;  (*skip*)
+      WHILE ~R.eot  & (ch <= " ") DO GetCh() END ;  (*skip*)
       IF ("0" <= ch) & (ch <= "9") THEN m := ORD(ch) - 30H
       ELSIF ("A" <= ch) & (ch <= "F") THEN m := ORD(ch) - 37H
       ELSE m := 0; Mark("hexdig expected")
       END ;
-      Texts.Read(R, ch);
+      GetCh();
       IF ("0" <= ch) & (ch <= "9") THEN n := ORD(ch) - 30H
       ELSIF ("A" <= ch) & (ch <= "F") THEN n := ORD(ch) - 37H
       ELSE n := 0; Mark("hexdig expected")
       END ;
       IF i < stringBufSize THEN str[i] := CHR(m*10H + n); INC(i) ELSE Mark("string too long") END ;
-      Texts.Read(R, ch)
+      GetCh()
     END ;
-    Texts.Read(R, ch); slen := i  (*no 0X appended!*)
+    GetCh(); slen := i  (*no 0X appended!*)
   END HexString;
 
   PROCEDURE Ten(e: INTEGER): REAL;
@@ -130,7 +161,7 @@ MODULE ORS; (* NW 19.9.93 / 15.3.2017  Scanner in Oberon-07*)
   BEGIN ival := 0; i := 0; n := 0; k := 0;
     REPEAT
       IF n < 16 THEN d[n] := ORD(ch)-30H; INC(n) ELSE Mark("too many digits"); n := 0 END ;
-      Texts.Read(R, ch)
+      GetCh()
     UNTIL (ch < "0") OR (ch > "9") & (ch < "A") OR (ch > "F");
     IF (ch = "H") OR (ch = "R") OR (ch = "X") THEN  (*hex*)
       REPEAT h := d[i];
@@ -142,9 +173,9 @@ MODULE ORS; (* NW 19.9.93 / 15.3.2017  Scanner in Oberon-07*)
       ELSIF ch = "R" THEN sym := real; rval := SYSTEM.VAL(REAL, k)
       ELSE sym := int; ival := k
       END ;
-      Texts.Read(R, ch)
+      GetCh()
     ELSIF ch = "." THEN
-      Texts.Read(R, ch);
+      GetCh();
       IF ch = "." THEN (*double dot*) ch := 7FX;  (*decimal integer*)
         REPEAT
           IF d[i] < 10 THEN
@@ -157,16 +188,16 @@ MODULE ORS; (* NW 19.9.93 / 15.3.2017  Scanner in Oberon-07*)
       ELSE (*real number*) x := 0.0; e := 0;
         REPEAT  (*integer part*) x := x * 10.0 + FLT(d[i]); INC(i) UNTIL i = n;
         WHILE (ch >= "0") & (ch <= "9") DO  (*fraction*)
-          x := x * 10.0 + FLT(ORD(ch) - 30H); DEC(e); Texts.Read(R, ch)
+          x := x * 10.0 + FLT(ORD(ch) - 30H); DEC(e); GetCh()
         END ;
         IF (ch = "E") OR (ch = "D") THEN  (*scale factor*)
-          Texts.Read(R, ch); s := 0; 
-          IF ch = "-" THEN negE := TRUE; Texts.Read(R, ch)
+          GetCh(); s := 0; 
+          IF ch = "-" THEN negE := TRUE; GetCh()
           ELSE negE := FALSE;
-            IF ch = "+" THEN Texts.Read(R, ch) END
+            IF ch = "+" THEN GetCh() END
           END ;
           IF (ch >= "0") & (ch <= "9") THEN
-            REPEAT s := s*10 + ORD(ch)-30H; Texts.Read(R, ch)
+            REPEAT s := s*10 + ORD(ch)-30H; GetCh()
             UNTIL (ch < "0") OR (ch >"9");
             IF negE THEN e := e-s ELSE e := e+s END
           ELSE Mark("digit?")
@@ -192,52 +223,52 @@ MODULE ORS; (* NW 19.9.93 / 15.3.2017  Scanner in Oberon-07*)
   END Number;
 
   PROCEDURE comment;
-  BEGIN Texts.Read(R, ch);
+  BEGIN GetCh();
     REPEAT
       WHILE ~R.eot & (ch # "*") DO
-        IF ch = "(" THEN Texts.Read(R, ch);
+        IF ch = "(" THEN GetCh();
           IF ch = "*" THEN comment END
-        ELSE Texts.Read(R, ch)
+        ELSE GetCh()
         END
       END ;
-      WHILE ch = "*" DO Texts.Read(R, ch) END
+      WHILE ch = "*" DO GetCh() END
     UNTIL (ch = ")") OR R.eot;
-    IF ~R.eot THEN Texts.Read(R, ch) ELSE Mark("unterminated comment") END
+    IF ~R.eot THEN GetCh() ELSE Mark("unterminated comment") END
   END comment;
 
   PROCEDURE Get*(VAR sym: INTEGER);
   BEGIN
     REPEAT
-      WHILE ~R.eot & (ch <= " ") DO Texts.Read(R, ch) END;
+      WHILE ~R.eot & (ch <= " ") DO GetCh() END;
       IF R.eot THEN sym := eot
       ELSIF ch < "A" THEN
         IF ch < "0" THEN
           IF ch = 22X THEN String; sym := string
-          ELSIF ch = "#" THEN Texts.Read(R, ch); sym := neq
+          ELSIF ch = "#" THEN GetCh(); sym := neq
           ELSIF ch = "$" THEN HexString; sym := string
-          ELSIF ch = "&" THEN Texts.Read(R, ch); sym := and
-          ELSIF ch = "(" THEN Texts.Read(R, ch); 
+          ELSIF ch = "&" THEN GetCh(); sym := and
+          ELSIF ch = "(" THEN GetCh(); 
             IF ch = "*" THEN sym := null; comment ELSE sym := lparen END
-          ELSIF ch = ")" THEN Texts.Read(R, ch); sym := rparen
-          ELSIF ch = "*" THEN Texts.Read(R, ch); sym := times
-          ELSIF ch = "+" THEN Texts.Read(R, ch); sym := plus
-          ELSIF ch = "," THEN Texts.Read(R, ch); sym := comma
-          ELSIF ch = "-" THEN Texts.Read(R, ch); sym := minus
-          ELSIF ch = "." THEN Texts.Read(R, ch);
-            IF ch = "." THEN Texts.Read(R, ch); sym := upto ELSE sym := period END
-          ELSIF ch = "/" THEN Texts.Read(R, ch); sym := rdiv
-          ELSE Texts.Read(R, ch); (* ! % ' *) sym := null
+          ELSIF ch = ")" THEN GetCh(); sym := rparen
+          ELSIF ch = "*" THEN GetCh(); sym := times
+          ELSIF ch = "+" THEN GetCh(); sym := plus
+          ELSIF ch = "," THEN GetCh(); sym := comma
+          ELSIF ch = "-" THEN GetCh(); sym := minus
+          ELSIF ch = "." THEN GetCh();
+            IF ch = "." THEN GetCh(); sym := upto ELSE sym := period END
+          ELSIF ch = "/" THEN GetCh(); sym := rdiv
+          ELSE GetCh(); (* ! % ' *) sym := null
           END
         ELSIF ch < ":" THEN Number(sym)
-        ELSIF ch = ":" THEN Texts.Read(R, ch);
-          IF ch = "=" THEN Texts.Read(R, ch); sym := becomes ELSE sym := colon END 
-        ELSIF ch = ";" THEN Texts.Read(R, ch); sym := semicolon
-        ELSIF ch = "<" THEN  Texts.Read(R, ch);
-          IF ch = "=" THEN Texts.Read(R, ch); sym := leq ELSE sym := lss END
-        ELSIF ch = "=" THEN Texts.Read(R, ch); sym := eql
-        ELSIF ch = ">" THEN Texts.Read(R, ch);
-          IF ch = "=" THEN Texts.Read(R, ch); sym := geq ELSE sym := gtr END
-        ELSE (* ? @ *) Texts.Read(R, ch); sym := null
+        ELSIF ch = ":" THEN GetCh();
+          IF ch = "=" THEN GetCh(); sym := becomes ELSE sym := colon END 
+        ELSIF ch = ";" THEN GetCh(); sym := semicolon
+        ELSIF ch = "<" THEN  GetCh();
+          IF ch = "=" THEN GetCh(); sym := leq ELSE sym := lss END
+        ELSIF ch = "=" THEN GetCh(); sym := eql
+        ELSIF ch = ">" THEN GetCh();
+          IF ch = "=" THEN GetCh(); sym := geq ELSE sym := gtr END
+        ELSE (* ? @ *) GetCh(); sym := null
         END
       ELSIF ch < "[" THEN Identifier(sym)
       ELSIF ch < "a" THEN
@@ -246,22 +277,28 @@ MODULE ORS; (* NW 19.9.93 / 15.3.2017  Scanner in Oberon-07*)
         ELSIF ch = "^" THEN sym := arrow
         ELSE (* _ ` *) sym := null
         END ;
-        Texts.Read(R, ch)
+        GetCh()
       ELSIF ch < "{" THEN Identifier(sym) ELSE
         IF ch = "{" THEN sym := lbrace
         ELSIF ch = "}" THEN sym := rbrace
         ELSIF ch = "|" THEN sym := bar
         ELSIF ch = "~" THEN  sym := not
-        ELSIF ch = 7FX THEN  sym := upto
+        ELSIF ch = 7FX THEN  sym := upto 
         ELSE sym := null
         END ;
-        Texts.Read(R, ch)
+        GetCh()
       END
     UNTIL sym # null
   END Get;
 
   PROCEDURE Init*(T: Texts.Text; pos: INTEGER);
-  BEGIN errpos := pos; errcnt := 0; Texts.OpenReader(R, T, pos); Texts.Read(R, ch)
+  BEGIN 
+    errpos := pos; 
+    errcnt := 0; 
+    Texts.OpenReader(R, T, pos); 
+    lineNbr := 1;
+    columnNbr := 1;
+    GetCh()
   END Init;
 
   PROCEDURE EnterKW(sym: INTEGER; name: ARRAY OF CHAR);
