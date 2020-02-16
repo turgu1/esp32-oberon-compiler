@@ -8,15 +8,15 @@
     - 16-bits instructions
     - Boolean registers (16) and instructions
     - Zero-overhead Loops with buffer size of 256
+    - NSA/NSAU Instructions
+    - MIN/MAX Instructions
     - SEXT Instruction
     - MUL16S / MUL16U / MULL / MULUH / MULSH Instructions
     - QUOS / QUOU / REMS / REMU Instructions
 
-    Not used options
+    Not used options / Instructions
     - MAC16 DSP Instructions
     - CLAMPS Instruction
-    - NSA/NSAU Instructions
-    - MIN/MAX Instructions
     - L32AI / S32RI / S32C1I Instructions
     - ADDX / SUBX Instructions
     - Processor ID
@@ -29,7 +29,7 @@
     
     A0 : Return Address
     A1 : Stack Pointer
-    
+    A2 : SB
   *)
 
 MODULE Esp32;
@@ -39,101 +39,178 @@ CONST
 
   (* Core Architecture Op codes *)
   (* Load *)
-  opL8UI  = 000002H; (* RRI8 8-bit unsigned load (8-bit offset) *)
-  opL16SI = 009002H; (* RRI8 16-bit signed load (8-bit shifted offset) *)
-  opL16UI = 001002H; (* RRI8 16-bit unsigned load (8-bit shifted offset) *)
-  opL32I  = 002002H; (* RRI8 32-bit load (8-bit shifted offset) *)
-  opL32R  = 000001H; (* RI16 32-bit load PC-relative (16-bit negative word offset) *)
+  opL8UI  = 000002H; (* RRI8 8-bit unsigned load (8-bit offset)
+                        L8UI at, as, 0..255 *)
+  opL16SI = 009002H; (* RRI8 16-bit signed load (8-bit shifted offset)
+                        L16SI at, as, 0..510 *)
+  opL16UI = 001002H; (* RRI8 16-bit unsigned load (8-bit shifted offset)
+                        L16UI at, as, 0..510 *)
+  opL32I  = 002002H; (* RRI8 32-bit load (8-bit shifted offset)
+                        L32I at, as, 0..1020 *)
+  opL32R  = 000001H; (* RI16 32-bit load PC-relative (16-bit negative word offset)
+                        L32R at, label *)
 
   (* Store *)
-  opS8I  = 004002H; (* RRI8 8-bit store (8-bit offset) *)
-  opS16I = 005002H; (* RRI8 16-bit store (8-bit shifted offset) *)
-  opS32I = 006002H; (* RRI8 32-bit store (8-bit shifted offset) *)
+  opS8I  = 004002H; (* RRI8 8-bit store (8-bit offset) 
+                       S8I at, as, 0..255 *)
+  opS16I = 005002H; (* RRI8 16-bit store (8-bit shifted offset) 
+                       S16I at, as, 0..510 *)
+  opS32I = 006002H; (* RRI8 32-bit store (8-bit shifted offset) 
+                       S32I at, as, 0..1020 *)
 
   (* Jump and Call *)
-(*opCALL0  = 000005H; (* CALL4  Call subroutine, PC-relative  NOT USED *)
-(*opCALLX0 = 0000C0H; (* CALLX Call subroutine, address in register NOT USED *)
-  opJ      = 000006H; (* CALL  Unconditional jump, PC-relative *)
-  opJX     = 0000A0H; (* CALLX Unconditional jump, address in register *)
-(*opRET    = 000080H; (* CALLX Subroutine return—jump to return address. 
+(*opCALL0  = 000005H;  * CALL4  Call subroutine, PC-relative  NOT USED
+                         CALL0 label *)
+(*opCALLX0 = 0000C0H;  * CALLX Call subroutine, address in register NOT USED
+                         CALLX0 as *)
+  opJ      = 000006H; (* CALL  Unconditional jump, PC-relative
+                         J label *)
+  opJX     = 0000A0H; (* CALLX Unconditional jump, address in register
+                         JX as *)
+(*opRET    = 000080H;  * CALLX Subroutine return—jump to return address. 
                          Used to return from a routine called by CALL0/CALLX0 NOT USED *)
 
   (* Conditional Branch *)
-  opBEQZ  = 000016H; (* BRI12  Branch if equal to zero *)
-  opBNEZ  = 000056H; (* BRI12  Branch if not equal to zero *)
-  opBGEZ  = 0000D6H; (* BRI12  Branch if greater than or equal to zero *)
-  opBLTZ  = 000096H; (* BRI12  Branch if less than zero *)
-  opBEQI  = 000026H; (* BRI8   Branch if equal immediate *)
-  opBNEI  = 000066H; (* BRI8   Branch if not equal immediate *)
-  opBGEI  = 0000E6H; (* BRI8   Branch if greater than or equal immediate *)
-  opBLTI  = 0000A6H; (* BRI8   Branch if less than immediate *)
-  opBGEUI = 0000F6H; (* BRI8   Branch if greater than or equal unsigned immediate *)
-  opBLTUI = 0000B6H; (* BRI8   Branch if less than unsigned immediate *)
-  opBBCI  = 006007H; (* RRI8b  Branch if bit clear immediate *)
-  opBBSI  = 00E007H; (* RRI8b  Branch if bit set immediate *)
-  opBEQ   = 001007H; (* RRI8   Branch if equal *)
-  opBNE   = 009007H; (* RRI8   Branch if not equal *)
-  opBGE   = 00A007H; (* RRI8   Branch if greater than or equal *)
-  opBLT   = 002007H; (* RRI8   Branch if less than *)
-  opBGEU  = 00B007H; (* RRI8   Branch if greater than or equal unsigned *)
-  opBLTU  = 003007H; (* RRI8   Branch if less than Unsigned *)
-  opBANY  = 008007H; (* RRI8   Branch if any of masked bits set *)
-  opBNONE = 000007H; (* RRI8   Branch if none of masked bits set (All Clear) *)
-  opBALL  = 004007H; (* RRI8   Branch if all of masked bits set *)
-  opBNALL = 00C007H; (* RRI8   Branch if not all of masked bits set *)
-  opBBC   = 005007H; (* RRI8   Branch if bit clear *)
-  opBBS   = 00D007H; (* RRI8   Branch if bit set *)
+  opBEQZ  = 000016H; (* BRI12  Branch if equal to zero
+                        BEQZ as, label *)
+  opBNEZ  = 000056H; (* BRI12  Branch if not equal to zero
+                        BNEZ as, label *)
+  opBGEZ  = 0000D6H; (* BRI12  Branch if greater than or equal to zero
+                        BGEZ as, label *)
+  opBLTZ  = 000096H; (* BRI12  Branch if less than zero
+                        BLTZ as, label *)
+  opBEQI  = 000026H; (* BRI8   Branch if equal immediate
+                        BEQI as, imm, label *)
+  opBNEI  = 000066H; (* BRI8   Branch if not equal immediate
+                        BNEI as, imm, label *)
+  opBGEI  = 0000E6H; (* BRI8   Branch if greater than or equal immediate
+                        BGEI as, imm, label *)
+  opBLTI  = 0000A6H; (* BRI8   Branch if less than immediate
+                        BLTI as, imm, label *)
+  opBGEUI = 0000F6H; (* BRI8   Branch if greater than or equal unsigned immediate
+                        BGEUI as, imm, label *)
+  opBLTUI = 0000B6H; (* BRI8   Branch if less than unsigned immediate
+                        BLTUI as, imm, label *)
+  opBBCI  = 006007H; (* RRI8b  Branch if bit clear immediate
+                        BBCI as, 0..31, label *)
+  opBBSI  = 00E007H; (* RRI8b  Branch if bit set immediate
+                        BBSI as, 0..31, label *)
+  opBEQ   = 001007H; (* RRI8   Branch if equal
+                        BEQ as, at, label *)
+  opBNE   = 009007H; (* RRI8   Branch if not equal
+                        BNE as, at, label *)
+  opBGE   = 00A007H; (* RRI8   Branch if greater than or equal
+                        BGE as, at, label *)
+  opBLT   = 002007H; (* RRI8   Branch if less than
+                        BLT as, at, label *)
+  opBGEU  = 00B007H; (* RRI8   Branch if greater than or equal unsigned
+                        BGEU as, at, label *)
+  opBLTU  = 003007H; (* RRI8   Branch if less than Unsigned
+                        BLTU as, at, label *)
+  opBANY  = 008007H; (* RRI8   Branch if any of masked bits set
+                        BANY as, at, label *)
+  opBNONE = 000007H; (* RRI8   Branch if none of masked bits set (All Clear)
+                        BNONE as, at, label *)
+  opBALL  = 004007H; (* RRI8   Branch if all of masked bits set
+                        BALL as, at, label *)
+  opBNALL = 00C007H; (* RRI8   Branch if not all of masked bits set
+                        BNALL as, at, label *)
+  opBBC   = 005007H; (* RRI8   Branch if bit clear
+                        BBC as, at, label *)
+  opBBS   = 00D007H; (* RRI8   Branch if bit set
+                        BBS as, at, label *)
 
   (* Move *)
-  opMOVI   = 000A002H; (* RRI8 Load register with 12-bit signed constant *)
-  opMOVEQZ = 0830000H; (* RRR  Conditional move if zero *)
-  opMOVNEZ = 0930000H; (* RRR  Conditional move if non-zero *)
-  opMOVLTZ = 0A30000H; (* RRR  Conditional move if less than zero *)
-  opMOVGEZ = 0B30000H; (* RRR  Conditional move if greater than or equal to zero *)
+  opMOVI   = 000A002H; (* RRI8 Load register with 12-bit signed constant
+                          MOVI at, -2048..2047 *)
+  opMOVEQZ = 0830000H; (* RRR  Conditional move if zero
+                          MOVEQZ ar, as, at *)
+  opMOVNEZ = 0930000H; (* RRR  Conditional move if non-zero
+                          MOVNEZ ar, as, at *)
+  opMOVLTZ = 0A30000H; (* RRR  Conditional move if less than zero
+                          MOVLTZ ar, as, at *)
+  opMOVGEZ = 0B30000H; (* RRR  Conditional move if greater than or equal to zero
+                          MOVGEZ ar, as, at *)
 
   (* Arithmetic *)
-  opADD   = 0800000H; (* RRR  Add two registers *)
-  opADDX2 = 0900000H; (* RRR  Add register to register shifted by 1 *)
-  opADDX4 = 0A00000H; (* RRR  Add register to register shifted by 2 *)
-  opADDX8 = 0B00000H; (* RRR  Add register to register shifted by 3 *)
-  opSUB   = 0C00000H; (* RRR  Subtract two registers *)
-  opSUBX2 = 0D00000H; (* RRR  Subtract register from register shifted by 1 *)
-  opSUBX4 = 0E00000H; (* RRR  Subtract register from register shifted by 2 *)
-  opSUBX8 = 0F00000H; (* RRR  Subtract register from register shifted by 3 *)
-  opNEG   = 0600000H; (* RRR  Negate *)
-  opABS   = 0600100H; (* RRR  Absolute value *)
-  opADDI  = 000C002H; (* RRI8 Add signed constant to register *)
-  opADDMI = 000D002H; (* RRI8 Add signed constant shifted by 8 to register *)
+  opADD   = 0800000H; (* RRR  Add two registers
+                         ADD ar, as, at *)
+  opADDX2 = 0900000H; (* RRR  Add register to register shifted by 1
+                         ADDX2 ar, as, at *)
+  opADDX4 = 0A00000H; (* RRR  Add register to register shifted by 2
+                         ADDX4 ar, as, at *)
+  opADDX8 = 0B00000H; (* RRR  Add register to register shifted by 3
+                         ADDX8 ar, as, at *)
+  opSUB   = 0C00000H; (* RRR  Subtract two registers
+                         SUB ar, as, at *)
+  opSUBX2 = 0D00000H; (* RRR  Subtract register from register shifted by 1
+                         SUBX2 ar, as, at *)
+  opSUBX4 = 0E00000H; (* RRR  Subtract register from register shifted by 2
+                         SUBX4 ar, as, at *)
+  opSUBX8 = 0F00000H; (* RRR  Subtract register from register shifted by 3
+                         SUBX8 ar, as, at *)
+  opNEG   = 0600000H; (* RRR  Negate
+                         NEG ar, at *)
+  opABS   = 0600100H; (* RRR  Absolute value
+                         ABS ar, at *)
+  opADDI  = 000C002H; (* RRI8 Add signed constant to register
+                         ADDI at, as, -128..127 *)
+  opADDMI = 000D002H; (* RRI8 Add signed constant shifted by 8 to register
+                         ADDMI at, as, -32768..32512 *)
 
   (* Bitwise Logical *)
-  opAND = 0100000H; (* RRR Bitwise logical AND *)
-  opOR  = 0200000H; (* RRR Bitwise logical OR *)
-  opXOR = 0300000H; (* RRR Bitwise logical exclusive OR *)
+  opAND = 0100000H; (* RRR Bitwise logical AND
+                       AND ar, as, at *)
+  opOR  = 0200000H; (* RRR Bitwise logical OR
+                       OR ar, as, at *)
+  opXOR = 0300000H; (* RRR Bitwise logical exclusive OR
+                       XOR ar, as, at *)
 
   (* Shift *)
-  opEXTUI = 0040000H; (* RRRx Extract unsigned field immediate *)
-  opSLLI  = 0010000H; (* RRRll Shift left logical immediate by 1..31 bit positions *)
-  opSRLI  = 0410000H; (* RRR Shift right logical immediate by 0..15 bit positions *)
-  opSRAI  = 0210000H; (* RRRra Shift right arithmetic immediate by 0..31 bit positions *)
-  opSRC   = 0810000H; (* RRR Shift right combined (a funnel shift with shift amount from SAR) *)
-  opSRA   = 0B10000H; (* RRR Shift right arithmetic (shift amount from SAR) *)
-  opSLL   = 0A10000H; (* RRR Shift left logical *)
-  opSRL   = 0910000H; (* RRR Shift right logical *)
-  opSSA8B = 0403000H; (* RRR Set shift amount register (SAR) for big-endian byte align *)
-  opSSA8L = 0402000H; (* RRR Set shift amount register (SAR) for little-endian byte align *)
-  opSSR   = 0400000H; (* RRR Set shift amount register (SAR) for shift right logical *)
-  opSSL   = 0401000H; (* RRR Set shift amount register (SAR) for shift left logical *)
-  opSSAI  = 0404000H; (* RRR Set shift amount register (SAR) immediate *)
+  opEXTUI = 0040000H; (* RRRx Extract unsigned field immediate
+                         EXTUI ar, at, shiftimm, maskimm *)
+  opSLLI  = 0010000H; (* RRRll Shift left logical immediate by 1..31 bit positions
+                         SLLI ar, as, 1..31 *)
+  opSRLI  = 0410000H; (* RRR Shift right logical immediate by 0..15 bit positions
+                         SRLI ar, at, 0..15 *)
+  opSRAI  = 0210000H; (* RRRra Shift right arithmetic immediate by 0..31 bit positions
+                         SRAI ar, at, 0..31 *)
+  opSRC   = 0810000H; (* RRR Shift right combined (a funnel shift with shift amount from SAR)
+                         SRC ar, as, at *)
+  opSRA   = 0B10000H; (* RRR Shift right arithmetic (shift amount from SAR)
+                         SRA ar, at *)
+  opSLL   = 0A10000H; (* RRR Shift left logical
+                         SLL ar, as *)
+  opSRL   = 0910000H; (* RRR Shift right logical
+                         SRL ar, at *)
+(*opSSA8B = 0403000H;  * RRR Set shift amount register (SAR) for big-endian byte align NOT USED
+                         SSA8B as *)
+  opSSA8L = 0402000H; (* RRR Set shift amount register (SAR) for little-endian byte align
+                         SSA8L as *)
+  opSSR   = 0400000H; (* RRR Set shift amount register (SAR) for shift right logical
+                         SSR as *)
+  opSSL   = 0401000H; (* RRR Set shift amount register (SAR) for shift left logical
+                         SSL as *)
+  opSSAI  = 0404000H; (* RRR Set shift amount register (SAR) immediate
+                         SSAI 0..31 *)
 
   (* Processor Control *)
-  opRSR   = 0030000H; (* RSR Read Special Register *)
-  opWSR   = 0130000H; (* RSR Write Special Register *)
-  opXSR   = 0610000H; (* RSR Exchange Special Register *)
-  opISYNC = 0002000H; (* RRR Instruction fetch synchronize *)
-  opRSYNC = 0002010H; (* RRR Instruction register synchronize *)
-  opESYNC = 0002020H; (* RRR Register value synchronize *)
-  opDSYNC = 0002030H; (* RRR Load/store synchronize *)
-  opNOP   = 00020F0H; (* RRR No operation *)
+  opRSR   = 0030000H; (* RSR Read Special Register
+                         RSR at, 0..255 *)
+  opWSR   = 0130000H; (* RSR Write Special Register
+                         WSR at, 0..255 *)
+  opXSR   = 0610000H; (* RSR Exchange Special Register
+                         XSR at, 0..255 *)
+  opISYNC = 0002000H; (* RRR Instruction fetch synchronize
+                         ISYNC *)
+  opRSYNC = 0002010H; (* RRR Instruction register synchronize
+                         RSYNC *)
+  opESYNC = 0002020H; (* RRR Register value synchronize
+                         ESYNC *)
+  opDSYNC = 0002030H; (* RRR Load/store synchronize
+                         DSYNC *)
+  opNOP   = 00020F0H; (* RRR No operation
+                         NOP *)
 
   (* Zero Overhead Loop Option *)
   (* Special Registers for Zero Overhead Loop option *)
@@ -141,67 +218,213 @@ CONST
   srLEND   = 1;  (* Loop end *)
   srLCOUNT = 2;  (* Loop count *)
   (* Instructions *)
-  opLOOP    = 0008076H; (* BRI8 Loop *)
-  opLOOPGTZ = 000A076H; (* BRI8 Loop if Greater Than Zero *)
-  opLOOPNEZ = 0009076H; (* BRI8 Loop if Not-Equal Zero *)
+  opLOOP    = 0008076H; (* BRI8 Loop
+                           LOOP as, label *)
+  opLOOPGTZ = 000A076H; (* BRI8 Loop if Greater Than Zero
+                           LOOPGTZ as, label *)
+  opLOOPNEZ = 0009076H; (* BRI8 Loop if Not-Equal Zero
+                           LOOPNEZ as, label *)
 
   (* Code density instruction (16-bits wide) *)
-  opADDn   = 0000AH; (* RRRN Add two registers  *)
-  opADDIn  = 0000BH; (* RRRN Add register and immediate (-1 and 1..15) *)
-  opBEQZn  = 0008CH; (* RRI6 Branch if register is zero with a 6-bit unsigned offset (forward only) *)
-  opBNEZn  = 000CCH; (* RRI6 Branch if register is non-zero with a 6-bit unsigned offset (forward only) *)
-  opBREAKn = 0F02DH; (* RRRN This instruction is the same as BREAK but with a 16-bit encoding *)
-  opL32In  = 00008H; (* RRRNi4 Load 32 bits, 4-bit offset *)
-  opMOVn   = 0000DH; (* RRRN Narrow move *)
-  opMOVIn  = 0000CH; (* RRI7 Load register with immediate (-32..95) *)
-  opNOPn   = 0F03DH; (* RRRN This instruction performs no operation. It is typically used for instruction alignment. *)
+  opADDn   = 0000AH; (* RRRN Add two registers
+                        ADD.N ar, as, at *)
+  opADDIn  = 0000BH; (* RRRN Add register and immediate (-1 and 1..15)
+                        ADDI.N ar, as, imm *)
+  opBEQZn  = 0008CH; (* RRI6 Branch if register is zero with a 6-bit unsigned offset (forward only)
+                        BEQZ.N as, label *)
+  opBNEZn  = 000CCH; (* RRI6 Branch if register is non-zero with a 6-bit unsigned offset (forward only)
+                        BNEZ.N as, label *)
+(*opBREAKn = 0F02DH;  * RRRN This instruction is the same as BREAK but with a 16-bit encoding
+                        BREAK.N 0..15 *)
+  opL32In  = 00008H; (* RRRNi4 Load 32 bits, 4-bit offset
+                        L32I.N at, as, 0..60 *)
+  opMOVn   = 0000DH; (* RRRN Narrow move
+                        MOV.N at, as *)
+  opMOVIn  = 0000CH; (* RRI7 Load register with immediate (-32..95)
+                        MOVI.N as, -32..95 *)
+  opNOPn   = 0F03DH; (* RRRN This instruction performs no operation. It is typically used for instruction alignment.
+                        NOP.N *)
 (*opRETn   = 0F00DH;  * RRRN The same as RET but with a 16-bit encoding NOT USED *)
-  opRETWn  = 0F01DH; (* RRRN The same as RETW but with a 16-bit encoding *)
-  opS32In  = 00009H; (* RRRNi4 Store 32 bits, 4-bit offset *)
+  opRETWn  = 0F01DH; (* RRRN The same as RETW but with a 16-bit encoding
+                        RETW.N *)
+  opS32In  = 00009H; (* RRRNi4 Store 32 bits, 4-bit offset
+                        S32I.N at, as, 0..60 *)
 
   (* 16bits / 32bits Multiplication Options *)
-  opMUL16S = 0D10000H; (* RRR Signed 16×16 multiplication *)
-  opMUL16U = 0C10000H; (* RRR Unsigned 16×16 multiplication *)
-  opMULL   = 0820000H; (* RRR Multiply low *)
-  opMULUH  = 0A20000H; (* RRR Multiply unsigned high *)
-  opMULSH  = 0B20000H; (* RRR Multiply signed high *)
+  opMUL16S = 0D10000H; (* RRR Signed 16×16 multiplication
+                          MUL16S ar, as, at *)
+  opMUL16U = 0C10000H; (* RRR Unsigned 16×16 multiplication
+                          MUL16U ar, as, at *)
+  opMULL   = 0820000H; (* RRR Multiply low
+                          MULL ar, as, at *)
+  opMULUH  = 0A20000H; (* RRR Multiply unsigned high
+                          MULUH ar, as, at *)
+  opMULSH  = 0B20000H; (* RRR Multiply signed high
+                          MULSH ar, as, at *)
 
   (* 32bits Integer Divide *)
-  opQUOS = 0D20000H; (* RRR Quotient Signed *)
-  opQUOU = 0C20000H; (* RRR Quotient Unsigned *)
-  opREMS = 0F20000H; (* RRR Remainder Signed *)
-  opREMU = 0E20000H; (* RRR Remainder Unsigned *)
+  opQUOS = 0D20000H; (* RRR Quotient Signed
+                        QUOS ar, as, at *)
+  opQUOU = 0C20000H; (* RRR Quotient Unsigned
+                        QUOU ar, as, at *)
+  opREMS = 0F20000H; (* RRR Remainder Signed
+                        REMS ar, as, at *)
+  opREMU = 0E20000H; (* RRR Remainder Unsigned
+                        REMU ar, as, at *)
 
   (* Boolean Instructions *)
-  opALL4  = 0009000H; (* RRR  4-Boolean and reduction *)
-  opALL8  = 000B000H; (* RRR  8-Boolean and reduction *)
-  opANDB  = 0020000H; (* RRR  Boolean and *)
-  opANDBC = 0120000H; (* RRR  Boolean and with complement *)
-  opANY4  = 0008000H; (* RRR  4-Boolean or reduction *)
-  opANY8  = 000A000H; (* RRR  8-Boolean or reduction *)
-  opBF    = 0000076H; (* RRI8 Branch if boolean false *)
-  opBT    = 0001076H; (* RRI8 Branch if boolean true *)
-  opMOVF  = 0C30000H; (* RRR  Conditional move if false *)
-  opMOVT  = 0D30000H; (* RRR  Conditional move if true *)
-  opORB   = 0220000H; (* RRR  Boolean or *)
-  opORBC  = 0320000H; (* RRR  Boolean or with complement *)
-  opXORB  = 0420000H; (* RRR  Boolean xor *)
+  opALL4  = 0009000H; (* RRR  4-Boolean and reduction
+                         ALL4 bt, bs *)
+  opALL8  = 000B000H; (* RRR  8-Boolean and reduction
+                         ALL8 bt, bs *)
+  opANDB  = 0020000H; (* RRR  Boolean and
+                         ANDB br, bs, bt *)
+  opANDBC = 0120000H; (* RRR  Boolean and with complement
+                         ANDBC br, bs, bt *)
+  opANY4  = 0008000H; (* RRR  4-Boolean or reduction
+                         ANY4 bt, bs *)
+  opANY8  = 000A000H; (* RRR  8-Boolean or reduction
+                         ANY8 bt, bs *)
+  opBF    = 0000076H; (* RRI8 Branch if boolean false
+                         BF bs, label *)
+  opBT    = 0001076H; (* RRI8 Branch if boolean true
+                         BT bs, label *)
+  opMOVF  = 0C30000H; (* RRR  Conditional move if false
+                         MOVF ar, as, bt *)
+  opMOVT  = 0D30000H; (* RRR  Conditional move if true
+                         MOVT ar, as, bt *)
+  opORB   = 0220000H; (* RRR  Boolean or
+                         ORB br, bs, bt *)
+  opORBC  = 0320000H; (* RRR  Boolean or with complement
+                         ORBC br, bs, bt *)
+  opXORB  = 0420000H; (* RRR  Boolean xor
+                         XORB br, bs, bt *)
 
   (* Windowed Register Option *)
-  opMOVSP   = 0H; (* RRR    Atomic check window and move *)
-  opCALL4   = 0H; (* CALL4  Call subroutine, PC-relative,  4 Registers *)
-  opCALL8   = 0H; (* CALL4  Call subroutine, PC-relative,  8 Registers *)
-  opCALL12  = 0H; (* CALL4  Call subroutine, PC-relative, 12 Registers *)
-  opCALLX4  = 0H; (* CALLX  Call subroutine, address in register,  4 Registers *)
-  opCALLX8  = 0H; (* CALLX  Call subroutine, address in register,  8 Registers *)
-  opCALLX12 = 0H; (* CALLX  Call subroutine, address in register, 12 Registers *)
-  opENTRY   = 0H; (* BRI12  [Align 4] Subroutine entry—rotate registers, adjust stack pointer *)
-  opRETW    = 0H; (* CALLX  Subroutine return—unrotate registers, jump to return address *)
-  opROTW    = 0H; (* RRR    Rotate window by a constant *)
-  opL32E    = 0H; (* RRI4   Load 32 bits for window exception *)
-  opS32E    = 0H; (* RRI4   Store 32 bits for window exception *)
-  opRFWO    = 0H; (* RRR    Return from window overflow exception *)
-  opRFWU    = 0H; (* RRR    Return from window underflow exception *)
+  opMOVSP   = 0001000H; (* RRR    Atomic check window and move
+                           MOVSP at, as *)
+  opCALL4   = 0000015H; (* CALL4  Call subroutine, PC-relative,  4 Registers
+                           CALL4 label *)
+  opCALL8   = 0000025H; (* CALL4  Call subroutine, PC-relative,  8 Registers
+                           CALL8 label *)
+  opCALL12  = 0000035H; (* CALL4  Call subroutine, PC-relative, 12 Registers
+                           CALL12 label *)
+  opCALLX4  = 00000D0H; (* CALLX  Call subroutine, address in register,  4 Registers
+                           CALLX4 as *)
+  opCALLX8  = 00000E0H; (* CALLX  Call subroutine, address in register,  8 Registers
+                           CALLX8 as *)
+  opCALLX12 = 00000F0H; (* CALLX  Call subroutine, address in register, 12 Registers
+                           CALLX12 as *)
+  opENTRY   = 0000036H; (* BRI12  [Align 4] Subroutine entry—rotate registers, adjust stack pointer
+                           ENTRY as, 0..32760 *)
+  opRETW    = 0000090H; (* CALLX  Subroutine return—unrotate registers, jump to return address
+                           RETW *)
+  opROTW    = 0408000H; (* RRR    Rotate window by a constant
+                           ROTW -8..7 *)
+  opL32E    = 0090000H; (* RRI4   Load 32 bits for window exception
+                           L32E at, as, -64..-4 *)
+  opS32E    = 0490000H; (* RRI4   Store 32 bits for window exception
+                           S32E at, as, -64..-4 *)
+  opRFWO    = 0003400H; (* RRR    Return from window overflow exception
+                           RFWO *)
+  opRFWU    = 0003500H; (* RRR    Return from window underflow exception
+                           RFWU *)
+
+  (* Miscellaneous Operations *)
+  opCLAMPS = 0330000H; (* RRR Clamp to signed power of two range
+                          CLAMPS ar, as, 7..22 *)
+  opMAX    = 0530000H; (* RRR Maximum value signed
+                          MAX ar, as, at *)
+  opMAXU   = 0730000H; (* RRR Maximum value unsigned
+                          MAXU ar, as, at *)
+  opMIN    = 0430000H; (* RRR Minimum value signed
+                          MIN ar, as, at *)
+  opMINU   = 0630000H; (* RRR Minimum value unsigned
+                          MINU ar, as, at *)
+  opNSA    = 040E000H; (* RRR Normalization shift amount signed
+                          NSA at, as *)
+  opNSAU   = 040F000H; (* RRR Normalization shift amount unsigned
+                          NSAU at, as *)
+  opSEXT   = 0230000H; (* RRR Sign extend
+                          SEXT ar, as, 7..22 *)
+
+  (* Floating Point *)
+  opABSs    = 0FA0010H; (* RRR  Single-precision absolute value
+                           ABS.S fr, fs *)
+  opADDs    = 00A0000H; (* RRR  Single-precision add
+                           ADD.S fr, fs, ft *)
+  opCEILs   = 0BA0000H; (* RRR  Scale and convert single-precision to integer, round to +infinite
+                           CEIL.S ar, fs, 0..15 *)
+  opFLOATs  = 0CA0000H; (* RRR  Convert signed integer to single-precision and scale
+                           FLOAT.S fr, as, 0..15 *)
+  opFLOORs  = 0AA0000H; (* RRR  Scale and convert single-precision to integer, round to -infinite
+                           FLOOR.S ar, fs, 0..15 *)
+  opLSI     = 0000003H; (* RRI8 Load single-precision immediate
+                           LSI ft, as, 0..1020 *)
+  opLSIU    = 0008003H; (* RRI8 Load single-Precision Immediate with Base Update
+                           LSIU ft, as, 0..1020 *)
+  opLSX     = 0080000H; (* RRR  Load single-Precision Indexed
+                           LSX fr, as, at *)
+  opLSXU    = 0180000H; (* RRR  Load single-Precision Indexed with Base Update
+                           LSXU fr, as, at *)
+  opMADDs   = 04A0000H; (* RRR  Single-precision multiply/add
+                           MADD.S fr, fs, ft *)
+  opMOVs    = 0FA0000H; (* RRR  Single-precision move
+                           MOV.S fr, fs *)
+  opMOVEQZs = 08B0000H; (* RRR  Single-precision conditional move if equal to zero
+                           MOVEQZ.S fr, fs, at *)
+  opMOVFs   = 0CB0000H; (* RRR  Single-precision conditional move if false
+                           MOVF.S fr, fs, bt *)
+  opMOVGEZs = 0BB0000H; (* RRR  Single-precision conditional move if greater than or equal to zero
+                           MOVGEZ.S fr, fs, at *)
+  opMOVLTZs = 0AB0000H; (* RRR  Single-precision conditional move if less than zero
+                           MOVLTZ.S fr, fs, at *)
+  opMOVNEZs = 09B0000H; (* RRR  Single-precision conditional move if not equal to zero
+                           MOVNEZ.S fr, fs, at *)
+  opMOVTs   = 0DB0000H; (* RRR  Single-precision conditional move if true
+                           MOVT.S fr, fs, bt *)
+  opMSUBs   = 05A0000H; (* RRR  Single-precision multiply/subtract
+                           MSUB.S fr, fs, ft *)
+  opMULs    = 02A0000H; (* RRR  Single-precision multiply
+                           MUL.S fr, fs, ft *)
+  opNEGs    = 0FA0060H; (* RRR  Single-precision negate
+                           NEG.S fr, fs *)
+  opOEQs    = 02B0000H; (* RRR  Single-precision compare equal
+                           OEQ.S br, fs, ft *)
+  opOLEs    = 06B0000H; (* RRR  Single-precision compare less than or equal
+                           OLE.S br, fs, ft *)
+  opOLTs    = 04B0000H; (* RRR  Single-precision compare less than
+                           OLT.S br, fs, ft *)
+  opRFR     = 0FA0040H; (* RRR  Move from FR to AR
+                           RFR ar, fs *)
+  opROUNDs  = 08A0000H; (* RRR  Scale and convert single-precision to integer, round to nearest
+                           ROUND.S ar, fs, 0..15 *)
+  opSSI     = 0004003H; (* RRI8  Store single-Precision Immediate
+                           SSI ft, as, 0..1020 *)
+  opSSIU    = 000C003H; (* RRI8 Store single-Precision Immediate with Base Update
+                           SSIU ft, as, 0..1020 *)
+  opSSX     = 0480000H; (* RRR  Store single-Precision Indexed
+                           SSX fr, as, at *)
+  opSSXU    = 0580000H; (* RRR  Store single-Precision Indexed with Base Update
+                           SSXU fr, as, at *)
+  opSUBs    = 01A0000H; (* RRR  Single-precision subtract
+                           SUB.S fr, fs, ft *)
+  opTRUNCs  = 09A0000H; (* RRR  Scale and convert single-precision to signed integer, round to 0
+                           TRUNC.S ar, fs, 0..15 *)
+  opUEQs    = 03B0000H; (* RRR  Single-precision compare unordered or equal
+                           UEQ.S br, fs, ft *)
+  opUFLOATs = 0DA0000H; (* RRR  Convert unsigned integer to single-precision and scale
+                           UFLOAT.S fr, as, 0..15 *)
+  opULEs    = 07B0000H; (* RRR  Single-precision compare unordered or less than or equal
+                           ULE.S br, fs, ft *)
+  opULTs    = 05B0000H; (* RRR  Single-precision compare unordered or less than
+                           ULT.S br, fs, ft *)
+  opUNs     = 01B0000H; (* RRR  Single-precision compare unordered
+                           UN.S br, fs, ft *)
+  opUTRUNCs = 0EA0000H; (* RRR  Scale and convert single-precision to unsigned integer, round to 0
+                           UTRUNC.S ar, fs, 0..15 *)
+  opWFR     = 0FA0050H; (* RRR  Move from AR to FR
+                           WFR fr, as *)
 
 VAR
   instr : INTEGER; (* Instruction result after formatting *)
@@ -407,8 +630,8 @@ END RRRN;
    +-----+-----+-----+-----+ *)
 PROCEDURE RRRNi4(op: INTEGER; s, t, offset : BYTE);
 BEGIN
-  range(r, 0, 15);
   range(s, 0, 15);
+  range(t, 0, 15);
   range(offset, 0, 60);
   instr := op + LSL(ASR(offset, 2), 12) + LSL(s, 8) + LSL(t, 4);
   Gen16();
