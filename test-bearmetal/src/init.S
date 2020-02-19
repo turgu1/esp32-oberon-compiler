@@ -12,13 +12,15 @@
 # - Constants that cannot be kept in registers are put in the
 #   .data section
 #
-# - Main code of a Module is put in an .init section. All init sections
-#   (but the first) will be called in sequence to initialize modules. The first module
-#   in the list is considered the main module and its initialization code will
-#   be launched at the end.
+# - Main code of a Module is put in an .init section. All init 
+#   sections (but the first) will be called in sequence to 
+#   initialize modules. The first module in the list is considered
+#   the main module and its initialization code will be launched
+#   at the end.
 #
-# - One entry in the .init_table section must be defined to point at the module 
-#   initialization code. Not required if the initialization is empty
+# - One entry in the .init_table section must be defined to point
+#   at the module initialization code. Not required if the 
+#   initialization is empty
 #
 # - All procedural code is put in a .text section
 #
@@ -120,4 +122,4 @@ loop_3:
     callx4 a2                  # call main module initialization code
 
 _init_end:
-    j _init_end                # never return. May be stopped by watchdog.
+    j _init_end                # never return. May reboot if watchdog enabled.
