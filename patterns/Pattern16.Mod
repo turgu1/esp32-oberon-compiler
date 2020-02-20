@@ -19,3 +19,27 @@ BEGIN
     m := 1
   END
 END Pattern16.
+
+(* 
+    .section .bss_module_Pattern16
+    .align 4
+
+m:  .space 4
+n:  .space 4
+x:  .space 4
+u:  .space 4
+a:  .space 40
+b:  .space 40
+s:  .space 16
+t:  .space 16
+
+    .section .init_module_Pattern16
+    .align 4
+
+_module_Pattern16_init:
+    entry a1, 0
+    retw
+
+    .section .init_table_module_Pattern16
+    .int _module_Pattern16_init 
+*)

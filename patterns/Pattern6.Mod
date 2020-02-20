@@ -11,3 +11,20 @@ BEGIN
     i := i - 1
   UNTIL i = 0
 END Pattern6.
+
+(* 
+    .section .bss_module_Pattern6
+    .align 4
+
+i:  space 4
+
+    .section .init_module_Pattern6
+    .align 4
+
+_module_Pattern6_init:
+    entry a1, 0
+    retw
+
+    .section .init_table_module_Pattern6
+    .int _module_Pattern6_init 
+*)

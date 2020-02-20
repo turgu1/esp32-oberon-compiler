@@ -17,3 +17,22 @@ BEGIN
   p.next := q;
   p.next.next := NIL
 END Pattern4.
+
+(* 
+    .section .bss_module_Pattern4
+    .align 4
+
+p:  space 4
+q:  space 4
+r:  space 16
+
+    .section .init_module_Pattern4
+    .align 4
+
+_module_Pattern4_init:
+    entry a1, 0
+    retw
+
+    .section .init_table_module_Pattern4
+    .int _module_Pattern4_init 
+*)

@@ -23,3 +23,21 @@ BEGIN
     s := {2}
   END
 END Pattern5.
+
+(* 
+    .section .bss_module_Pattern5
+    .align 4
+
+n:  space 4
+s:  space 4
+
+    .section .init_module_Pattern5
+    .align 4
+
+_module_Pattern5_init:
+    entry a1, 0
+    retw
+
+    .section .init_table_module_Pattern5
+    .int _module_Pattern5_init 
+*)

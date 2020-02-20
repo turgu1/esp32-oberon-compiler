@@ -12,3 +12,22 @@ BEGIN
     m := 1
   END
 END Pattern11.
+
+(* 
+    .section .bss_module_Pattern11
+    .align 4
+
+s:  space 4
+m:  space 4
+n:  space 4
+
+    .section .init_module_Pattern11
+    .align 4
+
+_module_Pattern11_init:
+    entry a1, 0
+    retw
+
+    .section .init_table_module_Pattern11
+    .int _module_Pattern11_init 
+*)

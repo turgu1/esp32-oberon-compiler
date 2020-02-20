@@ -16,3 +16,26 @@ VAR
 BEGIN
   P(a);
 END Pattern10.
+
+(* 
+    .section .bss_module_Pattern10
+    .align 4
+
+a:  space 48
+
+    .section .text_module_Pattern10
+    .align 4
+
+P:  entry a1, 8
+    retw
+    
+    .section .init_module_Pattern10
+    .align 4
+
+_module_Pattern10_init:
+    entry a1, 0
+    retw
+
+    .section .init_table_module_Pattern10
+    .int _module_Pattern10_init 
+*)
