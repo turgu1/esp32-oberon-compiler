@@ -2,9 +2,9 @@
 
 This is an ongoing effort to build an ESP32 Oberon Compiler, using the Oberon-07 Compiler from <http://www.projectoberon.com> by Niklaus Wirth and Jürg Gutknecht.
 
-The code is being ported to obnc and will generate ELF compatible object code to be used with (or without) the ESP-IDF framework.
+The code is being ported to obnc and will generate ELF compatible object code to be used with (or without) the ESP-IDF framework. I'm currently targetting a 'bearmetal' version, supplying everything necessary for building applications, relying only on the assembler and linker provided with ESP-IDF. At least, this is the intent. Nothing is in a workable condition at this point in time.
 
-At least, this is the intent. Nothing is in a workable condition at this point in time.
+The folder `test-bearmetal` demonstrate the feasability. It is a working piece of assembly code thatI made that can be compiled and pushed to an ESP32. It will get a led blink every half a second.
 
 In a Nutshell, the steps to get a working compiler are the following:
 
@@ -16,7 +16,7 @@ In a Nutshell, the steps to get a working compiler are the following:
 6. Use the compiler source code as a test case for checking if the new compiler is able to compile...
 7. Build an understanding of the code production compiler stage (from the documentation)
 8. Build an understanding of the target architecture (ESP32 and ESP-IDF)
-9. Integrate an ELF compliant generator
+9. Integrate an ELF compliant generator -> First version will produce assembly language instead. Many advantages here, specially in managing the complexity of loading registers with large (32 bits) values. The assembler is producing the ELF format...
 10. Cleanup ORG in preparation of machine code translation
 11. Build the translation
 12. Test the results

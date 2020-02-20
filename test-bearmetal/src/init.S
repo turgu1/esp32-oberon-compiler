@@ -24,7 +24,7 @@
 #
 # - All procedural code is put in a .text section
 #
-# - Global variables are placed in the .bss section. They will be
+# - Global variables are placed in a .bss section. They will be
 #   initialized with zeroes by this code.
 #
 # - All procedure and initialization code must be using 
@@ -32,6 +32,7 @@
 # ----
 
     .global _init_start
+    .extern _sbss, _ebss, _sdata, _edata, _sidata, _sitable, _eitable
 
     .section .entry.text
 
@@ -39,40 +40,17 @@
 
     .align 4
 
-# Sections information table as built by the linker
-#
-# Defined in the ld/esp32.ld file
-
-    .extern _sbss, _ebss, _sdata, _edata, _sidata, _itable, _eitable
-
-_start_bss:         .int _sbss
-_end_bss:           .int _ebss
-_start_data:        .int _sdata
-_end_data:          .int _edata
-_start_init_data:   .int _sidata
-_start_init_table:  .int _itable
-_end_init_table:    .int _eitable
-
-    .literal_position
-
 # Main entry point, as defined in the ld/esp32.ld file
 
 _init_start:
 
-    # Disable both Watchdog
-    #
-    # This could be removed once we know it to not be an Achille Heel
-
-    call4 _stop_watchdog
- 
-    # Set CPU Speed to 160MHz
-
-    call4 _set_160mhz
+    call4 _stop_watchdog      # Disable both Watchdog
+    call4 _set_160mhz         # Set CPU Speed to 160MHz
 
     # Clear .bss section
 
-    l32r a2, _end_bss         # Compute size in 4-byte chunks (a2)
-    l32r a3, _start_bss       # a3 = address of .bss
+    movi a2, _ebss            # Compute size in 4-byte chunks (a2)
+    movi a3, _sbss            # a3 = address of .bss
     sub  a2, a2, a3           # a2 = size of .bss in bytes
     beqz a2, loop_1           # if .bss is empty, nothing to do
     srli a2, a2, 2            # a2 = size of .bss in words
@@ -84,9 +62,9 @@ loop_1:
 
     # Copy initialized data
 
-    l32r a2, _end_data         # Compute size in 4-byte chunks (a2)
-    l32r a3, _start_data       # a3 = address of _data
-    l32r a4, _start_init_data  # a4 = address of initialization data
+    movi a2, _edata            # Compute size in 4-byte chunks (a2)
+    movi a3, _sdata            # a3 = address of _data
+    movi a4, _sidata           # a4 = address of initialization data
     sub  a2, a2, a3            # a2 = size of .data in bytes
     beqz a2, loop_2            # if .data is empty, nothing to do
     srli a2, a2, 2             # a2 = size of .data in words
@@ -99,8 +77,8 @@ loop_2:
 
     # Call modules initialization code (but the first one)
 
-    l32r a2, _end_init_table   # compute size of init table - 4
-    l32r a3, _start_init_table # a3 = init table address
+    movi a2, _eitable          # compute size of init table - 4
+    movi a3, _sitable          # a3 = init table address
     addi a3, a3, 4             # pass the first entry
     sub  a2, a2, a3            # a2 = size in bytes
     bltz a2, _init_end         # if table is empty, leave
@@ -114,7 +92,7 @@ loop_3:
 
     # Call main module init code
 
-    l32r a2, _start_init_table # get init table address
+    movi a2, _sitable          # get init table address
     l32i a2, a2, 0             # retrieve the init code adress
     callx4 a2                  # call main module initialization code
 
@@ -124,41 +102,41 @@ _init_end:
 
 # ---- _stop_watchdog ----
 
-# Registers to disable both Watchdog
+    # Registers to disable both Watchdog
+    .equ RTC_CNTL_WDTCONFIG0_REG, 0x3FF4808C
+    .equ TIMG0_T0_WDTCONFIG0_REG, 0x3FF5F048
 
     .align 4
-
-RTC_CNTL_WDTCONFIG0_REG: .int 0x3FF4808C
-TIMG0_T0_WDTCONFIG0_REG: .int 0x3FF5F048
 
 _stop_watchdog:
     entry a1, 0
     movi a2, 0
-    l32r a3, RTC_CNTL_WDTCONFIG0_REG
+    movi a3, RTC_CNTL_WDTCONFIG0_REG
     s32i a2, a3, 0
-    l32r a3, TIMG0_T0_WDTCONFIG0_REG
+    movi a3, TIMG0_T0_WDTCONFIG0_REG
     s32i a2, a3, 0
     retw
 
 # ---- _set_160mhz ----
 
-    .align 4
+    .equ RTC_CNTL_CLK_CONF_REG,  0x3FF48070
+    .equ DPORT_CPU_PER_CONF_REG, 0x3ff0003C
+    .equ CLKCONF,                0x08002210
 
-RTC_CNTL_CLK_CONF_REG:  .int 0x3FF48070
-DPORT_CPU_PER_CONF_REG: .int 0x3ff0003C
-CLKCONF:                .int 0x08002210
+    .align 4
 
 _set_160mhz:
     entry a1, 0
 
     # Switch SoC clock source to PLL (instead of the default which is XTAl).
     # This switches the CPU (and APB) clock from 40MHz to 80MHz.
-    l32r a2, RTC_CNTL_CLK_CONF_REG
-    l32r a3, CLKCONF
+    movi a2, RTC_CNTL_CLK_CONF_REG
+    movi a3, CLKCONF
     s32i a3, a2, 0
 
-    # Switch CPU from 80MHz to _set_160mhz
-    l32r a2, DPORT_CPU_PER_CONF_REG
+    # Switch CPU from 80MHz to 160MHz
+    movi a2, DPORT_CPU_PER_CONF_REG
     movi a3, 1
     s32i a3, a2, 0
+
     retw 

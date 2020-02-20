@@ -2,25 +2,20 @@
  * GNU linker script for Espressif ESP32 for the Oberon Compiler
  */
 
-/* Default entry point */
 ENTRY( _init_start );
 
-/* Specify main memory areas */
 MEMORY
 {
-  /* TODO: Use human-readable lengths */
-  /* TODO: Use the full memory map - this is just a test */
   CODE_RAM ( RX )       : ORIGIN = 0x40080400, len = 0xFC00
   DATA_RAM ( RW )       : ORIGIN = 0x3FFF0000, len = 0x1000
 }
 
-/* Define output sections */
 SECTIONS {
   /* The program code and other data goes into Instruction RAM */
   .iram.text :
   {
     . = ALIGN(16);
-    _itable = .;
+    _sitable = .;
     KEEP (*(.init_table*))
     _eitable = .;
     KEEP(*(.entry.text))

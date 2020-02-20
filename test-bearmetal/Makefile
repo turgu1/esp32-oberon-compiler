@@ -2,7 +2,7 @@
 # Use the xtensa-esp32-elf toolchain.
 TOOLCHAIN = xtensa-esp32-elf-
 
-ASFLAGS_PLATFORM  = -mlongcalls -mtext-section-literals -fstrict-volatile-bitfields
+ASFLAGS_PLATFORM  = -mlongcalls -mauto-litpools -mtext-section-literals -fstrict-volatile-bitfields
 LDFLAGS_PLATFORM = $(AFLAGS_PLATFORM)
 
 ###
