@@ -6,7 +6,7 @@ The code is being ported to obnc and will generate ELF compatible object code to
 
 The folder `test-bearmetal` demonstrate the feasability. It is a working piece of assembly code thatI made that can be compiled and pushed to an ESP32. It will get a led blink every half a second.
 
-In a Nutshell, the steps to get a working compiler are the following:
+In a Nutshell, the steps I'm taking to get a working compiler are the following:
 
 1. Retrieve the ORB, ORG, ORS, ORP and Texts Source Modules
 2. Add Logger.Mod and Oberon.Mod Modules
@@ -16,15 +16,16 @@ In a Nutshell, the steps to get a working compiler are the following:
 6. Use the compiler source code as a test case for checking if the new compiler is able to compile...
 7. Build an understanding of the code production compiler stage (from the documentation)
 8. Build an understanding of the target architecture (ESP32 and ESP-IDF)
-9. Integrate an ELF compliant generator -> First version will produce assembly language instead. Many advantages here, specially in managing the complexity of loading registers with large (32 bits) values. The assembler is producing the ELF format...
-10. Cleanup ORG in preparation of machine code translation
-11. Build the translation
-12. Test the results
-13. Build a PlatformIO Custom Development Platform
-13. Develop standard modules for ESP32
-14. Enjoy
+9. Generate machine code by hand for each pattern found in the Chapter 12 of <https://inf.ethz.ch/personal/wirth/ProjectOberon/PO.Applications.pdf>, taking notes on the target formalisms required for code generation.
+10. Integrate an ELF compliant generator -> First version will produce assembly language instead. Many advantages here, specially in managing the complexity of loading registers with large (32 bits) values. The assembler is producing the ELF format...
+11. Cleanup ORG in preparation of machine code translation
+12. Build the translation
+13. Test the results
+14. Build a PlatformIO Custom Development Platform
+15. Develop standard modules for ESP32
+16. Enjoy
 
-I'm now at step 8
+I'm now at step 9
 
 ## Modifications
 
