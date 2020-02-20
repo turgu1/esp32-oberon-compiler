@@ -7,10 +7,10 @@
 # Guy Turcotte
 # 2020.02.18
 #
-# Modules are compiled with the following memory organisation:
+# Oberon Modules are compiled with the following memory organisation:
 #
 # - Constants that cannot be kept in registers are put in the
-#   .data section
+#   .data section (maybe .rodata in the future...)
 #
 # - Main code of a Module is put in an .init section. All init 
 #   sections (but the first) will be called in sequence to 
@@ -53,10 +53,7 @@ _start_init_data:   .int _sidata
 _start_init_table:  .int _itable
 _end_init_table:    .int _eitable
 
-# Registers to disable both Watchdog
-
-RTC_CNTL_WDTCONFIG0_REG: .int 0x3FF4808C
-TIMG0_T0_WDTCONFIG0_REG: .int 0x3FF5F048
+    .literal_position
 
 # Main entry point, as defined in the ld/esp32.ld file
 
@@ -66,13 +63,13 @@ _init_start:
     #
     # This could be removed once we know it to not be an Achille Heel
 
-    movi a2, 0
-    l32r a3, RTC_CNTL_WDTCONFIG0_REG
-    s32i a2, a3, 0
-    l32r a3, TIMG0_T0_WDTCONFIG0_REG
-    s32i a2, a3, 0
+    call4 _stop_watchdog
+ 
+    # Set CPU Speed to 160MHz
 
-    # Clear bss
+    call4 _set_160mhz
+
+    # Clear .bss section
 
     l32r a2, _end_bss         # Compute size in 4-byte chunks (a2)
     l32r a3, _start_bss       # a3 = address of .bss
@@ -123,3 +120,45 @@ loop_3:
 
 _init_end:
     j _init_end                # never return. May reboot if watchdog enabled.
+
+
+# ---- _stop_watchdog ----
+
+# Registers to disable both Watchdog
+
+    .align 4
+
+RTC_CNTL_WDTCONFIG0_REG: .int 0x3FF4808C
+TIMG0_T0_WDTCONFIG0_REG: .int 0x3FF5F048
+
+_stop_watchdog:
+    entry a1, 0
+    movi a2, 0
+    l32r a3, RTC_CNTL_WDTCONFIG0_REG
+    s32i a2, a3, 0
+    l32r a3, TIMG0_T0_WDTCONFIG0_REG
+    s32i a2, a3, 0
+    retw
+
+# ---- _set_160mhz ----
+
+    .align 4
+
+RTC_CNTL_CLK_CONF_REG:  .int 0x3FF48070
+DPORT_CPU_PER_CONF_REG: .int 0x3ff0003C
+CLKCONF:                .int 0x08002210
+
+_set_160mhz:
+    entry a1, 0
+
+    # Switch SoC clock source to PLL (instead of the default which is XTAl).
+    # This switches the CPU (and APB) clock from 40MHz to 80MHz.
+    l32r a2, RTC_CNTL_CLK_CONF_REG
+    l32r a3, CLKCONF
+    s32i a3, a2, 0
+
+    # Switch CPU from 80MHz to _set_160mhz
+    l32r a2, DPORT_CPU_PER_CONF_REG
+    movi a3, 1
+    s32i a3, a2, 0
+    retw 

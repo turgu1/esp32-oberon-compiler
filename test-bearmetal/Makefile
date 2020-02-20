@@ -21,24 +21,40 @@ LDFLAGS += $(LDFLAGS_PLATFORM)
 ASFLAGS += -c -O0 -Wall -fmessage-length=0
 ASFLAGS += $(ASFLAGS_PLATFORM)
 
-# Set C source files.
-A_SRC += \
-	./src/init.S \
-	./src/Test1.S \
-	./src/Test2.S
+PORT = /dev/tty.SLAB_USBtoUART
 
-OBJS += $(A_SRC:.S=.o)
+BLDDIR = ./build/
+SRCDIR = ./src/
+
+SRC =  \
+	init.S \
+	Test1.S \
+	Test2.S
+
+OBJS = $(addprefix $(BLDDIR), $(SRC:.S=.o))
+
+TARGETELF = $(BLDDIR)main.elf
+TARGETBIN = $(BLDDIR)main.bin
 
 # Set the first rule in the file to 'make all'
 .PHONY: all
-all: main.elf
+all: $(TARGETELF)
+
+.PHONY: test
+test:
+	echo $(OBJS)
 
 # Rules to build files.
-%.o: %.S
+$(BLDDIR)%.o: $(SRCDIR)%.S
 	$(CC) -x assembler-with-cpp $(ASFLAGS) $< -o $@
 
-main.elf: $(OBJS)
+$(TARGETELF): $(OBJS)
 	$(CC) $^ $(LDFLAGS) -o $@
+
+.PHONY: flash
+flash: $(TARGETELF)
+	esptool.py --chip=esp32 elf2image $(TARGETELF)
+	esptool.py --chip=esp32 --port $(PORT) write_flash 0x1000 $(TARGETBIN) -ff 80m -fm dout
 
 # Target to clean build artifacts.
 .PHONY: clean

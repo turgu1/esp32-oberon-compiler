@@ -20,12 +20,15 @@ In a Nutshell, the steps to get a working compiler are the following:
 10. Cleanup ORG in preparation of machine code translation
 11. Build the translation
 12. Test the results
+13. Build a PlatformIO Custom Development Platform
 13. Develop standard modules for ESP32
 14. Enjoy
 
-I'm now at step 6
+I'm now at step 8
 
-Some of the modifications:
+## Modifications
+
+Some of the modifications to the Project Oberon compiler source code (up to step 5):
 
 Strict Oberon-07 definition (obnc):
 
@@ -42,13 +45,13 @@ For OBNC Integration:
 - Replace Files.WriteByte with Files.Write
 - CR is now a line-feed character. Usual end of line code under Unix/Linux.
 
-## Oberon.Mod
+### Oberon.Mod
 
 This module is expected to parse command line parameters and call the ORP.Compile procedure.
 
 The Oberon.Log has been replaced with a new Logger Module. Very basic for now.
 
-## Texts.Mod
+### Texts.Mod
 
 Many procedures have been deleted, not usefull for the compiler execution.
 All code related to fonts and graphics geometry deleted.
