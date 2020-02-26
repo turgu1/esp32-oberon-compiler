@@ -34,7 +34,8 @@ INITO = $(BLDDIR)/init.o
 SRC =  \
     Test.Mod \
 	Test2.Mod \
-	Test3.Mod
+	Test3.Mod \
+	Out.Mod
 
 SYMS = $(addprefix $(SRCDIR), $(SRC:.Mod=.smb))
 ASSS = $(addprefix $(BLDDIR), $(SRC:.Mod=.S))
@@ -57,6 +58,7 @@ test:
 $(BLDDIR)Test.S $(SRCDIR)Test.smb: $(SRCDIR)Test.Mod $(SRCDIR)Test2.smb $(SRCDIR)Test3.smb
 $(BLDDIR)Test2.S $(SRCDIR)Test2.smb: $(SRCDIR)Test2.Mod 
 $(BLDDIR)Test3.S $(SRCDIR)Test3.smb: $(SRCDIR)Test3.Mod
+$(BLDDIR)Out.S $(SRCDIR)Out.smb: $(SRCDIR)Out.Mod
 
 $(BLDDIR)%.S $(SRCDIR)%.smb : $(SRCDIR)%.Mod
 	cd $(SRCDIR) ; ../$(OB) -s $(<F)

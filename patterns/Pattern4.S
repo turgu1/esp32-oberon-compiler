@@ -1,24 +1,3 @@
-MODULE Pattern4;
-TYPE
-  Ptr = POINTER TO Node;
-  Node = RECORD 
-    num: INTEGER;
-    name: ARRAY 8 OF CHAR;
-    next: Ptr
-  END;
-VAR 
-  p, q: Ptr;
-  r: Node;
-    
-BEGIN
-  r.num := 10; 
-  p.num := 6;
-  p.name[7] := "0";
-  p.next := q;
-  p.next.next := NIL
-END Pattern4.
-
-(* 
     .title "Module Pattern4, Key A8E2D4B5"
     .sbttl "Oberon ESP32 Compiler Version 0.1.0"
 
@@ -27,6 +6,7 @@ END Pattern4.
 _Pattern4_A8E2D4B5_s_bss:
 _Pattern4_s_bss:
     .space 48
+
 
     .section .init_Pattern4_A8E2D4B5
     .global _Pattern4_A8E2D4B5_s_init
@@ -62,4 +42,3 @@ _Pattern4_init:
 _Pattern4_A8E2D4B5_s_init_table:
     .int .init_Pattern4_A8E2D4B5
 
-*)

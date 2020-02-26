@@ -12,7 +12,7 @@ MODULE ORG; (* N.Wirth, 16.4.2016 / 4.4.2017 / 31.5.2019  Oberon compiler; code 
     Reg = 10; RegI = 11; Cond = 12;  (*internal item modes*)
 
     FirstRH = 2;   (* First available register for arguments *)
-    LastRH  = 15;  (* Last availeble register *)
+    LastRH  = 14;  (* Last available register *)
 
   (*frequently used opcodes*)  U = 2000H; V = 1000H;
     Mov = 0; Lsl = 1; Asr = 2; Ror= 3; And = 4; Ann = 5; Ior = 6; Xor = 7;
@@ -504,17 +504,11 @@ MODULE ORG; (* N.Wirth, 16.4.2016 / 4.4.2017 / 31.5.2019  Oberon compiler; code 
   PROCEDURE CheckRegs*;
   BEGIN
     IF RH # FirstRH THEN 
-      Out.String("RH = ");
-      Out.Int(RH, 0);
-      Out.Ln();
       ORS.Mark("Reg Stack"); 
       RH := FirstRH 
     END ;
     (* IF pc >= maxCode - 40 THEN ORS.Mark("program too long") END ; *)
     IF frame # 0 THEN 
-      Out.String("Frame = ");
-      Out.Int(frame, 0);
-      Out.Ln();
       ORS.Mark("frame error"); 
       frame := 0
     END
@@ -639,7 +633,7 @@ MODULE ORG; (* N.Wirth, 16.4.2016 / 4.4.2017 / 31.5.2019  Oberon compiler; code 
         PutRRR("add", temp, temp, r2);
         PutRRI(op, r1, temp, 0)
       ELSE
-        PutRRI("addmi", temp, r2, offset);
+        PutRRI("addmi", temp, r2, (offset DIV 256) * 256);
         PutRRI(op, r1, temp, offset MOD 256);
       END
     ELSE
@@ -889,14 +883,28 @@ MODULE ORG; (* N.Wirth, 16.4.2016 / 4.4.2017 / 31.5.2019  Oberon compiler; code 
   PROCEDURE DeRef*(VAR x: Item);
   BEGIN
     IF x.mode = ORB.Var THEN
-      IF x.r > 0 THEN (*local*) Put2(Ldr, RH, SP, x.a + frame) ELSE GetSB(x.r); Put2(Ldr, RH, RH, x.a) END ;
-      NilCheck; x.r := RH; incR
+      IF x.r > 0 THEN (*local*) 
+        PutMoveRRI("l32i", 1020, RH, SP, x.a + frame)
+      ELSE 
+        GetSB(x.r); 
+        PutMoveRRI("l32i", 1020, RH, RH, x.a);
+      END ;
+      NilCheck; 
+      x.r := RH; incR
     ELSIF x.mode = ORB.Par THEN
-      Put2(Ldr, RH, SP, x.a + frame); Put2(Ldr, RH, RH, x.b); NilCheck; x.r := RH; incR
-    ELSIF x.mode = RegI THEN Put2(Ldr, x.r, x.r, x.a); NilCheck
-    ELSIF x.mode # Reg THEN ORS.Mark("bad mode in DeRef")
+      PutMoveRRI("l32i", 1020, RH, SP, x.a + frame);
+      PutMoveRRI("l32i", 1020, RH, RH, x.b);
+      NilCheck; 
+      x.r := RH; incR
+    ELSIF x.mode = RegI THEN 
+      PutMoveRRI("l32i", 1020, x.r, x.r, x.a);
+      NilCheck
+    ELSIF x.mode # Reg THEN 
+      ORS.Mark("bad mode in DeRef")
     END ;
-    x.mode := RegI; x.a := 0; x.b := 0
+    x.mode := RegI; 
+    x.a := 0; 
+    x.b := 0
   END DeRef;
 
   PROCEDURE Q(T: ORB.Type; VAR dcw: INTEGER);

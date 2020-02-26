@@ -54,28 +54,29 @@ _init_start:
     movi a2, _ebss            # Compute size in 4-byte chunks (a2)
     movi a3, _sbss            # a3 = address of .bss
     sub  a2, a2, a3           # a2 = size of .bss in bytes
-    beqz a2, loop_1           # if .bss is empty, nothing to do
+    beqz a2, 1f               # if .bss is empty, nothing to do
     srli a2, a2, 2            # a2 = size of .bss in words
     movi a4, 0                # a4 = 0
-    loop a2, loop_1           # loop to clear memory
+    loop a2, 1f               # loop to clear memory
     s32i a4, a3, 0            # @a3[0] = 0
     addi a3, a3, 4            # adjust a3 to next word
-loop_1:
+1:
 
-    # Copy initialized data
-
+.ifdef init_data
+    # Copy initialized data (not used, seems to be done by the ROM loader)
     movi a2, _edata            # Compute size in 4-byte chunks (a2)
     movi a3, _sdata            # a3 = address of _data
     movi a4, _sidata           # a4 = address of initialization data
     sub  a2, a2, a3            # a2 = size of .data in bytes
-    beqz a2, loop_2            # if .data is empty, nothing to do
+    beqz a2, 2f                # if .data is empty, nothing to do
     srli a2, a2, 2             # a2 = size of .data in words
-    loop a2, loop_2            # loop to initialize memory
+    loop a2, 2f                # loop to initialize memory
     l32i a5, a4, 0             # a5 = @a4[0]
     s32i a5, a3, 0             # @a3[0] = a5
     addi a4, a4, 4             # adjust a4 to next word
     addi a3, a3, 4             # adjust a3 to next word
-loop_2:
+2:
+.endif
 
     # Call modules initialization code (but the first one)
 
@@ -84,13 +85,13 @@ loop_2:
     addi a3, a3, 4             # pass the first entry
     sub  a2, a2, a3            # a2 = size in bytes
     bltz a2, _init_end         # if table is empty, leave
-    beqz a2, loop_3            # if there is only one module, it is the main one
+    beqz a2, 3f                # if there is only one module, it is the main one
     srli a2, a2, 2             # a2 = size in words
-    loop a2, loop_3            # loop for each table entry
+    loop a2, 3f                # loop for each table entry
     l32i a4, a3, 0             # load init code address
     callx4 a4                  # call the module initialization code
     addi a3, a3, 4             # adjust for next table entry
-loop_3:
+3:
 
     # Call main module init code
 

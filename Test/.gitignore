@@ -1,2 +1,6 @@
 .DS_Store
-build/*
+build/*.o
+build/*.s
+build/*.elf
+build/*.map
+

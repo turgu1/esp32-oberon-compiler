@@ -12,7 +12,13 @@ loop_1:
     call4 _wait_a_quarter
     call4 _led_off
     call4 _wait_a_quarter
+    movi  a6, msg
+    call4 _put_string
     j loop_1
+
+    .section .data
+    .align 4
+msg: .asciz "Allo\r\n"
 
     .section .text_module_Test1
 

@@ -75,8 +75,8 @@ _Pattern3_init:
     
     movi a2, 6
     movi a3, _Pattern3_s_bss
-    addmi a4, a3, 1836
-    s32i a2, a4, 44    # Hum... there is a problem here.
+    addmi a4, a3, 1792 # a4 := 1792 + base address
+    s32i a2, a4, 44    # x[3, 4, 5] := 6
     retw
 
     .section .init_table_Pattern3_A7E2D4B5

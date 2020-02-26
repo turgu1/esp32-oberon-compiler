@@ -1,20 +1,32 @@
 MODULE Test;
-  IMPORT Test2, Test3;
+IMPORT Out;
+
 VAR
-  a,b,c,d: INTEGER;
-  i : INTEGER;
+  errorCount: INTEGER;
 
-PROCEDURE Toto*(i, j: INTEGER);
+PROCEDURE Assert*(cond: BOOLEAN; msg: ARRAY OF CHAR);
 BEGIN
-END Toto;
+  IF ~cond THEN
+    Out.String(msg);
+    Out.Ln;
+  END
+END Assert;
 
-PROCEDURE [5] IntRoutine;
+PROCEDURE Completed* : INTEGER;
 BEGIN
-END IntRoutine;
+  Out.String("Test Completed. ") 
+  IF errorCount > 0 THEN
+    Out.String("There is ");
+    Out.Int(errorCount);
+    Out.String(" observed.")
+  ELSE
+    Out.String("No Error!");
+  END;
+  Out.Ln;
+  RETURN errorCount
+END Completed;
 
 BEGIN
-  Toto(i,Test2.aa);
-  i := Test2.Add(1, 2);
-  i := Test3.Div(3, 4);
+  errorCount := 0;
 END Test.
 
