@@ -83,6 +83,8 @@ MODULE ORG; (* N.Wirth, 16.4.2016 / 4.4.2017 / 31.5.2019  Oberon compiler; code 
 
     thisModuleId: ORS.Ident;
 
+    label: INTEGER; (* local label number *)
+
   (*instruction assemblers according to formats*)
 
   PROCEDURE Spaces(i: INTEGER);
@@ -490,12 +492,35 @@ MODULE ORG; (* N.Wirth, 16.4.2016 / 4.4.2017 / 31.5.2019  Oberon compiler; code 
   PROCEDURE PutCALLExternal(callType : INTEGER; name, moduleId: ORS.Ident; moduleKey: INTEGER);
   BEGIN
     Texts.WriteString(CodeW, "    call");
-    Texts.WriteInt(CodeW, callType, 0);
+    Texts.WriteInt(   CodeW, callType, 0);
     Texts.WriteString(CodeW, " ");
     ImportName(name, "p", moduleId, moduleKey);
     Texts.WriteLn(CodeW)
   END PutCALLExternal;
 
+  PROCEDURE PutLabel(label: INTEGER);
+  BEGIN
+    Texts.WriteInt(   CodeW, label, 0);
+    Texts.WriteString(CodeW, ":");
+    Texts.WriteLn(    CodeW)
+  END PutLabel;
+
+  PROCEDURE PutBranch(op: ARRAY OF CHAR; r, label: INTEGER; forward: BOOLEAN);
+  BEGIN 
+    Texts.WriteString(CodeW, "    ");
+    Texts.WriteString(CodeW, op);
+    Texts.WriteString(CodeW, " a");
+    Texts.WriteInt(CodeW, r, 0);
+    Texts.WriteString(CodeW, ", ");
+    Texts.WriteInt(CodeW, label, 0);
+    IF forward THEN
+      Texts.WriteChar(CodeW, "f")
+    ELSE
+      Texts.WriteChar(CodeW, "b")
+    END
+    Texts.WriteLn(CodeW);
+  END PutBranch;
+  
   PROCEDURE incR;
   BEGIN
     IF RH < LastRH-1 THEN INC(RH) ELSE ORS.Mark("register stack overflow") END
@@ -744,8 +769,10 @@ MODULE ORG; (* N.Wirth, 16.4.2016 / 4.4.2017 / 31.5.2019  Oberon compiler; code 
   PROCEDURE loadCond(VAR x: Item);
   BEGIN
     IF x.type.form = ORB.Bool THEN
-      IF x.mode = ORB.Const THEN x.r := 15 - x.a*8
-      ELSE load(x);
+      IF x.mode = ORB.Const THEN 
+        x.r := 15 - x.a*8
+      ELSE  
+        load(x);
         IF code[pc-1] DIV 40000000H # -2 THEN Put1(Cmp, x.r, x.r, 0) END ;
         x.r := NE; DEC(RH)
       END ;
@@ -760,10 +787,14 @@ MODULE ORG; (* N.Wirth, 16.4.2016 / 4.4.2017 / 31.5.2019  Oberon compiler; code 
   END loadTypTagAdr;
 
   PROCEDURE loadStringAdr(VAR x: Item);
-  BEGIN GetSB(0); Put1a(Add, RH, RH, varsize+x.a); x.mode := Reg; x.r := RH; incR
+  BEGIN 
+    GetSB(0); 
+    Put1a(Add, RH, RH, varsize + x.a); 
+    x.mode := Reg; 
+    x.r := RH; incR
   END loadStringAdr;
 
-  (* Items: Conversion from constants or from Objects on the Heap to Items on the Stack*)
+  (* Items: Conversion from constants or from Objects on the Heap to Items on the Stack *)
 
   PROCEDURE MakeConstItem*(VAR x: Item; typ: ORB.Type; val: INTEGER);
   BEGIN x.mode := ORB.Const; x.type := typ; x.a := val
@@ -1066,8 +1097,12 @@ MODULE ORG; (* N.Wirth, 16.4.2016 / 4.4.2017 / 31.5.2019  Oberon compiler; code 
         x.a := x.a + y.a
       ELSIF y.mode = ORB.Const THEN load(x);
         IF y.a # 0 THEN 
-          PutRI("movi", RH, y.a);
-          PutRRR("add", x.r, x.r, RH) 
+          IF (y.a >= -128) & (y.a < 128) THEN
+            PutRRI("addi", x.r, x.r, y.a)
+          ELSE
+            PutRI("movi", RH, y.a);
+            PutRRR("add", x.r, x.r, RH) 
+          END
         END
       ELSE 
         load(x); load(y); 
@@ -1081,8 +1116,12 @@ MODULE ORG; (* N.Wirth, 16.4.2016 / 4.4.2017 / 31.5.2019  Oberon compiler; code 
       ELSIF y.mode = ORB.Const THEN 
         load(x);
         IF y.a # 0 THEN 
-          PutRI("movi", RH, y.a);
-          PutRRR("sub", x.r, x.r, RH) 
+          IF (y.a > -128) & (y.a <= 128) THEN
+            PutRRI("addi", x.r, x.r, -y.a)
+          ELSE
+            PutRI("movi", RH, y.a);
+            PutRRR("sub", x.r, x.r, RH) 
+          END
         END
       ELSE 
         load(x); load(y); 
@@ -1347,10 +1386,14 @@ MODULE ORG; (* N.Wirth, 16.4.2016 / 4.4.2017 / 31.5.2019  Oberon compiler; code 
   BEGIN
     IF x.type.form = ORB.String THEN loadStringAdr(x) ELSE loadAdr(x) END ;
     IF y.type.form = ORB.String THEN loadStringAdr(y) ELSE loadAdr(y) END ;
-    Put2(Ldr+1, RH, x.r, 0); Put1(Add, x.r, x.r, 1);
-    Put2(Ldr+1, RH+1, y.r, 0); Put1(Add, y.r, y.r, 1);
-    Put0(Cmp, RH+2, RH, RH+1); Put3(BC, NE, 2);
-    Put1(Cmp, RH+2, RH, 0); Put3(BC, NE, -8);
+    Put2(Ldr+1, RH, x.r, 0); 
+    Put1(Add, x.r, x.r, 1);
+    Put2(Ldr+1, RH+1, y.r, 0); 
+    Put1(Add, y.r, y.r, 1);
+    Put0(Cmp, RH+2, RH, RH+1); 
+    Put3(BC, NE, 2);
+    Put1(Cmp, RH+2, RH, 0); 
+    Put3(BC, NE, -8);
     DEC(RH, 2); SetCC(x, relmap[op - ORS.eql])
   END StringRelation;
 
@@ -1385,23 +1428,10 @@ MODULE ORG; (* N.Wirth, 16.4.2016 / 4.4.2017 / 31.5.2019  Oberon compiler; code 
       ORS.Mark("bad mode in Store")
     END ;
     DEC(RH)
-
-    (*
-    IF x.type.size = 1 THEN op := Str+1 ELSE op := Str END ;
-    IF x.mode = ORB.Var THEN
-      IF x.r > 0 THEN (*local*) Put2(op, y.r, SP, x.a + frame)
-      ELSE GetSB(x.r); Put2(op, y.r, RH, x.a)
-      END
-    ELSIF x.mode = ORB.Par THEN Put2(Ldr, RH, SP, x.a + frame); Put2(op, y.r, RH, x.b);
-    ELSIF x.mode = RegI THEN Put2(op, y.r, x.r, x.a); DEC(RH);
-    ELSE ORS.Mark("bad mode in Store")
-    END ;
-    DEC(RH)
-    *)
   END Store;
 
   PROCEDURE StoreStruct*(VAR x, y: Item); (* x := y, frame = 0 *)
-    VAR s, pc0: INTEGER;
+  VAR s, pc0: INTEGER;
   BEGIN
     IF y.type.size # 0 THEN
       loadAdr(x); loadAdr(y);
@@ -1431,17 +1461,28 @@ MODULE ORG; (* N.Wirth, 16.4.2016 / 4.4.2017 / 31.5.2019  Oberon compiler; code 
   END StoreStruct;
 
   PROCEDURE CopyString*(VAR x, y: Item);  (* x := y *) 
-     VAR len: INTEGER;
-   BEGIN loadAdr(x); len := x.type.len;
+  VAR len: INTEGER;
+  BEGIN 
+    loadAdr(x); 
+    len := x.type.len;
     IF len >= 0 THEN
       IF len <  y.b THEN ORS.Mark("string too long") END
-    ELSIF check THEN Put2(Ldr, RH, SP, x.a+4);  (*open array len, frame = 0*)
-      Put1(Cmp,RH, RH, y.b); Trap(LT, 3)
+    ELSIF check THEN 
+      PutMoveRRI("l32i", 1020, RH, SP, x.a + 4); (* open array len, frame = 0 *)
+      Put1(Cmp,RH, RH, y.b); 
+      Trap(LT, 3)
     END ;
     loadStringAdr(y);
-    Put2(Ldr, RH, y.r, 0); Put1(Add, y.r, y.r, 4);
-    Put2(Str, RH, x.r, 0); Put1(Add, x.r, x.r, 4);
-    Put1(Asr, RH, RH, 24); Put3(BC, NE,  -6);  RH := FirstRH
+
+    PutLabel(label);
+    PutRRI("l32i", RH,  y.r, 0); 
+    PutRRI("addi", y.r, y.r, 4);
+    PutRRI("s32i", RH,  x.r, 0); 
+    PutRRI("addi", x.r, x.r, 4);
+    Put1(Asr, RH, RH, 24); 
+    Put3(BC, NE,  -6);  
+    RH := FirstRH;
+    INC(label)
    END CopyString;
   
   (* Code generation for parameters *)
@@ -1453,7 +1494,7 @@ MODULE ORG; (* N.Wirth, 16.4.2016 / 4.4.2017 / 31.5.2019  Oberon compiler; code 
   END OpenArrayParam;
 
   PROCEDURE VarParam*(VAR x: Item; ftype: ORB.Type);
-    VAR xmd: INTEGER;
+  VAR xmd: INTEGER;
   BEGIN xmd := x.mode; loadAdr(x);
     IF (ftype.form = ORB.Array) & (ftype.len < 0) THEN (*open array*)
       IF x.type.len >= 0 THEN Put1a(Mov, RH, 0, x.type.len) ELSE  Put2(Ldr, RH, SP, x.a+4+frame) END ;
@@ -2182,6 +2223,7 @@ MODULE ORG; (* N.Wirth, 16.4.2016 / 4.4.2017 / 31.5.2019  Oberon compiler; code 
     fixorgT := 0; 
     check   := v # 0; 
     version := v;
+    label   := 1;
 
     IF v = 0 THEN 
       pc := 1;
