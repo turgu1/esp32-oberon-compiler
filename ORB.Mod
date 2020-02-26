@@ -17,29 +17,36 @@ MODULE ORB;   (*NW 25.6.2014  / 1.3.2019  in Oberon-07*)
       Pointer* = 7; NilTyp* = 8; NoTyp* = 9; Proc* = 10;
       String* = 11; Array* = 12; Record* = 13;
       
-  TYPE Object* = POINTER TO ObjDesc;
+  TYPE 
+    Object* = POINTER TO ObjDesc;
     Module* = POINTER TO ModDesc;
-    Type* = POINTER TO TypeDesc;
+    Type*   = POINTER TO TypeDesc;
 
-    ObjDesc*= RECORD
-      class*, exno*: BYTE;
-      expo*, rdo*: BOOLEAN;   (*exported / read-only*)
-      lev*: INTEGER;
-      next*, dsc*: Object;
-      type*: Type;
-      name*: ORS.Ident;
-      val*: INTEGER
+    ObjDesc* = RECORD
+      class*, 
+      exno*:  BYTE;
+      expo*,             (* exported *)
+      rdo*:   BOOLEAN;   (* read-only *)
+      lev*:   INTEGER;
+      next*, 
+      dsc*:   Object;
+      type*:  Type;
+      name*:  ORS.Ident;
+      val*:   INTEGER
     END ;
 
     ModDesc* = RECORD (ObjDesc) orgname*: ORS.Ident END ;
 
     TypeDesc* = RECORD
-      form*, ref*, mno*: INTEGER;  (*ref is only used for import/export*)
+      form*, 
+      ref*,              (*ref is only used for import/export*)
+      mno*:    INTEGER;  
       nofpar*: INTEGER;  (*for procedures, extension level for records*)
-      len*: INTEGER;  (*for arrays, len < 0 => open array; for records: adr of descriptor*)
-      dsc*, typobj*: Object;
-      base*: Type;  (*for arrays, records, pointers*)
-      size*: INTEGER  (*in bytes; always multiple of 4, except for Byte, Bool and Char*)
+      len*:    INTEGER;  (*for arrays, len < 0 => open array; for records: adr of descriptor*)
+      dsc*, 
+      typobj*: Object;
+      base*:   Type;     (*for arrays, records, pointers*)
+      size*:   INTEGER   (*in bytes; always multiple of 4, except for Byte, Bool and Char*)
     END ;
 
   (* Object classes and the meaning of "val":
@@ -62,10 +69,21 @@ MODULE ORB;   (*NW 25.6.2014  / 1.3.2019  in Oberon-07*)
     Array    -        type of elements
     Record   fields   extension *)
 
-  VAR topScope*, universe, system*: Object;
-    byteType*, boolType*, charType*: Type;
-    intType*, realType*, setType*, nilType*, noType*, strType*: Type;
-    nofmod, Ref: INTEGER;
+  VAR 
+    topScope*, 
+    universe, 
+    system*: Object;
+    byteType*, 
+    boolType*, 
+    charType*: Type;
+    intType*, 
+    realType*, 
+    setType*, 
+    nilType*, 
+    noType*, 
+    strType*: Type;
+    nofmod, 
+    Ref: INTEGER;
     typtab: ARRAY maxTypTab OF Type;
 
   PROCEDURE NewObj*(VAR obj: Object; id: ORS.Ident; class: INTEGER);  (*insert new Object with name id*)
@@ -332,7 +350,7 @@ MODULE ORB;   (*NW 25.6.2014  / 1.3.2019  in Oberon-07*)
           ELSIF obj.type.form = Real THEN Files.WriteInt(R, obj.val)
           ELSE Files.WriteNum(R, obj.val)
           END
-        ELSIF obj.class = Var THEN Files.WriteNum(R, obj.exno)
+        ELSIF obj.class = Var THEN Files.WriteNum(R, obj.val)
         END
       END ;
       obj := obj.next

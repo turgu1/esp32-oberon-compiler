@@ -1,20 +1,3 @@
-MODULE Pattern2;
-VAR
-  i, j, k, n: INTEGER;
-  x, y: REAL;
-  s, t, u: SET;
-
-BEGIN
-  i := (i + 1) * (i - 1);
-  k := k DIV 17;
-  k := 8 * n;
-  k := n DIV 2;
-  k := n MOD 16;
-  x := -y / (x - 1.0);
-  s := s + t * u
-END Pattern2.
-
-(* 
     .title "Module Pattern2, Key A6E2D4B5"
     .sbttl "Oberon ESP32 Compiler Version 0.1.0"
 
@@ -23,6 +6,7 @@ END Pattern2.
 _Pattern2_A6E2D4B5_s_bss:
 _Pattern2_s_bss:
     .space 36
+
 
     .section .init_Pattern2_A6E2D4B5
     .global _Pattern2_A6E2D4B5_s_init
@@ -98,4 +82,3 @@ _Pattern2_init:
 _Pattern2_A6E2D4B5_s_init_table:
     .int .init_Pattern2_A6E2D4B5
 
-*)

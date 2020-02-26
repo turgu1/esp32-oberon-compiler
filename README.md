@@ -17,15 +17,16 @@ In a Nutshell, the steps I'm taking to get a working compiler are the following:
 7. Build an understanding of the code production compiler stage (from the documentation)
 8. Build an understanding of the target architecture (ESP32 and ESP-IDF)
 9. Generate machine code by hand for each pattern found in the Chapter 12 of <https://inf.ethz.ch/personal/wirth/ProjectOberon/PO.Applications.pdf>, taking notes on the target formalisms required for code generation.
-10. Integrate an ELF compliant generator -> First version will produce assembly language instead. Many advantages here, specially in managing the complexity of loading registers with large (32 bits) values. The assembler is producing the ELF format...
+10. Refine target architecture
 11. Cleanup ORG in preparation of machine code translation
 12. Build the translation
-13. Test the results
-14. Build a PlatformIO Custom Development Platform
-15. Develop standard modules for ESP32
-16. Enjoy
+13. Create Oakridge compliant Modules In and Out to permit interaction over a serial port
+14. Test the results. Build a test suite and make it run
+15. Build a PlatformIO Custom Development Platform
+16. Develop standard modules for ESP32
+17. Enjoy
 
-I'm now at step 9
+I'm now doing a round robin between steps 9, 10, 11 and 12
 
 ## Modifications
 
@@ -48,7 +49,9 @@ For OBNC Integration:
 
 ### Oberon.Mod
 
-This module is expected to parse command line parameters and call the ORP.Compile procedure.
+This module is expected to parse command line parameters and call the ORP.Compile procedure. New parameters to be added, beyond the -s option:
+
+- Folder location path for standard modules and other project related folders
 
 The Oberon.Log has been replaced with a new Logger Module. Very basic for now.
 
@@ -61,6 +64,17 @@ Some potential bugs corrected:
 
 - Calls to T.notify without verifying if it is NIL.
 - Read Procedure modified to properly manage eot.
+
+### Other changes:
+
+- The .smb file output has been modified to get exported variable offsets instead of an export sequence number. The code generator is relying on the ELF loader to resolve the location of data sections. The imported variables are accessed through their offset.
+
+- The ESP32 doesn't supply a floating point division instruction. A function called by the generated code will
+be added.
+
+- Internally, the ESP32 does'nt have a condition code we can count on to do logical comparison. A value on a register is considered FALSE if it is equal to zero, TRUE otherwise.
+
+- For now, the static base address is loaded every time an access to a module variables is made. Putting the SB on register a15 will be done as a performance refinement.
 
 ## Installation
 

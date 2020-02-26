@@ -18,7 +18,7 @@ MODULE Texts; (*JG 21.11.90 / NW 11.7.90 / 24.12.95 / 22.11.10 / 20.3.2017*)
     Real*   = 4;        (*real number x*)
     Char*   = 6;        (*special character c*)
 
-    CR = 0AX;
+    NewLine = 0AX;
     replace* = 0; insert* = 1; delete* = 2; unmark* = 3;  (*op-codes*)
 
   TYPE Piece = POINTER TO PieceDesc;
@@ -280,7 +280,7 @@ MODULE Texts; (*JG 21.11.90 / NW 11.7.90 / 24.12.95 / 22.11.10 / 20.3.2017*)
       x: REAL;
   BEGIN ch := S.nextCh; i := 0;
     WHILE ~S.eot & (ch <= " ") DO
-      IF ch = CR THEN INC(S.line) END ;
+      IF ch = NewLine THEN INC(S.line) END ;
       Read(S, ch)
     END ;
     IF ("A" <= ch) & (ch <= "Z") OR ("a" <= ch) & (ch <= "z") THEN (*name*)
@@ -352,6 +352,14 @@ MODULE Texts; (*JG 21.11.90 / NW 11.7.90 / 24.12.95 / 22.11.10 / 20.3.2017*)
     Files.Set(W.rider, Files.New(""), 0)
   END OpenWriter;
 
+  PROCEDURE OpenWriterToFile* (VAR W: Writer; F: Files.File);
+  BEGIN 
+    NEW(W.buf);
+    OpenBuf(W.buf);
+    Files.Set(W.rider, F, 0)
+  END OpenWriterToFile;
+
+
   PROCEDURE Write* (VAR W: Writer; ch: CHAR);
     VAR p: Piece;
   BEGIN
@@ -370,7 +378,7 @@ MODULE Texts; (*JG 21.11.90 / NW 11.7.90 / 24.12.95 / 22.11.10 / 20.3.2017*)
   END Write;
 
   PROCEDURE WriteLn* (VAR W: Writer);
-  BEGIN Write(W, CR)
+  BEGIN Write(W, NewLine)
   END WriteLn;
 
   PROCEDURE WriteString* (VAR W: Writer; s: ARRAY OF CHAR);

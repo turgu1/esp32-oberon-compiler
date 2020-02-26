@@ -1,19 +1,3 @@
-MODULE Pattern3;
-VAR
-  i, j, k, n: INTEGER; 
-  a: ARRAY 10 OF INTEGER;
-  x: ARRAY 10, 10 OF INTEGER;
-  y: ARRAY 10, 10, 10 OF INTEGER;
-
-BEGIN 
-  k := a[i]; 
-  n := a[5]; 
-  x[i, j] := 2;
-  y[i, j, k] := 3;
-  y[3, 4, 5] := 6
-END Pattern3.
-
-(* 
     .title "Module Pattern3, Key A7E2D4B5"
     .sbttl "Oberon ESP32 Compiler Version 0.1.0"
 
@@ -22,6 +6,7 @@ END Pattern3.
 _Pattern3_A7E2D4B5_s_bss:
 _Pattern3_s_bss:
     .space 4456
+
 
     .section .init_Pattern3_A7E2D4B5
     .global _Pattern3_A7E2D4B5_s_init
@@ -72,7 +57,7 @@ _Pattern3_init:
     add a2, a2, a3     # a2 = ~y[i, j, k]
     movi a3, 3
     s32i a3, a2, 456   # y[i, j, k] := 3
-    
+
     movi a2, 6
     movi a3, _Pattern3_s_bss
     addmi a4, a3, 1836
@@ -84,4 +69,3 @@ _Pattern3_init:
 _Pattern3_A7E2D4B5_s_init_table:
     .int .init_Pattern3_A7E2D4B5
 
-*)

@@ -1,10 +1,8 @@
 .DS_Store
 .obnc
 test
-
 Oberon
 ORTool
-Test
 ORP
 patterns/*.rsc
 patterns/*.smb

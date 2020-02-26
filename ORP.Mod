@@ -29,13 +29,25 @@ MODULE ORP; (*N. Wirth 1.7.97 / 8.2.2020  Oberon compiler for RISC in Oberon-07*
   END Check;
 
   PROCEDURE qualident(VAR obj: ORB.Object);
-  BEGIN obj := ORB.thisObj(); ORS.Get(sym);
-    IF obj = NIL THEN ORS.Mark("undef"); obj := dummy END ;
+  BEGIN 
+    obj := ORB.thisObj(); 
+    ORS.Get(sym);
+    IF obj = NIL THEN 
+      ORS.Mark("undef"); 
+      obj := dummy
+    END;
     IF (sym = ORS.period) & (obj.class = ORB.Mod) THEN
       ORS.Get(sym);
-      IF sym = ORS.ident THEN obj := ORB.thisimport(obj); ORS.Get(sym);
-        IF obj = NIL THEN ORS.Mark("undef"); obj := dummy END
-      ELSE ORS.Mark("identifier expected"); obj := dummy
+      IF sym = ORS.ident THEN 
+        obj := ORB.thisimport(obj); 
+        ORS.Get(sym);
+        IF obj = NIL THEN 
+          ORS.Mark("undef"); 
+          obj := dummy
+        END
+      ELSE 
+        ORS.Mark("identifier expected"); 
+        obj := dummy
       END
     END
   END qualident;
@@ -307,20 +319,29 @@ MODULE ORP; (*N. Wirth 1.7.97 / 8.2.2020  Oberon compiler for RISC in Oberon-07*
   END set; 
 
   PROCEDURE factor(VAR x: ORG.Item);
-    VAR obj: ORB.Object; rx: INTEGER;
+    VAR obj: ORB.Object; rx, callType: INTEGER;
   BEGIN (*sync*)
     IF (sym < ORS.char) OR (sym > ORS.ident) THEN ORS.Mark("expression expected");
-      REPEAT ORS.Get(sym) UNTIL (sym >= ORS.char) & (sym <= ORS.for) OR (sym >= ORS.then)
-    END ;
+      REPEAT 
+        ORS.Get(sym)
+      UNTIL (sym >= ORS.char) & (sym <= ORS.for) OR (sym >= ORS.then)
+    END;
     IF sym = ORS.ident THEN
       qualident(obj);  
       IF obj.class = ORB.SFunc THEN StandFunc(x, obj.val, obj.type)
-      ELSE ORG.MakeItem(x, obj, level); selector(x);
+      ELSE 
+        ORG.MakeItem(x, obj, level); 
+        selector(x);
         IF sym = ORS.lparen THEN
           ORS.Get(sym);
           IF (x.type.form = ORB.Proc) & (x.type.base.form # ORB.NoTyp) THEN
-            ORG.PrepCall(x, rx); ParamList(x); ORG.Call(x, rx); x.type := x.type.base
-          ELSE ORS.Mark("not a function"); ParamList(x)
+            callType := ORG.PrepCall(x, rx); 
+            ParamList(x); 
+            ORG.Call(x, rx, callType); 
+            x.type := x.type.base
+          ELSE 
+            ORS.Mark("not a function"); 
+            ParamList(x)
           END
         END
       END
@@ -464,7 +485,7 @@ MODULE ORP; (*N. Wirth 1.7.97 / 8.2.2020  Oberon compiler for RISC in Oberon-07*
     VAR obj: ORB.Object;
       orgtype: ORB.Type; (*original type of case var*)
       x, y, z, w: ORG.Item;
-      L0, L1, rx: INTEGER;
+      L0, L1, rx, callType: INTEGER;
 
     PROCEDURE TypeCase(obj: ORB.Object; VAR x: ORG.Item);
       VAR typobj: ORB.Object;
@@ -489,9 +510,10 @@ MODULE ORP; (*N. Wirth 1.7.97 / 8.2.2020  Oberon compiler for RISC in Oberon-07*
       IF ~((sym >= ORS.ident)  & (sym <= ORS.for) OR (sym >= ORS.semicolon)) THEN
         ORS.Mark("statement expected");
         REPEAT ORS.Get(sym) UNTIL (sym >= ORS.ident)
-      END ;
+      END;
       IF sym = ORS.ident THEN
-        qualident(obj); ORG.MakeItem(x, obj, level);
+        qualident(obj); 
+        ORG.MakeItem(x, obj, level);
         IF x.mode = ORB.SProc THEN StandProc(obj.val)
         ELSE selector(x);
           IF sym = ORS.becomes THEN (*assignment*)
@@ -513,12 +535,20 @@ MODULE ORP; (*N. Wirth 1.7.97 / 8.2.2020  Oberon compiler for RISC in Oberon-07*
           ELSIF sym = ORS.lparen THEN (*procedure call*)
             ORS.Get(sym);
             IF (x.type.form = ORB.Proc) & (x.type.base.form = ORB.NoTyp) THEN
-              ORG.PrepCall(x, rx); ParamList(x); ORG.Call(x, rx)
-            ELSE ORS.Mark("not a procedure"); ParamList(x)
+              callType := ORG.PrepCall(x, rx); 
+              ParamList(x); 
+              ORG.Call(x, rx, callType)
+            ELSE 
+              ORS.Mark("not a procedure"); ParamList(x)
             END
           ELSIF x.type.form = ORB.Proc THEN (*procedure call without parameters*)
             IF x.type.nofpar > 0 THEN ORS.Mark("missing parameters") END ;
-            IF x.type.base.form = ORB.NoTyp THEN ORG.PrepCall(x, rx); ORG.Call(x, rx) ELSE ORS.Mark("not a procedure") END
+            IF x.type.base.form = ORB.NoTyp THEN 
+              callType := ORG.PrepCall(x, rx); 
+              ORG.Call(x, rx, callType) 
+            ELSE 
+              ORS.Mark("not a procedure") 
+            END
           ELSIF x.mode = ORB.Typ THEN ORS.Mark("illegal assignment")
           ELSE ORS.Mark("not a procedure")
           END
@@ -852,27 +882,39 @@ MODULE ORP; (*N. Wirth 1.7.97 / 8.2.2020  Oberon compiler for RISC in Oberon-07*
       x: ORG.Item;
       locblksize, parblksize, L: INTEGER;
       int: BOOLEAN;
+      intLevel: INTEGER;
   BEGIN (* ProcedureDecl *) int := FALSE; ORS.Get(sym); 
-    IF sym = ORS.times THEN ORS.Get(sym); int := TRUE END ;
+    IF sym = ORS.lbrak THEN 
+      ORS.Get(sym); 
+      int := TRUE;
+      IF sym = ORS.int THEN
+        intLevel := ORS.ival;
+        ORS.Get(sym);
+      ELSE
+        ORS.Mark("Interrupt Level expected");
+        intLevel := 0;
+      END;
+      Check(ORS.rbrak, "] expected");
+    END;
     IF sym = ORS.ident THEN
       ORS.CopyId(procid); ORS.Get(sym);
       ORB.NewObj(proc, ORS.id, ORB.Const);
-      IF int THEN parblksize := 12 ELSE parblksize := 4 END ;
+      IF int THEN parblksize := 0 (* to be defined *) ELSE parblksize := 0 END ;
       NEW(type); type.form := ORB.Proc; type.size := ORG.WordSize;
       proc.type := type; proc.val := -1; proc.lev := level; 
       CheckExport(proc.expo);
       IF proc.expo THEN proc.exno := exno; INC(exno) END ;
       ORB.OpenScope; INC(level); type.base := ORB.noType;
       ProcedureType(type, parblksize);  (*formal parameter list*)
-      Check(ORS.semicolon, "no ;"); locblksize := parblksize; 
+      Check(ORS.semicolon, "; expected"); locblksize := parblksize; 
       Declarations(locblksize);
       proc.val := ORG.Here() * 4; proc.type.dsc := ORB.topScope.next;
       IF sym = ORS.procedure THEN
         L := 0; ORG.FJump(L);
-        REPEAT ProcedureDecl; Check(ORS.semicolon, "no ;") UNTIL sym # ORS.procedure;
+        REPEAT ProcedureDecl; Check(ORS.semicolon, "; expected") UNTIL sym # ORS.procedure;
         ORG.FixOne(L); proc.val := ORG.Here() * 4; proc.type.dsc := ORB.topScope.next
       END ;
-      ORG.Enter(parblksize, locblksize, int);
+      ORG.Enter(procid, proc.expo, parblksize, locblksize, int);
       IF sym = ORS.begin THEN ORS.Get(sym); StatSequence END ;
       IF sym = ORS.return THEN
         ORS.Get(sym); expression(x);
@@ -882,8 +924,8 @@ MODULE ORP; (*N. Wirth 1.7.97 / 8.2.2020  Oberon compiler for RISC in Oberon-07*
       ELSIF type.base.form # ORB.NoTyp THEN
         ORS.Mark("function without result"); type.base := ORB.noType
       END ;
-      ORG.Return(type.base.form, x, locblksize, int);
-      ORB.CloseScope; DEC(level); Check(ORS.end, "no END");
+      ORG.Return(type.base.form, x, locblksize, int, intLevel);
+      ORB.CloseScope; DEC(level); Check(ORS.end, "END expected");
       IF sym = ORS.ident THEN
         IF ORS.id # procid THEN ORS.Mark("no match") END ;
         ORS.Get(sym)
@@ -928,7 +970,7 @@ MODULE ORP; (*N. Wirth 1.7.97 / 8.2.2020  Oberon compiler for RISC in Oberon-07*
         WHILE sym = ORS.comma DO ORS.Get(sym); Import END ;
         Check(ORS.semicolon, "; missing")
       END ;
-      ORG.Open(version); Declarations(dc); ORG.SetDataSize((dc + 3) DIV 4 * 4);
+      ORG.Open(modid, version); Declarations(dc); ORG.SetDataSize((dc + 3) DIV 4 * 4);
       WHILE sym = ORS.procedure DO ProcedureDecl; Check(ORS.semicolon, "no ;") END ;
       ORG.Header;
       IF sym = ORS.begin THEN ORS.Get(sym); StatSequence END ;

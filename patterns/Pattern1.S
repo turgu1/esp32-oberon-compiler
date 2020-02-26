@@ -1,17 +1,3 @@
-MODULE Pattern1;
-VAR
-  ch: CHAR;
-  k:  INTEGER;
-  x:  REAL;
-  s:  SET;
-BEGIN 
-  ch := "0";
-  k  :=  10;
-  x  := 1.0;
-  s  := {0, 4, 8}
-END Pattern1.
-
-(* 
     .title "Module Pattern1, Key A5E2D4B5"
     .sbttl "Oberon ESP32 Compiler Version 0.1.0"
 
@@ -46,4 +32,4 @@ _Pattern1_init:
     .global _Pattern1_A5E2D4B5_s_init_table
 _Pattern1_A5E2D4B5_s_init_table:
     .int .init_Pattern1_A5E2D4B5
-*)
+
