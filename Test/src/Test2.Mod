@@ -1,0 +1,18 @@
+MODULE Test2;
+
+VAR
+  b,c: INTEGER;
+  kk*: INTEGER;
+  aa*: INTEGER;
+
+PROCEDURE Add*(i, j : INTEGER): INTEGER;
+BEGIN
+  RETURN i + j
+END Add;
+
+PROCEDURE Sub*(i, j : INTEGER): INTEGER;
+BEGIN
+  RETURN i - j
+END Sub;
+
+END Test2.
