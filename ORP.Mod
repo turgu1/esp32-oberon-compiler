@@ -194,7 +194,7 @@ MODULE ORP; (*N. Wirth 1.7.97 / 8.2.2020  Oberon compiler for RISC in Oberon-07*
 
   PROCEDURE CompTypes(t0, t1: ORB.Type; varpar: BOOLEAN): BOOLEAN;
   BEGIN (*check for assignment compatibility*)
-    RETURN (t0 = t1)    (*openarray assignment disallowed in ORG*)
+    RETURN (t0 = t1)    (* openarray assignment disallowed in ORG *)
       OR (t0.form = ORB.Array) & (t1.form = ORB.Array) & (t0.base =  t1.base) & (t0.len = t1.len)
       OR (t0.form = ORB.Record) & (t1.form = ORB.Record)  & IsExtension(t0, t1)
       OR ~varpar &
@@ -214,17 +214,27 @@ MODULE ORP; (*N. Wirth 1.7.97 / 8.2.2020  Oberon compiler for RISC in Oberon-07*
           IF ~par.rdo THEN CheckReadOnly(x) END ;
           ORG.VarParam(x, par.type)
         END
-      ELSIF (x.type.form = ORB.Array) & (par.type.form = ORB.Array) &
-          (x.type.base = par.type.base) & (par.type.len < 0) THEN
+      ELSIF (x.type.form = ORB.Array) & 
+            (par.type.form = ORB.Array) &
+            (x.type.base = par.type.base) & 
+            (par.type.len < 0) THEN
         IF ~par.rdo THEN CheckReadOnly(x) END ;
         ORG.OpenArrayParam(x)
-      ELSIF (x.type.form = ORB.String) & varpar & par.rdo & (par.type.form = ORB.Array) & 
-          (par.type.base.form = ORB.Char) & (par.type.len < 0) THEN ORG.StringParam(x)
+      ELSIF (x.type.form = ORB.String) & 
+            varpar & par.rdo & 
+            (par.type.form = ORB.Array) & 
+            (par.type.base.form = ORB.Char) & 
+            (par.type.len < 0) THEN ORG.StringParam(x)
       ELSIF ~varpar & (par.type.form = ORB.Int) & (x.type.form = ORB.Int) THEN ORG.ValueParam(x)  (*BYTE*)
-      ELSIF (x.type.form = ORB.String) & (x.b = 2) & (par.class = ORB.Var) & (par.type.form = ORB.Char) THEN
+      ELSIF (x.type.form = ORB.String) & 
+            (x.b = 2) & 
+            (par.class = ORB.Var) & 
+            (par.type.form = ORB.Char) THEN
         ORG.StrToChar(x); ORG.ValueParam(x)
-      ELSIF (par.type.form = ORB.Array) & (par.type.base = ORB.byteType) & 
-          (par.type.len >= 0) & (par.type.size = x.type.size) THEN
+      ELSIF (par.type.form = ORB.Array) & 
+            (par.type.base = ORB.byteType) & 
+            (par.type.len >= 0) & 
+            (par.type.size = x.type.size) THEN
         ORG.VarParam(x, par.type)
       ELSE ORS.Mark("incompatible parameters")
       END
@@ -258,9 +268,9 @@ MODULE ORP; (*N. Wirth 1.7.97 / 8.2.2020  Oberon compiler for RISC in Oberon-07*
     IF n = npar THEN
       IF fct = 0 THEN (*ABS*)
         IF x.type.form IN {ORB.Int, ORB.Real} THEN ORG.Abs(x); restyp := x.type ELSE ORS.Mark("bad type") END
-      ELSIF fct = 1 THEN (*ODD*) CheckInt(x); ORG.Odd(x)
+      ELSIF fct = 1 THEN (*ODD*)   CheckInt(x);  ORG.Odd(x)
       ELSIF fct = 2 THEN (*FLOOR*) CheckReal(x); ORG.Floor(x)
-      ELSIF fct = 3 THEN (*FLT*) CheckInt(x); ORG.Float(x)
+      ELSIF fct = 3 THEN (*FLT*)   CheckInt(x);  ORG.Float(x)
       ELSIF fct = 4 THEN (*ORD*)
         IF x.type.form <= ORB.Proc THEN ORG.Ord(x)
         ELSIF (x.type.form = ORB.String) & (x.b = 2) THEN ORG.StrToChar(x)
@@ -268,13 +278,17 @@ MODULE ORP; (*N. Wirth 1.7.97 / 8.2.2020  Oberon compiler for RISC in Oberon-07*
         END
       ELSIF fct = 5 THEN (*CHR*) CheckInt(x); ORG.Ord(x)
       ELSIF fct = 6 THEN (*LEN*)
-          IF x.type.form = ORB.Array THEN ORG.Len(x) ELSE ORS.Mark("not an array") END
+          IF x.type.form = ORB.Array THEN ORG.Len(x) ELSE 
+            ORS.Mark("not an array") 
+          END
       ELSIF fct IN {7, 8, 9} THEN (*LSL, ASR, ROR*) CheckInt(y);
-        IF x.type.form IN {ORB.Int, ORB.Set} THEN ORG.Shift(fct-7, x, y); restyp := x.type ELSE ORS.Mark("bad type") END
+        IF x.type.form IN {ORB.Int, ORB.Set} THEN 
+          ORG.Shift(fct-7, x, y); restyp := x.type 
+        ELSE ORS.Mark("bad type") END
       ELSIF fct = 11 THEN (*ADC*) ORG.ADC(x, y)
       ELSIF fct = 12 THEN (*SBC*) ORG.SBC(x, y)
       ELSIF fct = 13 THEN (*UML*) ORG.UML(x, y)
-      ELSIF fct = 14 THEN (*BIT*) CheckInt(x); CheckInt(y); ORG.Bit(x, y)
+      ELSIF fct = 14 THEN (*BIT*) CheckInt(x);   CheckInt(y); ORG.Bit(x, y)
       ELSIF fct = 15 THEN (*REG*) CheckConst(x); CheckInt(x); ORG.Register(x)
       ELSIF fct = 16 THEN (*VAL*)
         IF (x.mode= ORB.Typ) & (x.type.size <= y.type.size) THEN restyp := x.type; x := y
@@ -345,16 +359,16 @@ MODULE ORP; (*N. Wirth 1.7.97 / 8.2.2020  Oberon compiler for RISC in Oberon-07*
           END
         END
       END
-    ELSIF sym = ORS.int THEN ORG.MakeConstItem(x, ORB.intType, ORS.ival); ORS.Get(sym)
-    ELSIF sym = ORS.real THEN ORG.MakeRealItem(x, ORS.rval); ORS.Get(sym)
-    ELSIF sym = ORS.char THEN ORG.MakeConstItem(x, ORB.charType, ORS.ival); ORS.Get(sym)
-    ELSIF sym = ORS.nil THEN ORS.Get(sym); ORG.MakeConstItem(x, ORB.nilType, 0)
+    ELSIF sym = ORS.int    THEN ORG.MakeConstItem(x, ORB.intType, ORS.ival); ORS.Get(sym)
+    ELSIF sym = ORS.real   THEN ORG.MakeRealItem(x, ORS.rval); ORS.Get(sym)
+    ELSIF sym = ORS.char   THEN ORG.MakeConstItem(x, ORB.charType, ORS.ival); ORS.Get(sym)
+    ELSIF sym = ORS.nil    THEN ORS.Get(sym); ORG.MakeConstItem(x, ORB.nilType, 0)
     ELSIF sym = ORS.string THEN ORG.MakeStringItem(x, ORS.slen); ORS.Get(sym)
     ELSIF sym = ORS.lparen THEN ORS.Get(sym); expression(x); Check(ORS.rparen, "no )")
     ELSIF sym = ORS.lbrace THEN ORS.Get(sym); set(x); Check(ORS.rbrace, "no }")
-    ELSIF sym = ORS.not THEN ORS.Get(sym); factor(x); CheckBool(x); ORG.Not(x)
-    ELSIF sym = ORS.false THEN ORS.Get(sym); ORG.MakeConstItem(x, ORB.boolType, 0)
-    ELSIF sym = ORS.true THEN ORS.Get(sym); ORG.MakeConstItem(x, ORB.boolType, 1)
+    ELSIF sym = ORS.not    THEN ORS.Get(sym); factor(x); CheckBool(x); ORG.Not(x)
+    ELSIF sym = ORS.false  THEN ORS.Get(sym); ORG.MakeConstItem(x, ORB.boolType, 0)
+    ELSIF sym = ORS.true   THEN ORS.Get(sym); ORG.MakeConstItem(x, ORB.boolType, 1)
     ELSE ORS.Mark("not a factor"); ORG.MakeConstItem(x, ORB.intType, 0)
     END
   END factor;
@@ -377,7 +391,8 @@ MODULE ORP; (*N. Wirth 1.7.97 / 8.2.2020  Oberon compiler for RISC in Oberon-07*
         ELSIF f = ORB.Set THEN factor(y); CheckSet(y); ORG.SetOp(op, x, y)
         ELSE ORS.Mark("bad type")
         END
-      ELSE (*op = and*) CheckBool(x); ORG.And1(x); factor(y); CheckBool(y); ORG.And2(x, y)
+      ELSE (*op = and*) 
+        CheckBool(x); ORG.And1(x); ORG.GetLabelTF(y); factor(y); CheckBool(y); ORG.And2(x, y)
       END
     END
   END term;
@@ -392,7 +407,7 @@ MODULE ORP; (*N. Wirth 1.7.97 / 8.2.2020  Oberon compiler for RISC in Oberon-07*
     END ;
     WHILE (sym >= ORS.plus) & (sym <= ORS.or) DO
       op := sym; ORS.Get(sym);
-      IF op = ORS.or THEN ORG.Or1(x); CheckBool(x); term(y); CheckBool(y); ORG.Or2(x, y)
+      IF op = ORS.or THEN ORG.Or1(x); CheckBool(x); ORG.GetLabelTF(y); term(y); CheckBool(y); ORG.Or2(x, y)
       ELSIF x.type.form = ORB.Int THEN term(y); CheckInt(y); ORG.AddOp(op, x, y)
       ELSIF x.type.form = ORB.Real THEN term(y); CheckReal(y); ORG.RealOp(op, x, y)
       ELSE CheckSet(x); term(y); CheckSet(y); ORG.SetOp(op, x, y)
@@ -421,9 +436,12 @@ MODULE ORP; (*N. Wirth 1.7.97 / 8.2.2020  Oberon compiler for RISC in Oberon-07*
           (IsExtension(x.type.base, y.type.base) OR IsExtension(y.type.base, x.type.base))
           OR (xf = ORB.Proc) & (yf = ORB.Proc) & EqualSignatures(x.type, y.type) THEN
         IF rel <= ORS.neq THEN ORG.IntRelation(rel,  x, y) ELSE ORS.Mark("only = or #") END
-      ELSIF (xf = ORB.Array) & (x.type.base.form = ORB.Char) &
-            ((yf = ORB.String) OR (yf = ORB.Array) & (y.type.base.form = ORB.Char))
-          OR (yf = ORB.Array) & (y.type.base.form = ORB.Char) & (xf = ORB.String) THEN
+      ELSIF (xf = ORB.Array) & 
+            (x.type.base.form = ORB.Char) &
+            ((yf = ORB.String) OR (yf = ORB.Array) & (y.type.base.form = ORB.Char)) OR 
+            (yf = ORB.Array) & 
+            (y.type.base.form = ORB.Char) & 
+            (xf = ORB.String) THEN
         ORG.StringRelation(rel, x, y)
       ELSIF (xf = ORB.Char) & (yf = ORB.String) & (y.b = 2) THEN
         ORG.StrToChar(y); ORG.IntRelation(rel, x, y)
@@ -554,30 +572,45 @@ MODULE ORP; (*N. Wirth 1.7.97 / 8.2.2020  Oberon compiler for RISC in Oberon-07*
           END
         END
       ELSIF sym = ORS.if THEN
-        ORS.Get(sym); expression(x); CheckBool(x); ORG.CFJump(x);
+        ORS.Get(sym); 
+        ORG.GetSetLabelTF(x, L0); L1 := 0;
+        expression(x); 
+        CheckBool(x); 
+        ORG.CFJump(x);
         Check(ORS.then, "no THEN");
-        StatSequence; L0 := 0;
+        StatSequence;
         WHILE sym = ORS.elsif DO
-          ORS.Get(sym); ORG.FJump(L0); ORG.Fixup(x); expression(x); CheckBool(x);
+          ORS.Get(sym); IF L1 = 0 THEN ORG.GetLabel(L1) END;
+          ORG.FJump(L1); ORG.PutLabel(L0); ORG.GetSetLabelTF(x, L0); 
+          expression(x); CheckBool(x);
           ORG.CFJump(x); Check(ORS.then, "no THEN"); StatSequence
         END ;
-        IF sym = ORS.else THEN ORS.Get(sym); ORG.FJump(L0); ORG.Fixup(x); StatSequence
-        ELSE ORG.Fixup(x)
+        IF sym = ORS.else THEN 
+          ORS.Get(sym); IF L1 = 0 THEN ORG.GetLabel(L1) END;
+          ORG.FJump(L1); ORG.PutLabel(L0); ORG.GetSetLabelTF(x, L0);
+          StatSequence
         END ;
-        ORG.FixLink(L0); Check(ORS.end, "no END")
+        ORG.PutLabel(x.lf); 
+        (*IF L1 # 0 THEN ORG.PutLabel(L1) END;*)
+        Check(ORS.end, "no END")
       ELSIF sym = ORS.while THEN
-        ORS.Get(sym); L0 := ORG.Here(); expression(x); CheckBool(x); ORG.CFJump(x);
-        Check(ORS.do, "no DO"); StatSequence; ORG.BJump(L0);
+        ORS.Get(sym); L1 := ORG.Here(); ORG.GetSetLabelTF(x, L0);  
+        expression(x); CheckBool(x); ORG.CFJump(x);
+        Check(ORS.do, "no DO"); StatSequence; ORG.BJump(L1);
         WHILE sym = ORS.elsif DO
-          ORS.Get(sym); ORG.Fixup(x); expression(x); CheckBool(x); ORG.CFJump(x);
-          Check(ORS.do, "no DO"); StatSequence; ORG.BJump(L0)
+          ORS.Get(sym); ORG.PutLabel(L0); ORG.GetSetLabelTF(x, L0); 
+          expression(x); CheckBool(x); ORG.CFJump(x);
+          Check(ORS.do, "no DO"); StatSequence; ORG.BJump(L1)
         END ;
-        ORG.Fixup(x); Check(ORS.end, "no END")
+        ORG.PutLabel(L0); 
+        Check(ORS.end, "no END")
       ELSIF sym = ORS.repeat THEN
-        ORS.Get(sym); L0 := ORG.Here(); StatSequence;
+        ORS.Get(sym); L1 := ORG.Here(); 
+        StatSequence;
         IF sym = ORS.until THEN
-          ORS.Get(sym); expression(x); CheckBool(x); ORG.CBJump(x, L0)
-        ELSE ORS.Mark("missing UNTIL")
+          ORS.Get(sym); ORG.GetSetLabelTF(x, L0); expression(x); CheckBool(x); ORG.CBJump(x, L1)
+        ELSE 
+          ORS.Mark("missing UNTIL")
         END
       ELSIF sym = ORS.for THEN
         ORS.Get(sym);

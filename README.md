@@ -72,9 +72,9 @@ Some potential bugs corrected:
 - The ESP32 doesn't supply a floating point division instruction. A function called by the generated code will
 be added.
 
-- Internally, the ESP32 does'nt have a condition code we can count on to do logical comparison. A value on a register is considered FALSE if it is equal to zero, TRUE otherwise.
+- For now, the static base address is loaded every time an access to a module variables is made. Putting the SB on register a15 will be done as a future performance refinement.
 
-- For now, the static base address is loaded every time an access to a module variables is made. Putting the SB on register a15 will be done as a performance refinement.
+- There is no Condition Codes in the ESP32, but a variety of branch instructions based on the content of register parameters. This, combined with the assembly language output of the compiler, requires sensible changes to the fixup algorithm and conditional instructions generation used in ORG.
 
 ## Installation
 
