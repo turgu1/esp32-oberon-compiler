@@ -1,5 +1,5 @@
 MODULE ORP; (*N. Wirth 1.7.97 / 8.2.2020  Oberon compiler for RISC in Oberon-07*)
-  IMPORT Texts, Logger, ORS, ORB, ORG;
+  IMPORT Texts, Out, Logger, ORS, ORB, ORG;
   (*Author: Niklaus Wirth, 2014.
     Parser of Oberon-RISC compiler. Uses Scanner ORS to obtain symbols (tokens),
     ORB for definition of data structures and for handling import and export, and
@@ -392,7 +392,7 @@ MODULE ORP; (*N. Wirth 1.7.97 / 8.2.2020  Oberon compiler for RISC in Oberon-07*
         ELSE ORS.Mark("bad type")
         END
       ELSE (*op = and*) 
-        CheckBool(x); ORG.And1(x); ORG.GetLabelTF(y); factor(y); CheckBool(y); ORG.And2(x, y)
+        CheckBool(x); ORG.And1(x); factor(y); CheckBool(y); ORG.And2(x, y)
       END
     END
   END term;
@@ -407,7 +407,7 @@ MODULE ORP; (*N. Wirth 1.7.97 / 8.2.2020  Oberon compiler for RISC in Oberon-07*
     END ;
     WHILE (sym >= ORS.plus) & (sym <= ORS.or) DO
       op := sym; ORS.Get(sym);
-      IF op = ORS.or THEN ORG.Or1(x); CheckBool(x); ORG.GetLabelTF(y); term(y); CheckBool(y); ORG.Or2(x, y)
+      IF op = ORS.or THEN ORG.Or1(x); CheckBool(x); term(y); CheckBool(y); ORG.Or2(x, y)
       ELSIF x.type.form = ORB.Int THEN term(y); CheckInt(y); ORG.AddOp(op, x, y)
       ELSIF x.type.form = ORB.Real THEN term(y); CheckReal(y); ORG.RealOp(op, x, y)
       ELSE CheckSet(x); term(y); CheckSet(y); ORG.SetOp(op, x, y)
@@ -529,12 +529,12 @@ MODULE ORP; (*N. Wirth 1.7.97 / 8.2.2020  Oberon compiler for RISC in Oberon-07*
         ORS.Mark("statement expected");
         REPEAT ORS.Get(sym) UNTIL (sym >= ORS.ident)
       END;
-      IF sym = ORS.ident THEN
+      IF sym = ORS.ident THEN (* ----- ASSIGNMENT / PROCEDURE CALL ----- *)
         qualident(obj); 
         ORG.MakeItem(x, obj, level);
         IF x.mode = ORB.SProc THEN StandProc(obj.val)
         ELSE selector(x);
-          IF sym = ORS.becomes THEN (*assignment*)
+          IF sym = ORS.becomes THEN (* ----- assignment ----- *)
             ORS.Get(sym); CheckReadOnly(x); expression(y);
             IF CompTypes(x.type, y.type, FALSE) THEN
               IF (x.type.form <= ORB.Pointer) OR (x.type.form = ORB.Proc) THEN ORG.Store(x, y)
@@ -550,7 +550,7 @@ MODULE ORP; (*N. Wirth 1.7.97 / 8.2.2020  Oberon compiler for RISC in Oberon-07*
             ELSE ORS.Mark("illegal assignment")
             END
           ELSIF sym = ORS.eql THEN ORS.Mark("should be :="); ORS.Get(sym); expression(y)
-          ELSIF sym = ORS.lparen THEN (*procedure call*)
+          ELSIF sym = ORS.lparen THEN (* ----- procedure call ----- *)
             ORS.Get(sym);
             IF (x.type.form = ORB.Proc) & (x.type.base.form = ORB.NoTyp) THEN
               callType := ORG.PrepCall(x, rx); 
@@ -571,48 +571,58 @@ MODULE ORP; (*N. Wirth 1.7.97 / 8.2.2020  Oberon compiler for RISC in Oberon-07*
           ELSE ORS.Mark("not a procedure")
           END
         END
-      ELSIF sym = ORS.if THEN
+      ELSIF sym = ORS.if THEN (* ----- IF ----- *)
         ORS.Get(sym); 
-        ORG.GetSetLabelTF(x, L0); L1 := 0;
+        L0 := 0; ORG.ClearLabels(x);
         expression(x); 
-        CheckBool(x); 
-        ORG.CFJump(x);
+        CheckBool(x); ORG.CFJump(x);
         Check(ORS.then, "no THEN");
         StatSequence;
         WHILE sym = ORS.elsif DO
-          ORS.Get(sym); IF L1 = 0 THEN ORG.GetLabel(L1) END;
-          ORG.FJump(L1); ORG.PutLabel(L0); ORG.GetSetLabelTF(x, L0); 
-          expression(x); CheckBool(x);
-          ORG.CFJump(x); Check(ORS.then, "no THEN"); StatSequence
-        END ;
+          ORS.Get(sym);
+          IF L0 = 0 THEN ORG.GetLabel(L0) END; ORG.FJump(L0); 
+          ORG.PutLabel(x.lf); ORG.ClearLabels(x); 
+          expression(x); 
+          CheckBool(x); ORG.CFJump(x); 
+          Check(ORS.then, "no THEN"); 
+          StatSequence
+        END;
         IF sym = ORS.else THEN 
-          ORS.Get(sym); IF L1 = 0 THEN ORG.GetLabel(L1) END;
-          ORG.FJump(L1); ORG.PutLabel(L0); ORG.GetSetLabelTF(x, L0);
+          ORS.Get(sym); 
+          IF L0 = 0 THEN ORG.GetLabel(L0) END; ORG.FJump(L0); 
+          ORG.PutLabel(x.lf); x.lf := 0;
           StatSequence
         END ;
-        ORG.PutLabel(x.lf); 
-        (*IF L1 # 0 THEN ORG.PutLabel(L1) END;*)
+        IF x.lf # 0 THEN ORG.PutLabel(x.lf) END; 
+        IF   L0 # 0 THEN ORG.PutLabel(L0)   END;
         Check(ORS.end, "no END")
-      ELSIF sym = ORS.while THEN
-        ORS.Get(sym); L1 := ORG.Here(); ORG.GetSetLabelTF(x, L0);  
-        expression(x); CheckBool(x); ORG.CFJump(x);
-        Check(ORS.do, "no DO"); StatSequence; ORG.BJump(L1);
+      ELSIF sym = ORS.while THEN (* ----- WHILE ----- *)
+        ORS.Get(sym); 
+        L0 := ORG.Here(); ORG.ClearLabels(x);   
+        expression(x); 
+        CheckBool(x); ORG.CFJump(x);
+        Check(ORS.do, "no DO"); 
+        StatSequence; 
+        ORG.BJump(L0);
         WHILE sym = ORS.elsif DO
-          ORS.Get(sym); ORG.PutLabel(L0); ORG.GetSetLabelTF(x, L0); 
-          expression(x); CheckBool(x); ORG.CFJump(x);
-          Check(ORS.do, "no DO"); StatSequence; ORG.BJump(L1)
+          ORS.Get(sym); 
+          ORG.PutLabel(x.lf); ORG.ClearLabels(x); 
+          expression(x); 
+          CheckBool(x); ORG.CFJump(x);
+          Check(ORS.do, "no DO"); StatSequence; ORG.BJump(L0)
         END ;
-        ORG.PutLabel(L0); 
+        ORG.PutLabel(x.lf); 
         Check(ORS.end, "no END")
-      ELSIF sym = ORS.repeat THEN
-        ORS.Get(sym); L1 := ORG.Here(); 
+      ELSIF sym = ORS.repeat THEN (* ----- REPEAT ----- *)
+        ORS.Get(sym); L0 := ORG.Here(); 
         StatSequence;
         IF sym = ORS.until THEN
-          ORS.Get(sym); ORG.GetSetLabelTF(x, L0); expression(x); CheckBool(x); ORG.CBJump(x, L1)
+          ORS.Get(sym); ORG.ClearLabels(x); expression(x); CheckBool(x); ORG.CBJump(x, L0)
         ELSE 
           ORS.Mark("missing UNTIL")
-        END
-      ELSIF sym = ORS.for THEN
+        END;
+        ORG.PutLabel(x.lt); 
+      ELSIF sym = ORS.for THEN (* ----- FOR ----- *)
         ORS.Get(sym);
         IF sym = ORS.ident THEN
           qualident(obj); ORG.MakeItem(x, obj, level); CheckInt(x); CheckReadOnly(x);
@@ -629,7 +639,7 @@ MODULE ORP; (*N. Wirth 1.7.97 / 8.2.2020  Oberon compiler for RISC in Oberon-07*
           END
         ELSE ORS.Mark("identifier expected")
         END
-      ELSIF sym = ORS.case THEN
+      ELSIF sym = ORS.case THEN (* ----- CASE ----- *)
         ORS.Get(sym);
         IF sym = ORS.ident THEN
           qualident(obj); orgtype := obj.type;
@@ -1018,11 +1028,11 @@ MODULE ORP; (*N. Wirth 1.7.97 / 8.2.2020  Oberon compiler for RISC in Oberon-07*
         ORB.Export(modid, newSF, key);
         IF newSF THEN Texts.WriteString(W, " new symbol file") END
       END ;
-      IF ORS.errcnt = 0 THEN
+      (*IF ORS.errcnt = 0 THEN*)
         ORG.Close(modid, key, exno);
-        Texts.WriteInt(W, ORG.pc, 6); Texts.WriteInt(W, dc, 6); Texts.WriteHex(W, key)
-      ELSE Texts.WriteLn(W); Texts.WriteString(W, "compilation FAILED")
-      END ;
+        Texts.WriteInt(W, ORG.pc, 6); Texts.WriteInt(W, dc, 6); Texts.WriteHex(W, key);
+      (*ELSE Texts.WriteLn(W); Texts.WriteString(W, "compilation FAILED")
+      END ;*)
       Texts.WriteLn(W); Texts.Append(Logger.Log, W.buf);
       ORB.CloseScope; pbsList := NIL
     ELSE ORS.Mark("must start with MODULE")

@@ -9,8 +9,7 @@ SIMS = \
 	$(ODIR)/ORS.sym\
 	$(ODIR)/ORB.sym\
 	$(ODIR)/ORG.sym\
-	$(ODIR)/ORP.sym\
-	$(ODIR)/Esp32.sym
+	$(ODIR)/ORP.sym
 
 $(ODIR)/%.sym: %.Mod
 	$(OC) $<
@@ -32,5 +31,3 @@ $(ODIR)/ORB.sym: ORB.Mod $(ODIR)/ORS.sym
 $(ODIR)/ORG.sym: ORG.Mod $(ODIR)/ORS.sym $(ODIR)/ORB.sym
 
 $(ODIR)/ORP.sym: ORP.Mod $(ODIR)/ORS.sym $(ODIR)/ORB.sym $(ODIR)/ORG.sym $(ODIR)/Texts.sym $(ODIR)/Logger.sym
-
-$(ODIR)/Esp32.sym: Esp32.Mod

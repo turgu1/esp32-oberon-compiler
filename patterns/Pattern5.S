@@ -1,30 +1,3 @@
-MODULE Pattern5;
-VAR
-  n: INTEGER;
-  s: SET;
-    
-BEGIN
-  IF n = 0 THEN
-    INC(n)
-  END;
-  IF (n >= 0) & (n < 100) THEN
-    DEC(n)
-  END;
-  IF ODD(n) OR (n IN s) THEN
-    n := -1000
-  END;
-  IF n < 0 THEN
-    s := {}
-  ELSIF n < 10 THEN
-    s := {0}
-  ELSIF n < 100 THEN
-    s := {1}
-  ELSE
-    s := {2}
-  END
-END Pattern5.
-
-(* 
     .title "Module Pattern5, Key A9E2D4B5"
     .sbttl "Oberon ESP32 Compiler Version 0.1.0"
 
@@ -34,6 +7,7 @@ _Pattern5_A9E2D4B5_s_bss:
 _Pattern5_s_bss:
     .space 8
 
+
     .section .init_Pattern5_A9E2D4B5
     .global _Pattern5_A9E2D4B5_s_init
 _Pattern5_A9E2D4B5_s_init:
@@ -41,11 +15,11 @@ _Pattern5_A9E2D4B5_s_init:
 _Pattern5_init:
     entry a1, 0
     movi a2, _Pattern5_s_bss
-    l32i a2, a2, 0            # a2 := i
-    movi a3, 0                # a3 := 0
-    bne a2 a3, 1f             # Branch if not equal to 0
+    l32i a2, a2, 0
+    movi a3, 0
+    bne a2 a3, 1f
     movi a2, _Pattern5_s_bss
-    addi a2, a2, 0           
+    addi a2, a2, 0
     l32i a3, a2, 0
     addi a3, a3, 1
     s32i a3, a2, 0
@@ -117,4 +91,4 @@ _Pattern5_init:
     .global _Pattern5_A9E2D4B5_s_init_table
 _Pattern5_A9E2D4B5_s_init_table:
     .int .init_Pattern5_A9E2D4B5
-*)
+
