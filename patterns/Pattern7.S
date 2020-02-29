@@ -1,14 +1,3 @@
-MODULE Pattern7;
-VAR 
-  i, m, n: INTEGER;
-  
-BEGIN
-  FOR i := 0 TO n - 1 DO
-    m := 2 * m
-  END
-END Pattern7.
-
-(* 
     .title "Module Pattern7, Key ABE2D4B5"
     .sbttl "Oberon ESP32 Compiler Version 0.1.0"
 
@@ -25,23 +14,23 @@ _Pattern7_ABE2D4B5_s_init:
 
 _Pattern7_init:
     entry a1, 0
-    movi a2, 0                 # a2 = 0  -> x := y
+    movi a2, 0
 1:
     movi a3, _Pattern7_s_bss
-    l32i a3, a3, 8             # a3 := n
-    addi a3, a3, -1            # subtract 1
-    blt a3 a2, 2f              # branch if (n - 1) < x
+    l32i a3, a3, 8
+    addi a3, a3, -1
+    blt a3 a2, 2f
     movi a3, _Pattern7_s_bss
-    s32i a2, a3, 0             # save x
+    s32i a2, a3, 0
     movi a2, _Pattern7_s_bss
-    l32i a2, a2, 4             # a2 := m
-    slli a2, a2, 1             # a2 := m * 2
+    l32i a2, a2, 4
+    slli a2, a2, 1
     movi a3, _Pattern7_s_bss
-    s32i a2, a3, 4             # m := m * 2
+    s32i a2, a3, 4
     movi a2, _Pattern7_s_bss
-    l32i a2, a2, 0             # a2 := x
-    addi a2, a2, 1             # a2 := x + 1
-    j 1b                       # loop...
+    l32i a2, a2, 0
+    addi a2, a2, 1
+    j 1b
 2:
     retw
 
@@ -50,4 +39,3 @@ _Pattern7_init:
 _Pattern7_ABE2D4B5_s_init_table:
     .int .init_Pattern7_ABE2D4B5
 
-*)

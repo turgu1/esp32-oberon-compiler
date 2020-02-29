@@ -631,10 +631,10 @@ MODULE ORP; (*N. Wirth 1.7.97 / 8.2.2020  Oberon compiler for RISC in Oberon-07*
             Check(ORS.to, "no TO"); expression(z); CheckInt(z); obj.rdo := TRUE;
             IF sym = ORS.by THEN ORS.Get(sym); expression(w); CheckConst(w); CheckInt(w)
             ELSE ORG.MakeConstItem(w, ORB.intType, 1)
-            END ;
+            END;
             Check(ORS.do, "no DO"); ORG.For1(x, y, z, w, L1);
             StatSequence; Check(ORS.end, "no END");
-            ORG.For2(x, y, w); ORG.BJump(L0); ORG.FixLink(L1); obj.rdo := FALSE
+            ORG.For2(x, y, w); ORG.BJump(L0); ORG.PutLabel(L1); obj.rdo := FALSE
           ELSE ORS.Mark(":= expected")
           END
         ELSE ORS.Mark("identifier expected")
@@ -643,12 +643,20 @@ MODULE ORP; (*N. Wirth 1.7.97 / 8.2.2020  Oberon compiler for RISC in Oberon-07*
         ORS.Get(sym);
         IF sym = ORS.ident THEN
           qualident(obj); orgtype := obj.type;
-          IF (orgtype.form = ORB.Pointer) OR (orgtype.form = ORB.Record) & (obj.class = ORB.Par) THEN
-            Check(ORS.of, "OF expected"); TypeCase(obj, x); L0 := 0;
+          IF (orgtype.form = ORB.Pointer) OR 
+             (orgtype.form = ORB.Record) & 
+             (obj.class = ORB.Par) THEN
+            Check(ORS.of, "OF expected"); 
+            ORG.ClearLabels(x);
+            TypeCase(obj, x); 
+            ORG.GetLabel(L0);
             WHILE sym = ORS.bar DO
-              ORS.Get(sym); ORG.FJump(L0); ORG.Fixup(x); obj.type := orgtype; TypeCase(obj, x)
+              ORS.Get(sym); ORG.FJump(L0); 
+              (* ORG.Fixup(x); *) ORG.PutLabel(x.lf); ORG.ClearLabels(x);
+              obj.type := orgtype; TypeCase(obj, x)
             END ;
-            ORG.Fixup(x); ORG.FixLink(L0); obj.type := orgtype
+            (* ORG.Fixup(x); *) ORG.PutLabel(x.lf);
+            ORG.PutLabel(L0); obj.type := orgtype
           ELSE ORS.Mark("numeric case not implemented");
             Check(ORS.of, "OF expected"); SkipCase;
             WHILE sym = ORS.bar DO SkipCase END

@@ -1,18 +1,3 @@
-MODULE Pattern6;
-VAR
-  i: INTEGER;
-
-BEGIN 
-  i := 0;
-  WHILE i < 10 DO
-    i := i + 2
-  END;
-  REPEAT
-    i := i - 1
-  UNTIL i = 0
-END Pattern6.
-
-(* 
     .title "Module Pattern6, Key AAE2D4B5"
     .sbttl "Oberon ESP32 Compiler Version 0.1.0"
 
@@ -61,4 +46,4 @@ _Pattern6_init:
     .global _Pattern6_AAE2D4B5_s_init_table
 _Pattern6_AAE2D4B5_s_init_table:
     .int .init_Pattern6_AAE2D4B5
-*)
+

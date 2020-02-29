@@ -540,7 +540,7 @@ MODULE ORG; (* N.Wirth, 16.4.2016 / 4.4.2017 / 31.5.2019  Oberon compiler; code 
     Texts.WriteString(CodeW, op);
     Texts.WriteString(CodeW, " a");
     Texts.WriteInt(CodeW, r1, 0);
-    Texts.WriteString(CodeW, " a");
+    Texts.WriteString(CodeW, ", a");
     Texts.WriteInt(CodeW, r2, 0);
     Texts.WriteString(CodeW, ", ");
     Texts.WriteInt(CodeW, label, 0);
@@ -551,6 +551,25 @@ MODULE ORG; (* N.Wirth, 16.4.2016 / 4.4.2017 / 31.5.2019  Oberon compiler; code 
     END;
     Texts.WriteLn(CodeW);
   END PutBranchRR;
+
+  PROCEDURE PutBranchRI(op: ARRAY OF CHAR; r, imm, label: INTEGER; forward: BOOLEAN);
+  BEGIN 
+    e("PutBranchRR");
+    Texts.WriteString(CodeW, "    ");
+    Texts.WriteString(CodeW, op);
+    Texts.WriteString(CodeW, " a");
+    Texts.WriteInt(CodeW, r, 0);
+    Texts.WriteString(CodeW, ", ");
+    Texts.WriteInt(CodeW, imm, 0);
+    Texts.WriteString(CodeW, ", ");
+    Texts.WriteInt(CodeW, label, 0);
+    IF forward THEN
+      Texts.Write(CodeW, "f")
+    ELSE
+      Texts.Write(CodeW, "b")
+    END;
+    Texts.WriteLn(CodeW);
+  END PutBranchRI;
 
   PROCEDURE PutBranchR(op: ARRAY OF CHAR; r, label: INTEGER; forward: BOOLEAN);
   BEGIN 
@@ -1366,36 +1385,40 @@ MODULE ORG; (* N.Wirth, 16.4.2016 / 4.4.2017 / 31.5.2019  Oberon compiler; code 
 
   PROCEDURE Set*(VAR x, y: Item);   (* x := {x .. y} *)
   BEGIN
-    IF (x.mode = ORB.Const) & ( y.mode = ORB.Const) THEN
+    IF (x.mode = ORB.Const) & (y.mode = ORB.Const) THEN
       IF x.a <= y.a THEN 
         x.a := LSL(2, y.a) - LSL(1, x.a) 
       ELSE 
         x.a := 0 
       END
     ELSE
-      IF (x.mode = ORB.Const) & (x.a <= 16) THEN
-        x.a := LSL(-1, x.a)
+      IF x.mode = ORB.Const THEN
+        x.a := LSL(-1, x.a);
+        PutRI("movi", RH, x.a);
+        x.r := RH; incR;
+        x.mode := Reg
       ELSE 
         load(x); 
-        Put1(Mov, RH, 0, -1); 
-        Put0(Lsl, x.r, RH, x.r)
+        PutRI("movi", RH, -1);
+        PutR("ssl", x.r);
+        PutRR("sll", x.r, RH);
       END ;
-      IF (y.mode = ORB.Const) & (y.a < 16) THEN 
-        Put1(Mov, RH, 0, LSL(-2, y.a)); 
-        y.mode := Reg; 
-        y.r := RH; incR
-      ELSE 
-        load(y); Put1(Mov, RH, 0, -2); Put0(Lsl, y.r, RH, y.r)
-      END ;
-      IF x.mode = ORB.Const THEN
-        IF x.a # 0 THEN 
-          Put1(Xor, y.r, y.r, -1); 
-          Put1a(And, RH-1, y.r, x.a) 
-        END ;
-        x.mode := Reg; x.r := RH-1
-      ELSE 
-        DEC(RH); 
-        Put0(Ann, RH-1, x.r, y.r)
+      IF (y.mode # ORB.Const) OR (y.a < 31) THEN 
+        IF y.mode = ORB.Const THEN 
+          y.a := LSL(-1, y.a + 1);
+          PutRI("movi", RH, y.a);
+          y.r := RH; incR
+        ELSE 
+          load(y); 
+          PutBranchRI("bgei", y.r, 31, label, FORWARD);
+          PutRI("movi", RH, -1);
+          PutRRI("addi", y.r, y.r, 1);
+          PutR("ssl", y.r);
+          PutRR("sll", y.r, RH);
+        END;
+        PutRRR("xor", x.r, x.r, y.r);
+        IF y.mode # ORB.Const THEN PutLabel(label); INC(label) END;
+        DEC(RH)
       END
     END
   END Set;
@@ -1647,31 +1670,44 @@ MODULE ORG; (* N.Wirth, 16.4.2016 / 4.4.2017 / 31.5.2019  Oberon compiler; code 
     incR  (*len*)
   END StringParam;
 
-  (*For Statements*)
+  (* For Statements *)
 
   PROCEDURE For0*(VAR x, y: Item);
   BEGIN 
     load(y)
   END For0;
 
-  PROCEDURE For1*(VAR x, y, z, w: Item; VAR L: INTEGER);
+  PROCEDURE For1*(VAR x, y, z, w: Item; VAR L: INTEGER); (* for x := y to z by w *)
   BEGIN 
-    IF z.mode = ORB.Const THEN Put1a(Cmp, RH, y.r, z.a)
-    ELSE load(z); Put0(Cmp, RH-1, y.r, z.r); DEC(RH)
+    IF z.mode = ORB.Const THEN 
+      PutRI("movi", RH, z.a);
+      incR
+    ELSE
+      load(z); 
     END ;
-    L := pc;
-    IF w.a > 0 THEN Put3(BC, GT, 0)
-    ELSIF w.a < 0 THEN Put3(BC, LT, 0)
-    ELSE ORS.Mark("zero increment"); Put3(BC, MI, 0)
-    END ;
+    
+    L := label; INC(label);
+
+    IF w.a > 0 THEN PutCondBranch(GT, L, FORWARD)
+    ELSIF w.a < 0 THEN PutCondBranch(LT, L, FORWARD)
+    ELSE 
+      ORS.Mark("zero increment");
+      PutCondBranch(GT, L, FORWARD) (* Just to keep Reg mgt happy *)
+    END;
+    incR;
     Store(x, y)
   END For1;
 
   PROCEDURE For2*(VAR x, y, w: Item);
   BEGIN 
     load(x); 
-    DEC(RH); 
-    Put1a(Add, x.r, x.r, w.a)
+    IF (w.a >= -128) & (w.a <= 127) THEN
+      PutRRI("addi", x.r, x.r, w.a)
+    ELSE
+      PutRI("movi", RH, w.a);
+      PutRRI("add",  x.r, x.r, RH)
+    END;
+    DEC(RH)
   END For2;
 
   (* Branches, procedure calls, procedure prolog and epilog *)
@@ -1944,9 +1980,6 @@ MODULE ORG; (* N.Wirth, 16.4.2016 / 4.4.2017 / 31.5.2019  Oberon compiler; code 
         IF upordown # 0 THEN y.a := - y.a END;
         IF (y.a >= -128) & (y.a <= 127) THEN
           PutRRI("addi", zr, zr, y.a) 
-        ELSIF (y.a >= -32768) & (y.a <= 32512) THEN
-          PutRRI("addmi", zr, zr, (y.a DIV 256) * 256);
-          PutRRI("addi", zr, zr, y.a MOD 256) 
         ELSE
           PutRI("movi", RH, y.a);
           PutRRR("add", zr, zr, RH)
@@ -1968,9 +2001,6 @@ MODULE ORG; (* N.Wirth, 16.4.2016 / 4.4.2017 / 31.5.2019  Oberon compiler; code 
         IF upordown # 0 THEN y.a := - y.a END;
         IF (y.a >= -128) & (y.a <= 127) THEN
           PutRRI("addi", zr, zr, y.a) 
-        ELSIF (y.a >= -32768) & (y.a <= 32512) THEN
-          PutRRI("addmi", zr, zr, (y.a DIV 256) * 256);
-          PutRRI("addi", zr, zr, y.a MOD 256)
         ELSE
           PutRI("movi", RH, y.a);
           PutRRR("add", zr, zr, RH)
