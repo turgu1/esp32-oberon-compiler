@@ -82,8 +82,10 @@ be added.
 
 The OBNC Oberon-07 version 0.16.1 is used to build this compiler. The authors is using it on both Linux and MacOs platforms without any major issue. It must be built using the following commands and option (after having changed current directory to obnc):
 
-> ./build --c-real-type=float
-> ./install
+```
+$ ./build --c-real-type=float
+$ ./install
+```
 
 (Both INTEGER and REAL must be set to 32bits.)
 
