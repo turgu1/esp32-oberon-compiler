@@ -72,18 +72,18 @@ Some potential bugs corrected:
 - The ESP32 doesn't supply a floating point division instruction. A function called by the generated code will
 be added.
 
-- For now, the static base address is loaded every time an access to a module variables is made. Putting the SB on register a15 will be done as a future performance refinement.
+- The Static Base address (SB) is loaded in register a15 when required.
 
 - There is no Condition Codes in the ESP32, but a variety of branch instructions based on the content of register parameters. This, combined with the assembly language output of the compiler, requires sensible changes to the fixup algorithm and conditional instructions generation used in ORG.
 
 ## Installation
 
-### obnc
+### OBNC
 
 The OBNC Oberon-07 version 0.16.1 is used to build this compiler. The authors is using it on both Linux and MacOs platforms without any major issue. It must be built using the following commands and option (after having changed current directory to obnc):
 
-  ./build --c-real-type=float
-  ./install
+> ./build --c-real-type=float
+> ./install
 
 (Both INTEGER and REAL must be set to 32bits.)
 
