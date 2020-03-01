@@ -621,7 +621,7 @@ MODULE ORP; (*N. Wirth 1.7.97 / 8.2.2020  Oberon compiler for RISC in Oberon-07*
         ELSE 
           ORS.Mark("missing UNTIL")
         END;
-        ORG.PutLabel(x.lt); 
+        IF x.lt # 0 THEN ORG.PutLabel(x.lt) END 
       ELSIF sym = ORS.for THEN (* ----- FOR ----- *)
         ORS.Get(sym);
         IF sym = ORS.ident THEN

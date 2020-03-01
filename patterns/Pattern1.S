@@ -14,18 +14,15 @@ _Pattern1_A5E2D4B5_s_init:
 
 _Pattern1_init:
     entry a1, 0
+    movi a15, _Pattern1_s_bss
     movi a2, 48
-    movi a3, _Pattern1_s_bss
-    s8i a2, a3, 0
+    s8i a2, a15, 0
     movi a2, 10
-    movi a3, _Pattern1_s_bss
-    s32i a2, a3, 4
-    movi a2, 1
-    movi a3, _Pattern1_s_bss
-    s32i a2, a3, 8
+    s32i a2, a15, 4
+    movi a2, 1065353216
+    s32i a2, a15, 8
     movi a2, 273
-    movi a3, _Pattern1_s_bss
-    s32i a2, a3, 12
+    s32i a2, a15, 12
     retw
 
     .section .init_table_Pattern1_A5E2D4B5

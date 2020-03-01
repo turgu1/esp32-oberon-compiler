@@ -1,18 +1,4 @@
-MODULE Pattern12c;
-  IMPORT Pattern12a, Pattern12b;
-  
-VAR
-  i: INTEGER;
-  y: REAL;
-  
-BEGIN 
-  i := Pattern12a.k;
-  y := Pattern12b.x;
-  Pattern12b.Q;
-END Pattern12c.
-
-(* 
-     .title "Module Pattern12c, Key A6E336E7"
+    .title "Module Pattern12c, Key A6E336E7"
     .sbttl "Oberon ESP32 Compiler Version 0.1.0"
 
     .section .bss_Pattern12c_A6E336E7
@@ -44,4 +30,3 @@ _Pattern12c_init:
 _Pattern12c_A6E336E7_s_init_table:
     .int .init_Pattern12c_A6E336E7
 
-*)

@@ -1,6 +1,6 @@
 MODULE Oberon;
 
-  IMPORT Out, extArgs, ORP;
+  IMPORT SYSTEM, Out, extArgs, ORP;
 
 CONST
   DEBUG = FALSE;
@@ -27,50 +27,59 @@ BEGIN
 END Usage;
 
 BEGIN
-  overrideSymbolFile := FALSE;
-  filePresent        := FALSE;
-  argCount           := extArgs.count;
 
-  IF (argCount > 0) & (argCount <= 2) THEN
-    i := 0;
-    WHILE i < argCount DO
-      extArgs.Get(i, arg, res);
+  IF (SYSTEM.SIZE(INTEGER) # 4) OR
+     (SYSTEM.SIZE(REAL) # 4) THEN
+     Out.String("INTEGER or REAL not of size 4!!"); Out.Ln;
+     Out.String("INTEGER: "); Out.Int(SYSTEM.SIZE(INTEGER), 0); Out.Ln;
+     Out.String("REAL: "); Out.Int(SYSTEM.SIZE(REAL), 0); Out.Ln;
+  ELSE
 
-      IF DEBUG THEN
-        Out.String("Argument "); 
-        Out.Int(i + 1, 0); 
-        Out.String(": "); 
-        Out.String(arg);
-        Out.Ln;
-      END;
+    overrideSymbolFile := FALSE;
+    filePresent        := FALSE;
+    argCount           := extArgs.count;
 
-      IF (arg = "-s") THEN
-        overrideSymbolFile := TRUE;
+    IF (argCount > 0) & (argCount <= 2) THEN
+      i := 0;
+      WHILE i < argCount DO
+        extArgs.Get(i, arg, res);
+
         IF DEBUG THEN
-          Out.String("Overriding Symbol File");
+          Out.String("Argument "); 
+          Out.Int(i + 1, 0); 
+          Out.String(": "); 
+          Out.String(arg);
           Out.Ln;
-        END
+        END;
+
+        IF (arg = "-s") THEN
+          overrideSymbolFile := TRUE;
+          IF DEBUG THEN
+            Out.String("Overriding Symbol File");
+            Out.Ln;
+          END
+        ELSE
+          filename    := arg;
+          filePresent := TRUE;
+        END;
+
+        INC(i)
+      END;
+
+      IF filePresent THEN
+        IF DEBUG THEN
+          Out.String("Compiling "); 
+          Out.String(filename); 
+          Out.String("..."); 
+          Out.Ln;
+        END;
+        
+        ORP.Compile(filename, overrideSymbolFile);
       ELSE
-        filename    := arg;
-        filePresent := TRUE;
-      END;
-
-      INC(i)
-    END;
-
-    IF filePresent THEN
-      IF DEBUG THEN
-        Out.String("Compiling "); 
-        Out.String(filename); 
-        Out.String("..."); 
-        Out.Ln;
-      END;
-      
-      ORP.Compile(filename, overrideSymbolFile);
+        Usage;
+      END
     ELSE
       Usage;
     END
-  ELSE
-    Usage;
   END
 END Oberon.

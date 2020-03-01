@@ -14,16 +14,14 @@ _Pattern11_A5E3D3E6_s_init:
 
 _Pattern11_init:
     entry a1, 0
-    movi a2, _Pattern11_s_bss
-    l32i a2, a2, 4
+    movi a15, _Pattern11_s_bss
+    l32i a2, a15, 4
     movi a3, 1
     ssl a2
     sll a2, a3
-    movi a3, _Pattern11_s_bss
-    s32i a2, a3, 0
+    s32i a2, a15, 0
     movi a2, -1
-    movi a3, _Pattern11_s_bss
-    l32i a3, a3, 8
+    l32i a3, a15, 8
     bgei a3, 31, 1f
     movi a4, -1
     addi a3, a3, 1
@@ -31,22 +29,17 @@ _Pattern11_init:
     sll a3, a4
     xor a2, a2, a3
 1:
-    movi a3, _Pattern11_s_bss
-    s32i a2, a3, 0
-    movi a2, _Pattern11_s_bss
-    l32i a2, a2, 4
+    s32i a2, a15, 0
+    l32i a2, a15, 4
     movi a3, -1
     ssl a2
     sll a2, a3
-    movi a3, _Pattern11_s_bss
-    s32i a2, a3, 0
-    movi a2, _Pattern11_s_bss
-    l32i a2, a2, 4
+    s32i a2, a15, 0
+    l32i a2, a15, 4
     movi a3, -1
     ssl a2
     sll a2, a3
-    movi a3, _Pattern11_s_bss
-    l32i a3, a3, 8
+    l32i a3, a15, 8
     bgei a3, 31, 2f
     movi a4, -1
     addi a3, a3, 1
@@ -54,15 +47,12 @@ _Pattern11_init:
     sll a3, a4
     xor a2, a2, a3
 2:
-    movi a3, _Pattern11_s_bss
-    s32i a2, a3, 0
+    s32i a2, a15, 0
     movi a2, 10412
-    movi a3, _Pattern11_s_bss
-    l32i a3, a3, 8
+    l32i a3, a15, 8
     bbc a2, a3, 3f
     movi a2, 1
-    movi a3, _Pattern11_s_bss
-    s32i a2, a3, 4
+    s32i a2, a15, 4
 3:
     retw
 

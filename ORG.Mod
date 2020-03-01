@@ -1,5 +1,5 @@
 MODULE ORG; (* N.Wirth, 16.4.2016 / 4.4.2017 / 31.5.2019  Oberon compiler; code generator for RISC*)
-  IMPORT SYSTEM, Files, Texts, ORS, ORB, Out;
+  IMPORT SYSTEM, Files, Texts, ORS, ORB, Out, Reals;
   (*Code generator for Oberon compiler for RISC processor.
      Procedural interface to Parser OSAP; result in array "code".
      Procedure Close writes code-files*)
@@ -7,7 +7,7 @@ MODULE ORG; (* N.Wirth, 16.4.2016 / 4.4.2017 / 31.5.2019  Oberon compiler; code 
   CONST 
     WordSize* = 4;
     StkOrg0 = -64; VarOrg0 = 0;  (*for RISC-0 only*)
-    MT = 12; SP = 1; LNK = 0;   (*dedicated registers*)
+    MT = 12; SP = 1; LNK = 0; SB = 15;   (*dedicated registers*)
     maxCode = 8000; maxStrx = 2400; maxTD = 160; C24 = 1000000H;
     Reg = 10; RegI = 11; Cond = 12;  (*internal item modes*)
 
@@ -37,6 +37,7 @@ MODULE ORG; (* N.Wirth, 16.4.2016 / 4.4.2017 / 31.5.2019  Oberon compiler; code 
 
     FORWARD = TRUE;
     BACKWARD = FALSE;
+
   TYPE 
     (* 
     Item forms and meaning of fields:
@@ -104,6 +105,8 @@ MODULE ORG; (* N.Wirth, 16.4.2016 / 4.4.2017 / 31.5.2019  Oberon compiler; code 
     BrReverse,                (* Parameters must be reversed *)
     BrOneParam,               (* One parameter instructions  *)
     BrNotValid: SET;          (* Not valid entries           *)
+
+    UsedRegs: SET;
 
   (*instruction assemblers according to formats*)
 
@@ -306,6 +309,49 @@ MODULE ORG; (* N.Wirth, 16.4.2016 / 4.4.2017 / 31.5.2019  Oberon compiler; code 
     REPEAT DEC(i); Texts.Write(W, a[i]) UNTIL i = 0
   END WriteHex;
   
+  PROCEDURE incR;
+  BEGIN
+    IF RH < LastRH-1 THEN
+      INCL(UsedRegs, RH);
+      INC(RH) 
+    ELSE 
+      ORS.Mark("register stack overflow") 
+    END
+  END incR;
+
+  PROCEDURE decR;
+  BEGIN
+    IF RH > FirstRH THEN
+      DEC(RH);
+      EXCL(UsedRegs, RH)
+    ELSE
+      ORS.Mark("register stack underflow") 
+    END
+  END decR;
+
+  PROCEDURE FirstFreeReg() : INTEGER;
+  VAR
+    i: INTEGER;
+  BEGIN 
+    i := LastRH;
+    WHILE (i > FirstRH) & ~(i IN UsedRegs) DO DEC(i) END;
+    RETURN i
+  END FirstFreeReg;
+
+  PROCEDURE CheckRegs*;
+  BEGIN
+    IF RH # FirstRH THEN 
+      ORS.Mark("Reg Stack"); 
+      RH := FirstRH;
+      UsedRegs := {}
+    END ;
+    (* IF pc >= maxCode - 40 THEN ORS.Mark("program too long") END ; *)
+    IF frame # 0 THEN 
+      ORS.Mark("frame error"); 
+      frame := 0
+    END
+  END CheckRegs;
+
   PROCEDURE PutA(op, a: ARRAY OF CHAR);
   BEGIN 
     Texts.WriteString(CodeW, "    ");
@@ -601,14 +647,14 @@ MODULE ORG; (* N.Wirth, 16.4.2016 / 4.4.2017 / 31.5.2019  Oberon compiler; code 
       e(BrOp[cond]);
       IF cond IN BrOneParam THEN
         PutBranchR(BrOp[cond], RH-1, label, forward);
-        DEC(RH)
+        decR
       ELSE
         IF cond IN BrReverse THEN
           PutBranchRR(BrOp[cond], RH-1, RH-2, label, forward)
         ELSE
           PutBranchRR(BrOp[cond], RH-2, RH-1, label, forward)
         END;
-        DEC(RH, 2);
+        decR; decR
       END
     END      
   END PutCondBranch;
@@ -628,30 +674,8 @@ MODULE ORG; (* N.Wirth, 16.4.2016 / 4.4.2017 / 31.5.2019  Oberon compiler; code 
     Texts.WriteLn(CodeW);
   END PutJump;
   
-  PROCEDURE incR;
-  BEGIN
-    IF RH < LastRH-1 THEN 
-      INC(RH) 
-    ELSE 
-      ORS.Mark("register stack overflow") 
-    END
-  END incR;
-
-  PROCEDURE CheckRegs*;
-  BEGIN
-    IF RH # FirstRH THEN 
-      ORS.Mark("Reg Stack"); 
-      RH := FirstRH 
-    END ;
-    (* IF pc >= maxCode - 40 THEN ORS.Mark("program too long") END ; *)
-    IF frame # 0 THEN 
-      ORS.Mark("frame error"); 
-      frame := 0
-    END
-  END CheckRegs;
-
-    (* Produce a unique sectin name of the following form:
-       <sectionPrefix>_<moduleId>_<key>
+    (* Produce a unique section name of the following form:
+       _<sectionPrefix>_<moduleId>_<kind>_<key>
    *)
 
   PROCEDURE ExportName(name, kind, moduleId: ARRAY OF CHAR;  moduleKey: INTEGER);
@@ -717,25 +741,53 @@ MODULE ORG; (* N.Wirth, 16.4.2016 / 4.4.2017 / 31.5.2019  Oberon compiler; code 
 
   (* loading of operands and addresses into registers *)
 
+  (* Put the Static Base in a15. This must be done:
+     - At the entry of every exported procedure
+     - On return of every external procedure call
+     - On return of every register based call
+     - On main module entry
+   *)
+  PROCEDURE GetLocalSB;
+  BEGIN 
+    Texts.WriteString(CodeW, "    movi a15, _");
+    Texts.WriteString(CodeW, thisModuleId);
+    Texts.WriteString(CodeW, "_s_bss");
+    Texts.WriteLn(CodeW);
+  END GetLocalSB;
+
   PROCEDURE GetSB(base: INTEGER);
   VAR
     moduleId: ORS.Ident;
     moduleKey: INTEGER;
   BEGIN
-    Texts.WriteString(CodeW, "    movi a");
-    Texts.WriteInt(CodeW, RH, 0);
-    IF base = 0 THEN
-      Texts.WriteString(CodeW, ", _");
-      Texts.WriteString(CodeW, thisModuleId);
-    ELSE
+    (* Old Code ...
+      Texts.WriteString(CodeW, "    movi a");
+      Texts.WriteInt(CodeW, RH, 0);
+      IF base = 0 THEN
+        Texts.WriteString(CodeW, ", _");
+        Texts.WriteString(CodeW, thisModuleId);
+      ELSE
+        ModuleInfo(base, moduleId, moduleKey);
+        Texts.WriteString(CodeW, ", _");
+        Texts.WriteString(CodeW, moduleId);
+        Texts.WriteString(CodeW, "_");
+        WriteHex(CodeW, moduleKey);
+      END;
+      Texts.WriteString(CodeW, "_s_bss");
+      Texts.WriteLn(CodeW);
+    ... *)
+    (* The Static Base (base = 0) is in a15 *)
+    IF base # 0 THEN
+      Texts.WriteString(CodeW, "    movi a");
+      Texts.WriteInt(CodeW, RH, 0);
       ModuleInfo(base, moduleId, moduleKey);
       Texts.WriteString(CodeW, ", _");
       Texts.WriteString(CodeW, moduleId);
       Texts.WriteString(CodeW, "_");
       WriteHex(CodeW, moduleKey);
-    END;
-    Texts.WriteString(CodeW, "_s_bss");
-    Texts.WriteLn(CodeW);
+      Texts.WriteString(CodeW, "_s_bss");
+      Texts.WriteLn(CodeW);
+    END
   END GetSB;
 
   PROCEDURE NilCheck;
@@ -801,8 +853,12 @@ MODULE ORG; (* N.Wirth, 16.4.2016 / 4.4.2017 / 31.5.2019  Oberon compiler; code 
         IF x.r > 0 THEN (* local on the stack *) 
           PutMoveRRI(op, max, RH, SP, x.a + frame);
         ELSE  (* module globals or imported *)
-          GetSB(x.r); 
-          PutMoveRRI(op, max, RH, RH, x.a);
+          GetSB(x.r);
+          IF x.r = 0 THEN 
+            PutMoveRRI(op, max, RH, SB, x.a);
+          ELSE
+            PutMoveRRI(op, max, RH, RH, x.a);
+          END
         END;
         x.r := RH; incR
       ELSIF x.mode = ORB.Par THEN 
@@ -835,17 +891,25 @@ MODULE ORG; (* N.Wirth, 16.4.2016 / 4.4.2017 / 31.5.2019  Oberon compiler; code 
         offset := x.a + frame;
         IF offset > 127 THEN
           PutRI("movi", RH, offset);
-          PutRRR("add", RH, RH, SP);
+          PutRRR("add", RH, RH, SP)
         ELSE
-          PutRRI("addi", RH, SP, offset);
+          PutRRI("addi", RH, SP, offset)
         END
       ELSE 
         GetSB(x.r); 
         IF x.a > 127 THEN
           PutRI("movi", RH+1, x.a);
-          PutRRR("add", RH, RH, RH+1);
+          IF x.r = 0 THEN
+            PutRRR("add", RH, SB, RH+1)
+          ELSE
+            PutRRR("add", RH, RH, RH+1)
+          END
         ELSE
-          PutRRI("addi", RH, RH, x.a);
+          IF x.r = 0 THEN
+            PutRRI("addi", RH, SB, x.a)
+          ELSE
+            PutRRI("addi", RH, RH, x.a)
+          END
         END
       END ;
       x.r := RH; incR
@@ -900,8 +964,8 @@ MODULE ORG; (* N.Wirth, 16.4.2016 / 4.4.2017 / 31.5.2019  Oberon compiler; code 
 
   PROCEDURE loadStringAdr(VAR x: Item);
   BEGIN 
-    GetSB(0); 
-    Put1a(Add, RH, RH, varsize + x.a); 
+    (* GetSB(0); *)
+    Put1a(Add, RH, SB, varsize + x.a); 
     x.mode := Reg; 
     x.r := RH; incR
   END loadStringAdr;
@@ -913,7 +977,20 @@ MODULE ORG; (* N.Wirth, 16.4.2016 / 4.4.2017 / 31.5.2019  Oberon compiler; code 
   END MakeConstItem;
 
   PROCEDURE MakeRealItem*(VAR x: Item; val: REAL);
-  BEGIN x.mode := ORB.Const; x.type := ORB.realType; x.a := SYSTEM.VAL(INTEGER, val)
+  VAR
+    r: REAL;
+  BEGIN 
+    e("MakeRealItem");
+    x.mode := ORB.Const; 
+    x.type := ORB.realType; 
+    (*x.a := SYSTEM.VAL(INTEGER, val);
+      r := SYSTEM.VAL(REAL, x.a); *)
+    Reals.RealToInt(val, x.a);
+    Reals.IntToReal(x.a, r);
+    IF val # r THEN Out.String("FUCK!!!!"); Out.Ln;
+      Out.Real(r,0); Out.String(" vs "); Out.Real(val,0);
+      Out.Ln 
+    END
   END MakeRealItem;
 
   PROCEDURE MakeStringItem*(VAR x: Item; len: INTEGER); (*copies string from ORS-buffer to ORG-string array*)
@@ -1000,7 +1077,7 @@ MODULE ORG; (* N.Wirth, 16.4.2016 / 4.4.2017 / 31.5.2019  Oberon compiler; code 
         ELSE 
           GetSB(x.r);
           IF x.r = 0 THEN 
-            PutRRR("add", y.r, RH, y.r)
+            PutRRR("add", y.r, SB, y.r)
           ELSE 
             PutRI("movi", RH+1, x.a);
             PutRRR("add", RH, RH, RH+1); 
@@ -1018,7 +1095,7 @@ MODULE ORG; (* N.Wirth, 16.4.2016 / 4.4.2017 / 31.5.2019  Oberon compiler; code 
         x.a := x.b
       ELSIF x.mode = RegI THEN 
         PutRRR("add", x.r, x.r, y.r); 
-        DEC(RH)
+        decR
       END
     END
   END Index;
@@ -1030,7 +1107,11 @@ MODULE ORG; (* N.Wirth, 16.4.2016 / 4.4.2017 / 31.5.2019  Oberon compiler; code 
         PutMoveRRI("l32i", 1020, RH, SP, x.a + frame)
       ELSE 
         GetSB(x.r); 
-        PutMoveRRI("l32i", 1020, RH, RH, x.a);
+        IF x.r = 0 THEN
+          PutMoveRRI("l32i", 1020, RH, SB, x.a)
+        ELSE
+          PutMoveRRI("l32i", 1020, RH, RH, x.a)
+        END
       END ;
       NilCheck; 
       x.r := RH; incR
@@ -1121,7 +1202,7 @@ MODULE ORG; (* N.Wirth, 16.4.2016 / 4.4.2017 / 31.5.2019  Oberon compiler; code 
     VAR pc0: INTEGER;
   BEGIN
     IF T = NIL THEN
-      IF x.mode >= Reg THEN DEC(RH) END ;
+      IF x.mode >= Reg THEN decR END ;
       SetCC(x, 7)
     ELSE (*fetch tag into RH*)
       IF varpar THEN Put2(Ldr, RH, SP, x.a+4+frame)
@@ -1131,12 +1212,12 @@ MODULE ORG; (* N.Wirth, 16.4.2016 / 4.4.2017 / 31.5.2019  Oberon compiler; code 
       END ;
       Put2(Ldr, RH, RH, T.nofpar*4); incR;
       loadTypTagAdr(T);  (*tag of T*)
-      Put0(Cmp, RH-1, RH-1, RH-2); DEC(RH, 2);
+      Put0(Cmp, RH-1, RH-1, RH-2); decR; decR;
       IF ~varpar THEN fix(pc0, pc - pc0 - 1) END ;
       IF isguard THEN
         IF check THEN Trap(NE, 2) END
       ELSE SetCC(x, EQ);
-        IF ~varpar THEN DEC(RH) END
+        IF ~varpar THEN decR END
       END
     END
   END TypeTest;
@@ -1233,7 +1314,7 @@ MODULE ORG; (* N.Wirth, 16.4.2016 / 4.4.2017 / 31.5.2019  Oberon compiler; code 
       ELSE 
         load(x); load(y); 
         PutRRR("add", RH-2, x.r, y.r); 
-        DEC(RH); 
+        decR; 
         x.r := RH-1
       END
     ELSE (*op = ORS.minus*)
@@ -1252,7 +1333,7 @@ MODULE ORG; (* N.Wirth, 16.4.2016 / 4.4.2017 / 31.5.2019  Oberon compiler; code 
       ELSE 
         load(x); load(y); 
         PutRRR("sub", RH-2, x.r, y.r); 
-        DEC(RH); 
+        decR; 
         x.r := RH-1
       END
     END
@@ -1289,7 +1370,7 @@ MODULE ORG; (* N.Wirth, 16.4.2016 / 4.4.2017 / 31.5.2019  Oberon compiler; code 
     ELSE 
       load(x); load(y); 
       PutRRR("mull", RH-2, x.r, y.r); 
-      DEC(RH); 
+      decR; 
       x.r := RH-1
     END
   END MulOp;
@@ -1320,7 +1401,7 @@ MODULE ORG; (* N.Wirth, 16.4.2016 / 4.4.2017 / 31.5.2019  Oberon compiler; code 
         IF check THEN Trap(LE, 6) END ;
         load(x); 
         PutRRR("quos", RH-2, x.r, y.r); 
-        DEC(RH); 
+        decR; 
         x.r := RH-1
       END
     ELSE (* op = ORS.mod *)
@@ -1347,7 +1428,7 @@ MODULE ORG; (* N.Wirth, 16.4.2016 / 4.4.2017 / 31.5.2019  Oberon compiler; code 
         IF check THEN Trap(LE, 6) END ;
         load(y); 
         PutRRR("rems", RH-2, x.r, y.r);
-        DEC(RH)
+        decR
       END
     END
   END DivOp;
@@ -1367,7 +1448,7 @@ MODULE ORG; (* N.Wirth, 16.4.2016 / 4.4.2017 / 31.5.2019  Oberon compiler; code 
       PutA("call", "__fdiv32");
     END;
     PutRS("rfr", RH-2, 2);
-    DEC(RH); x.r := RH-1
+    decR; x.r := RH-1
   END RealOp;
 
   (* Code generation for set operators *)
@@ -1418,7 +1499,7 @@ MODULE ORG; (* N.Wirth, 16.4.2016 / 4.4.2017 / 31.5.2019  Oberon compiler; code 
         END;
         PutRRR("xor", x.r, x.r, y.r);
         IF y.mode # ORB.Const THEN PutLabel(label); INC(label) END;
-        DEC(RH)
+        decR
       END
     END
   END Set;
@@ -1474,7 +1555,7 @@ MODULE ORG; (* N.Wirth, 16.4.2016 / 4.4.2017 / 31.5.2019  Oberon compiler; code 
       ELSIF op = ORS.rdiv THEN 
         PutRRR("xor", RH-2, x.r, y.r)
       END;
-      DEC(RH); 
+      decR; 
       x.r := RH-1
     END 
   END SetOp;
@@ -1499,12 +1580,18 @@ MODULE ORG; (* N.Wirth, 16.4.2016 / 4.4.2017 / 31.5.2019  Oberon compiler; code 
     SetCC(x, relmap[op - ORS.eql]);
   END IntRelation;
 
+  (* Reals are treated as integers for comparaison. Equality won't work if
+     both positive and negative zeroes are compared. *)
   PROCEDURE RealRelation*(op: INTEGER; VAR x, y: Item);   (* x := x < y *)
-  BEGIN load(x);
-    IF (y.mode = ORB.Const) & (y.a = 0) THEN DEC(RH)
-    ELSE load(y); Put0(Fsb, x.r, x.r, y.r); DEC(RH, 2)
-    END ;
-    SetCC(x, relmap[op - ORS.eql])
+  BEGIN
+    load(x); 
+    IF y.mode = ORB.Const THEN
+      PutRI("movi", RH, y.a);
+      incR
+    ELSE
+      load(y);
+    END;
+    SetCC(x, relmap[op - ORS.eql]);
   END RealRelation;
 
   PROCEDURE StringRelation*(op: INTEGER; VAR x, y: Item);   (* x := x < y *)
@@ -1520,7 +1607,7 @@ MODULE ORG; (* N.Wirth, 16.4.2016 / 4.4.2017 / 31.5.2019  Oberon compiler; code 
     Put3(BC, NE, 2);
     Put1(Cmp, RH+2, RH, 0); 
     Put3(BC, NE, -8);
-    DEC(RH, 2); SetCC(x, relmap[op - ORS.eql])
+    decR; decR; SetCC(x, relmap[op - ORS.eql])
   END StringRelation;
 
   (* Code generation of Assignments *)
@@ -1540,20 +1627,24 @@ MODULE ORG; (* N.Wirth, 16.4.2016 / 4.4.2017 / 31.5.2019  Oberon compiler; code 
     IF x.mode = ORB.Var THEN
       IF x.r > 0 THEN (* local *)
         PutMoveRRI(op, max, y.r, SP, x.a + frame);
-      ELSE (* imported *)
+      ELSE (* imported or module *)
         GetSB(x.r);
-        PutMoveRRI(op, max, y.r, RH, x.a);
+        IF x.r = 0 THEN
+          PutMoveRRI(op, max, y.r, SB, x.a);
+        ELSE
+          PutMoveRRI(op, max, y.r, RH, x.a);
+        END
       END
     ELSIF x.mode = ORB.Par THEN
       PutMoveRRI("l32i", 1020, RH, SP, x.a + frame);
       PutMoveRRI(op, max, y.r, RH, x.b);
     ELSIF x.mode = RegI THEN 
       PutMoveRRI(op, max, y.r, x.r, x.a); 
-      DEC(RH);
+      decR;
     ELSE 
       ORS.Mark("bad mode in Store")
     END ;
-    DEC(RH)
+    decR
   END Store;
 
   PROCEDURE StoreStruct*(VAR x, y: Item); (* x := y, frame = 0 *)
@@ -1600,7 +1691,7 @@ MODULE ORG; (* N.Wirth, 16.4.2016 / 4.4.2017 / 31.5.2019  Oberon compiler; code 
       PutLabel(label);
       INC(label);
     END ;
-    RH := FirstRH
+    RH := FirstRH; UsedRegs := {}
   END StoreStruct;
 
   PROCEDURE CopyString*(VAR x, y: Item);  (* x := y *) 
@@ -1623,7 +1714,7 @@ MODULE ORG; (* N.Wirth, 16.4.2016 / 4.4.2017 / 31.5.2019  Oberon compiler; code 
       PutRRI("s32i", RH+1,  x.r, 0); 
       PutRRI("addi", x.r, x.r, 4);
     PutLabel(label);
-    RH := FirstRH;
+    RH := FirstRH; UsedRegs := {};
     INC(label)
    END CopyString;
   
@@ -1707,7 +1798,7 @@ MODULE ORG; (* N.Wirth, 16.4.2016 / 4.4.2017 / 31.5.2019  Oberon compiler; code 
       PutRI("movi", RH, w.a);
       PutRRI("add",  x.r, x.r, RH)
     END;
-    DEC(RH)
+    decR
   END For2;
 
   (* Branches, procedure calls, procedure prolog and epilog *)
@@ -1837,6 +1928,7 @@ MODULE ORG; (* N.Wirth, 16.4.2016 / 4.4.2017 / 31.5.2019  Oberon compiler; code 
     callType : INTEGER; (* 4, 8 or 12 *)
   BEGIN (*x.type.form = ORB.Proc*)
     IF x.mode > ORB.Par THEN load(x) END;
+    (* RH := FirstFreeReg();  Not working... for now *)
     r := RH;
     (* Which registers need to be saved *)
     IF RH <= 4 THEN
@@ -1878,10 +1970,11 @@ MODULE ORG; (* N.Wirth, 16.4.2016 / 4.4.2017 / 31.5.2019  Oberon compiler; code 
       ELSE (* imported *)
         ModuleInfo(x.r, moduleId, moduleKey);  
         PutCALLExternal(callType, x.name, moduleId, moduleKey);
+        GetLocalSB
       END
     ELSE
       IF (x.mode = ORB.Par) OR (x.mode = ORB.Var) THEN (* Variable or Parameter *)
-        load(x); DEC(RH)
+        load(x); decR
       ELSE (* Top of stack *)
         PutRRI("l32i", RH, SP, 0);
         PutRRI("addi", SP, SP, 4);
@@ -1890,9 +1983,10 @@ MODULE ORG; (* N.Wirth, 16.4.2016 / 4.4.2017 / 31.5.2019  Oberon compiler; code 
       END ;
       IF check THEN Trap(EQ, 5) END;
       PutCallR(callType, RH);
+      GetLocalSB
     END ;
     IF x.type.base.form = ORB.NoTyp THEN (*procedure*) 
-      RH := FirstRH
+      RH := FirstRH; UsedRegs := {}
     ELSE (*function*)
       (* callType + 2 is the register containing the function result *)
       IF (callType + 2) > r THEN
@@ -1937,7 +2031,8 @@ MODULE ORG; (* N.Wirth, 16.4.2016 / 4.4.2017 / 31.5.2019  Oberon compiler; code 
         PutRRI("s32i", r, 1, a); 
         INC(r); 
         INC(a, 4)
-      END
+      END;
+      IF exported THEN GetLocalSB END;
     ELSE (* interrupt procedure prolog *)
       (* To be defined *)
     END
@@ -1955,7 +2050,7 @@ MODULE ORG; (* N.Wirth, 16.4.2016 / 4.4.2017 / 31.5.2019  Oberon compiler; code 
       PutRI("rsr", 0, 208 + intLevel);
       PutI("rfi", intLevel);
     END;
-    RH := FirstRH
+    RH := FirstRH; UsedRegs := {}
   END Return;
 
   (* In-line code procedures*)
@@ -1988,10 +2083,10 @@ MODULE ORG; (* N.Wirth, 16.4.2016 / 4.4.2017 / 31.5.2019  Oberon compiler; code 
         load(y); 
         IF upordown # 0 THEN PutRR("neg", y.r, y.r) END;
         PutRRR("add", zr, zr, y.r); 
-        DEC(RH) 
+        decR 
       END;
       PutMoveRRI(storeOp, max, zr, SP, x.a);
-      DEC(RH)
+      decR
     ELSE 
       loadAdr(x); 
       zr := RH; 
@@ -2009,10 +2104,10 @@ MODULE ORG; (* N.Wirth, 16.4.2016 / 4.4.2017 / 31.5.2019  Oberon compiler; code 
         load(y); 
         IF upordown # 0 THEN PutRR("neg", y.r, y.r) END;
         PutRRR("add", zr, zr, y.r); 
-        DEC(RH) 
+        decR 
       END;
       PutRRI(storeOp, zr, x.r, 0); 
-      DEC(RH, 2)
+      decR; decR
     END
   END Increment;
 
@@ -2021,9 +2116,9 @@ MODULE ORG; (* N.Wirth, 16.4.2016 / 4.4.2017 / 31.5.2019  Oberon compiler; code 
   BEGIN loadAdr(x); zr := RH; Put2(Ldr, RH, x.r, 0); incR;
     IF inorex = 0 THEN op := Ior ELSE op := Ann END ;
     IF y.mode = ORB.Const THEN Put1a(op, zr, zr, LSL(1, y.a))
-    ELSE load(y); Put1(Mov, RH, 0, 1); Put0(Lsl, y.r, RH, y.r); Put0(op, zr, zr, y.r); DEC(RH)
+    ELSE load(y); Put1(Mov, RH, 0, 1); Put0(Lsl, y.r, RH, y.r); Put0(op, zr, zr, y.r); decR
     END ;
-    Put2(Str, zr, x.r, 0); DEC(RH, 2)
+    Put2(Str, zr, x.r, 0); decR; decR
   END Include;
 
   PROCEDURE Assert*(VAR x: Item);
@@ -2037,13 +2132,13 @@ MODULE ORG; (* N.Wirth, 16.4.2016 / 4.4.2017 / 31.5.2019  Oberon compiler; code 
   END Assert; 
 
   PROCEDURE New*(VAR x: Item);
-  BEGIN loadAdr(x); loadTypTagAdr(x.type.base); Trap(7, 0); RH := FirstRH
+  BEGIN loadAdr(x); loadTypTagAdr(x.type.base); Trap(7, 0); RH := FirstRH; UsedRegs := {}
   END New;
 
   PROCEDURE Pack*(VAR x, y: Item);
     VAR z: Item;
   BEGIN z := x; load(x); load(y);
-    Put1(Lsl, y.r, y.r, 23); Put0(Add, x.r, x.r, y.r); DEC(RH); Store(z, x)
+    Put1(Lsl, y.r, y.r, 23); Put0(Add, x.r, x.r, y.r); decR; Store(z, x)
   END Pack;
 
   PROCEDURE Unpk*(VAR x, y: Item);
@@ -2054,7 +2149,7 @@ MODULE ORG; (* N.Wirth, 16.4.2016 / 4.4.2017 / 31.5.2019  Oberon compiler; code 
   END Unpk;
 
   PROCEDURE Led*(VAR x: Item);
-  BEGIN load(x); Put1(Mov, RH, 0, -60); Put2(Str, x.r, RH, 0); DEC(RH)
+  BEGIN load(x); Put1(Mov, RH, 0, -60); Put2(Str, x.r, RH, 0); decR
   END Led;
 
   PROCEDURE Get*(VAR x, y: Item);
@@ -2083,7 +2178,7 @@ MODULE ORG; (* N.Wirth, 16.4.2016 / 4.4.2017 / 31.5.2019  Oberon compiler; code 
       PutRRI("s32i", RH, y.r, 0); 
       PutRRI("addi", y.r, y.r, 4);
     PutLabel(label);
-    DEC(RH, 3);
+    decR; decR; decR;
     INC(label);
     PutLabel(label - 2);
   END Copy;
@@ -2099,7 +2194,7 @@ MODULE ORG; (* N.Wirth, 16.4.2016 / 4.4.2017 / 31.5.2019  Oberon compiler; code 
     ELSE 
       load(y); 
       PutRR("mov", x.a, y.r); 
-      DEC(RH)
+      decR
     END
   END LDREG;
 
@@ -2149,7 +2244,7 @@ MODULE ORG; (* N.Wirth, 16.4.2016 / 4.4.2017 / 31.5.2019  Oberon compiler; code 
   PROCEDURE Len*(VAR x: Item);
   BEGIN
     IF x.type.len >= 0 THEN
-      IF x.mode = RegI THEN DEC(RH) END ;
+      IF x.mode = RegI THEN decR END ;
       x.mode := ORB.Const; 
       x.a := x.type.len
     ELSE (*open array*) 
@@ -2160,30 +2255,55 @@ MODULE ORG; (* N.Wirth, 16.4.2016 / 4.4.2017 / 31.5.2019  Oberon compiler; code 
   END Len;
 
   PROCEDURE Shift*(fct: INTEGER; VAR x, y: Item);
-    VAR op: INTEGER;
-  BEGIN load(x);
-    IF fct = 0 THEN op := Lsl ELSIF fct = 1 THEN op := Asr ELSE op := Ror END ;
-    IF y.mode = ORB.Const THEN Put1(op, x.r, x.r, y.a MOD 20H)
-    ELSE load(y); Put0(op, RH-2, x.r, y.r); DEC(RH); x.r := RH-1
+  BEGIN 
+    load(x);
+    IF fct = 0 THEN  (* LSL *)
+      IF y.mode = ORB.Const THEN
+        PutRRI("slli", x.r, x.r, y.a MOD 20H)
+      ELSE
+        load(y);
+        PutR("ssl", y.r);
+        PutRR("sll", x.r, x.r);
+        decR
+      END
+    ELSIF fct = 1 THEN (* ASR *)
+      IF y.mode = ORB.Const THEN
+        PutRRI("srai", x.r, x.r, y.a MOD 20H)
+      ELSE
+        load(y);
+        PutR("ssr", y.r);
+        PutRR("sra", x.r, x.r);
+        decR
+      END
+    ELSE (* ROR *)
+      IF y.mode = ORB.Const THEN
+        PutI("ssai", y.a MOD 20H)
+      ELSE
+        load(y);
+        PutR("ssr", y.r);
+        decR
+      END;
+      PutRR("mov", RH, x.r);
+      PutRRR("src", x.r, x.r, RH)
     END
   END Shift;
 
   PROCEDURE ADC*(VAR x, y: Item);
-  BEGIN load(x); load(y); Put0(Add+2000H, x.r, x.r, y.r); DEC(RH)
+  BEGIN load(x); load(y); Put0(Add+2000H, x.r, x.r, y.r); decR
   END ADC;
 
   PROCEDURE SBC*(VAR x, y: Item);
-  BEGIN load(x); load(y); Put0(Sub+2000H, x.r, x.r, y.r); DEC(RH)
+  BEGIN load(x); load(y); Put0(Sub+2000H, x.r, x.r, y.r); decR
   END SBC;
 
   PROCEDURE UML*(VAR x, y: Item);
-  BEGIN load(x); load(y); Put0(Mul+2000H, x.r, x.r, y.r); DEC(RH)
+  BEGIN load(x); load(y); Put0(Mul+2000H, x.r, x.r, y.r); decR
   END UML;
 
   PROCEDURE Bit*(VAR x, y: Item);
   BEGIN load(x); Put2(Ldr, x.r, x.r, 0);
-    IF y.mode = ORB.Const THEN Put1(Ror, x.r, x.r, y.a+1); DEC(RH)
-    ELSE load(y); Put1(Add, y.r, y.r, 1); Put0(Ror, x.r, x.r, y.r); DEC(RH, 2)
+    IF y.mode = ORB.Const THEN Put1(Ror, x.r, x.r, y.a+1); decR
+    ELSE load(y); Put1(Add, y.r, y.r, 1); Put0(Ror, x.r, x.r, y.r); decR; decR
     END ;
     SetCC(x, MI)
   END Bit;
@@ -2230,6 +2350,7 @@ MODULE ORG; (* N.Wirth, 16.4.2016 / 4.4.2017 / 31.5.2019  Oberon compiler; code 
     Texts.WriteString(CodeW, "_init:");
     Texts.WriteLn(    CodeW);
     PutRI("entry", SP, 0);
+    GetLocalSB
   END Header;
 
   PROCEDURE NofPtrs(typ: ORB.Type): INTEGER;
@@ -2259,8 +2380,9 @@ MODULE ORG; (* N.Wirth, 16.4.2016 / 4.4.2017 / 31.5.2019  Oberon compiler; code 
   END FindPtrs;
 
   (* Produce a section header of the following form: 
-        .section <sectionPrefix>_<moduleId>_<key>
-        <blank line>
+          .section .<sectionPrefix>_<moduleId>_<key>
+          .global _<sectionPrefix>_<moduleId>_s_<key>
+      _<sectionPrefix>_<moduleId>_s_<key>:
    *)
   PROCEDURE SectionHeader(sectionPrefix, moduleId: ARRAY OF CHAR;  moduleKey: INTEGER);
   BEGIN
@@ -2541,4 +2663,6 @@ BEGIN
   BrReverse  := {6, 14};
   BrOneParam := {0, 1, 7, 8, 9, 15};
   BrNotValid := {4, 12};
+
+  UsedRegs := {};
 END ORG.

@@ -78,6 +78,17 @@ be added.
 
 ## Installation
 
+### obnc
+
+The OBNC Oberon-07 version 0.16.1 is used to build this compiler. The authors is using it on both Linux and MacOs platforms without any major issue. It must be built using the following commands and option (after having changed current directory to obnc):
+
+  ./build --c-real-type=float
+  ./install
+
+(Both INTEGER and REAL must be set to 32bits.)
+
+### ESP32 Oberon Compiler
+
 There is a simple Makefile that will automate the creation of the Oberon executable. To build, simply use the command `make` to compile it. The result will be the executable file named `Oberon`.
 
 The OBNC Oberon-07 compiler is required with the extension libraries to parse command line arguments. It is available at the following location:

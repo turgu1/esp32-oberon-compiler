@@ -1,21 +1,3 @@
-MODULE Pattern9;
-VAR
-  x: REAL;
-  
-  PROCEDURE F(x: REAL): REAL;
-  BEGIN
-    IF x >= 1.0 THEN
-      x := F(F(x))
-    END;
-    RETURN x
-  END F;
-  
-END Pattern9.
-
-(* 
-   NOT OPTIMAL... REGISTER ALLOCATIONS ON CALLS TO BE REVISITED
-   ------------------------------------------------------------
-
     .title "Module Pattern9, Key ADE2D4B5"
     .sbttl "Oberon ESP32 Compiler Version 0.1.0"
 
@@ -60,4 +42,3 @@ _Pattern9_init:
 _Pattern9_ADE2D4B5_s_init_table:
     .int .init_Pattern9_ADE2D4B5
 
-*)

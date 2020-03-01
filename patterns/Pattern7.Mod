@@ -25,21 +25,17 @@ _Pattern7_ABE2D4B5_s_init:
 
 _Pattern7_init:
     entry a1, 0
+    movi a15, _Pattern7_s_bss
     movi a2, 0                 # a2 = 0  -> x := y
 1:
-    movi a3, _Pattern7_s_bss
-    l32i a3, a3, 8             # a3 := n
+    l32i a3, a15, 8            # a3 := n
     addi a3, a3, -1            # subtract 1
     blt a3 a2, 2f              # branch if (n - 1) < x
-    movi a3, _Pattern7_s_bss
-    s32i a2, a3, 0             # save x
-    movi a2, _Pattern7_s_bss
-    l32i a2, a2, 4             # a2 := m
+    s32i a2, a15, 0            # save x
+    l32i a2, a15, 4            # a2 := m
     slli a2, a2, 1             # a2 := m * 2
-    movi a3, _Pattern7_s_bss
-    s32i a2, a3, 4             # m := m * 2
-    movi a2, _Pattern7_s_bss
-    l32i a2, a2, 0             # a2 := x
+    s32i a2, a15, 4            # m := m * 2
+    l32i a2, a15, 0            # a2 := x
     addi a2, a2, 1             # a2 := x + 1
     j 1b                       # loop...
 2:

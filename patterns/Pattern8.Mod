@@ -46,9 +46,9 @@ _Pattern8_ACE2D4B5_s_init:
 
 _Pattern8_init:
     entry a1, 0
+    movi a15, _Pattern8_s_bss
     movi a6, 5                   # param x := 5
-    movi a7, _Pattern8_s_bss
-    addi a7, a7, 0               # param y = address of i
+    addi a7, a15, 0              # param y := address of i
     call4 _P
     retw
 

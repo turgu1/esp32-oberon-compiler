@@ -30,16 +30,14 @@ _Pattern11_A5E3D3E6_s_init:
 
 _Pattern11_init:
     entry a1, 0
-    movi a2, _Pattern11_s_bss
-    l32i a2, a2, 4           # a2 := m
+    movi 15, _Pattern11_s_bss
+    l32i a2, 15, 4           # a2 := m
     movi a3, 1
     ssl a2
     sll a2, a3               # a2 := {m}
-    movi a3, _Pattern11_s_bss
-    s32i a2, a3, 0           # s := {m}
+    s32i a2, 15, 0           # s := {m}
     movi a2, -1
-    movi a3, _Pattern11_s_bss
-    l32i a3, a3, 8           # a3 := n
+    l32i a3, 15, 8           # a3 := n
     bgei a3, 31, 1f          # if a3 >= 31, done
     movi a4, -1
     addi a3, a3, 1
@@ -47,22 +45,17 @@ _Pattern11_init:
     sll a3, a4
     xor a2, a2, a3           # a2 := {0..n}
 1:
-    movi a3, _Pattern11_s_bss
-    s32i a2, a3, 0           # s := {0..n}
-    movi a2, _Pattern11_s_bss
-    l32i a2, a2, 4           # a2 := m
+    s32i a2, 15, 0           # s := {0..n}
+    l32i a2, 15, 4           # a2 := m
     movi a3, -1
     ssl a2
     sll a2, a3
-    movi a3, _Pattern11_s_bss
-    s32i a2, a3, 0           # s := {m..31}
-    movi a2, _Pattern11_s_bss
-    l32i a2, a2, 4           # a2 := m
+    s32i a2, 15, 0           # s := {m..31}
+    l32i a2, 15, 4           # a2 := m
     movi a3, -1
     ssl a2
     sll a2, a3
-    movi a3, _Pattern11_s_bss
-    l32i a3, a3, 8           # a3 := n
+    l32i a3, 15, 8           # a3 := n
     bgei a3, 31, 2f
     movi a4, -1
     addi a3, a3, 1
@@ -70,15 +63,12 @@ _Pattern11_init:
     sll a3, a4
     xor a2, a2, a3
 2:
-    movi a3, _Pattern11_s_bss
-    s32i a2, a3, 0           # s := {m..n}
+    s32i a2, 15, 0           # s := {m..n}
     movi a2, 10412           # a2 := {2, 3, 5, 7, 11, 13}
-    movi a3, _Pattern11_s_bss
-    l32i a3, a3, 8           # a3 := n
+    l32i a3, 15, 8           # a3 := n
     bbc a2 a3, 3f            # branch if n not in set
     movi a2, 1
-    movi a3, _Pattern11_s_bss
-    s32i a2, a3, 4           # m := 1
+    s32i a2, 15, 4           # m := 1
 3:
     retw
 

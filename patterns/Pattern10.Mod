@@ -18,24 +18,55 @@ BEGIN
 END Pattern10.
 
 (* 
-    .section .bss_module_Pattern10
-    .align 4
+    .title "Module Pattern10, Key A5E3D3E5"
+    .sbttl "Oberon ESP32 Compiler Version 0.1.0"
 
-a:  space 48
+    .section .bss_Pattern10_A5E3D3E5
+    .global _Pattern10_A5E3D3E5_s_bss
+_Pattern10_A5E3D3E5_s_bss:
+_Pattern10_s_bss:
+    .space 48
 
-    .section .text_module_Pattern10
-    .align 4
+1:
+    .section .text_Pattern10_A5E3D3E5
+    .global _Pattern10_A5E3D3E5_s_text
+_Pattern10_A5E3D3E5_s_text:
 
-P:  entry a1, 8
+_P:
+    entry a1, 16
+    s32i a2, a1, 0     # SP[0] := Address of x
+    s32i a3, a1, 4     # SP[4] := Length of x
+    l32i a2, a1, 8     # a2 := i
+    slli a2, a2, 2     # a2 := a2 * 4
+    l32i a3, a1, 0     # a3 := address of x
+    add a2, a3, a2     # a2 := adress of x[i]
+    l32i a2, a2, 0     # a2 := x[i]
+    s32i a2, a1, 12    # n  := x[i]
+    l32i a2, a1, 8     # a2 := i
+    addi a2, a2, 1     # a2 := i + 1
+    slli a2, a2, 2     # a2 := a2 * 4
+    l32i a3, a1, 0     # a3 := address of x
+    add a2, a3, a2     # a2 := adress of x[i + 1]
+    l32i a3, a1, 12    # a3 := n
+    addi a3, a3, 5     # a3 := n + 5
+    s32i a3, a2, 0     # x[x + 1] := n + 5
     retw
-    
-    .section .init_module_Pattern10
-    .align 4
 
-_module_Pattern10_init:
+    .section .init_Pattern10_A5E3D3E5
+    .global _Pattern10_A5E3D3E5_s_init
+_Pattern10_A5E3D3E5_s_init:
+
+_Pattern10_init:
     entry a1, 0
+    movi a15, _Pattern10_s_bss
+    addi a6, a15, 0   # a6 = Address of a (will be a2 in _P)
+    movi a7, 12       # a7 = Length of a (will be a3 in _P)
+    call4 _P
     retw
 
-    .section .init_table_module_Pattern10
-    .int _module_Pattern10_init 
+    .section .init_table_Pattern10_A5E3D3E5
+    .global _Pattern10_A5E3D3E5_s_init_table
+_Pattern10_A5E3D3E5_s_init_table:
+    .int .init_Pattern10_A5E3D3E5
+
 *)
