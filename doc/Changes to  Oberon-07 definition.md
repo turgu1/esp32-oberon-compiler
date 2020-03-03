@@ -11,7 +11,7 @@ in the SYSTEM module:
 
 The following standard SYSTEM procedures are not implemented:
 
-```
+```Oberon
 LED LDPSR ADC SBC UML REG H COND
 ```
 
@@ -19,7 +19,7 @@ LED LDPSR ADC SBC UML REG H COND
 
 You can declare a procedure to be called when an interrupt occurs. To do so, you have to put into brackets the interrupt level number associated to the procedure like this:
 
-```
+```Oberon
 PROCEDURE [12] P();
 BEGIN
 END P;
