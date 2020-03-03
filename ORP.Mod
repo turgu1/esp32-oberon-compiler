@@ -1002,7 +1002,7 @@ MODULE ORP; (*N. Wirth 1.7.97 / 8.2.2020  Oberon compiler for RISC in Oberon-07*
     END
   END Import;
 
-  PROCEDURE Module;
+  PROCEDURE Module(generateCheckCode: BOOLEAN);
     VAR key: INTEGER;
   BEGIN Texts.WriteString(W, "  compiling "); ORS.Get(sym);
     IF sym = ORS.module THEN
@@ -1020,7 +1020,7 @@ MODULE ORP; (*N. Wirth 1.7.97 / 8.2.2020  Oberon compiler for RISC in Oberon-07*
         WHILE sym = ORS.comma DO ORS.Get(sym); Import END ;
         Check(ORS.semicolon, "; missing")
       END ;
-      ORG.Open(modid, version); Declarations(dc); ORG.SetDataSize((dc + 3) DIV 4 * 4);
+      ORG.Open(modid, version, generateCheckCode); Declarations(dc); ORG.SetDataSize((dc + 3) DIV 4 * 4);
       WHILE sym = ORS.procedure DO ProcedureDecl; Check(ORS.semicolon, "no ;") END ;
       ORG.Header;
       IF sym = ORS.begin THEN ORS.Get(sym); StatSequence END ;
@@ -1059,7 +1059,9 @@ MODULE ORP; (*N. Wirth 1.7.97 / 8.2.2020  Oberon compiler for RISC in Oberon-07*
   END Option;
   *)
 
-  PROCEDURE Compile*(filename : ARRAY OF CHAR; overrideSymbolFile : BOOLEAN);
+  PROCEDURE Compile*(filename : ARRAY OF CHAR; 
+                     overrideSymbolFile,
+                     generateCheckCode : BOOLEAN);
     VAR (* beg, end, time: INTEGER; *)
       T: Texts.Text;
       (*S: Texts.Scanner; *)
@@ -1070,7 +1072,7 @@ MODULE ORP; (*N. Wirth 1.7.97 / 8.2.2020  Oberon compiler for RISC in Oberon-07*
     Texts.Open(T, filename);
     IF T.len > 0 THEN 
       ORS.Init(T, 0);
-      Module
+      Module(generateCheckCode)
     ELSE
       Texts.WriteString(W, filename); 
       Texts.WriteString(W, " not found");
@@ -1106,7 +1108,9 @@ MODULE ORP; (*N. Wirth 1.7.97 / 8.2.2020  Oberon compiler for RISC in Oberon-07*
     *)
   END Compile;
 
-BEGIN Texts.OpenWriter(W); Texts.WriteString(W, "OR Compiler  8.2.2020");
+BEGIN 
+  Texts.OpenWriter(W); 
+  Texts.WriteString(W, "ESP32 Oberon-07 Compiler Version ");Texts.WriteString(W, ORB.CompilerVersion);
   Texts.WriteLn(W); Texts.Append(Logger.Log, W.buf);
   NEW(dummy); dummy.class := ORB.Var; dummy.type := ORB.intType;
   expression := expression0; Type := Type0; FormalType := FormalType0

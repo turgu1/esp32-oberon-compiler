@@ -16,30 +16,34 @@ VAR
 
 
   overrideSymbolFile : BOOLEAN;
+  generateCheckCode  : BOOLEAN; 
   filePresent        : BOOLEAN;
 
   filename : Filename;
 
 PROCEDURE Usage;
 BEGIN
-  Out.String("Usage: Oberon [-s] filename");
   Out.Ln;
+  Out.String("Usage: Oberon [-s][-c] filename"); Out.Ln;
+  Out.String("-s : Update Symbols File"       ); Out.Ln;
+  Out.String("-c : Generate Verification Code"); Out.Ln;
 END Usage;
 
 BEGIN
 
   IF (SYSTEM.SIZE(INTEGER) # 4) OR
      (SYSTEM.SIZE(REAL) # 4) THEN
+     Out.Ln;
      Out.String("INTEGER or REAL not of size 4!!"); Out.Ln;
      Out.String("INTEGER: "); Out.Int(SYSTEM.SIZE(INTEGER), 0); Out.Ln;
-     Out.String("REAL: "); Out.Int(SYSTEM.SIZE(REAL), 0); Out.Ln;
+     Out.String("REAL: "   ); Out.Int(SYSTEM.SIZE(REAL), 0);    Out.Ln;
   ELSE
-
     overrideSymbolFile := FALSE;
+    generateCheckCode  := FALSE;
     filePresent        := FALSE;
     argCount           := extArgs.count;
 
-    IF (argCount > 0) & (argCount <= 2) THEN
+    IF (argCount > 0) & (argCount <= 3) THEN
       i := 0;
       WHILE i < argCount DO
         extArgs.Get(i, arg, res);
@@ -58,6 +62,12 @@ BEGIN
             Out.String("Overriding Symbol File");
             Out.Ln;
           END
+        ELSIF (arg = "-c") THEN
+          generateCheckCode := TRUE;
+          IF DEBUG THEN
+            Out.String("Generating Check Code");
+            Out.Ln;
+          END
         ELSE
           filename    := arg;
           filePresent := TRUE;
@@ -74,7 +84,7 @@ BEGIN
           Out.Ln;
         END;
         
-        ORP.Compile(filename, overrideSymbolFile);
+        ORP.Compile(filename, overrideSymbolFile, generateCheckCode);
       ELSE
         Usage;
       END

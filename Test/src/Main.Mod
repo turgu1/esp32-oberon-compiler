@@ -13,6 +13,7 @@ BEGIN
 
   count := Test.Exec();
   count := Test.Completed();
-
+  
+  Out.String("[The End]"); Out.Ln;
   WHILE TRUE DO END
 END Main.

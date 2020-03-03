@@ -2726,9 +2726,11 @@ MODULE ORG; (* N.Wirth, 16.4.2016 / 4.4.2017 / 31.5.2019  Oberon compiler; code 
     *)
   END Close;
 
-  PROCEDURE Open*(modid: ORS.Ident; v: INTEGER);
+  PROCEDURE Open*(modid: ORS.Ident; v: INTEGER; generateCheckCode: BOOLEAN);
   BEGIN 
     thisModuleId := modid;
+
+    check   := generateCheckCode;
 
     tdx     := 0; 
     strx    := 0; 
@@ -2736,7 +2738,6 @@ MODULE ORG; (* N.Wirth, 16.4.2016 / 4.4.2017 / 31.5.2019  Oberon compiler; code 
     fixorgP := 0; 
     fixorgD := 0; 
     fixorgT := 0; 
-    check   := FALSE; (* was: v # 0 *) 
     label   := 1;
 
     CodeF := Files.New("");
