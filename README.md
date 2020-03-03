@@ -40,10 +40,8 @@ Strict Oberon-07 definition (obnc):
 
 For OBNC Integration:
 
-- Files.Read requires BYTE, not CHAR. Replace Files.Read(f, ch) with
-    Files.Read(f, byte)
-- Files.Write requires BYTE, not CHAR. Replace Files.Write(f, ch) with
-    Files.Write(f, ORD(ch))
+- Files.Read requires BYTE, not CHAR. Replace `Files.Read(f, ch)` with `Files.Read(f, byte)`
+- Files.Write requires BYTE, not CHAR. Replace `Files.Write(f, ch)` with `Files.Write(f, ORD(ch))`
 - Replace Files.WriteByte with Files.Write
 - CR is now a line-feed character. Usual end of line code under Unix/Linux.
 
@@ -78,7 +76,7 @@ Some potential bugs corrected:
   + entering an exported procedure or 
   + when a call is made to a procedure passed as a parameter address or from a variable.
 
-- Call to functions in parameters preparation, like P(F(3.0)) is not very efficient in term of stack and register usage. It is better to use temporary variables and prepare parameters before the main call (will be revisited once the compiler is working properly). For example:
+- Call to functions in parameters preparation, like `P(F(3.0))` is not very efficient in term of stack and register usage. It is better to use temporary variables and prepare parameters before the main call (will be revisited once the compiler is working properly). For example:
 
 ```
      i := F(3.0); P(i)
@@ -108,7 +106,5 @@ The OBNC Oberon-07 compiler is required with the extension libraries to parse co
 ### ESP32 Oberon Compiler
 
 There is a simple Makefile that will automate the creation of the Oberon executable. To build, simply use the command `make` to compile it. The result will be the executable file named `Oberon`.
-
-
 
 Guy
