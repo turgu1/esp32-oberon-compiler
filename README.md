@@ -20,7 +20,7 @@ In a Nutshell, the steps I'm taking to get a working compiler are the following:
 10. Refine target architecture
 11. Cleanup ORG in preparation of machine code translation
 12. Build the translation
-13. Create Oakridge compliant Modules In and Out to permit interaction over a serial port
+13. Create Oakridge compliant Modules In and Out to permit interaction over a serial port on the ESP32
 14. Test the results. Build a test suite and make it run
 15. Build a PlatformIO Custom Development Platform
 16. Develop standard modules for ESP32
@@ -81,10 +81,10 @@ Some potential bugs corrected:
 - Call to functions in parameters preparation, like P(F(3.0)) is not very efficient in term of stack and register usage. It is better to use temporary variables and prepare parameters before the main call (will be revisited once the compiler is working properly). For example:
 
 ```
-i := F(3.0); P(i)
+     i := F(3.0); P(i)
 ```
 
-- There is no Condition Codes in the ESP32, but a variety of branch instructions based on the content of register parameters. This, combined with the assembly language output of the compiler, requires sensible changes to the fixup algorithm and conditional instructions generation used in ORG. Using labels in the assembly language, fixups are longer required.
+- There is no Condition Codes in the ESP32, but a variety of branch instructions based on the content of register parameters. This, combined with the assembly language output of the compiler, requires sensible changes to the fixup algorithm and conditional instructions generation used in ORG. Using labels in the assembly language, fixups are no longer required.
 
 - Trap is using a routine that you can find in the init.S startup code that save registers and reason for trap before restarting the program.
 
