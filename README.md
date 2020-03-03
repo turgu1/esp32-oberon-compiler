@@ -2,31 +2,32 @@
 
 This is an ongoing effort to build an ESP32 Oberon Compiler, using the Oberon-07 Compiler from <http://www.projectoberon.com> by Niklaus Wirth and Jürg Gutknecht.
 
-The code is being ported to obnc and will generate ELF compatible object code to be used with (or without) the ESP-IDF framework. I'm currently targetting a 'bearmetal' version, supplying everything necessary for building applications, relying only on the assembler and linker provided with ESP-IDF. At least, this is the intent. Nothing is in a workable condition at this point in time.
+The code is being ported to obnc and will generate ELF object code through ESP32 assembly language generation. I'm currently targetting a 'bearmetal' version, supplying everything necessary for building applications, relying only on the assembler linker and loader provided with ESP-IDF. At least, this is the intent. Nothing is in a workable condition at this point in time.
 
-The folder `test-bearmetal` demonstrate the feasability. It is a working piece of assembly code thatI made that can be compiled and pushed to an ESP32. It will get a led blink every half a second.
+The folder `test-bearmetal` demonstrates the feasability of independant coding from ESP-IDF. It is a working piece of assembly code that I made that can be compiled and pushed to an ESP32. It gets a led blink every half a second and push some message on the serial port.
 
 In a Nutshell, the steps I'm taking to get a working compiler are the following:
 
-1. Retrieve the ORB, ORG, ORS, ORP and Texts Source Modules
+1. Retrieve the ORB, ORG, ORS, ORP and Texts Source Modules from the Project Oberon source code
 2. Add Logger.Mod and Oberon.Mod Modules
 3. Cleanup all modules to be obnc compliant
 4. Cleanup Texts.Mod to be ASCII based
 5. Modify ORP.Compile* to be calleable from the Oberon module
-6. Use the compiler source code as a test case for checking if the new compiler is able to compile...
-7. Build an understanding of the code production compiler stage (from the documentation)
-8. Build an understanding of the target architecture (ESP32 and ESP-IDF)
-9. Generate machine code by hand for each pattern found in the Chapter 12 of [https://inf.ethz.ch/personal/wirth/ProjectOberon/PO.Applications.pdf], taking notes on the target formalisms required for code generation.
-10. Refine target architecture
-11. Cleanup ORG in preparation of machine code translation
-12. Build the translation
-13. Create Oakridge compliant Modules In and Out to permit interaction over a serial port on the ESP32
-14. Test the results. Build a test suite and make it run
-15. Build a PlatformIO Custom Development Platform
-16. Develop standard modules for ESP32
-17. Enjoy
+6. Build an understanding of the code production compiler stage (from the documentation)
+7. Build an understanding of the target architecture (ESP32 and ESP-IDF)
+8. Generate machine code by hand for each pattern found in the Chapter 12 of [https://inf.ethz.ch/personal/wirth/ProjectOberon/PO.Applications.pdf], taking notes on the target formalisms required for code generation.
+9. Refine target architecture
+10. Cleanup ORG in preparation of machine code translation
+11. Build the translation
+12. Creates main support code (program statup, Module Out, garbage collector, serial port output)
+13. Test the results. Build a test suite and make it run
+14. Add language functionalities (mainly SYSTEM procedures) required in support of the ESP32 architecture
+15. Create other Oakridge compliant Modules 
+16. Build a PlatformIO Custom Development Platform
+17. Develop modules for some of the ESP32 subsystems
+18. Enjoy
 
-I'm now doing a round robin between steps 9, 10, 11 and 12
+I'm now doing a round robin between steps 8, 9, 10, 11 and 12
 
 ## Modifications
 
