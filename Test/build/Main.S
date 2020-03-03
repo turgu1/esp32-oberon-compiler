@@ -1,23 +1,27 @@
     .title "Module Main, Key 6E69624D"
     .sbttl "Oberon ESP32 Compiler Version 0.1.0"
 
-    .section .str_Main_6E69624D, "4"
-    .global _Main_6E69624D_s_str
-_Main_6E69624D_s_str:
+    .align 4
+    .section .data_strs_Main_6E69624D
+    .global _Main_6E69624D_s_data_strs
+_Main_6E69624D_s_data_strs:
 _Main_s_str:
     .byte 69,83,80,51,50,32,79,98,101,114,111,110,32,67,111,109
     .byte 112,105,108,101,114,32,84,101,115,116,32,83,117,105,116,101
     .byte 46,0,0,0,83,116,97,114,116,0,0,0,91,84,104,101
     .byte 32,69,110,100,93,0,0,0
 
-    .section .bss_Main_6E69624D, "4"
+    .align 4
+    .section .bss_Main_6E69624D
     .global _Main_6E69624D_s_bss
 _Main_6E69624D_s_bss:
 _Main_s_bss:
     .space 4
 
 
-    .section .init_Main_6E69624D, "4"
+
+    .align 4
+    .section .init_Main_6E69624D
     .global _Main_6E69624D_s_init
 _Main_6E69624D_s_init:
 
@@ -62,7 +66,9 @@ _Main_init:
 2:
     retw
 
-    .section .init_table_Main_6E69624D, "4"
+
+    .align 4
+    .section .init_table_Main_6E69624D
     .global _Main_6E69624D_s_init_table
 _Main_6E69624D_s_init_table:
     .int .init_Main_6E69624D

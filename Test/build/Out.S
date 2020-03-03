@@ -1,19 +1,23 @@
     .title "Module Out, Key 6D1528C7"
     .sbttl "Oberon ESP32 Compiler Version 0.1.0"
 
-    .section .str_Out_6D1528C7, "4"
-    .global _Out_6D1528C7_s_str
-_Out_6D1528C7_s_str:
+    .align 4
+    .section .data_strs_Out_6D1528C7
+    .global _Out_6D1528C7_s_data_strs
+_Out_6D1528C7_s_data_strs:
 _Out_s_str:
     .byte 32,32,48,0
 
-    .section .bss_Out_6D1528C7, "4"
+    .align 4
+    .section .bss_Out_6D1528C7
     .global _Out_6D1528C7_s_bss
 _Out_6D1528C7_s_bss:
 _Out_s_bss:
     .space 4
 
-    .section .text_Out_6D1528C7, "4"
+
+    .align 4
+    .section .text_Out_6D1528C7
     .global _Out_6D1528C7_s_text
 _Out_6D1528C7_s_text:
 
@@ -446,7 +450,9 @@ _Setup:
     call4 _SetBaudRate
     retw
 
-    .section .init_Out_6D1528C7, "4"
+
+    .align 4
+    .section .init_Out_6D1528C7
     .global _Out_6D1528C7_s_init
 _Out_6D1528C7_s_init:
 
@@ -455,7 +461,9 @@ _Out_init:
     movi a15, _Out_s_bss
     retw
 
-    .section .init_table_Out_6D1528C7, "4"
+
+    .align 4
+    .section .init_table_Out_6D1528C7
     .global _Out_6D1528C7_s_init_table
 _Out_6D1528C7_s_init_table:
     .int .init_Out_6D1528C7

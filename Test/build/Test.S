@@ -1,9 +1,10 @@
     .title "Module Test, Key DC7FAF87"
     .sbttl "Oberon ESP32 Compiler Version 0.1.0"
 
-    .section .str_Test_DC7FAF87, "4"
-    .global _Test_DC7FAF87_s_str
-_Test_DC7FAF87_s_str:
+    .align 4
+    .section .data_strs_Test_DC7FAF87
+    .global _Test_DC7FAF87_s_data_strs
+_Test_DC7FAF87_s_data_strs:
 _Test_s_str:
     .byte 65,115,115,101,114,116,32,70,97,105,108,101,100,58,32,0
     .byte 84,101,115,116,32,67,111,109,112,108,101,116,101,100,46,32
@@ -15,13 +16,16 @@ _Test_s_str:
     .byte 100,46,0,0,78,111,32,69,114,114,111,114,33,32,76,105
     .byte 102,101,32,105,115,32,103,111,111,100,33,33,0,0,0,0
 
-    .section .bss_Test_DC7FAF87, "4"
+    .align 4
+    .section .bss_Test_DC7FAF87
     .global _Test_DC7FAF87_s_bss
 _Test_DC7FAF87_s_bss:
 _Test_s_bss:
     .space 812
 
-    .section .text_Test_DC7FAF87, "4"
+
+    .align 4
+    .section .text_Test_DC7FAF87
     .global _Test_DC7FAF87_s_text
 _Test_DC7FAF87_s_text:
 
@@ -198,7 +202,9 @@ _Setup:
     s32i a2, a15, 8
     retw
 
-    .section .init_Test_DC7FAF87, "4"
+
+    .align 4
+    .section .init_Test_DC7FAF87
     .global _Test_DC7FAF87_s_init
 _Test_DC7FAF87_s_init:
 
@@ -208,7 +214,9 @@ _Test_init:
     call4 _Setup
     retw
 
-    .section .init_table_Test_DC7FAF87, "4"
+
+    .align 4
+    .section .init_table_Test_DC7FAF87
     .global _Test_DC7FAF87_s_init_table
 _Test_DC7FAF87_s_init_table:
     .int .init_Test_DC7FAF87

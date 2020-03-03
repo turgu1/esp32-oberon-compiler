@@ -2486,6 +2486,9 @@ MODULE ORG; (* N.Wirth, 16.4.2016 / 4.4.2017 / 31.5.2019  Oberon compiler; code 
    *)
   PROCEDURE SectionHeader(sectionPrefix, moduleId: ARRAY OF CHAR;  moduleKey: INTEGER);
   BEGIN
+    Texts.WriteLn(AsW);
+    Texts.WriteString(AsW, "    .align 4");
+    Texts.WriteLn(AsW);
     Texts.WriteString(AsW, "    .section ");
     SectionName(sectionPrefix, moduleId, moduleKey);
     Texts.WriteLn(AsW);
@@ -2586,13 +2589,29 @@ MODULE ORG; (* N.Wirth, 16.4.2016 / 4.4.2017 / 31.5.2019  Oberon compiler; code 
     Texts.WriteString(AsW, ORB.CompilerVersion);
     Texts.Write(      AsW, 22X);
     Texts.WriteLn(    AsW);
-    Texts.WriteLn(    AsW);
-
+    
     initPresent := FALSE;
+
+    (* types description section *)
+    IF tdx > 0 THEN
+      SectionHeader("data_types", moduleId, moduleKey);
+      Texts.WriteString(AsW, "_");
+      Texts.WriteString(AsW, moduleId);
+      Texts.WriteString(AsW, "_s_types:");
+      FOR i := 0 TO tdx-1 DO 
+        IF (i MOD 8) = 0 THEN
+          Texts.WriteLn(AsW);
+          Texts.WriteString(AsW, "    .byte4 ");
+        END;
+        Texts.WriteInt(AsW, data[i], 0);
+        IF (i < tdx-1) & (((i+1) MOD 8) # 0) THEN Texts.Write(AsW, ",") END
+      END;    
+      Texts.WriteLn(AsW);
+    END;
 
     (* Strings section *)
     IF strx > 0 THEN
-      SectionHeader("str", moduleId, moduleKey);
+      SectionHeader("data_strs", moduleId, moduleKey);
       Texts.WriteString(AsW, "_");
       Texts.WriteString(AsW, moduleId);
       Texts.WriteString(AsW, "_s_str:");
@@ -2604,7 +2623,6 @@ MODULE ORG; (* N.Wirth, 16.4.2016 / 4.4.2017 / 31.5.2019  Oberon compiler; code 
         Texts.WriteInt(AsW, ORD(str[i]), 0);
         IF (i < strx-1) & (((i+1) MOD 16) # 0) THEN Texts.Write(AsW, ",") END
       END;    
-      Texts.WriteLn(AsW);
       Texts.WriteLn(AsW);
     END;
 

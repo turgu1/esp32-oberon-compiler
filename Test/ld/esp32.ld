@@ -6,13 +6,13 @@ ENTRY( _init_start );
 
 MEMORY
 {
-  CODE_RAM ( RX )       : ORIGIN = 0x40080400, len = 0xFC00
-  DATA_RAM ( RW )       : ORIGIN = 0x3FFF0000, len = 0x1000
+  CODE_RAM (RX) : ORIGIN = 0x40080000, LENGTH = 128K
+  DATA_RAM (RW) : ORIGIN = 0x3FFAE000, LENGTH = 200K + 128K
 }
 
 SECTIONS {
   /* The program code and other data goes into Instruction RAM */
-  .iram.text :
+  .text :
   {
     . = ALIGN(16);
     _sitable = .;
@@ -32,20 +32,21 @@ SECTIONS {
   } >CODE_RAM
 
   /* Initialized data goes into Data RAM */
+
   _sidata = .;
   .data : AT(_sidata)
   {
     . = ALIGN(4);
     _sdata = .;
     *(.data)
-    *(.data*)
-    *(.str*)
+    *(.data_types*)
+    *(.data_strs*)
     . = ALIGN(4);
     _edata = .;
   } >DATA_RAM
 
   /* Uninitialized data also goes into Data RAM */
-  .bss :
+  .bss (NOLOAD) :
   {
     . = ALIGN(4);
     KEEP(*(.__trap_support_data))
@@ -58,7 +59,6 @@ SECTIONS {
   } >DATA_RAM
 
   . = ALIGN(4);
-  PROVIDE ( end = . );
   PROVIDE ( _end = . );
 }
 

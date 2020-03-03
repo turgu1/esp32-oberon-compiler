@@ -42,8 +42,8 @@ SYMS = $(addprefix $(SRCDIR), $(SRC:.Mod=.smb))
 ASSS = $(addprefix $(BLDDIR), $(SRC:.Mod=.S))
 OBJS = $(addprefix $(BLDDIR), $(SRC:.Mod=.o))
 
-TARGETELF = $(BLDDIR)main.elf
-TARGETBIN = $(BLDDIR)main.bin
+TARGETELF = $(BLDDIR)tests.elf
+TARGETBIN = $(BLDDIR)tests.bin
 
 
 .PHONY: all

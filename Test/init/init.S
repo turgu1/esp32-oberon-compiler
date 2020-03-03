@@ -48,7 +48,7 @@ _init_start:
 
     # save TOS address
 
-    movi a2, .__trap_support
+    movi a2, .__trap_support_data
     s32i a1, a2, 68
 
     call4 _stop_watchdog      # Disable both Watchdog
@@ -186,7 +186,7 @@ startTOS: .space 4
 __TRAP__:
     addi a1, a1, -4     # Some space to save a2
     s32i a2, a1, 0
-    movi a2, .__trap_support
+    movi a2, .__trap_support_data
 
     # Save all registers
 
