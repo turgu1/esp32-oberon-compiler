@@ -15,3 +15,12 @@ The following standard SYSTEM procedures are not implemented:
 LED LDPSR ADC SBC UML REG H COND
 ```
 
+## Interrupt procedure
+
+You can declare a procedure to be called when an interrupt occurs. To do so, you have to put into brackets the interrupt level number associated to the procedure like this:
+
+```
+PROCEDURE [12] P();
+BEGIN
+END P;
+```

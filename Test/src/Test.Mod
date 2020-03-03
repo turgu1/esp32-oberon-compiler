@@ -9,13 +9,14 @@ MODULE Test;
     TestProc* = PROCEDURE ();
 
   VAR
-    assertCallCount,
-    errorCount: INTEGER;
+    assertCallCount: INTEGER;
+    errorCount:      INTEGER; 
+    registryCount:   INTEGER;
     testProcs: ARRAY MaxTestProc OF TestProc;
-    registryCount: INTEGER;
 
   PROCEDURE Register*(proc: TestProc);
   BEGIN
+    Out.Ln;
     IF registryCount < (MaxTestProc - 1) THEN
       testProcs[registryCount] := proc;
       INC(registryCount)

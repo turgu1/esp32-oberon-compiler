@@ -251,29 +251,33 @@ MODULE ORG; (* N.Wirth, 16.4.2016 / 4.4.2017 / 31.5.2019  Oberon compiler; code 
 
   PROCEDURE ModuleInfo(idx: INTEGER; VAR moduleId: ORS.Ident; VAR moduleKey: INTEGER);
   VAR
-    obj: ORB.Object;
+    obj, obj1: ORB.Object;
     savedIdx: INTEGER;
     found: BOOLEAN;
   BEGIN
     moduleId := "Unknown";
     moduleKey := 0;
     savedIdx := idx;
-    obj := ORB.topScope.next;
+    obj := ORB.topScope;
+    obj1 := NIL;
+    WHILE obj.dsc # NIL DO obj1 := obj; obj := obj.dsc END;
+    IF obj # NIL THEN obj := obj1.next END;
     found := FALSE;
-    WHILE (idx # 0) & (obj # NIL) & (obj.class = ORB.Mod) DO  (* imports *)
-      IF obj.dsc # ORB.system THEN
-        INC(idx);
-        IF idx = 0 THEN 
-          moduleId := obj(ORB.Module).orgname;
-          moduleKey  := obj.val;
-          found := TRUE
+    WHILE (idx # 0) & (obj # NIL) DO
+      IF obj.class = ORB.Mod THEN  (* imports *)
+        IF obj.dsc # ORB.system THEN
+          INC(idx);
+          IF idx = 0 THEN 
+            moduleId := obj(ORB.Module).orgname;
+            moduleKey  := obj.val;
+            found := TRUE
+          END
         END
       END;
       obj := obj.next
     END;
     IF ~found THEN
-      ORS.Mark("Unable to find IMPORT module."); 
-      Out.String("IMPORT Module at index "); Out.Int(savedIdx, 0); Out.Ln
+      ORS.Mark("Unable to find IMPORT module.")
     END
   END ModuleInfo;
 
@@ -2438,12 +2442,6 @@ MODULE ORG; (* N.Wirth, 16.4.2016 / 4.4.2017 / 31.5.2019  Oberon compiler; code 
 
   PROCEDURE Header*;
   BEGIN 
-    (* entry := pc*4;
-    IF version = 0 THEN code[0] := 0E7000000H-1 + pc;  Put1a(Mov, SP, 0, StkOrg0)
-    ELSE Put1(Sub, SP, SP, 4); Put2(Str, LNK, SP, 0)
-    END;
-    *)
-
     Texts.WriteLn(    CodeW);
     Texts.WriteString(CodeW, "%I");
     Texts.WriteLn(    CodeW);
@@ -2506,8 +2504,8 @@ MODULE ORG; (* N.Wirth, 16.4.2016 / 4.4.2017 / 31.5.2019  Oberon compiler; code 
     len:  INTEGER;
     i:    INTEGER;
     name: ARRAY ORS.IdLen OF CHAR;
-    initPresent: BOOLEAN;
     b:    BYTE;
+    initPresent: BOOLEAN;
   BEGIN
     initPresent := FALSE;
     Files.Set(F, CodeF, 0);
@@ -2584,7 +2582,8 @@ MODULE ORG; (* N.Wirth, 16.4.2016 / 4.4.2017 / 31.5.2019  Oberon compiler; code 
 
     Texts.WriteString(AsW, "    .sbttl ");
     Texts.Write(      AsW, 22X);
-    Texts.WriteString(AsW, "Oberon ESP32 Compiler Version 0.1.0");
+    Texts.WriteString(AsW, "Oberon ESP32 Compiler Version ");
+    Texts.WriteString(AsW, ORB.CompilerVersion);
     Texts.Write(      AsW, 22X);
     Texts.WriteLn(    AsW);
     Texts.WriteLn(    AsW);
@@ -2600,10 +2599,10 @@ MODULE ORG; (* N.Wirth, 16.4.2016 / 4.4.2017 / 31.5.2019  Oberon compiler; code 
       FOR i := 0 TO strx-1 DO 
         IF (i MOD 16) = 0 THEN
           Texts.WriteLn(AsW);
-          Texts.WriteString(AsW, "    db ");
+          Texts.WriteString(AsW, "    .byte ");
         END;
         Texts.WriteInt(AsW, ORD(str[i]), 0);
-        IF ((i+1) MOD 16) # 0 THEN Texts.Write(AsW, ",") END
+        IF (i < strx-1) & (((i+1) MOD 16) # 0) THEN Texts.Write(AsW, ",") END
       END;    
       Texts.WriteLn(AsW);
       Texts.WriteLn(AsW);
@@ -2726,7 +2725,7 @@ MODULE ORG; (* N.Wirth, 16.4.2016 / 4.4.2017 / 31.5.2019  Oberon compiler; code 
     *)
   END Close;
 
-  PROCEDURE Open*(modid: ORS.Ident; v: INTEGER; generateCheckCode: BOOLEAN);
+  PROCEDURE Open*(modid: ORS.Ident; generateCheckCode: BOOLEAN);
   BEGIN 
     thisModuleId := modid;
 

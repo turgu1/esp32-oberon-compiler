@@ -13,7 +13,7 @@ MODULE ORP; (*N. Wirth 1.7.97 / 8.2.2020  Oberon compiler for RISC in Oberon-07*
   
   VAR sym: INTEGER;   (*last symbol read*)
     dc: INTEGER;    (*data counter*)
-    level, exno, version: INTEGER;
+    level, exno: INTEGER;
     newSF: BOOLEAN;  (*option flag*)
     expression: PROCEDURE (VAR x:    ORG.Item);  (*to avoid forward reference*)
     Type:       PROCEDURE (VAR type: ORB.Type);
@@ -1007,7 +1007,7 @@ MODULE ORP; (*N. Wirth 1.7.97 / 8.2.2020  Oberon compiler for RISC in Oberon-07*
   BEGIN Texts.WriteString(W, "  compiling "); ORS.Get(sym);
     IF sym = ORS.module THEN
       ORS.Get(sym);
-      IF sym = ORS.times THEN version := 0; dc := 8; Texts.Write(W, "*"); ORS.Get(sym) ELSE dc := 0; version := 1 END ;
+      dc := 0;
       ORB.Init; ORB.OpenScope;
       IF sym = ORS.ident THEN
         ORS.CopyId(modid); ORS.Get(sym);
@@ -1020,7 +1020,7 @@ MODULE ORP; (*N. Wirth 1.7.97 / 8.2.2020  Oberon compiler for RISC in Oberon-07*
         WHILE sym = ORS.comma DO ORS.Get(sym); Import END ;
         Check(ORS.semicolon, "; missing")
       END ;
-      ORG.Open(modid, version, generateCheckCode); Declarations(dc); ORG.SetDataSize((dc + 3) DIV 4 * 4);
+      ORG.Open(modid, generateCheckCode); Declarations(dc); ORG.SetDataSize((dc + 3) DIV 4 * 4);
       WHILE sym = ORS.procedure DO ProcedureDecl; Check(ORS.semicolon, "no ;") END ;
       ORG.Header;
       IF sym = ORS.begin THEN ORS.Get(sym); StatSequence END ;
@@ -1033,7 +1033,7 @@ MODULE ORP; (*N. Wirth 1.7.97 / 8.2.2020  Oberon compiler for RISC in Oberon-07*
       IF sym # ORS.period THEN 
         ORS.Mark("period missing")
       END;
-      IF (ORS.errcnt = 0) & (version # 0) THEN
+      IF ORS.errcnt = 0 THEN
         ORB.Export(modid, newSF, key);
         IF newSF THEN Texts.WriteString(W, " new symbol file") END
       END ;
