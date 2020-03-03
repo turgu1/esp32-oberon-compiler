@@ -13,7 +13,7 @@ _Pattern12c_s_bss:
 _Pattern12c_A6E336E7_s_init:
 
 _Pattern12c_init:
-    entry a1, 0
+    entry a1, 16
     movi a15, _Pattern12c_s_bss
     movi a2, _Pattern12a_A42AACE9_s_bss
     l32i a2, a2, 0

@@ -19,6 +19,7 @@ SECTIONS {
     KEEP (*(.init_table*))
     _eitable = .;
     KEEP(*(.entry.text))
+    KEEP(*(.entry.trap_support))
     *(.text)
     *(.text*)
     . = ALIGN(4);
@@ -38,6 +39,7 @@ SECTIONS {
     _sdata = .;
     *(.data)
     *(.data*)
+    *(.str*)
     . = ALIGN(4);
     _edata = .;
   } >DATA_RAM
@@ -46,6 +48,7 @@ SECTIONS {
   .bss :
   {
     . = ALIGN(4);
+    KEEP(*(.__trap_support_data))
     _sbss = .;
     *(.bss)
     *(.bss*)

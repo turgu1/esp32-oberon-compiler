@@ -18,7 +18,7 @@ loop_1:
 
     .section .data
     .align 4
-msg: .asciz "Allo\r\n"
+msg: .asciz "Hello!!\r\n"
 
     .section .text_module_Test1
 

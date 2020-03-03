@@ -46,6 +46,11 @@
 
 _init_start:
 
+    # save TOS address
+
+    movi a2, .__trap_support
+    s32i a1, a2, 68
+
     call4 _stop_watchdog      # Disable both Watchdog
     call4 _set_160mhz         # Set CPU Speed to 160MHz
 
@@ -100,7 +105,10 @@ _init_start:
     callx4 a2                  # call main module initialization code
 
 _init_end:
-    j _init_end                # never return. May reboot if watchdog enabled.
+    addi a1, a1, -4
+    s32i a2, a1, 0
+    movi a2, 99                 # Trap reason 99: End of program, restart
+    j __TRAP__
 
 
 # ---- _stop_watchdog ----
@@ -112,7 +120,7 @@ _init_end:
     .align 4
 
 _stop_watchdog:
-    entry a1, 0
+    entry a1, 16
     movi a2, 0
     movi a3, RTC_CNTL_WDTCONFIG0_REG
     s32i a2, a3, 0
@@ -129,7 +137,7 @@ _stop_watchdog:
     .align 4
 
 _set_160mhz:
-    entry a1, 0
+    entry a1, 16
 
     # Switch SoC clock source to PLL (instead of the default which is XTAl).
     # This switches the CPU (and APB) clock from 40MHz to 80MHz.
@@ -143,6 +151,75 @@ _set_160mhz:
     s32i a3, a2, 0
 
     retw 
+
+    .align 4
+    .section .__trap_support_data
+
+a0:       .space 4
+a1:       .space 4
+a2:       .space 4
+a3:       .space 4
+a4:       .space 4
+a5:       .space 4
+a6:       .space 4
+a7:       .space 4
+a8:       .space 4
+a9:       .space 4
+a10:      .space 4
+a11:      .space 4
+a12:      .space 4
+a13:      .space 4
+a14:      .space 4
+a15:      .space 4
+raison:   .space 4
+startTOS: .space 4
+
+    .align 4
+    .section .entry.trap_support
+    .global __TRAP__
+
+    # The __TRAP__ routine must be called with a jump instruction.
+    # On the stack, one 32 bit value contains register a2.
+    # Register a2 contains the reason for this trap.
+    # Registers are saved and control is passed back to the start program.
+
+__TRAP__:
+    addi a1, a1, -4     # Some space to save a2
+    s32i a2, a1, 0
+    movi a2, .__trap_support
+
+    # Save all registers
+
+    s32i a0, a2, 0      # save a0
+    s32i a1, a2, 4      # save a1
+    s32i a3, a2, 12     # save a3
+    l32i a3, a1, 4      # load saved a2 in a3
+    s32i a3, a2, 8      # save a2
+    s32i a4, a2, 16     # save a4
+    s32i a5, a2, 20     # save a5
+    s32i a6, a2, 24     # save a6
+    s32i a7, a2, 28     # save a7
+    s32i a8, a2, 32     # save a8
+    s32i a9, a2, 36     # save a9
+    s32i a10, a2, 40    # save a10
+    s32i a11, a2, 44    # save a11
+    s32i a12, a2, 48    # save a12
+    s32i a13, a2, 52    # save a13
+    s32i a14, a2, 56    # save a14
+    s32i a15, a2, 60    # save a15
+
+    # Save trap reason
+    
+    l32i a3, a1, 0
+    s32i a3, a2, 64
+
+    # retrieve saved top of stack
+
+    l32i a1, a2, 68
+
+    # restart program
+
+    j _init_start
 
     .align 4
     .section .text__float_support

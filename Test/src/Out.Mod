@@ -133,6 +133,9 @@ BEGIN
   SYSTEM.PUT(ClkDiv, baudRate)
 END SetBaudRate;
 
+PROCEDURE Setup*;
 BEGIN
   SetBaudRate(Baud115K);
+END Setup;
+
 END Out.

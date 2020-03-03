@@ -301,7 +301,7 @@ MODULE ORP; (*N. Wirth 1.7.97 / 8.2.2020  Oberon compiler for RISC in Oberon-07*
         END
       ELSIF fct = 19 THEN (*COND*) CheckConst(x); CheckInt(x); ORG.Condition(x)
       ELSIF fct = 20 THEN (*H*) CheckConst(x); CheckInt(x); ORG.H(x)
-      END ;
+      END;
       x.type := restyp
     ELSE ORS.Mark("wrong nof params")
     END
@@ -959,11 +959,10 @@ MODULE ORP; (*N. Wirth 1.7.97 / 8.2.2020  Oberon compiler for RISC in Oberon-07*
       ProcedureType(type, parblksize);  (*formal parameter list*)
       Check(ORS.semicolon, "; expected"); locblksize := parblksize; 
       Declarations(locblksize);
-      proc.val := ORG.Here() * 4; proc.type.dsc := ORB.topScope.next;
+      proc.type.dsc := ORB.topScope.next;
       IF sym = ORS.procedure THEN
-        L := 0; ORG.FJump(L);
         REPEAT ProcedureDecl; Check(ORS.semicolon, "; expected") UNTIL sym # ORS.procedure;
-        ORG.FixOne(L); proc.val := ORG.Here() * 4; proc.type.dsc := ORB.topScope.next
+        proc.type.dsc := ORB.topScope.next
       END ;
       ORG.Enter(procid, proc.expo, parblksize, locblksize, int);
       IF sym = ORS.begin THEN ORS.Get(sym); StatSequence END ;
@@ -1031,16 +1030,19 @@ MODULE ORP; (*N. Wirth 1.7.97 / 8.2.2020  Oberon compiler for RISC in Oberon-07*
         ORS.Get(sym)
       ELSE ORS.Mark("identifier missing")
       END ;
-      IF sym # ORS.period THEN ORS.Mark("period missing") END ;
+      IF sym # ORS.period THEN 
+        ORS.Mark("period missing")
+      END;
       IF (ORS.errcnt = 0) & (version # 0) THEN
         ORB.Export(modid, newSF, key);
         IF newSF THEN Texts.WriteString(W, " new symbol file") END
       END ;
-      (*IF ORS.errcnt = 0 THEN*)
+      IF ORS.errcnt = 0 THEN
         ORG.Close(modid, key, exno);
-        Texts.WriteInt(W, ORG.pc, 6); Texts.WriteInt(W, dc, 6); Texts.WriteHex(W, key);
-      (*ELSE Texts.WriteLn(W); Texts.WriteString(W, "compilation FAILED")
-      END ;*)
+        Texts.WriteInt(W, dc, 6); Texts.WriteHex(W, key);
+      ELSE 
+        Texts.WriteLn(W); Texts.WriteString(W, "compilation FAILED")
+      END;
       Texts.WriteLn(W); Texts.Append(Logger.Log, W.buf);
       ORB.CloseScope; pbsList := NIL
     ELSE ORS.Mark("must start with MODULE")

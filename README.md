@@ -16,7 +16,7 @@ In a Nutshell, the steps I'm taking to get a working compiler are the following:
 6. Use the compiler source code as a test case for checking if the new compiler is able to compile...
 7. Build an understanding of the code production compiler stage (from the documentation)
 8. Build an understanding of the target architecture (ESP32 and ESP-IDF)
-9. Generate machine code by hand for each pattern found in the Chapter 12 of <https://inf.ethz.ch/personal/wirth/ProjectOberon/PO.Applications.pdf>, taking notes on the target formalisms required for code generation.
+9. Generate machine code by hand for each pattern found in the Chapter 12 of [https://inf.ethz.ch/personal/wirth/ProjectOberon/PO.Applications.pdf], taking notes on the target formalisms required for code generation.
 10. Refine target architecture
 11. Cleanup ORG in preparation of machine code translation
 12. Build the translation
@@ -69,18 +69,30 @@ Some potential bugs corrected:
 
 - The .smb file output has been modified to get exported variable offsets instead of an export sequence number. The code generator is relying on the ELF loader to resolve the location of data sections. The imported variables are accessed through their offset.
 
-- The ESP32 doesn't supply a floating point division instruction. A function called by the generated code will
-be added.
+- The ESP32 doesn't supply a floating point division instruction. A function called by the generated code is added.
 
-- The Static Base address (SB) is loaded in register a15 when required.
+- The Module Static Base address (SB) is loaded in register a15 and refreshed when 
 
-- There is no Condition Codes in the ESP32, but a variety of branch instructions based on the content of register parameters. This, combined with the assembly language output of the compiler, requires sensible changes to the fixup algorithm and conditional instructions generation used in ORG.
+  + the module initialization code is started,
+  + an external procedure is called, 
+  + entering an exported procedure or 
+  + when a call is made to a procedure passed as a parameter address or from a variable.
+
+- Call to functions in parameters preparation, like P(F(3.0)) is not very efficient in term of stack and register usage. It is better to use temporary variables and prepare parameters before the main call (will be revisited once the compiler is working properly). For example:
+
+```
+i := F(3.0); P(i)
+```
+
+- There is no Condition Codes in the ESP32, but a variety of branch instructions based on the content of register parameters. This, combined with the assembly language output of the compiler, requires sensible changes to the fixup algorithm and conditional instructions generation used in ORG. Using labels in the assembly language, fixups are longer required.
+
+- Trap is using a routine that you can find in the init.S startup code that save registers and reason for trap before restarting the program.
 
 ## Installation
 
 ### OBNC
 
-The OBNC Oberon-07 version 0.16.1 is used to build this compiler. The authors is using it on both Linux and MacOs platforms without any major issue. It must be built using the following commands and option (after having changed current directory to obnc):
+The OBNC Oberon-07 version 0.16.1 is used to build this compiler. The author is using it on both Linux and MacOs platforms without any major issue. It must be built using the following commands and option (after having changed current directory to obnc):
 
 ```
 $ ./build --c-real-type=float
@@ -89,12 +101,14 @@ $ ./install
 
 (Both INTEGER and REAL must be set to 32bits.)
 
+The OBNC Oberon-07 compiler is required with the extension libraries to parse command line arguments. It is available at the following location:
+
+    [https://miasap.se/obnc/]
+    
 ### ESP32 Oberon Compiler
 
 There is a simple Makefile that will automate the creation of the Oberon executable. To build, simply use the command `make` to compile it. The result will be the executable file named `Oberon`.
 
-The OBNC Oberon-07 compiler is required with the extension libraries to parse command line arguments. It is available at the following location:
 
-    <https://miasap.se/obnc/>
 
 Guy

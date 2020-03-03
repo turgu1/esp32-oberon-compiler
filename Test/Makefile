@@ -32,6 +32,7 @@ INITO = $(BLDDIR)/init.o
 
 # The first module in the list is the main program
 SRC =  \
+    Main.Mod \
     Test.Mod \
 	Test2.Mod \
 	Test3.Mod \
@@ -55,7 +56,8 @@ test:
 
 # Rules to build files.
 
-$(BLDDIR)Test.S $(SRCDIR)Test.smb: $(SRCDIR)Test.Mod $(SRCDIR)Test2.smb $(SRCDIR)Test3.smb
+$(BLDDIR)Main.S $(SRCDIR)Main.smb: $(SRCDIR)Main.Mod $(SRCDIR)Test.smb $(SRCDIR)Out.smb
+$(BLDDIR)Test.S $(SRCDIR)Test.smb: $(SRCDIR)Test.Mod $(SRCDIR)Out.smb
 $(BLDDIR)Test2.S $(SRCDIR)Test2.smb: $(SRCDIR)Test2.Mod 
 $(BLDDIR)Test3.S $(SRCDIR)Test3.smb: $(SRCDIR)Test3.Mod
 $(BLDDIR)Out.S $(SRCDIR)Out.smb: $(SRCDIR)Out.Mod
@@ -82,3 +84,4 @@ flash: $(TARGETELF)
 .PHONY: clean
 clean:
 	rm -f $(BLDDIR)*
+	rm -f $(SRCDIR)*.smb
