@@ -459,6 +459,7 @@ _Out_6D1528C7_s_init:
 _Out_init:
     entry a1, 16
     movi a15, _Out_s_bss
+    call4 _Setup
     retw
 
 
@@ -466,5 +467,5 @@ _Out_init:
     .section .init_table_Out_6D1528C7
     .global _Out_6D1528C7_s_init_table
 _Out_6D1528C7_s_init_table:
-    .int .init_Out_6D1528C7
+    .int _Out_init
 

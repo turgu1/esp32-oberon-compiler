@@ -3,7 +3,7 @@
     .align 4
 
 _module_Test1_init:
-    entry a1, 0
+    entry a1, 16
     call4 _enable_timer
     call4 _setup_led
 
@@ -41,7 +41,7 @@ msg: .asciz "Hello!!\r\n"
     .equ TIMER_CONFIG, 0xC0004000
 
 _enable_timer:
-    entry a1, 0
+    entry a1, 16
     movi  a3, TIMG0_T0CONFIG_REG
     movi  a4, TIMER_CONFIG
     s32i  a4, a3, 0
@@ -57,7 +57,7 @@ _enable_timer:
     .align 4
 
 _wait_a_quarter:
-    entry a1, 0
+    entry a1, 16
     movi  a3, TIMG0_T0CONFIG_REG
     movi  a4, wait_time
 
@@ -94,7 +94,7 @@ conti_1:
     .align 4
 
 _setup_led:
-    entry a1, 0
+    entry a1, 16
     movi  a2, GPIO_ENABLE_W1TS
     movi  a3, LED_2
     s32i  a3, a2, 0
@@ -102,7 +102,7 @@ _setup_led:
 
     .align 4
 _led_on:
-    entry a1, 0
+    entry a1, 16
     movi  a2, GPIO_OUT_W1TS
     movi  a3, LED_2
     s32i  a3, a2, 0
@@ -110,7 +110,7 @@ _led_on:
 
     .align 4
 _led_off:
-    entry a1, 0
+    entry a1, 16
     movi  a2, GPIO_OUT_W1TC
     movi  a3, LED_2
     s32i  a3, a2, 0

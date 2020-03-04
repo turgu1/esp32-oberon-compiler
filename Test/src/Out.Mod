@@ -27,8 +27,10 @@ PROCEDURE String*(s: ARRAY OF CHAR);
 VAR
   i: INTEGER;
 BEGIN
+  DBGON
   i := 0;
-  WHILE (i < LEN(s)) & (s[i] # 0X) DO
+  
+  WHILE  (i < LEN(s)) DBGOFF & (s[i] # 0X) DO
     Char(s[i]);
     INC(i)
   END
@@ -138,4 +140,6 @@ BEGIN
   SetBaudRate(Baud115K);
 END Setup;
 
+BEGIN
+  Setup;
 END Out.

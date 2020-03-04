@@ -30,7 +30,9 @@
 #   the ENTRY A1, xxxx and RETW instructions (Windowing option).
 # ----
 
-    #.equ init_data, 1
+    .equ init_data, 0        # ESP32 loader is doing it
+    .equ math_support, 0
+    .equ trap_support, 0
 
     .title Oberon ESP32 Startup code
     .sbttl Oberon ESP32 Compiler Version 0.1.0
@@ -48,10 +50,11 @@
 
 _init_start:
 
+.if trap_support
     # save TOS address
-
-    # movi a2, .__trap_support_data
-    # s32i a1, a2, 68
+    movi a2, ._trap_support_data
+    s32i a1, a2, 68
+.endif
 
     call4 _stop_watchdog       # Disable both Watchdog
     call4 _set_160mhz          # Set CPU Speed to 160MHz
@@ -69,7 +72,7 @@ _init_start:
     addi a3, a3, 4             # adjust a3 to next word
 1:
 
-.ifdef init_data
+.if init_data
     # Copy initialized data (not used, seems to be done by the ROM loader)
     movi a2, _edata            # Compute size in 4-byte chunks (a2)
     movi a3, _sdata            # a3 = address of _data
@@ -95,8 +98,8 @@ _init_start:
     beqz a2, 3f                # if there is only one module, it is the main one
     srli a2, a2, 2             # a2 = size in words
     loop a2, 3f                # loop for each table entry
-    l32i a4, a3, 0             # load init code address
-    callx4 a4                  # call the module initialization code
+    l32i a7, a3, 0             # load init code address
+    callx4 a7                  # call the module initialization code
     addi a3, a3, 4             # adjust for next table entry
 3:
 
@@ -105,14 +108,17 @@ _init_start:
     movi a2, _sitable          # get init table address
     l32i a2, a2, 0             # retrieve the init code adress
     callx4 a2                  # call main module initialization code
-    j _init_start
 
 _init_end:
+
+.if trap_support
     addi a1, a1, -4
     s32i a2, a1, 0
     movi a2, 99                 # Trap reason 99: End of program, restart
     j __TRAP__
-
+.else
+    j _init_end
+.endif
 
 # ---- _stop_watchdog ----
 
@@ -155,27 +161,28 @@ _set_160mhz:
 
     retw 
 
+.if trap_support
     .align 4
-    .section .__trap_support_data
+    .section ._trap_support_data
 
-a0:       .space 4
-a1:       .space 4
-a2:       .space 4
-a3:       .space 4
-a4:       .space 4
-a5:       .space 4
-a6:       .space 4
-a7:       .space 4
-a8:       .space 4
-a9:       .space 4
-a10:      .space 4
-a11:      .space 4
-a12:      .space 4
-a13:      .space 4
-a14:      .space 4
-a15:      .space 4
-raison:   .space 4
-startTOS: .space 4
+_a0:       .int 0
+_a1:       .int 0
+_a2:       .int 0
+_a3:       .int 0
+_a4:       .int 0
+_a5:       .int 0
+_a6:       .int 0
+_a7:       .int 0
+_a8:       .int 0
+_a9:       .int 0
+_a10:      .int 0
+_a11:      .int 0
+_a12:      .int 0
+_a13:      .int 0
+_a14:      .int 0
+_a15:      .int 0
+_raison:   .int 0
+_startTOS: .int 0
 
     .align 4
     .section .entry.trap_support
@@ -189,7 +196,7 @@ startTOS: .space 4
 __TRAP__:
     addi a1, a1, -4     # Some space to save a2
     s32i a2, a1, 0
-    movi a2, .__trap_support_data
+    movi a2, ._trap_support_data
 
     # Save all registers
 
@@ -223,6 +230,9 @@ __TRAP__:
     # restart program
 
     j _init_start
+.endif
+
+.if math_support
 
     .align 4
     .section .text__float_support
@@ -289,3 +299,4 @@ __fsqrt32:
     addexp.s  f3, f2
     divn.s    f1, f5, f3
     ret
+.endif

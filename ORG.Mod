@@ -5,7 +5,6 @@ MODULE ORG; (* N.Wirth, 16.4.2016 / 4.4.2017 / 31.5.2019  Oberon compiler; code 
      Procedure Close writes code-files*)
 
   CONST 
-    DEBUG = FALSE;
     WordSize* = 4;
     SP = 1; SB = 15;   (*dedicated registers*)
     maxStrx = 2400; maxTD = 160;
@@ -119,13 +118,27 @@ MODULE ORG; (* N.Wirth, 16.4.2016 / 4.4.2017 / 31.5.2019  Oberon compiler; code 
 
   PROCEDURE e(s: ARRAY OF CHAR);
   BEGIN 
-    IF DEBUG THEN
+    IF ORS.debugging THEN
       Out.Ln;
       Out.String(" -> ");
       Out.String(s)
     END
   END e;
 
+  PROCEDURE eStr(s: ARRAY OF CHAR);
+  BEGIN 
+    IF ORS.debugging THEN
+      Out.String(s)
+    END
+  END eStr;
+
+  PROCEDURE eInt(i: INTEGER);
+  BEGIN 
+    IF ORS.debugging THEN
+      Out.Int(i, 0)
+    END
+  END eInt;
+  
   PROCEDURE ShowClass(c: INTEGER);
   BEGIN
     Out.String(" (");
@@ -848,7 +861,7 @@ MODULE ORG; (* N.Wirth, 16.4.2016 / 4.4.2017 / 31.5.2019  Oberon compiler; code 
       max, moduleKey: INTEGER;
       moduleId: ORS.Ident;
   BEGIN
-    e("load");
+    e("load "); 
     IF x.type.size = 1 THEN 
       op := "l8ui"; max := 255 
     ELSE 
@@ -857,6 +870,7 @@ MODULE ORG; (* N.Wirth, 16.4.2016 / 4.4.2017 / 31.5.2019  Oberon compiler; code 
     IF x.mode # Reg THEN (* if not already in a register *)
       IF x.mode = ORB.Const THEN (* Constant *)
         IF x.type.form = ORB.Proc THEN
+          eStr(" (proc) ");
           IF x.r > 0 THEN 
             ORS.Mark("not allowed")
           ELSIF x.r = 0 THEN
@@ -864,35 +878,45 @@ MODULE ORG; (* N.Wirth, 16.4.2016 / 4.4.2017 / 31.5.2019  Oberon compiler; code 
             Put3(BL, 7, 0); 
             Put1a(Sub, RH, LNK, pc*4 - x.a)
             *)
+            eStr(x.name);
             PutRA("movi", RH, x.name);
           ELSE 
-            (* GetSB(x.r); *) 
+            (* GetSB(x.r); *)
+            eStr("(import) name:"); eStr(x.name); eStr(" module:"); eStr(moduleId); eStr(" key:"); eInt(moduleKey); 
             ModuleInfo(x.r, moduleId, moduleKey);
             PutDataExternal("movi", RH, x.name, moduleId, moduleKey);
           END
         ELSE
+          eStr("(const) "); eInt(x.a);
           PutRI("movi", RH, x.a);
         END ;
         x.r := RH; incR
       ELSIF x.mode = ORB.Var THEN
+        eStr("(var) "); eStr(x.name);
         IF x.r > 0 THEN (* local on the stack *) 
+          eStr(" (stack) x.a:"); eInt(x.a); eStr(" frame:"); eInt(frame);
           PutMoveRRI(op, max, RH, SP, x.a + frame);
         ELSE  (* module globals or imported *)
           GetSB(x.r);
-          IF x.r = 0 THEN 
+          IF x.r = 0 THEN
+            eStr("(SB) "); eInt(x.a); 
             PutMoveRRI(op, max, RH, SB, x.a);
           ELSE
+            eStr("(imported) "); eInt(x.a); 
             PutMoveRRI(op, max, RH, RH, x.a);
           END
         END;
         x.r := RH; incR
-      ELSIF x.mode = ORB.Par THEN 
+      ELSIF x.mode = ORB.Par THEN
+        eStr("(par) x.a:"); eInt(x.a); eStr("frame:"); eInt(frame);
         PutMoveRRI("l32i", 1020, RH, SP, x.a + frame);
         PutMoveRRI(op, max, RH, RH, x.b);
         x.r := RH; incR
       ELSIF x.mode = RegI THEN
+        eStr("(regi) x.a:"); eInt(x.a);
         PutMoveRRI(op, max, x.r, x.r, x.a);
       ELSIF x.mode = Cond THEN
+        eStr("(cond");
         PutCondBranch(negated(x.r), label, FORWARD);
         PutRI("movi", RH, 1); 
         PutJump("j", label+1, FORWARD);
@@ -903,6 +927,7 @@ MODULE ORG; (* N.Wirth, 16.4.2016 / 4.4.2017 / 31.5.2019  Oberon compiler; code 
         x.r := RH; incR
       END;
       x.mode := Reg
+    ELSE eStr("(reg) no gen")
     END
   END load;
 
@@ -1267,12 +1292,14 @@ MODULE ORG; (* N.Wirth, 16.4.2016 / 4.4.2017 / 31.5.2019  Oberon compiler; code 
   PROCEDURE Not*(VAR x: Item);   (* x := ~x *)
     VAR t: INTEGER;
   BEGIN
+    e("not");
     IF x.mode # Cond THEN loadCond(x) END ;
     x.r := negated(x.r); t := x.lt; x.lt := x.lf; x.lf := t
   END Not;
 
   PROCEDURE And1*(VAR x: Item);   (* x := x & *)
   BEGIN
+    e("and1");
     IF x.mode # Cond THEN loadCond(x) END ;
     IF x.lf = 0 THEN x.lf := label; INC(label) END;
     PutCondBranch(negated(x.r), x.lf, FORWARD);
@@ -1281,6 +1308,7 @@ MODULE ORG; (* N.Wirth, 16.4.2016 / 4.4.2017 / 31.5.2019  Oberon compiler; code 
 
   PROCEDURE And2*(VAR x, y: Item);
   BEGIN
+    e("and2");
     IF y.mode # Cond THEN loadCond(y) END ;
     IF y.lt = 0 THEN y.lt := label; INC(label) END;
     x.lt := y.lt; x.r := y.r
@@ -1313,6 +1341,7 @@ MODULE ORG; (* N.Wirth, 16.4.2016 / 4.4.2017 / 31.5.2019  Oberon compiler; code 
 
   PROCEDURE Neg*(VAR x: Item);   (* x := -x *)
   BEGIN
+    e("neg");
     IF x.type.form = ORB.Int THEN
       IF x.mode = ORB.Const THEN x.a := -x.a
       ELSE 
@@ -1339,6 +1368,7 @@ MODULE ORG; (* N.Wirth, 16.4.2016 / 4.4.2017 / 31.5.2019  Oberon compiler; code 
 
   PROCEDURE AddOp*(op: INTEGER; VAR x, y: Item);   (* x := x +- y *)
   BEGIN
+    e("addop");
     IF op = ORS.plus THEN
       IF (x.mode = ORB.Const) & (y.mode = ORB.Const) THEN
         x.a := x.a + y.a
@@ -1380,25 +1410,27 @@ MODULE ORG; (* N.Wirth, 16.4.2016 / 4.4.2017 / 31.5.2019  Oberon compiler; code 
   END AddOp;
 
   PROCEDURE log2(m: INTEGER; VAR e: INTEGER): INTEGER;
-  BEGIN e := 0;
+  BEGIN 
+    e := 0;
     WHILE ~ODD(m) DO m := m DIV 2; INC(e) END ;
     RETURN m
   END log2;
   
   PROCEDURE MulOp*(VAR x, y: Item);   (* x := x * y *)
-    VAR e: INTEGER;
+    VAR ex: INTEGER;
   BEGIN
+    e("mulop");
     IF (x.mode = ORB.Const) & (y.mode = ORB.Const) THEN x.a := x.a * y.a
-    ELSIF (y.mode = ORB.Const) & (y.a >= 2) & (log2(y.a, e) = 1) THEN 
+    ELSIF (y.mode = ORB.Const) & (y.a >= 2) & (log2(y.a, ex) = 1) THEN 
       load(x);
-      PutRRI("slli", x.r, x.r, e)
+      PutRRI("slli", x.r, x.r, ex)
     ELSIF y.mode = ORB.Const THEN 
       load(x); 
       PutRI("movi", RH, y.a);
       PutRRR("mull", x.r, x.r, RH)
-    ELSIF (x.mode = ORB.Const) & (x.a >= 2) & (log2(x.a, e) = 1) THEN 
+    ELSIF (x.mode = ORB.Const) & (x.a >= 2) & (log2(x.a, ex) = 1) THEN 
       load(y); 
-      PutRRI("slli", y.r, y.r, e);
+      PutRRI("slli", y.r, y.r, ex);
       x.mode := Reg; 
       x.r := y.r
     ELSIF x.mode = ORB.Const THEN 
@@ -1416,8 +1448,9 @@ MODULE ORG; (* N.Wirth, 16.4.2016 / 4.4.2017 / 31.5.2019  Oberon compiler; code 
   END MulOp;
 
   PROCEDURE DivOp*(op: INTEGER; VAR x, y: Item);   (* x := x op y *)
-    VAR e: INTEGER;
+    VAR ex: INTEGER;
   BEGIN
+    e("divop");
     IF op = ORS.div THEN
       IF (x.mode = ORB.Const) & (y.mode = ORB.Const) THEN
         IF y.a > 0 THEN
@@ -1425,9 +1458,9 @@ MODULE ORG; (* N.Wirth, 16.4.2016 / 4.4.2017 / 31.5.2019  Oberon compiler; code 
         ELSE 
           ORS.Mark("bad divisor") 
         END
-      ELSIF (y.mode = ORB.Const) & (y.a >= 2) & (log2(y.a, e) = 1) THEN 
+      ELSIF (y.mode = ORB.Const) & (y.a >= 2) & (log2(y.a, ex) = 1) THEN 
         load(x); 
-        PutRRI("srai", x.r, x.r, e)
+        PutRRI("srai", x.r, x.r, ex)
       ELSIF y.mode = ORB.Const THEN
         IF y.a > 0 THEN
           load(x); 
@@ -1451,7 +1484,7 @@ MODULE ORG; (* N.Wirth, 16.4.2016 / 4.4.2017 / 31.5.2019  Oberon compiler; code 
         ELSE
           ORS.Mark("bad modulus")
         END
-      ELSIF (y.mode = ORB.Const) & (y.a >= 2) & (log2(y.a, e) = 1) THEN
+      ELSIF (y.mode = ORB.Const) & (y.a >= 2) & (log2(y.a, ex) = 1) THEN
         load(x);
         PutRI("movi", RH, y.a-1);
         PutRRR("and", x.r, x.r, RH);
@@ -1477,6 +1510,7 @@ MODULE ORG; (* N.Wirth, 16.4.2016 / 4.4.2017 / 31.5.2019  Oberon compiler; code 
 
   PROCEDURE RealOp*(op: INTEGER; VAR x, y: Item);   (* x := x op y *)
   BEGIN 
+    e("realop");
     load(x); load(y);
     PutSR("wfr", 0, x.r);
     PutSR("wfr", 1, y.r);
@@ -1668,25 +1702,31 @@ MODULE ORG; (* N.Wirth, 16.4.2016 / 4.4.2017 / 31.5.2019  Oberon compiler; code 
     VAR 
       op: ARRAY 5 OF CHAR;
       max: INTEGER;
-  BEGIN  
+  BEGIN
     load(y);
-
+    e("store ");
     IF x.type.size = 1 THEN op := "s8i"; max := 255 ELSE op := "s32i"; max := 1020 END ;
     IF x.mode = ORB.Var THEN
+      eStr("(var) "); eStr(x.name);
       IF x.r > 0 THEN (* local *)
+        eStr(" (stack) x.a:"); eInt(x.a); eStr(" frame:"); eInt(frame);
         PutMoveRRI(op, max, y.r, SP, x.a + frame);
       ELSE (* imported or module *)
         GetSB(x.r);
         IF x.r = 0 THEN
+          eStr(" (SB) x.a:"); eInt(x.a);
           PutMoveRRI(op, max, y.r, SB, x.a);
         ELSE
+          eStr(" (import) x.a:"); eInt(x.a);
           PutMoveRRI(op, max, y.r, RH, x.a);
         END
       END
     ELSIF x.mode = ORB.Par THEN
+      eStr("(par) "); eStr(x.name); eStr(" x.a:"); eInt(x.a); eStr(" frame:"); eInt(frame);
       PutMoveRRI("l32i", 1020, RH, SP, x.a + frame);
       PutMoveRRI(op, max, y.r, RH, x.b);
     ELSIF x.mode = RegI THEN 
+      eStr("(regi) x.a:"); eInt(x.a);
       PutMoveRRI(op, max, y.r, x.r, x.a); 
       decR;
     ELSE 
@@ -2338,11 +2378,14 @@ MODULE ORG; (* N.Wirth, 16.4.2016 / 4.4.2017 / 31.5.2019  Oberon compiler; code 
 
   PROCEDURE Len*(VAR x: Item);
   BEGIN
+    e("Len ");
     IF x.type.len >= 0 THEN
+      eStr("regi");
       IF x.mode = RegI THEN decR END ;
       x.mode := ORB.Const; 
       x.a := x.type.len
     ELSE (*open array*) 
+      eStr(" (open array) "); eStr("x.a+4:"); eInt(x.a); eStr(" frame:"); eInt(frame);
       PutMoveRRI("l32i", 1020, RH, SP, x.a + 4 + frame); 
       x.mode := Reg; 
       x.r := RH; incR
@@ -2601,7 +2644,7 @@ MODULE ORG; (* N.Wirth, 16.4.2016 / 4.4.2017 / 31.5.2019  Oberon compiler; code 
       FOR i := 0 TO tdx-1 DO 
         IF (i MOD 8) = 0 THEN
           Texts.WriteLn(AsW);
-          Texts.WriteString(AsW, "    .byte4 ");
+          Texts.WriteString(AsW, "    .int ");
         END;
         Texts.WriteInt(AsW, data[i], 0);
         IF (i < tdx-1) & (((i+1) MOD 8) # 0) THEN Texts.Write(AsW, ",") END
@@ -2654,7 +2697,9 @@ MODULE ORG; (* N.Wirth, 16.4.2016 / 4.4.2017 / 31.5.2019  Oberon compiler; code 
       Texts.WriteLn(AsW);
       SectionHeader("init_table", moduleId, moduleKey);
       Texts.WriteString(AsW, "    .int ");
-      SectionName("init", moduleId, moduleKey);
+      Texts.WriteString(AsW, "_");
+      Texts.WriteString(AsW, moduleId);
+      Texts.WriteString(AsW, "_init");
       Texts.WriteLn(AsW);
     END;
 

@@ -5,59 +5,56 @@
 ENTRY(_init_start)
 
 MEMORY {
-  IRAM (RX) : ORIGIN = 0x40080400, LENGTH = 127K
-  DRAM (RW) : ORIGIN = 0x3FFFF000, LENGTH = 200K + 128K
+  CODE_RAM (RX) : ORIGIN = 0x40080400, len = 0xFC00
+  DATA_RAM (RW) : ORIGIN = 0x3FFFF000, len = 0x1000
 }
 
 SECTIONS {
 
-  .text : ALIGN(4)
+  .iram.text : ALIGN(4)
   {
     . = ALIGN(16);
-    _sitable = ABSOLUTE(.);
+    _sitable = .;
     KEEP (*(.init_table*))
-    _eitable = ABSOLUTE(.);
-    KEEP(*(.entry.text))
-    KEEP(*(.entry.trap_support))
-    *(.literal .text)
-    *(.literal* .text*)
+    _eitable = .;
+    *(.entry.text)
+    *(.entry.trap_support)
+    *(.text)
+    *(.text*)
     . = ALIGN(4);
     KEEP (*(.init*))
     KEEP (*(.fini))
+    *(.rodata)
+    *(.rodata*)
     . = ALIGN(4);
-    _etext = ABSOLUTE(.);
-  } >IRAM
+    _etext = .;
+  } >CODE_RAM
 
   _sidata = .;
   .data : AT(_sidata) ALIGN(4) 
   {
     . = ALIGN(4);
-    _sdata = ABSOLUTE(.);
-    *(.data)
-    *(.data_types*)
-    *(.data_strs*)
+    _sdata = .;
+    KEEP (*(.data))
+    *(.data*)
+    *(._trap_support_data)
     . = ALIGN(4);
-    _edata = ABSOLUTE(.);
-  } >DRAM
-
-  .rodata : ALIGN(4)
-  {
-    *(.rodata)
-    *(.rodata*)
-  } >DRAM
+    _edata = .;
+  } >DATA_RAM
 
   .bss (NOLOAD) : ALIGN(4)
   {
     . = ALIGN(4);
-    KEEP(*(.__trap_support_data))
-    _sbss = ABSOLUTE(.);
+    _sbss = .;
     *(.bss)
     *(.bss*)
     *(COMMON)
     . = ALIGN(4);
-    _ebss = ABSOLUTE(.);
-  } >DRAM
+    _ebss = .;
+  } >DATA_RAM
 
-  end = .; PROVIDE (_end = .);
+  . = ALIGN(4);
+  PROVIDE ( end = .);
+  PROVIDE (_end = .);
 }
 

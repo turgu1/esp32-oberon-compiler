@@ -18,13 +18,12 @@ OS = $(TOOLCHAIN)size
 LDSCRIPT = ./ld/esp32.ld
 LDFLAGS += -nostdlib -T$(LDSCRIPT) -Wl,-Map=$@.map -Wl,--cref -Wl,--gc-sections
 LDFLAGS += $(LDFLAGS_PLATFORM)
-LDFLAGS += -lm -lc -lgcc
 
 ASFLAGS += -c -O0 -Wall -fmessage-length=0
 ASFLAGS += $(ASFLAGS_PLATFORM)
 
-#PORT = /dev/tty.SLAB_USBtoUART
-PORT = /dev/ttyUSB0
+PORT = /dev/tty.SLAB_USBtoUART
+#PORT = /dev/ttyUSB0
 
 BLDDIR = ./build/
 SRCDIR = ./src/
@@ -35,9 +34,10 @@ INITO = $(BLDDIR)/init.o
 # The first module in the list is the main program
 SRC =  \
     Main.Mod \
-    Test.Mod \
-	Assignments.Mod \
 	Out.Mod
+
+#   Test.Mod \
+#	Assignments.Mod \
 
 SYMS = $(addprefix $(SRCDIR), $(SRC:.Mod=.smb))
 ASSS = $(addprefix $(BLDDIR), $(SRC:.Mod=.S))
@@ -45,7 +45,6 @@ OBJS = $(addprefix $(BLDDIR), $(SRC:.Mod=.o))
 
 TARGETELF = $(BLDDIR)tests.elf
 TARGETBIN = $(BLDDIR)tests.bin
-
 
 .PHONY: all
 all: $(TARGETELF)
@@ -57,13 +56,13 @@ test:
 
 # Rules to build files.
 
-$(BLDDIR)Main.S $(SRCDIR)Main.smb: $(SRCDIR)Main.Mod $(SRCDIR)Test.smb $(SRCDIR)Out.smb
+$(BLDDIR)Main.S $(SRCDIR)Main.smb: $(SRCDIR)Main.Mod $(SRCDIR)Out.smb
 $(BLDDIR)Test.S $(SRCDIR)Test.smb: $(SRCDIR)Test.Mod $(SRCDIR)Out.smb
 $(BLDDIR)Assignments.S $(SRCDIR)Assignments.smb: $(SRCDIR)Assignments.Mod $(SRCDIR)Test.smb
 $(BLDDIR)Out.S $(SRCDIR)Out.smb: $(SRCDIR)Out.Mod
 
 $(BLDDIR)%.S $(SRCDIR)%.smb : $(SRCDIR)%.Mod
-	@cd $(SRCDIR) ; ../$(OB) -s $(<F)
+	cd $(SRCDIR) ; ../$(OB) -s $(<F)
 	@mv $(SRCDIR)$(patsubst %.smb,%.S,$(@F)) $(BLDDIR)
 
 $(OBJS): %.o: %.S

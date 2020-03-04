@@ -50,7 +50,7 @@ _init_start:
 
     # save TOS address
 
-    movi a2, .__trap_support_data
+    movi a2, ._trap_support_data
     s32i a1, a2, 68
 
     call4 _stop_watchdog       # Disable both Watchdog
@@ -107,7 +107,10 @@ _init_start:
     callx4 a2                  # call main module initialization code
 
 _init_end:
-    j _init_end
+    addi a1, a1, -4
+    s32i a2, a1, 0
+    movi a2, 99                 # Trap reason 99: End of program, restart
+    j __TRAP__
 
 
 # ---- _stop_watchdog ----
@@ -152,26 +155,26 @@ _set_160mhz:
     retw 
 
     .align 4
-    .section .__trap_support_data
+    .section ._trap_support_data
 
-_a0:       .byte4 0
-_a1:       .byte4 0
-_a2:       .byte4 0
-_a3:       .byte4 0
-_a4:       .byte4 0
-_a5:       .byte4 0
-_a6:       .byte4 0
-_a7:       .byte4 0
-_a8:       .byte4 0
-_a9:       .byte4 0
-_a10:      .byte4 0
-_a11:      .byte4 0
-_a12:      .byte4 0
-_a13:      .byte4 0
-_a14:      .byte4 0
-_a15:      .byte4 0
-_raison:   .byte4 0
-_startTOS: .byte4 0
+_a0:       .int 0
+_a1:       .int 0
+_a2:       .int 0
+_a3:       .int 0
+_a4:       .int 0
+_a5:       .int 0
+_a6:       .int 0
+_a7:       .int 0
+_a8:       .int 0
+_a9:       .int 0
+_a10:      .int 0
+_a11:      .int 0
+_a12:      .int 0
+_a13:      .int 0
+_a14:      .int 0
+_a15:      .int 0
+_raison:   .int 0
+_startTOS: .int 0
 
     .align 4
     .section .entry.trap_support
@@ -185,7 +188,7 @@ _startTOS: .byte4 0
 __TRAP__:
     addi a1, a1, -4     # Some space to save a2
     s32i a2, a1, 0
-    movi a2, .__trap_support_data
+    movi a2, ._trap_support_data
 
     # Save all registers
 
@@ -219,7 +222,6 @@ __TRAP__:
     # restart program
 
     j _init_start
-
 
     .align 4
     .section .text__float_support
@@ -286,5 +288,3 @@ __fsqrt32:
     addexp.s  f3, f2
     divn.s    f1, f5, f3
     ret
-
-
