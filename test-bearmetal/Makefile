@@ -21,7 +21,8 @@ LDFLAGS += $(LDFLAGS_PLATFORM)
 ASFLAGS += -c -O0 -Wall -fmessage-length=0
 ASFLAGS += $(ASFLAGS_PLATFORM)
 
-PORT = /dev/tty.SLAB_USBtoUART
+#PORT = /dev/tty.SLAB_USBtoUART
+PORT = /dev/ttyUSB0
 
 BLDDIR = ./build/
 SRCDIR = ./src/

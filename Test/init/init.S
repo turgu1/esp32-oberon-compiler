@@ -30,6 +30,8 @@
 #   the ENTRY A1, xxxx and RETW instructions (Windowing option).
 # ----
 
+    #.equ init_data, 1
+
     .title Oberon ESP32 Startup code
     .sbttl Oberon ESP32 Compiler Version 0.1.0
 
@@ -48,23 +50,23 @@ _init_start:
 
     # save TOS address
 
-    movi a2, .__trap_support_data
-    s32i a1, a2, 68
+    # movi a2, .__trap_support_data
+    # s32i a1, a2, 68
 
-    call4 _stop_watchdog      # Disable both Watchdog
-    call4 _set_160mhz         # Set CPU Speed to 160MHz
+    call4 _stop_watchdog       # Disable both Watchdog
+    call4 _set_160mhz          # Set CPU Speed to 160MHz
 
     # Clear .bss section
 
-    movi a2, _ebss            # Compute size in 4-byte chunks (a2)
-    movi a3, _sbss            # a3 = address of .bss
-    sub  a2, a2, a3           # a2 = size of .bss in bytes
-    beqz a2, 1f               # if .bss is empty, nothing to do
-    srli a2, a2, 2            # a2 = size of .bss in words
-    movi a4, 0                # a4 = 0
-    loop a2, 1f               # loop to clear memory
-    s32i a4, a3, 0            # @a3[0] = 0
-    addi a3, a3, 4            # adjust a3 to next word
+    movi a2, _ebss             # Compute size in 4-byte chunks (a2)
+    movi a3, _sbss             # a3 = address of .bss
+    sub  a2, a2, a3            # a2 = size of .bss in bytes
+    beqz a2, 1f                # if .bss is empty, nothing to do
+    srli a2, a2, 2             # a2 = size of .bss in words
+    movi a4, 0                 # a4 = 0
+    loop a2, 1f                # loop to clear memory
+    s32i a4, a3, 0             # @a3[0] = 0
+    addi a3, a3, 4             # adjust a3 to next word
 1:
 
 .ifdef init_data
@@ -103,6 +105,7 @@ _init_start:
     movi a2, _sitable          # get init table address
     l32i a2, a2, 0             # retrieve the init code adress
     callx4 a2                  # call main module initialization code
+    j _init_start
 
 _init_end:
     addi a1, a1, -4

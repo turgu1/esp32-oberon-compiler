@@ -19,6 +19,7 @@ SECTIONS {
     KEEP (*(.init_table*))
     _eitable = .;
     KEEP(*(.entry.text))
+    KEEP(*(.entry.trap_support))
     *(.text)
     *(.text*)
     . = ALIGN(4);
@@ -40,7 +41,8 @@ SECTIONS {
     *(.data*)
     . = ALIGN(4);
     _edata = .;
-  } >DATA_RAM
+  KEEP(*(.__trap_support_data))
+    } >DATA_RAM
 
   /* Uninitialized data also goes into Data RAM */
   .bss :

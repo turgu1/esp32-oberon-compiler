@@ -1002,24 +1002,26 @@ MODULE ORP; (*N. Wirth 1.7.97 / 8.2.2020  Oberon compiler for RISC in Oberon-07*
     END
   END Import;
 
-  PROCEDURE Module(generateCheckCode: BOOLEAN);
+  PROCEDURE Module(generateCheckCode: BOOLEAN; verbose : BOOLEAN);
     VAR key: INTEGER;
-  BEGIN Texts.WriteString(W, "  compiling "); ORS.Get(sym);
+  BEGIN 
+    IF verbose THEN Texts.WriteString(W, "  compiling ") END;
+    ORS.Get(sym);
     IF sym = ORS.module THEN
       ORS.Get(sym);
       dc := 0;
       ORB.Init; ORB.OpenScope;
       IF sym = ORS.ident THEN
         ORS.CopyId(modid); ORS.Get(sym);
-        Texts.WriteString(W, modid); Texts.Append(Logger.Log, W.buf)
+        IF verbose THEN Texts.WriteString(W, modid); Texts.Append(Logger.Log, W.buf) END
       ELSE ORS.Mark("identifier expected")
-      END ;
+      END;
       Check(ORS.semicolon, "no ;"); level := 0; exno := 1; key := 0;
       IF sym = ORS.import THEN
         ORS.Get(sym); Import;
         WHILE sym = ORS.comma DO ORS.Get(sym); Import END ;
         Check(ORS.semicolon, "; missing")
-      END ;
+      END;
       ORG.Open(modid, generateCheckCode); Declarations(dc); ORG.SetDataSize((dc + 3) DIV 4 * 4);
       WHILE sym = ORS.procedure DO ProcedureDecl; Check(ORS.semicolon, "no ;") END ;
       ORG.Header;
@@ -1029,89 +1031,56 @@ MODULE ORP; (*N. Wirth 1.7.97 / 8.2.2020  Oberon compiler for RISC in Oberon-07*
         IF ORS.id # modid THEN ORS.Mark("no match") END ;
         ORS.Get(sym)
       ELSE ORS.Mark("identifier missing")
-      END ;
+      END;
       IF sym # ORS.period THEN 
         ORS.Mark("period missing")
       END;
       IF ORS.errcnt = 0 THEN
         ORB.Export(modid, newSF, key);
-        IF newSF THEN Texts.WriteString(W, " new symbol file") END
-      END ;
+        IF newSF & verbose THEN Texts.WriteString(W, " new symbol file") END
+      END;
       IF ORS.errcnt = 0 THEN
         ORG.Close(modid, key, exno);
-        Texts.WriteInt(W, dc, 6); Texts.WriteHex(W, key);
+        IF verbose THEN Texts.WriteInt(W, dc, 6); Texts.WriteHex(W, key) END
       ELSE 
-        Texts.WriteLn(W); Texts.WriteString(W, "compilation FAILED")
+        Texts.WriteLn(W); Texts.WriteString(W, "compilation FAILED");
+        Texts.WriteLn(W); Texts.Append(Logger.Log, W.buf)
       END;
-      Texts.WriteLn(W); Texts.Append(Logger.Log, W.buf);
+      IF verbose THEN Texts.WriteLn(W) ; Texts.Append(Logger.Log, W.buf) END;
       ORB.CloseScope; pbsList := NIL
     ELSE ORS.Mark("must start with MODULE")
     END
   END Module;
 
-  (*
-  PROCEDURE Option(VAR S: Texts.Scanner);
-  BEGIN newSF := FALSE;
-    IF S.nextCh = "/" THEN
-      Texts.Scan(S); Texts.Scan(S); 
-      IF (S.class = Texts.Name) & (S.s[0] = "s") THEN newSF := TRUE END
-    END
-  END Option;
-  *)
-
   PROCEDURE Compile*(filename : ARRAY OF CHAR; 
                      overrideSymbolFile,
-                     generateCheckCode : BOOLEAN);
+                     generateCheckCode,
+                     verbose : BOOLEAN);
     VAR (* beg, end, time: INTEGER; *)
       T: Texts.Text;
       (*S: Texts.Scanner; *)
   BEGIN 
+    Texts.OpenWriter(W); 
+    IF verbose THEN
+      Texts.WriteString(W, "ESP32 Oberon-07 Compiler Version ");Texts.WriteString(W, ORB.CompilerVersion);
+      Texts.WriteLn(W); Texts.Append(Logger.Log, W.buf);
+    END;
     newSF := overrideSymbolFile;
 
     NEW(T);
     Texts.Open(T, filename);
     IF T.len > 0 THEN 
       ORS.Init(T, 0);
-      Module(generateCheckCode)
+      Module(generateCheckCode, verbose)
     ELSE
       Texts.WriteString(W, filename); 
       Texts.WriteString(W, " not found");
       Texts.WriteLn(W); 
       Texts.Append(Logger.Log, W.buf)
     END
-  (*Texts.OpenScanner(S, Oberon.Par.text, Oberon.Par.pos); Texts.Scan(S);
-    IF S.class = Texts.Char THEN
-      IF S.c = "@" THEN
-        Option(S); Oberon.GetSelection(T, beg, end, time);
-        IF time >= 0 THEN ORS.Init(T, beg); Module END
-      ELSIF S.c = "^" THEN
-        Option(S); Oberon.GetSelection(T, beg, end, time);
-        IF time >= 0 THEN
-          Texts.OpenScanner(S, T, beg); Texts.Scan(S);
-          IF S.class = Texts.Name THEN
-            Texts.WriteString(W, S.s); NEW(T); Texts.Open(T, S.s);
-            IF T.len > 0 THEN ORS.Init(T, 0); Module END
-          END
-        END
-      END
-    ELSE 
-      WHILE S.class = Texts.Name DO
-        NEW(T); Texts.Open(T, S.s);
-        IF T.len > 0 THEN Option(S); ORS.Init(T, 0); Module
-        ELSE Texts.WriteString(W, S.s); Texts.WriteString(W, " not found");
-          Texts.WriteLn(W); Texts.Append(Logger.Log, W.buf)
-        END ;
-        IF (T.len # 0) & (ORS.errcnt = 0) THEN Texts.Scan(S) ELSE S.class := 0 END
-      END
-    END ;
-    Oberon.Collect(0)
-    *)
   END Compile;
 
 BEGIN 
-  Texts.OpenWriter(W); 
-  Texts.WriteString(W, "ESP32 Oberon-07 Compiler Version ");Texts.WriteString(W, ORB.CompilerVersion);
-  Texts.WriteLn(W); Texts.Append(Logger.Log, W.buf);
   NEW(dummy); dummy.class := ORB.Var; dummy.type := ORB.intType;
   expression := expression0; Type := Type0; FormalType := FormalType0
 END ORP.

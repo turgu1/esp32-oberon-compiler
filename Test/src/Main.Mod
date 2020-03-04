@@ -6,6 +6,7 @@ VAR
   count : INTEGER;
 
 BEGIN
+  WHILE TRUE DO END;
   Out.Setup;
 
   Out.String("ESP32 Oberon Compiler Test Suite."); Out.Ln;

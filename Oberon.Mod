@@ -18,15 +18,17 @@ VAR
   overrideSymbolFile : BOOLEAN;
   generateCheckCode  : BOOLEAN; 
   filePresent        : BOOLEAN;
+  verbose            : BOOLEAN;
 
   filename : Filename;
 
 PROCEDURE Usage;
 BEGIN
   Out.Ln;
-  Out.String("Usage: Oberon [-s][-c] filename"); Out.Ln;
+  Out.String("Usage: Oberon [-s][-c][-v] filename"); Out.Ln;
   Out.String("-s : Update Symbols File"       ); Out.Ln;
   Out.String("-c : Generate Verification Code"); Out.Ln;
+  Out.String("-v : Show compiler version and output information"); Out.Ln;
 END Usage;
 
 BEGIN
@@ -41,9 +43,10 @@ BEGIN
     overrideSymbolFile := FALSE;
     generateCheckCode  := FALSE;
     filePresent        := FALSE;
+    verbose            := FALSE;
     argCount           := extArgs.count;
 
-    IF (argCount > 0) & (argCount <= 3) THEN
+    IF (argCount > 0) & (argCount <= 4) THEN
       i := 0;
       WHILE i < argCount DO
         extArgs.Get(i, arg, res);
@@ -68,23 +71,31 @@ BEGIN
             Out.String("Generating Check Code");
             Out.Ln;
           END
-        ELSE
+        ELSIF (arg = "-v") THEN
+          verbose := TRUE;
+          IF DEBUG THEN
+            Out.String("Generating Check Code");
+            Out.Ln;
+          END
+        ELSIF arg[0] # "-" THEN
           filename    := arg;
           filePresent := TRUE;
+        ELSE
+          i := argCount
         END;
 
         INC(i)
       END;
 
       IF filePresent THEN
-        IF DEBUG THEN
+        IF verbose THEN
           Out.String("Compiling "); 
           Out.String(filename); 
           Out.String("..."); 
           Out.Ln;
         END;
         
-        ORP.Compile(filename, overrideSymbolFile, generateCheckCode);
+        ORP.Compile(filename, overrideSymbolFile, generateCheckCode, verbose);
       ELSE
         Usage;
       END

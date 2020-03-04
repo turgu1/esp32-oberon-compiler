@@ -28,6 +28,11 @@ _Main_6E69624D_s_init:
 _Main_init:
     entry a1, 16
     movi a15, _Main_s_bss
+1:
+    movi a2, 1
+    beqz a2, 2f
+    j 1b
+2:
     call4 _Out_6D1528C7_p_Setup
     movi a15, _Main_s_bss
     movi a6, _Main_s_str
@@ -59,11 +64,11 @@ _Main_init:
     movi a15, _Main_s_bss
     call4 _Out_6D1528C7_p_Ln
     movi a15, _Main_s_bss
-1:
+3:
     movi a2, 1
-    beqz a2, 2f
-    j 1b
-2:
+    beqz a2, 4f
+    j 3b
+4:
     retw
 
 
