@@ -1,6 +1,7 @@
     .title "Module Pattern11, Key A5E3D3E6"
     .sbttl "Oberon ESP32 Compiler Version 0.1.0"
 
+    .align 4
     .section .bss_Pattern11_A5E3D3E6
     .global _Pattern11_A5E3D3E6_s_bss
 _Pattern11_A5E3D3E6_s_bss:
@@ -8,12 +9,12 @@ _Pattern11_s_bss:
     .space 12
 
 
+
+    .align 4
     .section .init_Pattern11_A5E3D3E6
-    .global _Pattern11_A5E3D3E6_s_init
-_Pattern11_A5E3D3E6_s_init:
 
 _Pattern11_init:
-    entry a1, 0
+    entry a1, 16
     movi a15, _Pattern11_s_bss
     l32i a2, a15, 4
     movi a3, 1
@@ -55,9 +56,10 @@ _Pattern11_init:
     s32i a2, a15, 4
 3:
     retw
+    .size _Pattern11_init, .-_Pattern11_init
 
+
+    .align 4
     .section .init_table_Pattern11_A5E3D3E6
-    .global _Pattern11_A5E3D3E6_s_init_table
-_Pattern11_A5E3D3E6_s_init_table:
-    .int .init_Pattern11_A5E3D3E6
+    .int _Pattern11_init
 

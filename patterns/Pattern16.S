@@ -1,12 +1,12 @@
     .title "Module Pattern16, Key A5E3D3EB"
     .sbttl "Oberon ESP32 Compiler Version 0.1.0"
 
-    .section .str_Pattern16_A5E3D3EB
-    .global _Pattern16_A5E3D3EB_s_str
-_Pattern16_A5E3D3EB_s_str:
+    .align 4
+    .section .data_strs_Pattern16_A5E3D3EB
 _Pattern16_s_str:
-    db 48,49,50,51,52,53,54,55,56,57,0,0,
+    .byte 48,49,50,51,52,53,54,55,56,57,0,0
 
+    .align 4
     .section .bss_Pattern16_A5E3D3EB
     .global _Pattern16_A5E3D3EB_s_bss
 _Pattern16_A5E3D3EB_s_bss:
@@ -14,14 +14,14 @@ _Pattern16_s_bss:
     .space 128
 
 
+
+    .align 4
     .section .init_Pattern16_A5E3D3EB
-    .global _Pattern16_A5E3D3EB_s_init
-_Pattern16_A5E3D3EB_s_init:
 
 _Pattern16_init:
     entry a1, 16
     movi a15, _Pattern16_s_bss
-    addi a2, a15, 0
+    mov a2, a15
     l32i a3, a2, 0
     addi a3, a3, 1
     s32i a3, a2, 0
@@ -65,7 +65,6 @@ _Pattern16_init:
     s32i a2, a15, 8
     addi a2, a15, 96
     movi a3, _Pattern16_s_str
-    addi a3, a3, 0
     movi a4, 3
     loop a4, 2f
     l32i a5, a3, 0
@@ -88,9 +87,10 @@ _Pattern16_init:
     s32i a2, a15, 0
 5:
     retw
+    .size _Pattern16_init, .-_Pattern16_init
 
+
+    .align 4
     .section .init_table_Pattern16_A5E3D3EB
-    .global _Pattern16_A5E3D3EB_s_init_table
-_Pattern16_A5E3D3EB_s_init_table:
-    .int .init_Pattern16_A5E3D3EB
+    .int _Pattern16_init
 

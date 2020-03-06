@@ -1,6 +1,7 @@
     .title "Module Pattern17, Key A5E3D3EC"
     .sbttl "Oberon ESP32 Compiler Version 0.1.0"
 
+    .align 4
     .section .bss_Pattern17_A5E3D3EC
     .global _Pattern17_A5E3D3EC_s_bss
 _Pattern17_A5E3D3EC_s_bss:
@@ -8,9 +9,9 @@ _Pattern17_s_bss:
     .space 20
 
 
+
+    .align 4
     .section .init_Pattern17_A5E3D3EC
-    .global _Pattern17_A5E3D3EC_s_init
-_Pattern17_A5E3D3EC_s_init:
 
 _Pattern17_init:
     entry a1, 16
@@ -49,9 +50,10 @@ _Pattern17_init:
     src a2, a2, a3
     s32i a2, a15, 0
     retw
+    .size _Pattern17_init, .-_Pattern17_init
 
+
+    .align 4
     .section .init_table_Pattern17_A5E3D3EC
-    .global _Pattern17_A5E3D3EC_s_init_table
-_Pattern17_A5E3D3EC_s_init_table:
-    .int .init_Pattern17_A5E3D3EC
+    .int _Pattern17_init
 

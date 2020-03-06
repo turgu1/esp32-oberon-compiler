@@ -11,15 +11,18 @@ MODULE ORB;   (*NW 25.6.2014  / 1.3.2019  in Oberon-07*)
       CompilerVersion* = "0.1.0";
       
       versionkey* = 1; maxTypTab = 64;
-    (* class values*) 
+    (* class values *) 
       Head*  = 0;
-      Const* = 1; Var* = 2; Par* = 3; Fld* = 4; Typ* = 5;
-      SProc* = 6; SFunc* = 7; Mod* = 8;
+      Const* = 1; Var*   = 2; Par*   = 3; 
+      Fld*   = 4; Typ*   = 5; SProc* = 6; 
+      SFunc* = 7; Mod*   = 8;
 
-    (* form values*)
-      Byte* = 1; Bool* = 2; Char* = 3; Int* = 4; Real* = 5; Set* = 6;
-      Pointer* = 7; NilTyp* = 8; NoTyp* = 9; Proc* = 10;
-      String* = 11; Array* = 12; Record* = 13;
+    (* form values *)
+      Byte*    =  1; Bool*   =  2; Char*   = 3; 
+      Int*     =  4; Real*   =  5; Set*    = 6;
+      Pointer* =  7; NilTyp* =  8; NoTyp*  = 9; 
+      Proc*    = 10; String* = 11; Array*  = 12; 
+      Record*  = 13;
       
   TYPE 
     Object* = POINTER TO ObjDesc;

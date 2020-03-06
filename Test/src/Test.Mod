@@ -27,6 +27,7 @@ MODULE Test;
   VAR
     i : INTEGER;
   BEGIN
+    Out.String("Start"); Out.Ln;
     errorCount := 0;
     FOR i := 0 TO registryCount - 1 DO
       testProcs[i]();
@@ -34,23 +35,30 @@ MODULE Test;
     RETURN errorCount
   END Exec;
 
+DBGON
+  
   PROCEDURE Assert*(cond: BOOLEAN; msg: ARRAY OF CHAR);
-  BEGIN
+
+  BEGIN 
     INC(assertCallCount);
-    IF ~cond THEN
+    IF  ~cond THEN
       Out.Ln;
       Out.String("Assert Failed: ");
       Out.String(msg);
+      Out.Ln;
+      Out.Flush;
       INC(errorCount)
     END
   END Assert;
 
+DBGOFF
+  
   PROCEDURE Completed*(): INTEGER;
   BEGIN
     Out.Ln;
     Out.Ln; Out.String("Test Completed. "); 
     Out.Ln; Out.String("Number of Test Procedures: "); Out.Int(registryCount, 0); 
-    Out.Ln; Out.String("Number of Assertion made: "); Out.Int(assertCallCount, 0); 
+    Out.Ln; Out.String("Number of Assertion made: ");  Out.Int(assertCallCount, 0); 
     IF errorCount > 0 THEN
       Out.Ln; Out.String("There is "); Out.Int(errorCount, 0); Out.String(" observed.")
     ELSE

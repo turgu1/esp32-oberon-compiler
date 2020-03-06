@@ -28,23 +28,23 @@ END Pattern5.
     .title "Module Pattern5, Key A9E2D4B5"
     .sbttl "Oberon ESP32 Compiler Version 0.1.0"
 
+    .align 4
     .section .bss_Pattern5_A9E2D4B5
     .global _Pattern5_A9E2D4B5_s_bss
 _Pattern5_A9E2D4B5_s_bss:
 _Pattern5_s_bss:
     .space 8
 
+    .align 4
     .section .init_Pattern5_A9E2D4B5
-    .global _Pattern5_A9E2D4B5_s_init
-_Pattern5_A9E2D4B5_s_init:
 
 _Pattern5_init:
-    entry a1, 0
+    entry a1, 16
     movi a15, _Pattern5_s_bss
-    l32i a2, a2, 0            # a2 := i
+    l32i a2, a15, 0           # a2 := i
     movi a3, 0                # a3 := 0
     bne a2 a3, 1f             # Branch if not equal to 0
-    addi a2, a15, 0 
+    mov a2, a15 
     l32i a3, a2, 0            # a3 := n
     addi a3, a3, 1            # INC(a3)
     s32i a3, a2, 0            # n := a3
@@ -56,7 +56,7 @@ _Pattern5_init:
     movi a3, 100              # a3 = 100
     bge a2 a3, 2f             # branch if n >= 100
 3:
-    addi a2, a15, 0
+    mov a2, a15
     l32i a3, a2, 0            # a3 := n
     addi a3, a3, -1           # DEC(a3)
     s32i a3, a2, 0            # n := a3
@@ -97,9 +97,9 @@ _Pattern5_init:
     s32i a2, a15, 4           # s := {2}
 7:
     retw
+   .size _Pattern5_init, .-_Pattern5_init
 
+    .align 4
     .section .init_table_Pattern5_A9E2D4B5
-    .global _Pattern5_A9E2D4B5_s_init_table
-_Pattern5_A9E2D4B5_s_init_table:
-    .int .init_Pattern5_A9E2D4B5
+    .int _Pattern5_init
 *)

@@ -1,31 +1,31 @@
 MODULE Main;
 
-IMPORT Out;
+IMPORT SYSTEM, Test, Out;
 
 VAR
   count : INTEGER;
 
+PROCEDURE ShowStackAdr;
+VAR
+  adr : INTEGER;
 BEGIN
-  FOR count := 0 TO 10000000 DO END;
+  adr := SYSTEM.ADR(adr);
+  Out.Ln; Out.String("Stack Address: "); Out.Hex(adr, 0); Out.Ln;
+END ShowStackAdr;
+
+BEGIN
+  FOR count := 0 TO 100000 DO END;
+  ShowStackAdr;
+  Out.Ln;
   Out.String("ESP32 Oberon Compiler Test Suite."); Out.Ln; 
-  Out.String("Start"); Out.Ln;
-(*)
+
   count := Test.Exec();
   count := Test.Completed();
   
-  Out.String("[The End]"); Out.Ln;
-  *)
+  Out.Ln; Out.Ln; Out.String("[The End]"); Out.Ln;
 
   WHILE TRUE DO 
     Out.Char("Z"); 
-    Out.Char("l"); 
-    Out.Char("o"); 
-    Out.Char("o"); 
-    Out.Char("b"); 
-    Out.Char("o"); 
-    Out.Char("o"); 
-    Out.Char("k"); 
-    Out.Ln;
     FOR count := 0 TO 10000000 DO END;
   END
 END Main.

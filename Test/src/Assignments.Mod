@@ -1,5 +1,5 @@
 MODULE Assignments;
-IMPORT Test;
+IMPORT Test, Out;
 
 VAR
   i: INTEGER;
@@ -11,30 +11,42 @@ VAR
   b,c: BOOLEAN;
   rec: RECORD i: INTEGER; b: BOOLEAN END;
 
-PROCEDURE Run;
+PROCEDURE Put(ch: CHAR);
 BEGIN
-  i := 25;
-  r := 3.0;
-  s := {1, 2, 3};
-  a[7] := 31;
-  t := "This is a test";
-  b := 3 < 5;
-  c := i > 30;
-  rec.i := 21;
-  rec.b := TRUE;
+  Out.Char(ch); (* Out.Flush *)
+END Put;
 
-  Test.Assert(i = 25,        "Integer Assignment");
-  Test.Assert(r = 3.0,       "Real Assignment");
-  Test.Assert(s = {1, 2, 3}, "Set Assignment");
-  Test.Assert(a[7] = 31,     "Array Assignment");
-  Test.Assert(t =            "This is a test", "String Assignment");
-  Test.Assert(b,             "Boolean assignment");
-  Test.Assert(~c,            "Boolean False assignment");
-  Test.Assert(j = 0,         "Memory initialization");
-  Test.Assert(rec.i = 21,    "Record integer assignment");
-  Test.Assert(rec.b,         "Record boolean assignment");
+PROCEDURE Run*;
+BEGIN
+  Out.String("Assignments: ");
+
+  Put("1"); i := 25;
+  (* Put("2"); *) r := 3.0;
+  (* Put("3"); *) s := {1, 2, 3};
+  (* Put("4"); *) a[7] := 31;
+  (* Put("5"); *) t := "This is a test";
+  (* Put("6"); *) b := 3 < 5;
+  (* Put("7"); *) c := i > 30;
+  (* Put("8"); *) rec.i := 21;
+  (* Put("9"); *) rec.b := TRUE;
+
+  (* Put("."); *)
+  Put(">");
+  (* Put("A"); *) Test.Assert(i = 25,        "Integer Assignment");
+  (* Put("B"); *) Test.Assert(r = 3.0,       "Real Assignment");
+  (* Put("C"); *) Test.Assert(s = {1, 2, 3}, "Set Assignment");
+  (* Put("D"); *) Test.Assert(a[7] = 31,     "Array Assignment");
+  (* Put("E"); *) Test.Assert(t = "This is a test", "String Assignment");
+  (* Put("F"); *) Test.Assert(b,             "Boolean assignment");
+  (* Put("G"); *) Test.Assert(~c,            "Boolean False assignment");
+  (* Put("H"); *) Test.Assert(j = 0,         "Memory initialization");
+  (* Put("I"); *) Test.Assert(rec.i = 21,    "Record integer assignment");
+  (* Put("J"); *) Test.Assert(rec.b,         "Record boolean assignment");
+  (* Put("."); *)
+
+  Out.String(" End"); Out.Ln;
 END Run;
 
 BEGIN
-  (*Test.Register(Run)*)
+  Test.Register(Run)
 END Assignments.

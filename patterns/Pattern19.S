@@ -1,6 +1,7 @@
     .title "Module Pattern19, Key A5E3D3EE"
     .sbttl "Oberon ESP32 Compiler Version 0.1.0"
 
+    .align 4
     .section .bss_Pattern19_A5E3D3EE
     .global _Pattern19_A5E3D3EE_s_bss
 _Pattern19_A5E3D3EE_s_bss:
@@ -8,9 +9,9 @@ _Pattern19_s_bss:
     .space 12
 
 
+
+    .align 4
     .section .init_Pattern19_A5E3D3EE
-    .global _Pattern19_A5E3D3EE_s_init
-_Pattern19_A5E3D3EE_s_init:
 
 _Pattern19_init:
     entry a1, 16
@@ -58,9 +59,10 @@ _Pattern19_init:
     j __TRAP__
 6:
     retw
+    .size _Pattern19_init, .-_Pattern19_init
 
+
+    .align 4
     .section .init_table_Pattern19_A5E3D3EE
-    .global _Pattern19_A5E3D3EE_s_init_table
-_Pattern19_A5E3D3EE_s_init_table:
-    .int .init_Pattern19_A5E3D3EE
+    .int _Pattern19_init
 

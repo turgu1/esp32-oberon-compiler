@@ -16,6 +16,7 @@ END Pattern6.
     .title "Module Pattern6, Key AAE2D4B5"
     .sbttl "Oberon ESP32 Compiler Version 0.1.0"
 
+    .align 4
     .section .bss_Pattern6_AAE2D4B5
     .global _Pattern6_AAE2D4B5_s_bss
 _Pattern6_AAE2D4B5_s_bss:
@@ -23,12 +24,13 @@ _Pattern6_s_bss:
     .space 4
 
 
+    .align 4
     .section .init_Pattern6_AAE2D4B5
     .global _Pattern6_AAE2D4B5_s_init
 _Pattern6_AAE2D4B5_s_init:
 
 _Pattern6_init:
-    entry a1, 0
+    entry a1, 16
     movi a15, _Pattern6_s_bss
     movi a2, 0                 # a3 := 0
     s32i a2, a15, 0            # i := 0
@@ -49,9 +51,9 @@ _Pattern6_init:
     movi a3, 0                 # a3 := 0
     bne a2 a3, 3b              # branch if i # 0
     retw
+    .size _Pattern6_init, .-_Pattern6_init
 
+    .align 4
     .section .init_table_Pattern6_AAE2D4B5
-    .global _Pattern6_AAE2D4B5_s_init_table
-_Pattern6_AAE2D4B5_s_init_table:
-    .int .init_Pattern6_AAE2D4B5
+    .int _Pattern6_init
 *)

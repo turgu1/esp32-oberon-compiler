@@ -5,8 +5,8 @@
 ENTRY(_init_start)
 
 MEMORY {
-  CODE_RAM (RX) : ORIGIN = 0x40080400, len = 0xFC00
-  DATA_RAM (RW) : ORIGIN = 0x3FFFF000, len = 0x1000
+  CODE_RAM (RX) : ORIGIN = 0x40080400, len = 127K
+  DATA_RAM (RW) : ORIGIN = 0x3FFB0000, len = 192K
 }
 
 SECTIONS {
@@ -49,6 +49,9 @@ SECTIONS {
     *(.bss)
     *(.bss*)
     *(COMMON)
+    _bos = .;
+    *(.stack)
+    _tos = .;
     . = ALIGN(4);
     _ebss = .;
   } >DATA_RAM

@@ -295,10 +295,12 @@ MODULE ORS; (* NW 19.9.93 / 15.3.2017  Scanner in Oberon-07*)
         GetCh()
       END;
       IF sym = debugon THEN 
-        debugging := TRUE; Out.Ln; Out.String("Debugging is ON");
+        debugging := TRUE; 
+        Out.Ln; Out.String("Debugging is ON");
         sym := null
       ELSIF sym = debugoff THEN 
-        debugging := FALSE; Out.Ln; Out.String("Debugging is OFF");
+        debugging := FALSE; 
+        Out.Ln; Out.String("Debugging is OFF"); Out.Ln;
         sym := null
       END
     UNTIL sym # null

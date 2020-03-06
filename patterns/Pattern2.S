@@ -1,6 +1,7 @@
     .title "Module Pattern2, Key A6E2D4B5"
     .sbttl "Oberon ESP32 Compiler Version 0.1.0"
 
+    .align 4
     .section .bss_Pattern2_A6E2D4B5
     .global _Pattern2_A6E2D4B5_s_bss
 _Pattern2_A6E2D4B5_s_bss:
@@ -8,12 +9,12 @@ _Pattern2_s_bss:
     .space 36
 
 
+
+    .align 4
     .section .init_Pattern2_A6E2D4B5
-    .global _Pattern2_A6E2D4B5_s_init
-_Pattern2_A6E2D4B5_s_init:
 
 _Pattern2_init:
-    entry a1, 0
+    entry a1, 16
     movi a15, _Pattern2_s_bss
     l32i a2, a15, 0
     addi a2, a2, 1
@@ -57,9 +58,10 @@ _Pattern2_init:
     or a2, a3, a2
     s32i a2, a15, 24
     retw
+    .size _Pattern2_init, .-_Pattern2_init
 
+
+    .align 4
     .section .init_table_Pattern2_A6E2D4B5
-    .global _Pattern2_A6E2D4B5_s_init_table
-_Pattern2_A6E2D4B5_s_init_table:
-    .int .init_Pattern2_A6E2D4B5
+    .int _Pattern2_init
 

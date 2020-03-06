@@ -50,11 +50,11 @@
 
 _init_start:
 
-.if trap_support
-    # save TOS address
-    movi a2, ._trap_support_data
-    s32i a1, a2, 68
-.endif
+    movi a1, _tos              # Set Top of stack
+    movi a0, 0                 # Initialize return adress to nothing
+    addi a1, a1, -16           # stack frame initialization only
+    addi a4, sp, 16            #     call4 can be done as 1st call level
+    s32e a4, sp, -12
 
     call4 _stop_watchdog       # Disable both Watchdog
     call4 _set_160mhz          # Set CPU Speed to 160MHz
@@ -88,26 +88,19 @@ _init_start:
 2:
 .endif
 
-    # Call modules initialization code (but the first one)
+    # Call modules initialization code (From the last to the first one)
 
-    movi a2, _eitable          # compute size of init table - 4
-    movi a3, _sitable          # a3 = init table address
-    addi a3, a3, 4             # pass the first entry
-    sub  a2, a2, a3            # a2 = size in bytes
-    bltz a2, _init_end         # if table is empty, leave
-    beqz a2, 3f                # if there is only one module, it is the main one
+    movi a3, _eitable          # compute size of init table - 4
+    movi a2, _sitable          # a3 = init table address
+    sub  a2, a3, a2            # a2 = size in bytes
+    beqz a2, _init_end         # if table is empty, leave
     srli a2, a2, 2             # a2 = size in words
     loop a2, 3f                # loop for each table entry
+    addi a3, a3, -4            # Adjust pointer in table
     l32i a7, a3, 0             # load init code address
     callx4 a7                  # call the module initialization code
-    addi a3, a3, 4             # adjust for next table entry
+    nop
 3:
-
-    # Call main module init code
-
-    movi a2, _sitable          # get init table address
-    l32i a2, a2, 0             # retrieve the init code adress
-    callx4 a2                  # call main module initialization code
 
 _init_end:
 
@@ -223,10 +216,6 @@ __TRAP__:
     l32i a3, a1, 0
     s32i a3, a2, 64
 
-    # retrieve saved top of stack
-
-    l32i a1, a2, 68
-
     # restart program
 
     j _init_start
@@ -300,3 +289,7 @@ __fsqrt32:
     divn.s    f1, f5, f3
     ret
 .endif
+
+    .align 4
+    .section .stack
+    .space 16384

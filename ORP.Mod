@@ -974,7 +974,7 @@ MODULE ORP; (*N. Wirth 1.7.97 / 8.2.2020  Oberon compiler for RISC in Oberon-07*
       ELSIF type.base.form # ORB.NoTyp THEN
         ORS.Mark("function without result"); type.base := ORB.noType
       END ;
-      ORG.Return(type.base.form, x, locblksize, int, intLevel);
+      ORG.Return(procid, type.base.form, x, locblksize, int, intLevel);
       ORB.CloseScope; DEC(level); Check(ORS.end, "END expected");
       IF sym = ORS.ident THEN
         IF ORS.id # procid THEN ORS.Mark("no match") END ;

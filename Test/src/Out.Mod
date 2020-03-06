@@ -4,33 +4,48 @@ MODULE Out;
 IMPORT SYSTEM;
 
 CONST
+  (* UART0 Registers *)
   Fifo      = 3FF40000H; (* UART0 fifo address *)
   ClkDiv    = 3FF40014H; (* UART0 clock divisor *)
+  status    = 3FF4001CH; (* UART0 status register *)
 
-  Baud115K  = 80000000 DIV 115200;
-  Baud76800 = 80000000 DIV 76800;
-  Baud38400 = 80000000 DIV 38400;
-  Baud19200 = 80000000 DIV 19200;
-  Baud9600  = 80000000 DIV 9600;
+  Baud115K*  = 80000000 DIV 115200;
+  Baud76800* = 80000000 DIV 76800;
+  Baud38400* = 80000000 DIV 38400;
+  Baud19200* = 80000000 DIV 19200;
+  Baud9600*  = 80000000 DIV 9600;
   
   CR        = 0DX;
   LF        = 0AX;
 
 PROCEDURE Open*; BEGIN END Open;
 
+PROCEDURE FifoCount(): INTEGER;
+VAR 
+  c, r : INTEGER;
+BEGIN
+  SYSTEM.GET(status, r);
+  c := ASR(r, 16) MOD 256;
+  RETURN c
+END FifoCount;
+
+PROCEDURE Flush*;
+BEGIN
+  WHILE FifoCount() > 0 DO END
+END Flush;
+
 PROCEDURE Char*(ch: CHAR);
 BEGIN
-  SYSTEM.PUT(Fifo, ORD(ch));
+  WHILE FifoCount() > 120 DO END; (* Wait for some space in UART xmit FIFO *)
+  SYSTEM.PUT(Fifo, ORD(ch))
 END Char;
 
 PROCEDURE String*(s: ARRAY OF CHAR);
 VAR
   i: INTEGER;
 BEGIN
-  DBGON
-  i := 0;
-  
-  WHILE  (i < LEN(s)) DBGOFF & (s[i] # 0X) DO
+  i := 0;  
+  WHILE  (i < LEN(s)) & (s[i] # 0X) DO
     Char(s[i]);
     INC(i)
   END

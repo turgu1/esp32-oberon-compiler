@@ -1,18 +1,21 @@
     .title "Module Pattern20, Key A6E3D3E5"
     .sbttl "Oberon ESP32 Compiler Version 0.1.0"
 
+    .align 4
     .section .bss_Pattern20_A6E3D3E5
     .global _Pattern20_A6E3D3E5_s_bss
 _Pattern20_A6E3D3E5_s_bss:
 _Pattern20_s_bss:
     .space 20
 
+
+    .align 4
     .section .text_Pattern20_A6E3D3E5
     .global _Pattern20_A6E3D3E5_s_text
 _Pattern20_A6E3D3E5_s_text:
 
 _qa:
-    entry a1, 16
+    entry a1, 32
     s32i a2, a1, 0
     s32i a3, a1, 4
     l8ui a2, a1, 0
@@ -25,10 +28,11 @@ _qa:
     movi a2, 0
 4:
     retw
+    .size _qa, .-_qa
 
     .align 4
 _qb:
-    entry a1, 16
+    entry a1, 32
     s32i a2, a1, 0
     s32i a3, a1, 4
     l8ui a2, a1, 0
@@ -41,10 +45,11 @@ _qb:
     movi a2, 0
 8:
     retw
+    .size _qb, .-_qb
 
     .align 4
 _q:
-    entry a1, 16
+    entry a1, 32
     s32i a2, a1, 0
     s32i a3, a1, 4
     movi a2, 1
@@ -60,10 +65,11 @@ _q:
     mov a2, a6
     s8i a2, a1, 8
     retw
+    .size _q, .-_q
 
+
+    .align 4
     .section .init_Pattern20_A6E3D3E5
-    .global _Pattern20_A6E3D3E5_s_init
-_Pattern20_A6E3D3E5_s_init:
 
 _Pattern20_init:
     entry a1, 16
@@ -119,9 +125,10 @@ _Pattern20_init:
     callx4 a8
     movi a15, _Pattern20_s_bss
     retw
+    .size _Pattern20_init, .-_Pattern20_init
 
+
+    .align 4
     .section .init_table_Pattern20_A6E3D3E5
-    .global _Pattern20_A6E3D3E5_s_init_table
-_Pattern20_A6E3D3E5_s_init_table:
-    .int .init_Pattern20_A6E3D3E5
+    .int _Pattern20_init
 

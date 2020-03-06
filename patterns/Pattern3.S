@@ -1,6 +1,7 @@
     .title "Module Pattern3, Key A7E2D4B5"
     .sbttl "Oberon ESP32 Compiler Version 0.1.0"
 
+    .align 4
     .section .bss_Pattern3_A7E2D4B5
     .global _Pattern3_A7E2D4B5_s_bss
 _Pattern3_A7E2D4B5_s_bss:
@@ -8,12 +9,12 @@ _Pattern3_s_bss:
     .space 4456
 
 
+
+    .align 4
     .section .init_Pattern3_A7E2D4B5
-    .global _Pattern3_A7E2D4B5_s_init
-_Pattern3_A7E2D4B5_s_init:
 
 _Pattern3_init:
-    entry a1, 0
+    entry a1, 16
     movi a15, _Pattern3_s_bss
     l32i a2, a15, 0
     slli a2, a2, 2
@@ -48,9 +49,10 @@ _Pattern3_init:
     addmi a3, a15, 1792
     s32i a2, a3, 44
     retw
+    .size _Pattern3_init, .-_Pattern3_init
 
+
+    .align 4
     .section .init_table_Pattern3_A7E2D4B5
-    .global _Pattern3_A7E2D4B5_s_init_table
-_Pattern3_A7E2D4B5_s_init_table:
-    .int .init_Pattern3_A7E2D4B5
+    .int _Pattern3_init
 

@@ -21,13 +21,14 @@ END Pattern10.
     .title "Module Pattern10, Key A5E3D3E5"
     .sbttl "Oberon ESP32 Compiler Version 0.1.0"
 
+    .align 4
     .section .bss_Pattern10_A5E3D3E5
     .global _Pattern10_A5E3D3E5_s_bss
 _Pattern10_A5E3D3E5_s_bss:
 _Pattern10_s_bss:
     .space 48
 
-1:
+    .align 4
     .section .text_Pattern10_A5E3D3E5
     .global _Pattern10_A5E3D3E5_s_text
 _Pattern10_A5E3D3E5_s_text:
@@ -51,22 +52,22 @@ _P:
     addi a3, a3, 5     # a3 := n + 5
     s32i a3, a2, 0     # x[x + 1] := n + 5
     retw
+    .size _P, .-_P
 
+    .align 4
     .section .init_Pattern10_A5E3D3E5
-    .global _Pattern10_A5E3D3E5_s_init
-_Pattern10_A5E3D3E5_s_init:
 
 _Pattern10_init:
-    entry a1, 0
+    entry a1, 16
     movi a15, _Pattern10_s_bss
     addi a6, a15, 0   # a6 = Address of a (will be a2 in _P)
     movi a7, 12       # a7 = Length of a (will be a3 in _P)
     call4 _P
     retw
+    .size _Pattern10_init, .-_Pattern10_init
 
+    .align 4
     .section .init_table_Pattern10_A5E3D3E5
-    .global _Pattern10_A5E3D3E5_s_init_table
-_Pattern10_A5E3D3E5_s_init_table:
-    .int .init_Pattern10_A5E3D3E5
+    .int _Pattern10_init
 
 *)

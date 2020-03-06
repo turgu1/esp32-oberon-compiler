@@ -24,3 +24,13 @@ PROCEDURE [12] P();
 BEGIN
 END P;
 ```
+
+## Procedure as a parameter
+
+Passing a procedure as a parameter requires that the procedure be defined exported (with a '*' after the procedure name in the declaration) if it is going to be supplied to another module. This will insure that the Static Base register will be properly initialized at the procedure entry point.
+
+## Pragmas
+
+### DBGON DBGOFF
+
+The words DBGON and DBGOFF can be put anywhere in the application source code. This will allow to get a trace of the compiler code generator module (ORG) procedure calls dur the compilation phase. This trace is an help to resolve issues with the compiler.
