@@ -73,9 +73,8 @@ Some potential bugs corrected:
 - The Module Static Base address (SB) is loaded in register a15 and refreshed when 
 
   + the module initialization code is started,
-  + an external procedure is called, 
-  + entering an exported procedure or 
-  + when a call is made to a procedure passed as a parameter address or from a variable.
+  + a procedure is called, 
+  + entering an exported procedure.
 
 - Call to functions in parameters preparation, like `P(F(3.0))` is not very efficient in term of stack and register usage. It is better to use temporary variables and prepare parameters before the main call (will be revisited once the compiler is working properly). For example:
 

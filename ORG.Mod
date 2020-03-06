@@ -2121,6 +2121,7 @@ MODULE ORG; (* N.Wirth, 16.4.2016 / 4.4.2017 / 31.5.2019  Oberon compiler; code 
       IF x.r >= 0 THEN (* local proc *)
         eStr(" local:"); eStr(x.name);
         PutCallLocal(callType, x.name); 
+        GetLocalSB
       ELSE (* imported *)
         eStr(" imported: "); eStr(x.name); 
         ModuleInfo(x.r, moduleId, moduleKey);  

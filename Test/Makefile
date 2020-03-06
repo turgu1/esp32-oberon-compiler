@@ -21,6 +21,7 @@ LDFLAGS += $(LDFLAGS_PLATFORM)
 
 ASFLAGS += -c -O0 -Wall -fmessage-length=0
 ASFLAGS += $(ASFLAGS_PLATFORM)
+ASFLAGS += -g
 
 PORT = /dev/tty.SLAB_USBtoUART
 #PORT = /dev/ttyUSB0

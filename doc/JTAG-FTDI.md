@@ -1,0 +1,74 @@
+# Debugging with JTAG
+
+
+Here are some notes about connecting an ESP32 development board with a computer through a JTAG interface.
+
+The author is debugging the compiler output using a DoIt ESP-DEVKIT-V1. It is connected to a very cheap FTD1232 board with the following configuration:
+
+```
+JTAG     ESP32      FTDI      Cable Color 
+----     -----      ----      ---------- 
+ TDI  -> IO12  <-->  RXD <--> Orange
+ TCK  -> IO13  <-->  TXD <--> Grey
+ TMS  -> IO14  <-->  CTS <--> Yellow
+ TDO  -> IO15  <-->  RTS <--> Brown
+ SRST ->  EN   <-->  DCD <--> Green
+ GND  ->  GND  <-->  GND <--> Black
+          VIN  <-->   5v <--> Red
+```
+
+![GitHub Logo](esp32-jtag.jpg)
+
+THE ESP-IDF framework is delivered with the OpenOCD software needed to supply access to the ESP32. 
+
+# OpenOCD Configuration
+
+The following configuration file is used for OpenOCD. It has been put in file $OPENOCD_SCRIPTS/board/doit-esp32.cfg in the OpenOCD folders:
+
+```
+#
+# Config file for DoIt ESP32 DEVKIT V1 using a FTD232R interface
+#
+#   openocd -f board/doit-esp32.cfg
+#
+
+# Source the JTAG interface configuration file
+source [find interface/ft232r.cfg]
+set ESP32_FLASH_VOLTAGE 1.8
+# Source the ESP32 configuration file
+source [find target/esp32.cfg]
+```
+
+# GDB Configuration
+
+The following configuration file is used to automate the connexion with OpenOCD (on port 3333) and break the execution at the program entry point _init_start:
+
+```
+target remote :3333
+set remote hardware-watchpoint-limit 2
+mon reset halt
+flushregs
+thb _init_start
+c
+```
+
+# Starting OpenOCD
+
+OpenOCD must be launched prior to using GDB. The following command is used:
+
+```sh
+$ openocd -f board/doit-esp32.cfg
+```
+
+# Starting GDB
+
+```sh
+$ xtensa-esp32-elf-gdb -x gdbinit build/tests.elf
+```
+
+# References
+
+- ESP32 Espressif JTAG Debugging page [https://docs.espressif.com/projects/esp-idf/en/latest/api-guides/jtag-debugging/index.html]
+
+- ftd232R Configuration: [http://openocd.org/doc/html/Debug-Adapter-Configuration.html]
+
