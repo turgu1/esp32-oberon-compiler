@@ -33,4 +33,4 @@ Passing a procedure as a parameter requires that the procedure be defined export
 
 ### DBGON DBGOFF
 
-The words DBGON and DBGOFF can be put anywhere in the application source code. This will allow to get a trace of the compiler code generator module (ORG) procedure calls dur the compilation phase. This trace is an help to resolve issues with the compiler.
+The words DBGON and DBGOFF can be put anywhere in the application source code. This will allow to get a trace of the compiler code generator module (ORG) procedure calls during the compilation phase. This trace is an help to resolve issues with the compiler.
