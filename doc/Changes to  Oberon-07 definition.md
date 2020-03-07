@@ -1,6 +1,6 @@
 # Changes to the Oberon-07 definition
 
-This document explains the changes made to the ESP32 Oberon-07 compiler in regard of the Niklaus Wirth language definition and implementation in  Project Oberon.
+This document explains the changes made to the ESP32 Oberon-07 compiler in regard of the Niklaus Wirth language definition and implementation in Project Oberon.
 
 ## Standard procedures
 

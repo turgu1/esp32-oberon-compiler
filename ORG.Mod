@@ -1,15 +1,17 @@
 MODULE ORG; 
   (* N.Wirth, 16.4.2016 / 4.4.2017 / 31.5.2019  Oberon compiler; code generator for RISC*)
-  (* G.Turcotte XX.X.2020 Version for the ESP32 processor chip)
+  (* G.Turcotte XX.X.2020 Version for the ESP32 processor chip *)
+
   IMPORT SYSTEM, Files, Texts, ORS, ORB, Out, Reals;
-  (*Code generator for Oberon compiler for ESP32 processor.
+  
+  (* Code generator for Oberon compiler for ESP32 processor.
      Procedural interface to Parser OSAP; result in stream "CodeW".
-     Procedure Close writes code-files in assembly language*)
+     Procedure Close writes code-files in assembly language *)
 
   CONST 
     WordSize* = 4;
     SP = 1; SB = 2;   (* dedicated registers *)
-    maxStrx = 2400; maxTD = 160;
+    maxStrx = 5000; maxTD = 160;
 
     Reg = 10; RegI = 11; Cond = 12;  (* internal item modes *)
 
