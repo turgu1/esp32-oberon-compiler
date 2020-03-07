@@ -225,7 +225,9 @@ MODULE ORP; (*N. Wirth 1.7.97 / 8.2.2020  Oberon compiler for RISC in Oberon-07*
             (par.type.form = ORB.Array) & 
             (par.type.base.form = ORB.Char) & 
             (par.type.len < 0) THEN ORG.StringParam(x)
-      ELSIF ~varpar & (par.type.form = ORB.Int) & (x.type.form = ORB.Int) THEN ORG.ValueParam(x)  (*BYTE*)
+      ELSIF ~varpar & 
+            (par.type.form = ORB.Int) & 
+            (x.type.form = ORB.Int) THEN ORG.ValueParam(x)  (*BYTE*)
       ELSIF (x.type.form = ORB.String) & 
             (x.b = 2) & 
             (par.class = ORB.Var) & 
@@ -544,10 +546,14 @@ MODULE ORP; (*N. Wirth 1.7.97 / 8.2.2020  Oberon compiler for RISC in Oberon-07*
               ORG.StoreStruct(x, y)
             ELSIF (x.type.form = ORB.Array) & (x.type.base.form = ORB.Char) & (y.type.form = ORB.String) THEN
               ORG.CopyString(x, y)
+            ELSIF (x.type.form = ORB.Array) & (x.type.base.form = ORB.Char) & (y.type.form = ORB.Char) THEN
+              ORG.CharToStr(y); ORG.CopyString(x, y);
             ELSIF (x.type.form = ORB.Int) & (y.type.form = ORB.Int) THEN ORG.Store(x, y)  (*BYTE*)
             ELSIF (x.type.form = ORB.Char) & (y.type.form = ORB.String) & (y.b = 2) THEN
               ORG.StrToChar(y); ORG.Store(x, y)
-            ELSE ORS.Mark("illegal assignment")
+            ELSE 
+              ORS.Mark("illegal assignment");
+              Out.Ln; Out.Int(x.type.form, 0); Out.String(" vs "); Out.Int(y.type.form, 0); Out.Ln
             END
           ELSIF sym = ORS.eql THEN ORS.Mark("should be :="); ORS.Get(sym); expression(y)
           ELSIF sym = ORS.lparen THEN (* ----- procedure call ----- *)

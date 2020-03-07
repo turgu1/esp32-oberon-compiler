@@ -1739,6 +1739,12 @@ MODULE ORG; (* N.Wirth, 16.4.2016 / 4.4.2017 / 31.5.2019  Oberon compiler; code 
   BEGIN x.type := ORB.charType; DEC(strx, 4); x.a := ORD(str[x.a])
   END StrToChar;
 
+  PROCEDURE CharToStr*(VAR x: Item);
+  BEGIN 
+    x.type := ORB.strType; str[strx] := CHR(x.a); x.a := strx; x.b := 1; INC(strx);
+    WHILE strx MOD 4 # 0 DO str[strx] := 0X; INC(strx) END
+  END CharToStr;
+
   PROCEDURE Store*(VAR x, y: Item); (* x := y *)
     VAR 
       op: ARRAY 5 OF CHAR;
@@ -2004,6 +2010,7 @@ MODULE ORG; (* N.Wirth, 16.4.2016 / 4.4.2017 / 31.5.2019  Oberon compiler; code 
     VAR 
       cnt, i: INTEGER;
   BEGIN 
+    eStr(" SaveRegs {"); eInt(low); eStr(".."); eInt(high); eStr("}");
     IF high = 15 THEN
       ORS.Mark("Call too complex. Reduce number of parameters.")
     ELSE
@@ -2025,6 +2032,7 @@ MODULE ORG; (* N.Wirth, 16.4.2016 / 4.4.2017 / 31.5.2019  Oberon compiler; code 
     VAR 
       cnt, i: INTEGER;
   BEGIN
+    eStr(" RestoreRegs {"); eInt(low); eStr(".."); eInt(high); eStr("}");
     cnt := high - low + 1;
     IF cnt > 0 THEN
       i := 0;
@@ -2073,16 +2081,9 @@ MODULE ORG; (* N.Wirth, 16.4.2016 / 4.4.2017 / 31.5.2019  Oberon compiler; code 
     IF RH <= 4 THEN
       callType :=  4;
       free     := 10;
-    ELSIF RH <= 8 THEN
+    ELSE
       callType := 8;
       free     := 6;
-    ELSE
-      callType := 12;
-      free     :=  2;
-    END;
-    IF (x.type.nofpar > free) & (callType > 4) THEN 
-      free     := free + 4; 
-      callType := callType - 4 
     END;
     IF (x.type.nofpar > free) & (callType > 4) THEN 
       free     := free + 4; 
@@ -2094,6 +2095,7 @@ MODULE ORG; (* N.Wirth, 16.4.2016 / 4.4.2017 / 31.5.2019  Oberon compiler; code 
       SaveRegs(callType, RH - 1);
     END;
     RH := callType + 2; (* First register to place params *)
+    eStr(" calltype:"); eInt(callType); eStr(" RH:"); eInt(RH);
     RETURN callType
   END PrepCall;
 
@@ -2138,9 +2140,9 @@ MODULE ORG; (* N.Wirth, 16.4.2016 / 4.4.2017 / 31.5.2019  Oberon compiler; code 
     IF x.type.base.form = ORB.NoTyp THEN (*procedure*) 
       RH := FirstRH; UsedRegs := {}
     ELSE (*function*)
-      (* callType + 2 is the register containing the function result *)
-      IF (callType + 2) > r THEN
-        PutRR("mov", r, callType + 2);
+      (* callType + 3 is the register containing the function result *)
+      IF (callType + 3) > r THEN
+        PutRR("mov", r, callType + 3);
       END;
       RestoreRegs(callType, r - 1);
       x.mode := Reg; 

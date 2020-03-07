@@ -1,0 +1,8 @@
+MODULE ExtTypes;
+  IMPORT Out;
+  TYPE
+    pR0* = POINTER TO R0;
+    pR1* = POINTER TO R1;
+    R0 = RECORD x: INTEGER END;
+    R1 = RECORD(R0) y*: INTEGER END;
+END ExtTypes.

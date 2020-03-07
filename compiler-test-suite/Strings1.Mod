@@ -1,0 +1,85 @@
+MODULE Strings1;
+  IMPORT Out;
+  CONST y = "A";
+  VAR a,b : ARRAY 10 OF CHAR;
+      c : ARRAY 0 OF CHAR;
+      d, e : ARRAY 2 OF CHAR;
+      x : CHAR;
+      s0 : ARRAY 5 OF ARRAY 5 OF CHAR;
+      s1 : ARRAY 5 OF CHAR;
+      i : INTEGER;
+
+  PROCEDURE PrintMid(x : ARRAY OF CHAR);
+  BEGIN
+    Out.Char(x[LEN(x) DIV 2])
+  END PrintMid;
+  
+  PROCEDURE Cmp(x, y : ARRAY OF CHAR);
+  BEGIN
+    IF x = y  THEN Out.Int(-1, 0) END;
+    IF y = x  THEN Out.Int(-2, 0) END;
+    IF x # y  THEN Out.Int(-3, 0) END;
+    IF y # x  THEN Out.Int(-4, 0) END;
+    IF x > y  THEN Out.Int(-5, 0) END;
+    IF y > x  THEN Out.Int(-6, 0) END;
+    IF x < y  THEN Out.Int(-7, 0) END;
+    IF y < x  THEN Out.Int(-8, 0) END;
+    IF x >= y THEN Out.Int(-9, 0) END;
+    IF y >= x THEN Out.Int(-10, 0) END;
+    IF x <= y THEN Out.Int(-11, 0) END;
+    IF y <= x THEN Out.Int(-12, 0) END;
+  END Cmp;
+BEGIN
+  PrintMid("Hello");
+  Out.Ln;
+  IF a = "Hello"         THEN Out.Int(0, 0) END;
+  IF "Hello" = "Hello"   THEN Out.Int(1, 0) END;
+  IF "Hello" = a         THEN Out.Int(2, 0) END;
+  IF a # "Hello"         THEN Out.Int(3, 0) END;
+  IF "Hello" # "Hello"   THEN Out.Int(4, 0) END;
+  IF "Hello" # a         THEN Out.Int(5, 0) END;
+  IF a > "Hello"         THEN Out.Int(6, 0) END;
+  IF "Hello" > "Hello"   THEN Out.Int(7, 0) END;
+  IF "Hello" > a         THEN Out.Int(8, 0) END;
+  IF a < "Hello"         THEN Out.Int(9, 0) END;
+  IF "Hello" < "Hello"   THEN Out.Int(10, 0) END;
+  IF "Hello" < a         THEN Out.Int(11, 0) END;
+  IF a >= "Hello"        THEN Out.Int(12, 0) END;
+  IF "Hello" >= "Hello"  THEN Out.Int(13, 0) END;
+  IF "Hello" >= a        THEN Out.Int(14, 0) END;
+  IF a <= "Hello"        THEN Out.Int(15, 0) END;
+  IF "Hello" <= "Hello"  THEN Out.Int(16, 0) END;
+  IF "Hello" <= a        THEN Out.Int(17, 0) END;
+  IF "HELL" = "HELLO"    THEN Out.Int(18, 0) END;
+  Out.Ln;
+  a := "Hello";
+  b := "World";
+  Cmp(a, b);
+  Out.Ln;
+  b := "Hello";
+  Cmp(a, b);
+  Out.Ln;
+  b := "";
+  Cmp(a, b);
+  Out.Ln;
+  Cmp(a, c);
+  Out.Ln;
+  d[0] := "A"; d[1] := "B";
+  e[0] := "A"; e[1] := "D";
+  Cmp(d, e);
+  Out.Ln;
+  x := "A";
+  IF x = "A" THEN Out.Int(1, 0) END;
+  IF "A" = x THEN Out.Int(2, 0) END;
+  IF "A" = y THEN Out.Int(3, 0) END;
+  s0[0] := "ZAB";
+  i := -1;
+  IF "ABC" < s0[1+i] THEN  Out.Int(4, 0) END;
+  IF s0[1+i] > "ABC" THEN  Out.Int(5, 0) END;
+  IF "ABC" < "ZBC" THEN Out.Int(6, 0) END;
+  IF "A" < "Z" THEN Out.Int(7, 0) END;
+  s1[0] := "A";
+  IF s1[1+i] = "A" THEN Out.Int(8, 0) END;
+  IF "A" = s1[1+i] THEN Out.Int(9, 0) END;
+  IF "A" = y THEN Out.Int(10, 0) END;
+END Strings1.

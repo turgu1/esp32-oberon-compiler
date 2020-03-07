@@ -1,0 +1,37 @@
+MODULE Pattern2b;
+  IMPORT Out;
+IMPORT SYSTEM;
+  VAR i, j: INTEGER;
+      x, y: REAL;
+      s, t: SET;
+BEGIN 
+  x := 1.0+7.0;
+  Out.Real(x);
+  y := 7.0;
+  x := 1.0+y;
+  Out.Real(x);
+  y := 9.0;
+  x := y-1.0;
+  Out.Real(x);
+  y := 4.0;
+  x := y*2.0;
+  Out.Real(x);
+  y := 16.0;
+  x := y/2.0;
+  Out.Real(x);
+  i := -8;
+  Out.Int(i); 
+  j := 8;
+  i := -j;
+  Out.Int(i); 
+  x := -8.0;
+  Out.Real(x); 
+  y := 8.0;
+  x := -y;
+  Out.Real(x); 
+  s := -{1, 3..31};
+  Out.Int(SYSTEM.VAL(INTEGER, s));
+  t := {1, 3..31};
+  s := -t;
+  Out.Int(SYSTEM.VAL(INTEGER, s));
+END Pattern2b.

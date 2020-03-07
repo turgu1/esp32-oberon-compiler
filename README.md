@@ -2,9 +2,9 @@
 
 This is an ongoing effort to build an ESP32 Oberon Compiler, using the Oberon-07 Compiler from <http://www.projectoberon.com> by Niklaus Wirth and Jürg Gutknecht.
 
-The code is being ported to obnc and will generate ELF object code through ESP32 assembly language generation. I'm currently targetting a 'bearmetal' version, supplying everything necessary for building applications, relying only on the assembler linker and loader provided with ESP-IDF. At least, this is the intent. Nothing is in a workable condition at this point in time.
+The code is being ported to obnc and will generate ELF object code through ESP32 assembly language generation. I'm currently targetting a 'bearmetal' version, supplying everything necessary for building applications, relying only on the assembler linker and loader provided with ESP-IDF. GDB and OpenOCD are also used to allow remote debugging through JTAG. This is the intent. A large portion is in a workable condition at this point in time.
 
-The folder `test-bearmetal` demonstrates the feasability of independant coding from ESP-IDF. It is a working piece of assembly code that I made that can be compiled and pushed to an ESP32. It gets a led blink every half a second and push some message on the serial port.
+The folder `test-bearmetal` demonstrates the feasability of independant coding from ESP-IDF. It is a working piece of assembly code that I made that can be compiled and pushed to an ESP32. It gets a led blink every half a second and push some message on the serial port. This was the starting point to start modeling am executable architecture based on the ESP32 for Oberon.
 
 In a Nutshell, the steps I'm taking to get a working compiler are the following:
 
@@ -66,7 +66,7 @@ Some potential bugs corrected:
 
 ### Other changes:
 
-- The .smb file output has been modified to get exported variable offsets instead of an export sequence number. The code generator is relying on the ELF loader to resolve the location of data sections. The imported variables are accessed through their offset.
+- The .smb file output has been modified to get exported variable offsets instead of an export sequence number. The code generator is relying on the ELF linker to resolve the location of data sections. The imported variables are accessed through their offset.
 
 - The ESP32 doesn't supply a floating point division instruction. A function called by the generated code is added.
 
