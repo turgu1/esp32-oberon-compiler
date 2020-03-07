@@ -1,10 +1,10 @@
 # esp32-oberon-compiler
 
-This is an ongoing effort to build an ESP32 Oberon Compiler, using the Oberon-07 Compiler from <http://www.projectoberon.com> by Niklaus Wirth and Jürg Gutknecht.
+This is an ongoing effort to build an ESP32 Oberon Compiler, using the Oberon-07 Compiler from [Project Oberon](http://www.projectoberon.com) by Niklaus Wirth and Jürg Gutknecht and some code from project [Extended Oberon](https://github.com/andreaspirklbauer/Oberon-extended) by Mr. Andreas Pirklbauer. Test cases are being designed in part using the [OberonC](https://github.com/lboasso) effort by Luca Boasso.
 
-The code is being ported to obnc and will generate ELF object code through ESP32 assembly language generation. I'm currently targetting a 'bearmetal' version, supplying everything necessary for building applications, relying only on the assembler linker and loader provided with ESP-IDF. GDB and OpenOCD are also used to allow remote debugging through JTAG. This is the intent. A large portion is in a workable condition at this point in time.
+The code is being ported to [OBNC](https://miasap.se/obnc/) and will generate ELF object code through ESP32 assembly language generation. I'm currently targetting a 'bear metal' version, supplying everything necessary for building applications, relying only on the assembler linker and loader provided with [ESP-IDF](https://docs.espressif.com/projects/esp-idf/en/latest/). GDB and OpenOCD are also used to allow remote debugging through JTAG. This is the intent. A large portion is in a workable condition at this point in time.
 
-The folder `test-bearmetal` demonstrates the feasability of independant coding from ESP-IDF. It is a working piece of assembly code that I made that can be compiled and pushed to an ESP32. It gets a led blink every half a second and push some message on the serial port. This was the starting point to start modeling am executable architecture based on the ESP32 for Oberon.
+The folder `test-bearmetal` demonstrates the feasability of independant coding from ESP-IDF. It is a working piece of assembly code that I made that can be compiled and pushed to an ESP32. It gets a led blink every half a second and pushes some message on the serial port. This was the starting point to start modeling an executable architecture based on the ESP32 for Oberon.
 
 In a Nutshell, the steps I'm taking to get a working compiler are the following:
 

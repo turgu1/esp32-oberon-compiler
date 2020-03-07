@@ -1,6 +1,7 @@
-# Documentation References
+# Documentation and Source Code References
 
 - [Project Oberon](http://www.projectoberon.com)
+- [The Extended Oberon operating system and the Revised Oberon-2 programming language by Mr. Andreas Pirklbauer](https://github.com/andreaspirklbauer/Oberon-extended)
 - [Prof. Niklaus Wirth Site](https://inf.ethz.ch/personal/wirth/)
 - [ESP32 Technical Reference Manual](https://espressif.com/sites/default/files/documentation/esp32_technical_reference_manual_en.pdf)
 - [Xtensa® Instruction Set Architecture (ISA)](http://0x04.net/~mwk/doc/xtensa.pdf)
@@ -9,3 +10,4 @@
 - [User Manual - GNU Linker](https://sourceware.org/binutils/docs/ld/)
 - [User Manual - Gnu Make](https://www.gnu.org/software/make/manual/)
 - [User Manual - Gnu Debugger](https://sourceware.org/gdb/current/onlinedocs/gdb/)
+- [OBNC Oberon compiler](https://miasap.se/obnc/)

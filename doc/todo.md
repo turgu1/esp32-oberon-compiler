@@ -1,13 +1,17 @@
 # Compiler changes
 
-- [ ] Add INTEGER/BYTE/CHAR CASE support
-- [ ] Add AND/BOR/XOR functions
+- [ ] Add INTEGER/BYTE/CHAR in CASE statements
+- [ ] Add AND/BOR/XOR for INTEGER/BYTE functions
 - [ ] Revisit ORG.ChrToStr/ORG.StrToChr functions
 - [ ] Implement Const Char as a string parameter
-- [ ] Revisit Types description
+- [ ] Revisit Types descriptor
 - [ ] Implement Pointers management structure
 - [ ] Revisit Interrupt procedure definition
-
+- [ ] Cleanup internal compiler debugging support
+- [ ] Revisit Logging module
+- [ ] ORG.{load,store} procedures optimization
+- [ ] Revisit Procedure calls (function parameters) optimization
+ 
 # Compiler Support
 
 - [ ] Trap mechanism to use Break instructions/Interrupts

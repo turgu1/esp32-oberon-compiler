@@ -1,18 +1,20 @@
-MODULE ORG; (* N.Wirth, 16.4.2016 / 4.4.2017 / 31.5.2019  Oberon compiler; code generator for RISC*)
+MODULE ORG; 
+  (* N.Wirth, 16.4.2016 / 4.4.2017 / 31.5.2019  Oberon compiler; code generator for RISC*)
+  (* G.Turcotte XX.X.2020 Version for the ESP32 processor chip)
   IMPORT SYSTEM, Files, Texts, ORS, ORB, Out, Reals;
-  (*Code generator for Oberon compiler for RISC processor.
-     Procedural interface to Parser OSAP; result in array "code".
-     Procedure Close writes code-files*)
+  (*Code generator for Oberon compiler for ESP32 processor.
+     Procedural interface to Parser OSAP; result in stream "CodeW".
+     Procedure Close writes code-files in assembly language*)
 
   CONST 
     WordSize* = 4;
-    SP = 1; SB = 2;   (*dedicated registers*)
+    SP = 1; SB = 2;   (* dedicated registers *)
     maxStrx = 2400; maxTD = 160;
 
-    Reg = 10; RegI = 11; Cond = 12;  (*internal item modes*)
+    Reg = 10; RegI = 11; Cond = 12;  (* internal item modes *)
 
     FirstRH = 3;   (* First available register for arguments *)
-    LastRH  = 15;  (* Last available register for arguments *)
+    LastRH  = 15;  (* Last available register for arguments  *)
     
     (* Conditional branch instructions *)
 
@@ -42,16 +44,23 @@ MODULE ORG; (* N.Wirth, 16.4.2016 / 4.4.2017 / 31.5.2019  Oberon compiler; code 
     TrZeroDiv = 6; (* integer division by zero      *)
     TrAssert  = 7; (* assertionviolated             *)
   TYPE 
-    (* 
+    (*
+
+    lf* and lt* added by Guy T. Required to be separate as this version of
+    the compiler uses labels in assembly language and the algorithm of
+    fixing back the code is rather different now (no fixing anymore). 
+    May be back to a, b later if a working solution is found to re-merge with
+    the existing fields as the original compiler.
+
     Item forms and meaning of fields:
-      mode     r      a       b
-      --------------------------------
-      Const   -     value (proc adr)    (immediate value)
-      Var     base   off     -               (direct adr)
-      Par      -     off0   off1           (indirect adr)
+      mode     r      a       b       lf     lt
+      --------------------------------------------
+      Const   -     value (proc adr)               (immediate value)
+      Var     base   off     -                     (direct adr)
+      Par      -     off0   off1                   (indirect adr)
       Reg    regno
       RegI   regno   off     -
-      Cond   cond   Fchain Tchain
+      Cond   cond     -      -       Fchain Tchain
 
       Fchain: False Chain
       Tchain: True Chain  
@@ -109,7 +118,7 @@ MODULE ORG; (* N.Wirth, 16.4.2016 / 4.4.2017 / 31.5.2019  Oberon compiler; code 
 
     UsedRegs: SET;
 
-  (* instruction assemblers according to formats *)
+  (* Compiler generator debugging support tools *)
 
   PROCEDURE Spaces(i: INTEGER);
   BEGIN 
@@ -361,6 +370,9 @@ MODULE ORG; (* N.Wirth, 16.4.2016 / 4.4.2017 / 31.5.2019  Oberon compiler; code 
       frame := 0
     END
   END CheckRegs;
+
+  (* The ESP32 is using a large amount of instruction formats... *)
+  (* instruction assemblers according to formats *)
 
   PROCEDURE PutA(op, a: ARRAY OF CHAR);
   BEGIN 
@@ -755,8 +767,6 @@ MODULE ORG; (* N.Wirth, 16.4.2016 / 4.4.2017 / 31.5.2019  Oberon compiler; code 
     x.b := 0; 
     x.r := n
   END SetCC;
-
-  (*handling of forward reference, fixups of branch addresses and constant tables*)
 
   PROCEDURE negated(cond: INTEGER): INTEGER;
   VAR
