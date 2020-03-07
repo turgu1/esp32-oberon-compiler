@@ -25,18 +25,18 @@ _Pattern7_s_bss:
 
 _Pattern7_init:
     entry a1, 16
-    movi a15, _Pattern7_s_bss
-    movi a2, 0                 # a2 = 0  -> x := y
+    movi a2, _Pattern7_s_bss
+    movi a3, 0                 # a3 = 0  -> x := y
 1:
-    l32i a3, a15, 8            # a3 := n
-    addi a3, a3, -1            # subtract 1
-    blt a3 a2, 2f              # branch if (n - 1) < x
-    s32i a2, a15, 0            # save x
-    l32i a2, a15, 4            # a2 := m
-    slli a2, a2, 1             # a2 := m * 2
-    s32i a2, a15, 4            # m := m * 2
-    l32i a2, a15, 0            # a2 := x
-    addi a2, a2, 1             # a2 := x + 1
+    l32i a4, a2, 8             # a4 := n
+    addi a4, a4, -1            # subtract 1
+    blt a4 a3, 2f              # branch if (n - 1) < x
+    s32i a3, a2, 0             # save x
+    l32i a3, a2, 4             # a3 := m
+    slli a3, a3, 1             # a3 := m * 2
+    s32i a3, a2, 4             # m := m * 2
+    l32i a3, a2, 0             # a3 := x
+    addi a3, a3, 1             # a3 := x + 1
     j 1b                       # loop...
 2:
     retw

@@ -34,11 +34,12 @@ _P:                        # PROCEDURE P
     entry a1, 32
     s32i a2, a1, 0         # save x
     s32i a3, a1, 4         # save y
-    l32i a2, a1, 0         # load x
-    s32i a2, a1, 8         # z := x
-    l32i a2, a1, 8         # load z
-    l32i a3, a1, 4         # load y
-    s32i a2, a3, 0         # @y := z
+    movi a2, _Pattern8_s_bss
+    l32i a3, a1, 0         # load x
+    s32i a3, a1, 8         # z := x
+    l32i a3, a1, 8         # load z
+    l32i a4, a1, 4         # load y
+    s32i a3, a4, 0         # @y := z
     retw
     .size _P, .-_P
 
@@ -47,9 +48,9 @@ _P:                        # PROCEDURE P
 
 _Pattern8_init:
     entry a1, 16
-    movi a15, _Pattern8_s_bss
+    movi a2, _Pattern8_s_bss
     movi a6, 5                   # param x := 5
-    mov a7, a15                  # param y := address of i
+    mov a7, a2                  # param y := address of i
     call4 _P
     retw
     .size _Pattern8_init, .-_Pattern8_init

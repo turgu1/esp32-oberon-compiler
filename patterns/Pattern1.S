@@ -15,15 +15,15 @@ _Pattern1_s_bss:
 
 _Pattern1_init:
     entry a1, 16
-    movi a15, _Pattern1_s_bss
-    movi a2, 48
-    s8i a2, a15, 0
-    movi a2, 10
-    s32i a2, a15, 4
-    movi a2, 1065353216
-    s32i a2, a15, 8
-    movi a2, 273
-    s32i a2, a15, 12
+    movi a2, _Pattern1_s_bss
+    movi a3, 48
+    s8i a3, a2, 0
+    movi a3, 10
+    s32i a3, a2, 4
+    movi a3, 1065353216
+    s32i a3, a2, 8
+    movi a3, 273
+    s32i a3, a2, 12
     retw
     .size _Pattern1_init, .-_Pattern1_init
 

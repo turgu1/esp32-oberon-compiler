@@ -26,30 +26,28 @@ _Pattern6_s_bss:
 
     .align 4
     .section .init_Pattern6_AAE2D4B5
-    .global _Pattern6_AAE2D4B5_s_init
-_Pattern6_AAE2D4B5_s_init:
 
 _Pattern6_init:
     entry a1, 16
-    movi a15, _Pattern6_s_bss
-    movi a2, 0                 # a3 := 0
-    s32i a2, a15, 0            # i := 0
+    movi a2, _Pattern6_s_bss
+    movi a3, 0                 # a4 := 0
+    s32i a3, a2, 0             # i := 0
 1:
-    l32i a2, a15, 0            # a2 := i
-    movi a3, 10                # a3 := 10
-    bge a2 a3, 2f              # branch if a2 >= 10
-    l32i a2, a15, 0            # a2 := i
-    addi a2, a2, 2             # a2 := i + 2
-    s32i a2, a15, 0            # i := i + 2
+    l32i a3, a2, 0             # a3 := i
+    movi a4, 10                # a4 := 10
+    bge a3 a4, 2f              # branch if a3 >= 10
+    l32i a3, a2, 0             # a3 := i
+    addi a3, a3, 2             # a3 := i + 2
+    s32i a3, a2, 0             # i := i + 2
     j 1b                       # loop to while test
 2:
 3:
-    l32i a2, a15, 0            # a2 := i
-    addi a2, a2, -1            # a2 := i - 1
-    s32i a2, a15, 0            # i := i - 1
-    l32i a2, a15, 0            # a2 := i
-    movi a3, 0                 # a3 := 0
-    bne a2 a3, 3b              # branch if i # 0
+    l32i a3, a2, 0             # a3 := i
+    addi a3, a3, -1            # a3 := i - 1
+    s32i a3, a2, 0             # i := i - 1
+    l32i a3, a2, 0             # a3 := i
+    movi a4, 0                 # a4 := 0
+    bne a3 a4, 3b              # branch if i # 0
     retw
     .size _Pattern6_init, .-_Pattern6_init
 

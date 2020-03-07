@@ -40,61 +40,61 @@ _Pattern5_s_bss:
 
 _Pattern5_init:
     entry a1, 16
-    movi a15, _Pattern5_s_bss
-    l32i a2, a15, 0           # a2 := i
-    movi a3, 0                # a3 := 0
-    bne a2 a3, 1f             # Branch if not equal to 0
-    mov a2, a15 
-    l32i a3, a2, 0            # a3 := n
-    addi a3, a3, 1            # INC(a3)
-    s32i a3, a2, 0            # n := a3
+    movi a2, _Pattern5_s_bss
+    l32i a3, a2, 0            # a3 := i
+    movi a4, 0                # a4 := 0
+    bne a3 a4, 1f             # Branch if not equal to 0
+    mov a3, a2 
+    l32i a4, a3, 0            # a4 := n
+    addi a4, a4, 1            # INC(a4)
+    s32i a4, a3, 0            # n := a4
 1:
-    l32i a2, a15, 0           # a2 := n
-    movi a3, 0                # a3 := 0
-    blt a2 a3, 2f             # branch if n < 0
-    l32i a2, a15, 0           # a2 := n
-    movi a3, 100              # a3 = 100
-    bge a2 a3, 2f             # branch if n >= 100
-3:
-    mov a2, a15
     l32i a3, a2, 0            # a3 := n
-    addi a3, a3, -1           # DEC(a3)
-    s32i a3, a2, 0            # n := a3
+    movi a4, 0                # a4 := 0
+    blt a3 a4, 2f             # branch if n < 0
+    l32i a3, a2, 0            # a3 := n
+    movi a4, 100              # a4 = 100
+    bge a3 a4, 2f             # branch if n >= 100
+3:
+    mov a3, a2
+    l32i a4, a3, 0            # a4 := n
+    addi a4, a4, -1           # DEC(a4)
+    s32i a4, a3, 0            # n := a4
 2:
-    l32i a2, a15, 0           # a2 := n
-    movi a3, 1
-    and a2, a2, a3            # a2 := ODD(n)
-    bnez a2, 4f               # branch if it is odd
-    l32i a2, a15, 4           # a2 := s
-    l32i a3, a15, 0           # a3 := n
-    bbc a2 a3, 5f             # branch if bit not set
+    l32i a3, a2, 0            # a3 := n
+    movi a4, 1
+    and a3, a3, a4            # a3 := ODD(n)
+    bnez a3, 4f               # branch if it is odd
+    l32i a3, a2, 4            # a3 := s
+    l32i a4, a2, 0            # a4 := n
+    bbc a3 a4, 5f             # branch if bit not set
 4:
-    movi a2, -1000            # a2 := -1000
-    s32i a2, a15, 0           # n := -1000
+    movi a3, -1000            # a3 := -1000
+    s32i a3, a2, 0            # n := -1000
 5:
-    l32i a2, a15, 0           # a2 := n
-    movi a3, 0                # a3 := 0
-    bge a2 a3, 6f             # branch if n >= 0
-    movi a2, 0
-    s32i a2, a15, 4
+    l32i a3, a2, 0            # a3 := n
+    movi a4, 0                # a4 := 0
+    bge a3 a4, 6f             # branch if n >= 0
+    movi a3, 0
+    s32i a3, a2, 4
     j 7f
 6:
-    l32i a2, a15, 0           # a2 := n
-    movi a3, 10               # a3 := 10
-    bge a2 a3, 8f             # branch if n >= 10
-    movi a2, 1                # a2 := {0}
-    s32i a2, a15, 4           # s := {0}
+    l32i a3, a2, 0            # a3 := n
+    movi a4, 10               # a4 := 10
+    bge a3 a4, 8f             # branch if n >= 10
+    movi a3, 1                # a3 := {0}
+    s32i a3, a2, 4            # s := {0}
     j 7f
 8:
-    l32i a2, a15, 0           # a2 := n
-    movi a3, 100              # a3 := 100
-    bge a2 a3, 9f             # branch if n >= 100
-    movi a2, 2                # a2 := {1}
-    s32i a2, a15, 4           # s := {1}
+    l32i a3, a2, 0            # a3 := n
+    movi a4, 100              # a4 := 100
+    bge a3 a4, 9f             # branch if n >= 100
+    movi a3, 2                # a3 := {1}
+    s32i a3, a2, 4            # s := {1}
     j 7f
 9:
-    movi a2, 4                # a2 := {2}
-    s32i a2, a15, 4           # s := {2}
+    movi a3, 4                # a3 := {2}
+    s32i a3, a2, 4            # s := {2}
 7:
     retw
    .size _Pattern5_init, .-_Pattern5_init

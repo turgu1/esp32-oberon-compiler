@@ -29,42 +29,42 @@ _Pattern3_s_bss:
 
 _Pattern3_init:
     entry a1, 16
-    movi a15, _Pattern3_s_bss
-    l32i a2, a15, 0    # a2 = i
-    slli a2, a2, 2     # a2 = i * 4
-    add a2, a15, a2
-    l32i a2, a2, 16    # a2 := a[i]
-    s32i a2, a15, 8    # k := a[i]
-    l32i a2, a15, 36   # a2 := a[5]
-    s32i a2, a15, 12   # n := a[5]
+    movi a2, _Pattern3_s_bss
+    l32i a3, a2, 0     # a3 = i
+    slli a3, a3, 2     # a3 = i * 4
+    add a3, a2, a3
+    l32i a3, a3, 16    # a3 := a[i]
+    s32i a3, a2, 8     # k := a[i]
+    l32i a3, a2, 36    # a3 := a[5]
+    s32i a3, a2, 12    # n := a[5]
     
-    l32i a2, a15, 0    # a2 = i
-    movi a3, 40
-    mull a2, a2, a3    # a2 = i * 40
-    add a2, a15, a2    # a2 = ~x[i, 0]
-    l32i a3, a15, 4    # a3 = j
-    slli a3, a3, 2     # a3 = j * 4
-    add a2, a2, a3     # a2 = ~x[i, j]
-    movi a3, 2         # a3 = 2
-    s32i a3, a2, 56    # x[i, j] = 2
-
-    l32i a2, a15, 0    # a2 = i
-    movi a3, 400       
-    mull a2, a2, a3    # a2 = i * 400
-    add a2, a15, a2    # a2 = ~y[i, 0, 0]
-    l32i a3, a15, 4    # a3 = j
+    l32i a3, a2, 0     # a3 = i
     movi a4, 40
-    mull a3, a3, a4    # a3 = j * 40
-    add a2, a2, a3     # a2 = ~y[i, j, 0]
-    l32i a3, a15, 8    # a3 = k
-    slli a3, a3, 2     # a3 = k * 4
-    add a2, a2, a3     # a2 = ~y[i, j, k]
-    movi a3, 3
-    s32i a3, a2, 456   # y[i, j, k] := 3
+    mull a3, a3, a4    # a3 = i * 40
+    add a3, a2, a3     # a3 = ~x[i, 0]
+    l32i a4, a2, 4     # a4 = j
+    slli a4, a4, 2     # a4 = j * 4
+    add a3, a3, a4     # a3 = ~x[i, j]
+    movi a4, 2         # a4 = 2
+    s32i a4, a3, 56    # x[i, j] = 2
+
+    l32i a3, a2, 0     # a3 = i
+    movi a4, 400       
+    mull a3, a3, a4    # a3 = i * 400
+    add a3, a2, a3     # a3 = ~y[i, 0, 0]
+    l32i a4, a2, 4     # a4 = j
+    movi a5, 40
+    mull a4, a4, a5    # a4 = j * 40
+    add a3, a3, a4     # a3 = ~y[i, j, 0]
+    l32i a4, a2, 8     # a4 = k
+    slli a4, a4, 2     # a4 = k * 4
+    add a3, a3, a4     # a3 = ~y[i, j, k]
+    movi a4, 3
+    s32i a4, a3, 456   # y[i, j, k] := 3
     
-    movi a2, 6
-    addmi a4, a15, 1792 # a4 := 1792 + base address
-    s32i a2, a4, 44    # x[3, 4, 5] := 6
+    movi a3, 6
+    addmi a4, a2, 1792 # a4 := 1792 + base address
+    s32i a3, a4, 44    # x[3, 4, 5] := 6
     retw
     .size _Pattern3_init, .-_Pattern3_init
 

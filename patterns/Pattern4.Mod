@@ -41,22 +41,22 @@ _Pattern4_s_bss:
 
 _Pattern4_init:
     entry a1, 16
-    movi a15, _Pattern4_s_bss
-    movi a2, 10               # a2 := 10
-    s32i a2, a15, 32          # r.num := 10
-    l32i a2, a15, 24          # a2 := p
-    movi a3, 6                # a3 := 6
-    s32i a3, a2, 0            # p.num := 6
-    l32i a2, a15, 24          # a2 := p
-    movi a3, 48               # a3 := "0"
-    s8i a3, a2, 11            # p.name[7] := "0"
-    l32i a2, a15, 24          # a2 := p
-    l32i a3, a15, 28          # a3 := q
-    s32i a3, a2, 12           # p.next := q
-    l32i a2, a15, 24          # a2 := p
-    l32i a2, a2, 12           # a2 := p.next
-    movi a3, 0                # a3 := NIL
-    s32i a3, a2, 12           # p.next.next := NIL
+    movi a2, _Pattern4_s_bss
+    movi a3, 10               # a3 := 10
+    s32i a3, a2, 32           # r.num := 10
+    l32i a3, a2, 24           # a3 := p
+    movi a4, 6                # a4 := 6
+    s32i a4, a3, 0            # p.num := 6
+    l32i a3, a2, 24           # a3 := p
+    movi a4, 48               # a4 := "0"
+    s8i a4, a3, 11            # p.name[7] := "0"
+    l32i a3, a2, 24           # a3 := p
+    l32i a4, a2, 28           # a4 := q
+    s32i a4, a3, 12           # p.next := q
+    l32i a3, a2, 24           # a3 := p
+    l32i a3, a3, 12           # a3 := p.next
+    movi a4, 0                # a4 := NIL
+    s32i a4, a3, 12           # p.next.next := NIL
     retw
    .size _Pattern4_init, .-_Pattern4_init
 

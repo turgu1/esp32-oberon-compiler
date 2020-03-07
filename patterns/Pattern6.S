@@ -15,25 +15,25 @@ _Pattern6_s_bss:
 
 _Pattern6_init:
     entry a1, 16
-    movi a15, _Pattern6_s_bss
-    movi a2, 0
-    s32i a2, a15, 0
+    movi a2, _Pattern6_s_bss
+    movi a3, 0
+    s32i a3, a2, 0
 1:
-    l32i a2, a15, 0
-    movi a3, 10
-    bge a2, a3, 2f
-    l32i a2, a15, 0
-    addi a2, a2, 2
-    s32i a2, a15, 0
+    l32i a3, a2, 0
+    movi a4, 10
+    bge a3, a4, 2f
+    l32i a3, a2, 0
+    addi a3, a3, 2
+    s32i a3, a2, 0
     j 1b
 2:
 3:
-    l32i a2, a15, 0
-    addi a2, a2, -1
-    s32i a2, a15, 0
-    l32i a2, a15, 0
-    movi a3, 0
-    bne a2, a3, 3b
+    l32i a3, a2, 0
+    addi a3, a3, -1
+    s32i a3, a2, 0
+    l32i a3, a2, 0
+    movi a4, 0
+    bne a3, a4, 3b
     retw
     .size _Pattern6_init, .-_Pattern6_init
 

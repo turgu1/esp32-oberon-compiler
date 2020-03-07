@@ -15,40 +15,40 @@ _Pattern17_s_bss:
 
 _Pattern17_init:
     entry a1, 16
-    movi a15, _Pattern17_s_bss
-    l32i a2, a15, 0
-    abs a2, a2
-    s32i a2, a15, 4
-    l32i a2, a15, 8
-    slli a2, a2, 1
-    srli a2, a2, 1
-    s32i a2, a15, 12
-    l32i a2, a15, 4
-    movi a3, 1
-    and a2, a2, a3
-    s8i a2, a15, 16
-    l8ui a2, a15, 17
-    s32i a2, a15, 4
-    l32i a2, a15, 8
-    wfr f0, a2
-    floor.s a2, f0, 0
-    s32i a2, a15, 4
-    l32i a2, a15, 0
-    float.s f0, a2, 0
-    rfr a2, f0
-    s32i a2, a15, 12
-    l32i a2, a15, 0
-    slli a2, a2, 3
-    s32i a2, a15, 4
-    l32i a2, a15, 0
-    srai a2, a2, 8
-    s32i a2, a15, 4
-    l32i a2, a15, 0
-    l32i a3, a15, 4
-    ssr a3
-    mov a3, a2
-    src a2, a2, a3
-    s32i a2, a15, 0
+    movi a2, _Pattern17_s_bss
+    l32i a3, a2, 0
+    abs a3, a3
+    s32i a3, a2, 4
+    l32i a3, a2, 8
+    slli a3, a3, 1
+    srli a3, a3, 1
+    s32i a3, a2, 12
+    l32i a3, a2, 4
+    movi a4, 1
+    and a3, a3, a4
+    s8i a3, a2, 16
+    l8ui a3, a2, 17
+    s32i a3, a2, 4
+    l32i a3, a2, 8
+    wfr f0, a3
+    floor.s a3, f0, 0
+    s32i a3, a2, 4
+    l32i a3, a2, 0
+    float.s f0, a3, 0
+    rfr a3, f0
+    s32i a3, a2, 12
+    l32i a3, a2, 0
+    slli a3, a3, 3
+    s32i a3, a2, 4
+    l32i a3, a2, 0
+    srai a3, a3, 8
+    s32i a3, a2, 4
+    l32i a3, a2, 0
+    l32i a4, a2, 4
+    ssr a4
+    mov a4, a3
+    src a3, a3, a4
+    s32i a3, a2, 0
     retw
     .size _Pattern17_init, .-_Pattern17_init
 

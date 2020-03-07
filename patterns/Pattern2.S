@@ -15,48 +15,48 @@ _Pattern2_s_bss:
 
 _Pattern2_init:
     entry a1, 16
-    movi a15, _Pattern2_s_bss
-    l32i a2, a15, 0
-    addi a2, a2, 1
-    l32i a3, a15, 0
-    addi a3, a3, -1
-    mull a2, a2, a3
-    s32i a2, a15, 0
-    l32i a2, a15, 8
-    movi a3, 17
-    quos a2, a2, a3
-    s32i a2, a15, 8
-    l32i a2, a15, 12
-    slli a2, a2, 3
-    s32i a2, a15, 8
-    l32i a2, a15, 12
-    srai a2, a2, 1
-    s32i a2, a15, 8
-    l32i a2, a15, 12
-    movi a3, 15
-    and a2, a2, a3
-    s32i a2, a15, 8
-    l32i a2, a15, 16
-    movi a3, 1065353216
-    wfr f0, a2
-    wfr f1, a3
-    sub.s f0, f0, f1
-    rfr a2, f2
-    l32i a3, a15, 20
+    movi a2, _Pattern2_s_bss
+    l32i a3, a2, 0
+    addi a3, a3, 1
+    l32i a4, a2, 0
+    addi a4, a4, -1
+    mull a3, a3, a4
+    s32i a3, a2, 0
+    l32i a3, a2, 8
+    movi a4, 17
+    quos a3, a3, a4
+    s32i a3, a2, 8
+    l32i a3, a2, 12
+    slli a3, a3, 3
+    s32i a3, a2, 8
+    l32i a3, a2, 12
+    srai a3, a3, 1
+    s32i a3, a2, 8
+    l32i a3, a2, 12
+    movi a4, 15
+    and a3, a3, a4
+    s32i a3, a2, 8
+    l32i a3, a2, 16
+    movi a4, 1065353216
     wfr f0, a3
-    wfr f1, a2
+    wfr f1, a4
+    sub.s f0, f0, f1
+    rfr a3, f2
+    l32i a4, a2, 20
+    wfr f0, a4
+    wfr f1, a3
     call __fdiv32
-    rfr a2, f2
-    wfr f0, a2
+    rfr a3, f2
+    wfr f0, a3
     neg.s f0, f0
-    rfr a2, f0
-    s32i a2, a15, 16
-    l32i a2, a15, 28
-    l32i a3, a15, 32
-    and a2, a2, a3
-    l32i a3, a15, 24
-    or a2, a3, a2
-    s32i a2, a15, 24
+    rfr a3, f0
+    s32i a3, a2, 16
+    l32i a3, a2, 28
+    l32i a4, a2, 32
+    and a3, a3, a4
+    l32i a4, a2, 24
+    or a3, a4, a3
+    s32i a3, a2, 24
     retw
     .size _Pattern2_init, .-_Pattern2_init
 

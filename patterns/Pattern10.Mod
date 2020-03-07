@@ -37,20 +37,21 @@ _P:
     entry a1, 16
     s32i a2, a1, 0     # SP[0] := Address of x
     s32i a3, a1, 4     # SP[4] := Length of x
-    l32i a2, a1, 8     # a2 := i
-    slli a2, a2, 2     # a2 := a2 * 4
-    l32i a3, a1, 0     # a3 := address of x
-    add a2, a3, a2     # a2 := adress of x[i]
-    l32i a2, a2, 0     # a2 := x[i]
-    s32i a2, a1, 12    # n  := x[i]
-    l32i a2, a1, 8     # a2 := i
-    addi a2, a2, 1     # a2 := i + 1
-    slli a2, a2, 2     # a2 := a2 * 4
-    l32i a3, a1, 0     # a3 := address of x
-    add a2, a3, a2     # a2 := adress of x[i + 1]
-    l32i a3, a1, 12    # a3 := n
-    addi a3, a3, 5     # a3 := n + 5
-    s32i a3, a2, 0     # x[x + 1] := n + 5
+    movi a2, _Pattern10_s_bss
+    l32i a3, a1, 8     # a3 := i
+    slli a3, a3, 2     # a3 := a3 * 4
+    l32i a4, a1, 0     # a4 := address of x
+    add a3, a4, a3     # a3 := adress of x[i]
+    l32i a3, a3, 0     # a3 := x[i]
+    s32i a3, a1, 12    # n  := x[i]
+    l32i a3, a1, 8     # a3 := i
+    addi a3, a3, 1     # a3 := i + 1
+    slli a3, a3, 2     # a3 := a3 * 4
+    l32i a4, a1, 0     # a4 := address of x
+    add a3, a4, a3     # a3 := adress of x[i + 1]
+    l32i a4, a1, 12    # a4 := n
+    addi a4, a4, 5     # a4 := n + 5
+    s32i a4, a3, 0     # x[x + 1] := n + 5
     retw
     .size _P, .-_P
 
@@ -61,7 +62,7 @@ _Pattern10_init:
     entry a1, 16
     movi a15, _Pattern10_s_bss
     addi a6, a15, 0   # a6 = Address of a (will be a2 in _P)
-    movi a7, 12       # a7 = Length of a (will be a3 in _P)
+    movi a7, 12       # a7 = Length of a (will be a4 in _P)
     call4 _P
     retw
     .size _Pattern10_init, .-_Pattern10_init

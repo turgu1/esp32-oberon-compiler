@@ -19,9 +19,9 @@ _Pattern12b_A32BBAE9_s_text:
 _Pattern12b_A32BBAE9_p_Q:
 _Q:
     entry a1, 16
-    movi a15, _Pattern12b_s_bss
-    movi a2, 1065353216
-    s32i a2, a15, 0
+    movi a2, _Pattern12b_s_bss
+    movi a3, 1065353216
+    s32i a3, a2, 0
     retw
     .size _Q, .-_Q
 
@@ -31,7 +31,7 @@ _Q:
 
 _Pattern12b_init:
     entry a1, 16
-    movi a15, _Pattern12b_s_bss
+    movi a2, _Pattern12b_s_bss
     retw
     .size _Pattern12b_init, .-_Pattern12b_init
 

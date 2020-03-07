@@ -24,6 +24,7 @@ _P:
     entry a1, 32
     s32i a2, a1, 0
     s32i a3, a1, 4
+    movi a2, _Pattern15_s_bss
     retw
     .size _P, .-_P
 
@@ -33,26 +34,26 @@ _P:
 
 _Pattern15_init:
     entry a1, 16
-    movi a15, _Pattern15_s_bss
-    mov a2, a15
-    movi a3, _Pattern15_s_str
-    movi a4, 2
-    loop a4, 1f
-    l32i a5, a3, 0
+    movi a2, _Pattern15_s_bss
+    mov a3, a2
+    movi a4, _Pattern15_s_str
+    movi a5, 2
+    loop a5, 1f
+    l32i a6, a4, 0
+    addi a4, a4, 4
+    s32i a6, a3, 0
     addi a3, a3, 4
-    s32i a5, a2, 0
-    addi a2, a2, 4
 1:
-    mov a2, a15
-    addi a3, a15, 32
-    movi a4, 8
-    loop a4, 2f
-    l32i a5, a3, 0
+    mov a3, a2
+    addi a4, a2, 32
+    movi a5, 8
+    loop a5, 2f
+    l32i a6, a4, 0
+    addi a4, a4, 4
+    s32i a6, a3, 0
     addi a3, a3, 4
-    s32i a5, a2, 0
-    addi a2, a2, 4
 2:
-    addi a6, a15, 32
+    addi a6, a2, 32
     movi a7, 32
     call4 _P
     movi a6, _Pattern15_s_str

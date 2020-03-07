@@ -15,18 +15,18 @@ _Pattern7_s_bss:
 
 _Pattern7_init:
     entry a1, 16
-    movi a15, _Pattern7_s_bss
-    movi a2, 0
+    movi a2, _Pattern7_s_bss
+    movi a3, 0
 1:
-    l32i a3, a15, 8
-    addi a3, a3, -1
-    blt a3, a2, 2f
-    s32i a2, a15, 0
-    l32i a2, a15, 4
-    slli a2, a2, 1
-    s32i a2, a15, 4
-    l32i a2, a15, 0
-    addi a2, a2, 1
+    l32i a4, a2, 8
+    addi a4, a4, -1
+    blt a4, a3, 2f
+    s32i a3, a2, 0
+    l32i a3, a2, 4
+    slli a3, a3, 1
+    s32i a3, a2, 4
+    l32i a3, a2, 0
+    addi a3, a3, 1
     j 1b
 2:
     retw

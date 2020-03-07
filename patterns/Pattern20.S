@@ -18,14 +18,15 @@ _qa:
     entry a1, 32
     s32i a2, a1, 0
     s32i a3, a1, 4
-    l8ui a2, a1, 0
-    beqz a2, 1f
-    l8ui a2, a1, 4
-    beqz a2, 3f
-    movi a2, 1
+    movi a2, _Pattern20_s_bss
+    l8ui a3, a1, 0
+    beqz a3, 1f
+    l8ui a3, a1, 4
+    beqz a3, 3f
+    movi a3, 1
     j 4f
 3:
-    movi a2, 0
+    movi a3, 0
 4:
     retw
     .size _qa, .-_qa
@@ -35,14 +36,15 @@ _qb:
     entry a1, 32
     s32i a2, a1, 0
     s32i a3, a1, 4
-    l8ui a2, a1, 0
-    bnez a2, 5f
-    l8ui a2, a1, 4
-    beqz a2, 7f
-    movi a2, 1
+    movi a2, _Pattern20_s_bss
+    l8ui a3, a1, 0
+    bnez a3, 5f
+    l8ui a3, a1, 4
+    beqz a3, 7f
+    movi a3, 1
     j 8f
 7:
-    movi a2, 0
+    movi a3, 0
 8:
     retw
     .size _qb, .-_qb
@@ -52,18 +54,19 @@ _q:
     entry a1, 32
     s32i a2, a1, 0
     s32i a3, a1, 4
-    movi a2, 1
-    s32i a2, a15, 4
+    movi a2, _Pattern20_s_bss
+    movi a3, 1
+    s32i a3, a2, 4
     movi a6, 1
     movi a7, 0
     call4 _qa
-    mov a2, a6
-    s8i a2, a1, 8
+    mov a3, a6
+    s8i a3, a1, 8
     movi a6, 1
     movi a7, 0
     call4 _qb
-    mov a2, a6
-    s8i a2, a1, 8
+    mov a3, a6
+    s8i a3, a1, 8
     retw
     .size _q, .-_q
 
@@ -73,57 +76,56 @@ _q:
 
 _Pattern20_init:
     entry a1, 16
-    movi a15, _Pattern20_s_bss
-    addi a2, a15, 16
-    l32i a3, a2, 0
-    movi a4, 1
-    slli a4, a4, 3
-    or a3, a3, a4
-    s32i a3, a2, 0
-    addi a2, a15, 16
-    l32i a3, a2, 0
-    movi a4, 1
-    l32i a5, a15, 4
-    ssl a5
-    sll a4, a4
-    or a3, a3, a4
-    s32i a3, a2, 0
-    addi a2, a15, 16
-    l32i a3, a2, 0
-    movi a4, 1
-    slli a4, a4, 3
-    movi a5, -1
-    xor a4, a4, a5
-    and a3, a3, a4
-    s32i a3, a2, 0
-    addi a2, a15, 16
-    l32i a3, a2, 0
-    movi a4, 1
-    l32i a5, a15, 4
-    ssl a5
-    sll a4, a4
-    movi a5, -1
-    xor a4, a4, a5
-    and a3, a3, a4
-    s32i a3, a2, 0
-    l32i a2, a15, 4
-    l32i a3, a15, 8
-    bge a2, a3, 9f
-    movi a2, 1
+    movi a2, _Pattern20_s_bss
+    addi a3, a2, 16
+    l32i a4, a3, 0
+    movi a5, 1
+    slli a5, a5, 3
+    or a4, a4, a5
+    s32i a4, a3, 0
+    addi a3, a2, 16
+    l32i a4, a3, 0
+    movi a5, 1
+    l32i a6, a2, 4
+    ssl a6
+    sll a5, a5
+    or a4, a4, a5
+    s32i a4, a3, 0
+    addi a3, a2, 16
+    l32i a4, a3, 0
+    movi a5, 1
+    slli a5, a5, 3
+    movi a6, -1
+    xor a5, a5, a6
+    and a4, a4, a5
+    s32i a4, a3, 0
+    addi a3, a2, 16
+    l32i a4, a3, 0
+    movi a5, 1
+    l32i a6, a2, 4
+    ssl a6
+    sll a5, a5
+    movi a6, -1
+    xor a5, a5, a6
+    and a4, a4, a5
+    s32i a4, a3, 0
+    l32i a3, a2, 4
+    l32i a4, a2, 8
+    bge a3, a4, 9f
+    movi a3, 1
     j 10f
 9:
-    movi a2, 0
+    movi a3, 0
 10:
-    s8i a2, a15, 0
-    movi a2, 1
-    s8i a2, a15, 0
-    movi a2, _q
-    s32i a2, a15, 12
+    s8i a3, a2, 0
+    movi a3, 1
+    s8i a3, a2, 0
+    movi a3, _q
+    s32i a3, a2, 12
     movi a6, 1
     movi a7, 2
-    l32i a8, a15, 12
+    l32i a8, a2, 12
     callx4 a8
-    movi a15, _Pattern20_s_bss
     retw
     .size _Pattern20_init, .-_Pattern20_init
 

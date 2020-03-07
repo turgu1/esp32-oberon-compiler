@@ -6,13 +6,13 @@ MODULE ORG; (* N.Wirth, 16.4.2016 / 4.4.2017 / 31.5.2019  Oberon compiler; code 
 
   CONST 
     WordSize* = 4;
-    SP = 1; SB = 15;   (*dedicated registers*)
+    SP = 1; SB = 2;   (*dedicated registers*)
     maxStrx = 2400; maxTD = 160;
 
     Reg = 10; RegI = 11; Cond = 12;  (*internal item modes*)
 
-    FirstRH = 2;   (* First available register for arguments *)
-    LastRH  = 14;  (* Last available register for arguments *)
+    FirstRH = 3;   (* First available register for arguments *)
+    LastRH  = 15;  (* Last available register for arguments *)
     
     (* Conditional branch instructions *)
 
@@ -595,9 +595,9 @@ MODULE ORG; (* N.Wirth, 16.4.2016 / 4.4.2017 / 31.5.2019  Oberon compiler; code 
   PROCEDURE PutLabel*(label: INTEGER);
   BEGIN
     e("PutLabel");
-    Texts.WriteInt(   CodeW, label, 0);
-    Texts.Write(CodeW, ":");
-    Texts.WriteLn(    CodeW)
+    Texts.WriteInt(CodeW, label, 0);
+    Texts.Write(   CodeW, ":");
+    Texts.WriteLn( CodeW)
   END PutLabel;
 
   PROCEDURE PutBranchRR(op: ARRAY OF CHAR; r1, r2, label: INTEGER; forward: BOOLEAN);
@@ -606,11 +606,11 @@ MODULE ORG; (* N.Wirth, 16.4.2016 / 4.4.2017 / 31.5.2019  Oberon compiler; code 
     Texts.WriteString(CodeW, "    ");
     Texts.WriteString(CodeW, op);
     Texts.WriteString(CodeW, " a");
-    Texts.WriteInt(CodeW, r1, 0);
+    Texts.WriteInt(   CodeW, r1, 0);
     Texts.WriteString(CodeW, ", a");
-    Texts.WriteInt(CodeW, r2, 0);
+    Texts.WriteInt(   CodeW, r2, 0);
     Texts.WriteString(CodeW, ", ");
-    Texts.WriteInt(CodeW, label, 0);
+    Texts.WriteInt(   CodeW, label, 0);
     IF forward THEN
       Texts.Write(CodeW, "f")
     ELSE
@@ -625,11 +625,11 @@ MODULE ORG; (* N.Wirth, 16.4.2016 / 4.4.2017 / 31.5.2019  Oberon compiler; code 
     Texts.WriteString(CodeW, "    ");
     Texts.WriteString(CodeW, op);
     Texts.WriteString(CodeW, " a");
-    Texts.WriteInt(CodeW, r, 0);
+    Texts.WriteInt(   CodeW, r, 0);
     Texts.WriteString(CodeW, ", ");
-    Texts.WriteInt(CodeW, imm, 0);
+    Texts.WriteInt(   CodeW, imm, 0);
     Texts.WriteString(CodeW, ", ");
-    Texts.WriteInt(CodeW, label, 0);
+    Texts.WriteInt(   CodeW, label, 0);
     IF forward THEN
       Texts.Write(CodeW, "f")
     ELSE
@@ -644,9 +644,9 @@ MODULE ORG; (* N.Wirth, 16.4.2016 / 4.4.2017 / 31.5.2019  Oberon compiler; code 
     Texts.WriteString(CodeW, "    ");
     Texts.WriteString(CodeW, op);
     Texts.WriteString(CodeW, " a");
-    Texts.WriteInt(CodeW, r, 0);
+    Texts.WriteInt(   CodeW, r, 0);
     Texts.WriteString(CodeW, ", ");
-    Texts.WriteInt(CodeW, label, 0);
+    Texts.WriteInt(   CodeW, label, 0);
     IF forward THEN
       Texts.Write(CodeW, "f")
     ELSE
@@ -814,42 +814,19 @@ MODULE ORG; (* N.Wirth, 16.4.2016 / 4.4.2017 / 31.5.2019  Oberon compiler; code 
 
   (* loading of operands and addresses into registers *)
 
-  (* Put the Static Base in a15. This must be done:
-     - At the entry of every exported procedure
-     - On return of every external procedure call
-     - On return of every register based call
-     - On main module entry
-   *)
   PROCEDURE GetLocalSB;
   BEGIN 
-    Texts.WriteString(CodeW, "    movi a15, _");
+    Texts.WriteString(CodeW, "    movi a2, _");
     Texts.WriteString(CodeW, thisModuleId);
     Texts.WriteString(CodeW, "_s_bss");
-    Texts.WriteLn(CodeW);
+    Texts.WriteLn(CodeW)
   END GetLocalSB;
 
-  PROCEDURE GetSB(base: INTEGER);
+  PROCEDURE GetExtSB(base: INTEGER);
   VAR
     moduleId: ORS.Ident;
     moduleKey: INTEGER;
   BEGIN
-    (* Old Code ...
-      Texts.WriteString(CodeW, "    movi a");
-      Texts.WriteInt(CodeW, RH, 0);
-      IF base = 0 THEN
-        Texts.WriteString(CodeW, ", _");
-        Texts.WriteString(CodeW, thisModuleId);
-      ELSE
-        ModuleInfo(base, moduleId, moduleKey);
-        Texts.WriteString(CodeW, ", _");
-        Texts.WriteString(CodeW, moduleId);
-        Texts.WriteString(CodeW, "_");
-        WriteHex(CodeW, moduleKey);
-      END;
-      Texts.WriteString(CodeW, "_s_bss");
-      Texts.WriteLn(CodeW);
-    ... *)
-    (* The Static Base (base = 0) is in a15 *)
     IF base # 0 THEN
       Texts.WriteString(CodeW, "    movi a");
       Texts.WriteInt(CodeW, RH, 0);
@@ -861,7 +838,7 @@ MODULE ORG; (* N.Wirth, 16.4.2016 / 4.4.2017 / 31.5.2019  Oberon compiler; code 
       Texts.WriteString(CodeW, "_s_bss");
       Texts.WriteLn(CodeW);
     END
-  END GetSB;
+  END GetExtSB;
 
   (* 
     Move (load or store) location r2+offset. The ESP32 uses l32i l8ui s32i s8ui
@@ -914,7 +891,7 @@ MODULE ORG; (* N.Wirth, 16.4.2016 / 4.4.2017 / 31.5.2019  Oberon compiler; code 
             eStr(x.name);
             PutRA("movi", RH, x.name);
           ELSE 
-            (* GetSB(x.r); *)
+            (* GetExtSB(x.r); *)
             eStr("(import) name:"); eStr(x.name); eStr(" module:"); eStr(moduleId); eStr(" key:"); eHex(moduleKey); 
             ModuleInfo(x.r, moduleId, moduleKey);
             PutDataExternal("movi", RH, x.name, moduleId, moduleKey);
@@ -930,11 +907,11 @@ MODULE ORG; (* N.Wirth, 16.4.2016 / 4.4.2017 / 31.5.2019  Oberon compiler; code 
           eStr(" (stack) x.a:"); eInt(x.a); eStr(" frame:"); eInt(frame);
           PutMoveRRI(op, max, RH, SP, x.a + frame);
         ELSE  (* module globals or imported *)
-          GetSB(x.r);
           IF x.r = 0 THEN
             eStr("(SB) "); eInt(x.a); 
             PutMoveRRI(op, max, RH, SB, x.a);
           ELSE
+            GetExtSB(x.r);
             eStr("(imported) "); eInt(x.a); 
             PutMoveRRI(op, max, RH, RH, x.a);
           END
@@ -983,12 +960,12 @@ MODULE ORG; (* N.Wirth, 16.4.2016 / 4.4.2017 / 31.5.2019  Oberon compiler; code 
         END
       ELSE 
         eStr(" (local/imported var) name:"); eStr(x.name); eStr(" x.a:"); eInt(x.a);
-        GetSB(x.r); 
         IF x.a > 127 THEN
           PutRI("movi", RH+1, x.a);
           IF x.r = 0 THEN
             PutRRR("add", RH, SB, RH+1)
           ELSE
+            GetExtSB(x.r); 
             PutRRR("add", RH, RH, RH+1)
           END
         ELSE
@@ -1181,10 +1158,10 @@ MODULE ORG; (* N.Wirth, 16.4.2016 / 4.4.2017 / 31.5.2019  Oberon compiler; code 
           INC(x.a, frame)
         ELSE 
           CheckFreeRegs(1);
-          GetSB(x.r);
           IF x.r = 0 THEN 
             PutRRR("add", y.r, SB, y.r)
           ELSE 
+            GetExtSB(x.r);
             CheckFreeRegs(2);
             PutRI("movi", RH+1, x.a);
             PutRRR("add", RH, RH, RH+1); 
@@ -1214,10 +1191,10 @@ MODULE ORG; (* N.Wirth, 16.4.2016 / 4.4.2017 / 31.5.2019  Oberon compiler; code 
       IF x.r > 0 THEN (*local*) 
         PutMoveRRI("l32i", 1020, RH, SP, x.a + frame)
       ELSE 
-        GetSB(x.r); 
         IF x.r = 0 THEN
           PutMoveRRI("l32i", 1020, RH, SB, x.a)
         ELSE
+          GetExtSB(x.r);
           PutMoveRRI("l32i", 1020, RH, RH, x.a)
         END
       END;
@@ -1776,12 +1753,12 @@ MODULE ORG; (* N.Wirth, 16.4.2016 / 4.4.2017 / 31.5.2019  Oberon compiler; code 
         eStr(" (stack) x.a:"); eInt(x.a); eStr(" frame:"); eInt(frame);
         PutMoveRRI(op, max, y.r, SP, x.a + frame);
       ELSE (* imported or module *)
-        GetSB(x.r);
         IF x.r = 0 THEN
           eStr(" (SB) x.a:"); eInt(x.a);
           PutMoveRRI(op, max, y.r, SB, x.a);
         ELSE
           eStr(" (import) x.a:"); eInt(x.a);
+          GetExtSB(x.r);
           PutMoveRRI(op, max, y.r, RH, x.a);
         END
       END
@@ -2027,17 +2004,24 @@ MODULE ORG; (* N.Wirth, 16.4.2016 / 4.4.2017 / 31.5.2019  Oberon compiler; code 
     VAR 
       cnt, i: INTEGER;
   BEGIN 
-    cnt := high - low + 1;
-    PutRRI("subi", SP, SP, cnt*4); 
-    INC(frame, cnt*4);
-    i := 0;
-    REPEAT
-      PutRRI("s32i", low, SP, i*4);
-      INC(i); INC(low);
-    UNTIL low > high
+    IF high = 15 THEN
+      ORS.Mark("Call too complex. Reduce number of parameters.")
+    ELSE
+      cnt := (high - low + 1) * 4;
+      cnt := ((cnt + 15) DIV 16) * 16; (* Must be a multiple of 16 *)
+      PutRI("movi", high+1, cnt);
+      PutRRR("add", high+1, high+1, SP);
+      PutRR("movsp", SP, high+1); 
+      INC(frame, cnt);
+      i := 0;
+      REPEAT
+        PutRRI("s32i", low, SP, i*4);
+        INC(i); INC(low);
+      UNTIL low > high
+    END
   END SaveRegs;
 
-  PROCEDURE RestoreRegs(low, high: INTEGER); (*R[low .. high]*)
+  PROCEDURE RestoreRegs(low, high: INTEGER); (* R[low .. high] *)
     VAR 
       cnt, i: INTEGER;
   BEGIN
@@ -2048,8 +2032,12 @@ MODULE ORG; (* N.Wirth, 16.4.2016 / 4.4.2017 / 31.5.2019  Oberon compiler; code 
         PutRRI("l32i", low, SP, i*4);
         INC(i); INC(low);
       UNTIL low > high;
-      PutRRI("addi", SP, SP, cnt*4); 
-      DEC(frame, 4*cnt)
+      cnt := cnt * 4;
+      cnt := ((cnt + 15) DIV 16) * 16; (* Must be a multiple of 16 *)
+      PutRI("movi", high+1, cnt);
+      PutRRR("sub", high+1, SP, high+1);
+      PutRR("movsp", SP, high+1); 
+      DEC(frame, cnt)
     END
   END RestoreRegs;
 
@@ -2083,21 +2071,21 @@ MODULE ORG; (* N.Wirth, 16.4.2016 / 4.4.2017 / 31.5.2019  Oberon compiler; code 
     r := RH;
     (* Which registers need to be saved *)
     IF RH <= 4 THEN
-      callType := 4;
-      free     := 9;
+      callType :=  4;
+      free     := 10;
     ELSIF RH <= 8 THEN
       callType := 8;
-      free     := 5;
+      free     := 6;
     ELSE
       callType := 12;
-      free     := 1;
+      free     :=  2;
     END;
     IF (x.type.nofpar > free) & (callType > 4) THEN 
-      free := free + 4; 
+      free     := free + 4; 
       callType := callType - 4 
     END;
     IF (x.type.nofpar > free) & (callType > 4) THEN 
-      free := free + 4; 
+      free     := free + 4; 
       callType := callType - 4 
     END;
     IF x.type.nofpar > free THEN
@@ -2120,14 +2108,12 @@ MODULE ORG; (* N.Wirth, 16.4.2016 / 4.4.2017 / 31.5.2019  Oberon compiler; code 
       eStr(" (const)");
       IF x.r >= 0 THEN (* local proc *)
         eStr(" local:"); eStr(x.name);
-        PutCallLocal(callType, x.name); 
-        GetLocalSB
+        PutCallLocal(callType, x.name)
       ELSE (* imported *)
         eStr(" imported: "); eStr(x.name); 
         ModuleInfo(x.r, moduleId, moduleKey);  
         eStr(" from:"); eStr(moduleId); eStr(" Key:"); eHex(moduleKey);
-        PutCALLExternal(callType, x.name, moduleId, moduleKey);
-        GetLocalSB
+        PutCALLExternal(callType, x.name, moduleId, moduleKey)
       END
     ELSE
       IF x.mode <= ORB.Par THEN (* Variable or Parameter *)
@@ -2148,7 +2134,6 @@ MODULE ORG; (* N.Wirth, 16.4.2016 / 4.4.2017 / 31.5.2019  Oberon compiler; code 
         incR 
       END;
       PutCallR(callType, x.r);
-      GetLocalSB
     END ;
     IF x.type.base.form = ORB.NoTyp THEN (*procedure*) 
       RH := FirstRH; UsedRegs := {}
@@ -2198,10 +2183,10 @@ MODULE ORG; (* N.Wirth, 16.4.2016 / 4.4.2017 / 31.5.2019  Oberon compiler; code 
         INC(r); 
         INC(a, 4)
       END;
-      IF exported THEN GetLocalSB END;
     ELSE (* interrupt procedure prolog *)
       (* To be defined *)
-    END
+    END;
+    GetLocalSB
   END Enter;
 
   PROCEDURE Return*(procid: ORS.Ident; form: INTEGER; VAR x: Item; size: INTEGER; int: BOOLEAN; intLevel: INTEGER);

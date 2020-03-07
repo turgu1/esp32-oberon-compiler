@@ -15,45 +15,45 @@ _Pattern11_s_bss:
 
 _Pattern11_init:
     entry a1, 16
-    movi a15, _Pattern11_s_bss
-    l32i a2, a15, 4
-    movi a3, 1
-    ssl a2
-    sll a2, a3
-    s32i a2, a15, 0
-    movi a2, -1
-    l32i a3, a15, 8
-    bgei a3, 31, 1f
-    movi a4, -1
-    addi a3, a3, 1
+    movi a2, _Pattern11_s_bss
+    l32i a3, a2, 4
+    movi a4, 1
     ssl a3
     sll a3, a4
-    xor a2, a2, a3
+    s32i a3, a2, 0
+    movi a3, -1
+    l32i a4, a2, 8
+    bgei a4, 31, 1f
+    movi a5, -1
+    addi a4, a4, 1
+    ssl a4
+    sll a4, a5
+    xor a3, a3, a4
 1:
-    s32i a2, a15, 0
-    l32i a2, a15, 4
-    movi a3, -1
-    ssl a2
-    sll a2, a3
-    s32i a2, a15, 0
-    l32i a2, a15, 4
-    movi a3, -1
-    ssl a2
-    sll a2, a3
-    l32i a3, a15, 8
-    bgei a3, 31, 2f
+    s32i a3, a2, 0
+    l32i a3, a2, 4
     movi a4, -1
-    addi a3, a3, 1
     ssl a3
     sll a3, a4
-    xor a2, a2, a3
+    s32i a3, a2, 0
+    l32i a3, a2, 4
+    movi a4, -1
+    ssl a3
+    sll a3, a4
+    l32i a4, a2, 8
+    bgei a4, 31, 2f
+    movi a5, -1
+    addi a4, a4, 1
+    ssl a4
+    sll a4, a5
+    xor a3, a3, a4
 2:
-    s32i a2, a15, 0
-    movi a2, 10412
-    l32i a3, a15, 8
-    bbc a2, a3, 3f
-    movi a2, 1
-    s32i a2, a15, 4
+    s32i a3, a2, 0
+    movi a3, 10412
+    l32i a4, a2, 8
+    bbc a3, a4, 3f
+    movi a3, 1
+    s32i a3, a2, 4
 3:
     retw
     .size _Pattern11_init, .-_Pattern11_init

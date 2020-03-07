@@ -18,11 +18,12 @@ _P:
     entry a1, 32
     s32i a2, a1, 0
     s32i a3, a1, 4
-    l32i a2, a1, 0
-    s32i a2, a1, 8
-    l32i a2, a1, 8
-    l32i a3, a1, 4
-    s32i a2, a3, 0
+    movi a2, _Pattern8_s_bss
+    l32i a3, a1, 0
+    s32i a3, a1, 8
+    l32i a3, a1, 8
+    l32i a4, a1, 4
+    s32i a3, a4, 0
     retw
     .size _P, .-_P
 
@@ -32,9 +33,9 @@ _P:
 
 _Pattern8_init:
     entry a1, 16
-    movi a15, _Pattern8_s_bss
+    movi a2, _Pattern8_s_bss
     movi a6, 5
-    mov a7, a15
+    mov a7, a2
     call4 _P
     retw
     .size _Pattern8_init, .-_Pattern8_init

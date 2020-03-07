@@ -19,9 +19,9 @@ _Pattern12a_A42AACE9_s_text:
 _Pattern12a_A42AACE9_p_P:
 _P:
     entry a1, 16
-    movi a15, _Pattern12a_s_bss
-    movi a2, 1
-    s32i a2, a15, 0
+    movi a2, _Pattern12a_s_bss
+    movi a3, 1
+    s32i a3, a2, 0
     retw
     .size _P, .-_P
 
@@ -31,7 +31,7 @@ _P:
 
 _Pattern12a_init:
     entry a1, 16
-    movi a15, _Pattern12a_s_bss
+    movi a2, _Pattern12a_s_bss
     retw
     .size _Pattern12a_init, .-_Pattern12a_init
 

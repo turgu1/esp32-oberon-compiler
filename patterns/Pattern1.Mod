@@ -28,15 +28,15 @@ _Pattern1_s_bss:
 
 _Pattern1_init:
     entry a1, 16
-    movi a15, _Pattern1_s_bss
-    movi a2, 48          # a2 := "0"
-    s8i a2, a15, 0       # ch := "0"
-    movi a2, 10          # a2 := 10
-    s32i a2, a15, 4      # k := 10
-    movi a2, 1065353216  # a2 := 1.0
-    s32i a2, a15, 8      # x := 1.0
-    movi a2, 273         # a2 := {0, 4, 8}
-    s32i a2, a15, 12     # s := {0, 4, 8}
+    movi a2, _Pattern1_s_bss
+    movi a3, 48          # a3 := "0"
+    s8i a3, a2, 0        # ch := "0"
+    movi a3, 10          # a3 := 10
+    s32i a3, a2, 4       # k := 10
+    movi a3, 1065353216  # a3 := 1.0
+    s32i a3, a2, 8       # x := 1.0
+    movi a3, 273         # a3 := {0, 4, 8}
+    s32i a3, a2, 12      # s := {0, 4, 8}
     retw
     .size _Pattern1_init, .-_Pattern1_init
 

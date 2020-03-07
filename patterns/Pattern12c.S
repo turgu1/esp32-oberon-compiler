@@ -15,15 +15,14 @@ _Pattern12c_s_bss:
 
 _Pattern12c_init:
     entry a1, 16
-    movi a15, _Pattern12c_s_bss
-    movi a2, _Pattern12a_A42AACE9_s_bss
-    l32i a2, a2, 0
-    s32i a2, a15, 0
-    movi a2, _Pattern12b_A32BBAE9_s_bss
-    l32i a2, a2, 0
-    s32i a2, a15, 4
+    movi a2, _Pattern12c_s_bss
+    movi a3, _Pattern12a_A42AACE9_s_bss
+    l32i a3, a3, 0
+    s32i a3, a2, 0
+    movi a3, _Pattern12b_A32BBAE9_s_bss
+    l32i a3, a3, 0
+    s32i a3, a2, 4
     call4 _Pattern12b_A32BBAE9_p_Q
-    movi a15, _Pattern12c_s_bss
     retw
     .size _Pattern12c_init, .-_Pattern12c_init
 

@@ -20,30 +20,30 @@ _Pattern18_s_bss:
 
 _Pattern18_init:
     entry a1, 16
-    movi a15, _Pattern18_s_bss
-    mov a2, a15
-    movi a3, _Pattern18_s_str
-    movi a4, 2
-    loop a4, 1f
-    l32i a5, a3, 0
+    movi a2, _Pattern18_s_bss
+    mov a3, a2
+    movi a4, _Pattern18_s_str
+    movi a5, 2
+    loop a5, 1f
+    l32i a6, a4, 0
+    addi a4, a4, 4
+    s32i a6, a3, 0
     addi a3, a3, 4
-    s32i a5, a2, 0
-    addi a2, a2, 4
 1:
-    mov a4, a15
-    movi a5, _Pattern18_s_str
-    addi a5, a5, 8
+    mov a5, a2
+    movi a6, _Pattern18_s_str
+    addi a6, a6, 8
 2:
-    l8ui a2, a4, 0
-    addi a4, a4, 1
     l8ui a3, a5, 0
     addi a5, a5, 1
-    bne a2, a3, 3f
-    bnez a2, 2b
+    l8ui a4, a6, 0
+    addi a6, a6, 1
+    bne a3, a4, 3f
+    bnez a3, 2b
 3:
-    bge a2, a3, 4f
-    movi a2, 3
-    s32i a2, a15, 512
+    bge a3, a4, 4f
+    movi a3, 3
+    s32i a3, a2, 512
 4:
     retw
     .size _Pattern18_init, .-_Pattern18_init

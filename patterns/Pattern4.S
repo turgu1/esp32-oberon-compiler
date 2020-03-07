@@ -22,22 +22,22 @@ _Pattern4_s_bss:
 
 _Pattern4_init:
     entry a1, 16
-    movi a15, _Pattern4_s_bss
-    movi a2, 10
-    s32i a2, a15, 32
-    l32i a2, a15, 24
-    movi a3, 6
-    s32i a3, a2, 0
-    l32i a2, a15, 24
-    movi a3, 48
-    s8i a3, a2, 11
-    l32i a2, a15, 24
-    l32i a3, a15, 28
-    s32i a3, a2, 12
-    l32i a2, a15, 24
-    l32i a2, a2, 12
-    movi a3, 0
-    s32i a3, a2, 12
+    movi a2, _Pattern4_s_bss
+    movi a3, 10
+    s32i a3, a2, 32
+    l32i a3, a2, 24
+    movi a4, 6
+    s32i a4, a3, 0
+    l32i a3, a2, 24
+    movi a4, 48
+    s8i a4, a3, 11
+    l32i a3, a2, 24
+    l32i a4, a2, 28
+    s32i a4, a3, 12
+    l32i a3, a2, 24
+    l32i a3, a3, 12
+    movi a4, 0
+    s32i a4, a3, 12
     retw
     .size _Pattern4_init, .-_Pattern4_init
 

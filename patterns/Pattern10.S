@@ -18,20 +18,21 @@ _P:
     entry a1, 32
     s32i a2, a1, 0
     s32i a3, a1, 4
-    l32i a2, a1, 8
-    slli a2, a2, 2
-    l32i a3, a1, 0
-    add a2, a3, a2
-    l32i a2, a2, 0
-    s32i a2, a1, 12
-    l32i a2, a1, 8
-    addi a2, a2, 1
-    slli a2, a2, 2
-    l32i a3, a1, 0
-    add a2, a3, a2
-    l32i a3, a1, 12
-    addi a3, a3, 5
-    s32i a3, a2, 0
+    movi a2, _Pattern10_s_bss
+    l32i a3, a1, 8
+    slli a3, a3, 2
+    l32i a4, a1, 0
+    add a3, a4, a3
+    l32i a3, a3, 0
+    s32i a3, a1, 12
+    l32i a3, a1, 8
+    addi a3, a3, 1
+    slli a3, a3, 2
+    l32i a4, a1, 0
+    add a3, a4, a3
+    l32i a4, a1, 12
+    addi a4, a4, 5
+    s32i a4, a3, 0
     retw
     .size _P, .-_P
 
@@ -41,8 +42,8 @@ _P:
 
 _Pattern10_init:
     entry a1, 16
-    movi a15, _Pattern10_s_bss
-    mov a6, a15
+    movi a2, _Pattern10_s_bss
+    mov a6, a2
     movi a7, 12
     call4 _P
     retw
