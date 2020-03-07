@@ -25,6 +25,18 @@ BEGIN
 END P;
 ```
 
+## CASE statement
+
+The CASE statement is accepting INTEGER, BYTE or CHAR as CASE expression and constant case labels. This was not implemented in the Project Oberon version of the compiler but has been retrieved from the Extended Oberon project. When such statements are used, it is also possible to have an ELSE clause. For example:
+
+```Oberon
+CASE ch OF
+  "a".."z" : i := 1
+ELSE
+  i := 2
+END
+```
+
 ## Procedure as a parameter
 
 Passing a procedure as a parameter requires that the procedure be defined exported (with a '*' after the procedure name in the declaration) if it is going to be supplied to another module. This will insure that the Static Base register will be properly initialized at the procedure entry point.

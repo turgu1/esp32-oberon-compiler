@@ -1,0 +1,3423 @@
+
+build/tests.elf:     file format elf32-xtensa-le
+
+
+Disassembly of section .iram.text:
+
+40080400 <_sitable>:
+40080400:	080d00        	lsx	f0, a13, a0
+40080403:	0d9840        	lsi	f4, a8, 52
+40080406:	4008      	l32i.n	a0, a0, 16
+40080408:	0dac      	beqz.n	a13, 4008042c <_init_start+0x8>
+4008040a:	4008      	l32i.n	a0, a0, 16
+4008040c:	0dbc      	beqz.n	a13, 40080440 <_init_start+0x1c>
+4008040e:	4008      	l32i.n	a0, a0, 16
+
+40080410 <_eitable>:
+40080410:	000406        	j	40080424 <_init_start>
+40080413:	45bc00        	extui	a11, a0, 28, 5
+40080416:	3ffb      	addi.n	a3, a15, 15
+40080418:	0228      	l32i.n	a2, a2, 0
+4008041a:	3ffb      	addi.n	a3, a15, 15
+4008041c:	080410        	lsx	f0, a4, a1
+4008041f:	040040        	extui	a0, a4, 0, 1
+40080422:	4008      	l32i.n	a0, a0, 16
+
+40080424 <_init_start>:
+40080424:	fffc11        	l32r	a1, 40080414 <_eitable+0x4>
+40080427:	000c      	movi.n	a0, 0
+40080429:	f0c112        	addi	a1, a1, -16
+4008042c:	10c142        	addi	a4, a1, 16
+4008042f:	49d140        	s32e	a4, a1, -12
+40080432:	000555        	call4	40080488 <_stop_watchdog>
+40080435:	000715        	call4	400804a8 <_set_160mhz>
+40080438:	fff721        	l32r	a2, 40080414 <_eitable+0x4>
+4008043b:	fff731        	l32r	a3, 40080418 <_eitable+0x8>
+4008043e:	c02230        	sub	a2, a2, a3
+40080441:	b28c      	beqz.n	a2, 40080450 <_init_start+0x2c>
+40080443:	412220        	srli	a2, a2, 2
+40080446:	00a042        	movi	a4, 0
+40080449:	038276        	loop	a2, 40080450 <_init_start+0x2c>
+4008044c:	0349      	s32i.n	a4, a3, 0
+4008044e:	334b      	addi.n	a3, a3, 4
+40080450:	fff331        	l32r	a3, 4008041c <_eitable+0xc>
+40080453:	fff321        	l32r	a2, 40080420 <_eitable+0x10>
+40080456:	c02320        	sub	a2, a3, a2
+40080459:	e28c      	beqz.n	a2, 4008046b <_init_end>
+4008045b:	412220        	srli	a2, a2, 2
+4008045e:	098276        	loop	a2, 4008046b <_init_end>
+40080461:	fcc332        	addi	a3, a3, -4
+40080464:	0378      	l32i.n	a7, a3, 0
+40080466:	0007d0        	callx4	a7
+40080469:	f03d      	nop.n
+
+4008046b <_init_end>:
+4008046b:	ffff06        	j	4008046b <_init_end>
+4008046e:	020000        	andb	b0, b0, b0
+40080471:	000000        	ill
+40080474:	000005        	call0	40080478 <_init_end+0xd>
+40080477:	045000        	extui	a5, a0, 0, 1
+4008047a:	4008      	l32i.n	a0, a0, 16
+4008047c:	046b      	addi.n	a0, a4, 6
+4008047e:	4008      	l32i.n	a0, a0, 16
+40080480:	808c      	beqz.n	a0, 4008048c <_stop_watchdog+0x4>
+40080482:	483ff4        	mula.da.ll.ldinc	m3, a15, m0, a15
+40080485:	3ff5f0        	f64cmph	a15, a5, a15, 3
+
+40080488 <_stop_watchdog>:
+40080488:	002136        	entry	a1, 16
+4008048b:	020c      	movi.n	a2, 0
+4008048d:	fffc31        	l32r	a3, 40080480 <_init_end+0x15>
+40080490:	0329      	s32i.n	a2, a3, 0
+40080492:	fffc31        	l32r	a3, 40080484 <_init_end+0x19>
+40080495:	0329      	s32i.n	a2, a3, 0
+40080497:	f01d      	retw.n
+40080499:	000000        	ill
+4008049c:	f48070        	extui	a8, a7, 0, 16
+4008049f:	3f          	.byte 0x3f
+400804a0:	002210        	lsi	f1, a2, 0
+400804a3:	3c08      	l32i.n	a0, a12, 12
+400804a5:	3ff000        	f64cmph	a15, a0, a0, 3
+
+400804a8 <_set_160mhz>:
+400804a8:	002136        	entry	a1, 16
+400804ab:	fffc21        	l32r	a2, 4008049c <_stop_watchdog+0x14>
+400804ae:	fffc31        	l32r	a3, 400804a0 <_stop_watchdog+0x18>
+400804b1:	0239      	s32i.n	a3, a2, 0
+400804b3:	fffc21        	l32r	a2, 400804a4 <_stop_watchdog+0x1c>
+400804b6:	130c      	movi.n	a3, 1
+400804b8:	0239      	s32i.n	a3, a2, 0
+400804ba:	f01d      	retw.n
+400804bc:	0228      	l32i.n	a2, a2, 0
+400804be:	3ffb      	addi.n	a3, a15, 15
+400804c0:	fb0000        	f64addc	a0, a0, 0, 0
+400804c3:	3f          	.byte 0x3f
+
+400804c4 <_Main_6E69624D_s_text>:
+400804c4:	004136        	entry	a1, 32
+400804c7:	fffd21        	l32r	a2, 400804bc <_set_160mhz+0x14>
+400804ca:	013d      	mov.n	a3, a1
+400804cc:	006132        	s32i	a3, a1, 0
+400804cf:	201110        	or	a1, a1, a1
+400804d2:	007ed5        	call4	40080cc0 <_Out_23908F94_p_Ln>
+400804d5:	fffa61        	l32r	a6, 400804c0 <_set_160mhz+0x18>
+400804d8:	071c      	movi.n	a7, 16
+400804da:	201110        	or	a1, a1, a1
+400804dd:	004f55        	call4	400809d4 <_Out_23908F94_p_String>
+400804e0:	002162        	l32i	a6, a1, 0
+400804e3:	00a072        	movi	a7, 0
+400804e6:	201110        	or	a1, a1, a1
+400804e9:	005b95        	call4	40080aa4 <_Out_23908F94_p_Hex>
+400804ec:	201110        	or	a1, a1, a1
+400804ef:	007d15        	call4	40080cc0 <_Out_23908F94_p_Ln>
+400804f2:	f01d      	retw.n
+400804f4:	022c      	movi.n	a2, 32
+400804f6:	3ffb      	addi.n	a3, a15, 15
+
+400804f8 <_Assignments_4FA6587C_s_text>:
+400804f8:	004136        	entry	a1, 32
+400804fb:	0129      	s32i.n	a2, a1, 0
+400804fd:	fffd21        	l32r	a2, 400804f4 <_Main_6E69624D_s_text+0x30>
+40080500:	000162        	l8ui	a6, a1, 0
+40080503:	201110        	or	a1, a1, a1
+40080506:	004a55        	call4	400809ac <_Out_23908F94_p_Char>
+40080509:	f01d      	retw.n
+	...
+
+4008050c <_ProcTests>:
+4008050c:	004136        	entry	a1, 32
+4008050f:	0129      	s32i.n	a2, a1, 0
+40080511:	1139      	s32i.n	a3, a1, 4
+40080513:	fff821        	l32r	a2, 400804f4 <_Main_6E69624D_s_text+0x30>
+40080516:	1138      	l32i.n	a3, a1, 4
+40080518:	fa0350        	wfr	f0, a3
+4008051b:	aa3000        	floor.s	a3, f0, 0
+4008051e:	2139      	s32i.n	a3, a1, 8
+40080520:	0138      	l32i.n	a3, a1, 0
+40080522:	0338      	l32i.n	a3, a3, 0
+40080524:	331b      	addi.n	a3, a3, 1
+40080526:	0148      	l32i.n	a4, a1, 0
+40080528:	0439      	s32i.n	a3, a4, 0
+4008052a:	2138      	l32i.n	a3, a1, 8
+4008052c:	0148      	l32i.n	a4, a1, 0
+4008052e:	0448      	l32i.n	a4, a4, 0
+40080530:	334a      	add.n	a3, a3, a4
+40080532:	f01d      	retw.n
+40080534:	fb0040        	f64addc	a4, a0, 0, 0
+40080537:	3f          	.byte 0x3f
+40080538:	400000        	ssr	a0
+4008053b:	        	srai	a3, a4, 6
+
+4008053c <_Assignments_4FA6587C_p_Run>:
+4008053c:	002136        	entry	a1, 16
+4008053f:	ffed21        	l32r	a2, 400804f4 <_Main_6E69624D_s_text+0x30>
+40080542:	fffc61        	l32r	a6, 40080534 <_ProcTests+0x28>
+40080545:	e70c      	movi.n	a7, 14
+40080547:	201110        	or	a1, a1, a1
+4008054a:	004895        	call4	400809d4 <_Out_23908F94_p_String>
+4008054d:	164c      	movi.n	a6, 65
+4008054f:	fffa95        	call4	400804f8 <_Assignments_4FA6587C_s_text>
+40080552:	931c      	movi.n	a3, 25
+40080554:	006232        	s32i	a3, a2, 0
+40080557:	42a062        	movi	a6, 66
+4008055a:	fff9d5        	call4	400804f8 <_Assignments_4FA6587C_s_text>
+4008055d:	fff631        	l32r	a3, 40080538 <_ProcTests+0x2c>
+40080560:	2239      	s32i.n	a3, a2, 8
+40080562:	43a062        	movi	a6, 67
+40080565:	fff915        	call4	400804f8 <_Assignments_4FA6587C_s_text>
+40080568:	e30c      	movi.n	a3, 14
+4008056a:	3239      	s32i.n	a3, a2, 12
+4008056c:	464c      	movi.n	a6, 68
+4008056e:	fff895        	call4	400804f8 <_Assignments_4FA6587C_s_text>
+40080571:	f31c      	movi.n	a3, 31
+40080573:	0b6232        	s32i	a3, a2, 44
+40080576:	45a062        	movi	a6, 69
+40080579:	fff7d5        	call4	400804f8 <_Assignments_4FA6587C_s_text>
+4008057c:	38c232        	addi	a3, a2, 56
+4008057f:	ffed41        	l32r	a4, 40080534 <_ProcTests+0x28>
+40080582:	10c442        	addi	a4, a4, 16
+40080585:	450c      	movi.n	a5, 4
+40080587:	078576        	loop	a5, 40080592 <_Assignments_4FA6587C_p_Run+0x56>
+4008058a:	0468      	l32i.n	a6, a4, 0
+4008058c:	444b      	addi.n	a4, a4, 4
+4008058e:	0369      	s32i.n	a6, a3, 0
+40080590:	334b      	addi.n	a3, a3, 4
+40080592:	46a062        	movi	a6, 70
+40080595:	fff615        	call4	400804f8 <_Assignments_4FA6587C_s_text>
+40080598:	330c      	movi.n	a3, 3
+4008059a:	540c      	movi.n	a4, 5
+4008059c:	04a347        	bge	a3, a4, 400805a4 <_Assignments_4FA6587C_p_Run+0x68>
+4008059f:	130c      	movi.n	a3, 1
+400805a1:	000046        	j	400805a6 <_Assignments_4FA6587C_p_Run+0x6a>
+400805a4:	030c      	movi.n	a3, 0
+400805a6:	4c4232        	s8i	a3, a2, 76
+400805a9:	764c      	movi.n	a6, 71
+400805ab:	fff4d5        	call4	400804f8 <_Assignments_4FA6587C_s_text>
+400805ae:	0238      	l32i.n	a3, a2, 0
+400805b0:	e41c      	movi.n	a4, 30
+400805b2:	06a437        	bge	a4, a3, 400805bc <_Assignments_4FA6587C_p_Run+0x80>
+400805b5:	130c      	movi.n	a3, 1
+400805b7:	0000c6        	j	400805be <_Assignments_4FA6587C_p_Run+0x82>
+400805ba:	0c0000        	lsi	f0, a0, 48
+400805bd:	423203        	lsi	f0, a2, 0x108
+400805c0:	4c4d      	lsi	f4, a12, 48
+400805c2:	f35586        	j	4007d31c <_ebss+0xc8d60>
+400805c5:	ff          	.byte 0xff
+400805c6:	531c      	movi.n	a3, 21
+400805c8:	166232        	s32i	a3, a2, 88
+400805cb:	964c      	movi.n	a6, 73
+400805cd:	fff295        	call4	400804f8 <_Assignments_4FA6587C_s_text>
+400805d0:	130c      	movi.n	a3, 1
+400805d2:	5c4232        	s8i	a3, a2, 92
+400805d5:	a64c      	movi.n	a6, 74
+400805d7:	fff215        	call4	400804f8 <_Assignments_4FA6587C_s_text>
+400805da:	0238      	l32i.n	a3, a2, 0
+400805dc:	146232        	s32i	a3, a2, 80
+400805df:	b64c      	movi.n	a6, 75
+400805e1:	fff155        	call4	400804f8 <_Assignments_4FA6587C_s_text>
+400805e4:	50c262        	addi	a6, a2, 80
+400805e7:	2278      	l32i.n	a7, a2, 8
+400805e9:	fff215        	call4	4008050c <_ProcTests>
+400805ec:	203770        	or	a3, a7, a7
+400805ef:	156232        	s32i	a3, a2, 84
+400805f2:	2ea062        	movi	a6, 46
+400805f5:	fff015        	call4	400804f8 <_Assignments_4FA6587C_s_text>
+400805f8:	61a062        	movi	a6, 97
+400805fb:	ffefd5        	call4	400804f8 <_Assignments_4FA6587C_s_text>
+400805fe:	0268      	l32i.n	a6, a2, 0
+40080600:	971c      	movi.n	a7, 25
+40080602:	069677        	bne	a6, a7, 4008060c <_Assignments_4FA6587C_p_Run+0xd0>
+40080605:	160c      	movi.n	a6, 1
+40080607:	0000c6        	j	4008060e <_Assignments_4FA6587C_p_Run+0xd2>
+4008060a:	0c0000        	lsi	f0, a0, 48
+4008060d:	c97106        	j	40072bd5 <_ebss+0xbe619>
+40080610:	ff          	.byte 0xff
+40080611:	20c772        	addi	a7, a7, 32
+40080614:	381c      	movi.n	a8, 19
+40080616:	201110        	or	a1, a1, a1
+40080619:	002315        	call4	4008084c <_Test_DC7FAF87_p_Assert>
+4008061c:	62a062        	movi	a6, 98
+4008061f:	ffed95        	call4	400804f8 <_Assignments_4FA6587C_s_text>
+40080622:	2268      	l32i.n	a6, a2, 8
+40080624:	ffc571        	l32r	a7, 40080538 <_ProcTests+0x2c>
+40080627:	059677        	bne	a6, a7, 40080630 <_Assignments_4FA6587C_p_Run+0xf4>
+4008062a:	160c      	movi.n	a6, 1
+4008062c:	000086        	j	40080632 <_Assignments_4FA6587C_p_Run+0xf6>
+4008062f:	060c00        	lsi	f0, a12, 24
+40080632:	ffc071        	l32r	a7, 40080534 <_ProcTests+0x28>
+40080635:	34c772        	addi	a7, a7, 52
+40080638:	081c      	movi.n	a8, 16
+4008063a:	201110        	or	a1, a1, a1
+4008063d:	0020d5        	call4	4008084c <_Test_DC7FAF87_p_Assert>
+40080640:	63a062        	movi	a6, 99
+40080643:	ffeb55        	call4	400804f8 <_Assignments_4FA6587C_s_text>
+40080646:	3268      	l32i.n	a6, a2, 12
+40080648:	e70c      	movi.n	a7, 14
+4008064a:	069677        	bne	a6, a7, 40080654 <_Assignments_4FA6587C_p_Run+0x118>
+4008064d:	160c      	movi.n	a6, 1
+4008064f:	0000c6        	j	40080656 <_Assignments_4FA6587C_p_Run+0x11a>
+40080652:	0c0000        	lsi	f0, a0, 48
+40080655:	b77106        	j	4006e41d <_ebss+0xb9e61>
+40080658:	ff          	.byte 0xff
+40080659:	44c772        	addi	a7, a7, 68
+4008065c:	f80c      	movi.n	a8, 15
+4008065e:	201110        	or	a1, a1, a1
+40080661:	001e95        	call4	4008084c <_Test_DC7FAF87_p_Assert>
+40080664:	64a062        	movi	a6, 100
+40080667:	ffe915        	call4	400804f8 <_Assignments_4FA6587C_s_text>
+4008066a:	b268      	l32i.n	a6, a2, 44
+4008066c:	f71c      	movi.n	a7, 31
+4008066e:	069677        	bne	a6, a7, 40080678 <_Assignments_4FA6587C_p_Run+0x13c>
+40080671:	160c      	movi.n	a6, 1
+40080673:	0000c6        	j	4008067a <_Assignments_4FA6587C_p_Run+0x13e>
+40080676:	0c0000        	lsi	f0, a0, 48
+40080679:	ae7106        	j	4006c041 <_ebss+0xb7a85>
+4008067c:	ff          	.byte 0xff
+4008067d:	54c772        	addi	a7, a7, 84
+40080680:	11a082        	movi	a8, 17
+40080683:	201110        	or	a1, a1, a1
+40080686:	001c55        	call4	4008084c <_Test_DC7FAF87_p_Assert>
+40080689:	65a062        	movi	a6, 101
+4008068c:	ffe695        	call4	400804f8 <_Assignments_4FA6587C_s_text>
+4008068f:	38c282        	addi	a8, a2, 56
+40080692:	ffa891        	l32r	a9, 40080534 <_ProcTests+0x28>
+40080695:	68c992        	addi	a9, a9, 104
+40080698:	000862        	l8ui	a6, a8, 0
+4008069b:	881b      	addi.n	a8, a8, 1
+4008069d:	000972        	l8ui	a7, a9, 0
+400806a0:	991b      	addi.n	a9, a9, 1
+400806a2:	029677        	bne	a6, a7, 400806a8 <_Assignments_4FA6587C_p_Run+0x16c>
+400806a5:	fef656        	bnez	a6, 40080698 <_Assignments_4FA6587C_p_Run+0x15c>
+400806a8:	049677        	bne	a6, a7, 400806b0 <_Assignments_4FA6587C_p_Run+0x174>
+400806ab:	160c      	movi.n	a6, 1
+400806ad:	000046        	j	400806b2 <_Assignments_4FA6587C_p_Run+0x176>
+400806b0:	060c      	movi.n	a6, 0
+400806b2:	ffa071        	l32r	a7, 40080534 <_ProcTests+0x28>
+400806b5:	78c772        	addi	a7, a7, 120
+400806b8:	281c      	movi.n	a8, 18
+400806ba:	201110        	or	a1, a1, a1
+400806bd:	0018d5        	call4	4008084c <_Test_DC7FAF87_p_Assert>
+400806c0:	66a062        	movi	a6, 102
+400806c3:	ffe355        	call4	400804f8 <_Assignments_4FA6587C_s_text>
+400806c6:	4c0262        	l8ui	a6, a2, 76
+400806c9:	ff9a71        	l32r	a7, 40080534 <_ProcTests+0x28>
+400806cc:	8ca082        	movi	a8, 140
+400806cf:	778a      	add.n	a7, a7, a8
+400806d1:	381c      	movi.n	a8, 19
+400806d3:	201110        	or	a1, a1, a1
+400806d6:	001755        	call4	4008084c <_Test_DC7FAF87_p_Assert>
+400806d9:	67a062        	movi	a6, 103
+400806dc:	ffe195        	call4	400804f8 <_Assignments_4FA6587C_s_text>
+400806df:	4d0262        	l8ui	a6, a2, 77
+400806e2:	66cc      	bnez.n	a6, 400806ec <_Assignments_4FA6587C_p_Run+0x1b0>
+400806e4:	160c      	movi.n	a6, 1
+400806e6:	000106        	j	400806ee <_Assignments_4FA6587C_p_Run+0x1b2>
+400806e9:	000000        	ill
+400806ec:	060c      	movi.n	a6, 0
+400806ee:	ff9171        	l32r	a7, 40080534 <_ProcTests+0x28>
+400806f1:	a0a082        	movi	a8, 160
+400806f4:	807780        	add	a7, a7, a8
+400806f7:	19a082        	movi	a8, 25
+400806fa:	201110        	or	a1, a1, a1
+400806fd:	0014d5        	call4	4008084c <_Test_DC7FAF87_p_Assert>
+40080700:	68a062        	movi	a6, 104
+40080703:	ffdf55        	call4	400804f8 <_Assignments_4FA6587C_s_text>
+40080706:	1268      	l32i.n	a6, a2, 4
+40080708:	070c      	movi.n	a7, 0
+4008070a:	069677        	bne	a6, a7, 40080714 <_Assignments_4FA6587C_p_Run+0x1d8>
+4008070d:	160c      	movi.n	a6, 1
+4008070f:	0000c6        	j	40080716 <_Assignments_4FA6587C_p_Run+0x1da>
+40080712:	0c0000        	lsi	f0, a0, 48
+40080715:	877106        	j	400624dd <_ebss+0xadf21>
+40080718:	ff          	.byte 0xff
+40080719:	bca082        	movi	a8, 188
+4008071c:	807780        	add	a7, a7, a8
+4008071f:	16a082        	movi	a8, 22
+40080722:	201110        	or	a1, a1, a1
+40080725:	001255        	call4	4008084c <_Test_DC7FAF87_p_Assert>
+40080728:	6aa062        	movi	a6, 106
+4008072b:	ffdcd5        	call4	400804f8 <_Assignments_4FA6587C_s_text>
+4008072e:	162262        	l32i	a6, a2, 88
+40080731:	571c      	movi.n	a7, 21
+40080733:	059677        	bne	a6, a7, 4008073c <_Assignments_4FA6587C_p_Run+0x200>
+40080736:	160c      	movi.n	a6, 1
+40080738:	000086        	j	4008073e <_Assignments_4FA6587C_p_Run+0x202>
+4008073b:	060c00        	lsi	f0, a12, 24
+4008073e:	ff7d71        	l32r	a7, 40080534 <_ProcTests+0x28>
+40080741:	d4a082        	movi	a8, 212
+40080744:	807780        	add	a7, a7, a8
+40080747:	1aa082        	movi	a8, 26
+4008074a:	201110        	or	a1, a1, a1
+4008074d:	000fd5        	call4	4008084c <_Test_DC7FAF87_p_Assert>
+40080750:	6ba062        	movi	a6, 107
+40080753:	ffda55        	call4	400804f8 <_Assignments_4FA6587C_s_text>
+40080756:	142262        	l32i	a6, a2, 80
+40080759:	a71c      	movi.n	a7, 26
+4008075b:	059677        	bne	a6, a7, 40080764 <_Assignments_4FA6587C_p_Run+0x228>
+4008075e:	160c      	movi.n	a6, 1
+40080760:	000086        	j	40080766 <_Assignments_4FA6587C_p_Run+0x22a>
+40080763:	060c00        	lsi	f0, a12, 24
+40080766:	ff7371        	l32r	a7, 40080534 <_ProcTests+0x28>
+40080769:	f0a082        	movi	a8, 240
+4008076c:	807780        	add	a7, a7, a8
+4008076f:	1aa082        	movi	a8, 26
+40080772:	201110        	or	a1, a1, a1
+40080775:	000d55        	call4	4008084c <_Test_DC7FAF87_p_Assert>
+40080778:	6ca062        	movi	a6, 108
+4008077b:	ffd7d5        	call4	400804f8 <_Assignments_4FA6587C_s_text>
+4008077e:	152262        	l32i	a6, a2, 84
+40080781:	d71c      	movi.n	a7, 29
+40080783:	059677        	bne	a6, a7, 4008078c <_Assignments_4FA6587C_p_Run+0x250>
+40080786:	160c      	movi.n	a6, 1
+40080788:	000086        	j	4008078e <_Assignments_4FA6587C_p_Run+0x252>
+4008078b:	060c00        	lsi	f0, a12, 24
+4008078e:	ff6971        	l32r	a7, 40080534 <_ProcTests+0x28>
+40080791:	0ca182        	movi	a8, 0x10c
+40080794:	807780        	add	a7, a7, a8
+40080797:	1aa082        	movi	a8, 26
+4008079a:	201110        	or	a1, a1, a1
+4008079d:	000ad5        	call4	4008084c <_Test_DC7FAF87_p_Assert>
+400807a0:	6da062        	movi	a6, 109
+400807a3:	ffd555        	call4	400804f8 <_Assignments_4FA6587C_s_text>
+400807a6:	5c0262        	l8ui	a6, a2, 92
+400807a9:	ff6271        	l32r	a7, 40080534 <_ProcTests+0x28>
+400807ac:	28a182        	movi	a8, 0x128
+400807af:	778a      	add.n	a7, a7, a8
+400807b1:	a81c      	movi.n	a8, 26
+400807b3:	201110        	or	a1, a1, a1
+400807b6:	000955        	call4	4008084c <_Test_DC7FAF87_p_Assert>
+400807b9:	e62c      	movi.n	a6, 46
+400807bb:	ffd3d5        	call4	400804f8 <_Assignments_4FA6587C_s_text>
+400807be:	ff5d61        	l32r	a6, 40080534 <_ProcTests+0x28>
+400807c1:	44a172        	movi	a7, 0x144
+400807c4:	806670        	add	a6, a6, a7
+400807c7:	05a072        	movi	a7, 5
+400807ca:	201110        	or	a1, a1, a1
+400807cd:	002055        	call4	400809d4 <_Out_23908F94_p_String>
+400807d0:	201110        	or	a1, a1, a1
+400807d3:	004ed5        	call4	40080cc0 <_Out_23908F94_p_Ln>
+400807d6:	f01d      	retw.n
+400807d8:	028c      	beqz.n	a2, 400807dc <_Test_DC7FAF87_p_Register>
+400807da:	3ffb      	addi.n	a3, a15, 15
+
+400807dc <_Test_DC7FAF87_p_Register>:
+400807dc:	004136        	entry	a1, 32
+400807df:	0129      	s32i.n	a2, a1, 0
+400807e1:	fffd21        	l32r	a2, 400807d8 <_Assignments_4FA6587C_p_Run+0x29c>
+400807e4:	201110        	or	a1, a1, a1
+400807e7:	004d95        	call4	40080cc0 <_Out_23908F94_p_Ln>
+400807ea:	2238      	l32i.n	a3, a2, 8
+400807ec:	c7a042        	movi	a4, 199
+400807ef:	12a347        	bge	a3, a4, 40080805 <_Test_DC7FAF87_p_Register+0x29>
+400807f2:	2238      	l32i.n	a3, a2, 8
+400807f4:	1133e0        	slli	a3, a3, 2
+400807f7:	323a      	add.n	a3, a2, a3
+400807f9:	0148      	l32i.n	a4, a1, 0
+400807fb:	3349      	s32i.n	a4, a3, 12
+400807fd:	328b      	addi.n	a3, a2, 8
+400807ff:	0348      	l32i.n	a4, a3, 0
+40080801:	441b      	addi.n	a4, a4, 1
+40080803:	0349      	s32i.n	a4, a3, 0
+40080805:	f01d      	retw.n
+40080807:	018c00        	slli	a8, a12, 32
+4008080a:	3ffb      	addi.n	a3, a15, 15
+
+4008080c <_Test_DC7FAF87_p_Exec>:
+4008080c:	004136        	entry	a1, 32
+4008080f:	fff221        	l32r	a2, 400807d8 <_Assignments_4FA6587C_p_Run+0x29c>
+40080812:	fffd61        	l32r	a6, 40080808 <_Test_DC7FAF87_p_Register+0x2c>
+40080815:	670c      	movi.n	a7, 6
+40080817:	201110        	or	a1, a1, a1
+4008081a:	001b95        	call4	400809d4 <_Out_23908F94_p_String>
+4008081d:	201110        	or	a1, a1, a1
+40080820:	0049d5        	call4	40080cc0 <_Out_23908F94_p_Ln>
+40080823:	030c      	movi.n	a3, 0
+40080825:	1239      	s32i.n	a3, a2, 4
+40080827:	030c      	movi.n	a3, 0
+40080829:	2248      	l32i.n	a4, a2, 8
+4008082b:	440b      	addi.n	a4, a4, -1
+4008082d:	142437        	blt	a4, a3, 40080845 <_Test_DC7FAF87_p_Exec+0x39>
+40080830:	0139      	s32i.n	a3, a1, 0
+40080832:	0138      	l32i.n	a3, a1, 0
+40080834:	1133e0        	slli	a3, a3, 2
+40080837:	323a      	add.n	a3, a2, a3
+40080839:	3338      	l32i.n	a3, a3, 12
+4008083b:	0003d0        	callx4	a3
+4008083e:	0138      	l32i.n	a3, a1, 0
+40080840:	331b      	addi.n	a3, a3, 1
+40080842:	fff8c6        	j	40080829 <_Test_DC7FAF87_p_Exec+0x1d>
+40080845:	1238      	l32i.n	a3, a2, 4
+40080847:	f01d      	retw.n
+40080849:	000000        	ill
+
+4008084c <_Test_DC7FAF87_p_Assert>:
+4008084c:	004136        	entry	a1, 32
+4008084f:	0129      	s32i.n	a2, a1, 0
+40080851:	1139      	s32i.n	a3, a1, 4
+40080853:	2149      	s32i.n	a4, a1, 8
+40080855:	ffe021        	l32r	a2, 400807d8 <_Assignments_4FA6587C_p_Run+0x29c>
+40080858:	023d      	mov.n	a3, a2
+4008085a:	0348      	l32i.n	a4, a3, 0
+4008085c:	01c442        	addi	a4, a4, 1
+4008085f:	006342        	s32i	a4, a3, 0
+40080862:	000132        	l8ui	a3, a1, 0
+40080865:	f3ec      	bnez.n	a3, 40080898 <_Test_DC7FAF87_p_Assert+0x4c>
+40080867:	201110        	or	a1, a1, a1
+4008086a:	004555        	call4	40080cc0 <_Out_23908F94_p_Ln>
+4008086d:	ffe661        	l32r	a6, 40080808 <_Test_DC7FAF87_p_Register+0x2c>
+40080870:	668b      	addi.n	a6, a6, 8
+40080872:	071c      	movi.n	a7, 16
+40080874:	201110        	or	a1, a1, a1
+40080877:	0015d5        	call4	400809d4 <_Out_23908F94_p_String>
+4008087a:	1168      	l32i.n	a6, a1, 4
+4008087c:	2178      	l32i.n	a7, a1, 8
+4008087e:	201110        	or	a1, a1, a1
+40080881:	001515        	call4	400809d4 <_Out_23908F94_p_String>
+40080884:	201110        	or	a1, a1, a1
+40080887:	004395        	call4	40080cc0 <_Out_23908F94_p_Ln>
+4008088a:	201110        	or	a1, a1, a1
+4008088d:	001055        	call4	40080994 <_Out_23908F94_p_Flush>
+40080890:	324b      	addi.n	a3, a2, 4
+40080892:	0348      	l32i.n	a4, a3, 0
+40080894:	441b      	addi.n	a4, a4, 1
+40080896:	0349      	s32i.n	a4, a3, 0
+40080898:	f01d      	retw.n
+	...
+
+4008089c <_Test_DC7FAF87_p_Completed>:
+4008089c:	002136        	entry	a1, 16
+4008089f:	ffce21        	l32r	a2, 400807d8 <_Assignments_4FA6587C_p_Run+0x29c>
+400808a2:	201110        	or	a1, a1, a1
+400808a5:	004195        	call4	40080cc0 <_Out_23908F94_p_Ln>
+400808a8:	201110        	or	a1, a1, a1
+400808ab:	004155        	call4	40080cc0 <_Out_23908F94_p_Ln>
+400808ae:	ffd661        	l32r	a6, 40080808 <_Test_DC7FAF87_p_Register+0x2c>
+400808b1:	18c662        	addi	a6, a6, 24
+400808b4:	11a072        	movi	a7, 17
+400808b7:	201110        	or	a1, a1, a1
+400808ba:	001195        	call4	400809d4 <_Out_23908F94_p_String>
+400808bd:	201110        	or	a1, a1, a1
+400808c0:	003fd5        	call4	40080cc0 <_Out_23908F94_p_Ln>
+400808c3:	ffd161        	l32r	a6, 40080808 <_Test_DC7FAF87_p_Register+0x2c>
+400808c6:	2cc662        	addi	a6, a6, 44
+400808c9:	c71c      	movi.n	a7, 28
+400808cb:	201110        	or	a1, a1, a1
+400808ce:	001055        	call4	400809d4 <_Out_23908F94_p_String>
+400808d1:	022262        	l32i	a6, a2, 8
+400808d4:	00a072        	movi	a7, 0
+400808d7:	201110        	or	a1, a1, a1
+400808da:	001355        	call4	40080a10 <_Out_23908F94_p_Int>
+400808dd:	201110        	or	a1, a1, a1
+400808e0:	003dd5        	call4	40080cc0 <_Out_23908F94_p_Ln>
+400808e3:	ffc961        	l32r	a6, 40080808 <_Test_DC7FAF87_p_Register+0x2c>
+400808e6:	48c662        	addi	a6, a6, 72
+400808e9:	1ba072        	movi	a7, 27
+400808ec:	201110        	or	a1, a1, a1
+400808ef:	000e55        	call4	400809d4 <_Out_23908F94_p_String>
+400808f2:	0268      	l32i.n	a6, a2, 0
+400808f4:	070c      	movi.n	a7, 0
+400808f6:	201110        	or	a1, a1, a1
+400808f9:	001155        	call4	40080a10 <_Out_23908F94_p_Int>
+400808fc:	1238      	l32i.n	a3, a2, 4
+400808fe:	040c      	movi.n	a4, 0
+40080900:	34a437        	bge	a4, a3, 40080938 <_Test_DC7FAF87_p_Completed+0x9c>
+40080903:	201110        	or	a1, a1, a1
+40080906:	003b95        	call4	40080cc0 <_Out_23908F94_p_Ln>
+40080909:	ffbf61        	l32r	a6, 40080808 <_Test_DC7FAF87_p_Register+0x2c>
+4008090c:	64c662        	addi	a6, a6, 100
+4008090f:	0aa072        	movi	a7, 10
+40080912:	201110        	or	a1, a1, a1
+40080915:	000bd5        	call4	400809d4 <_Out_23908F94_p_String>
+40080918:	012262        	l32i	a6, a2, 4
+4008091b:	00a072        	movi	a7, 0
+4008091e:	201110        	or	a1, a1, a1
+40080921:	000ed5        	call4	40080a10 <_Out_23908F94_p_Int>
+40080924:	ffb961        	l32r	a6, 40080808 <_Test_DC7FAF87_p_Register+0x2c>
+40080927:	70c662        	addi	a6, a6, 112
+4008092a:	b70c      	movi.n	a7, 11
+4008092c:	201110        	or	a1, a1, a1
+4008092f:	000a55        	call4	400809d4 <_Out_23908F94_p_String>
+40080932:	000586        	j	4008094c <_Test_DC7FAF87_p_Completed+0xb0>
+40080935:	000000        	ill
+40080938:	201110        	or	a1, a1, a1
+4008093b:	003855        	call4	40080cc0 <_Out_23908F94_p_Ln>
+4008093e:	ffb261        	l32r	a6, 40080808 <_Test_DC7FAF87_p_Register+0x2c>
+40080941:	7cc662        	addi	a6, a6, 124
+40080944:	971c      	movi.n	a7, 25
+40080946:	201110        	or	a1, a1, a1
+40080949:	000895        	call4	400809d4 <_Out_23908F94_p_String>
+4008094c:	1238      	l32i.n	a3, a2, 4
+4008094e:	f01d      	retw.n
+
+40080950 <_Test_DC7FAF87_p_Setup>:
+40080950:	002136        	entry	a1, 16
+40080953:	ffa121        	l32r	a2, 400807d8 <_Assignments_4FA6587C_p_Run+0x29c>
+40080956:	030c      	movi.n	a3, 0
+40080958:	0239      	s32i.n	a3, a2, 0
+4008095a:	030c      	movi.n	a3, 0
+4008095c:	1239      	s32i.n	a3, a2, 4
+4008095e:	030c      	movi.n	a3, 0
+40080960:	2239      	s32i.n	a3, a2, 8
+40080962:	f01d      	retw.n
+40080964:	05b8      	l32i.n	a11, a5, 0
+40080966:	3ffb      	addi.n	a3, a15, 15
+
+40080968 <_Out_23908F94_p_Open>:
+40080968:	002136        	entry	a1, 16
+4008096b:	fffe21        	l32r	a2, 40080964 <_Test_DC7FAF87_p_Setup+0x14>
+4008096e:	f01d      	retw.n
+40080970:	001c      	movi.n	a0, 16
+40080972:	        	lsi	f15, a15, 216
+
+40080974 <_FifoCount>:
+40080974:	004136        	entry	a1, 32
+40080977:	fffb21        	l32r	a2, 40080964 <_Test_DC7FAF87_p_Setup+0x14>
+4008097a:	fffd31        	l32r	a3, 40080970 <_Out_23908F94_p_Open+0x8>
+4008097d:	0338      	l32i.n	a3, a3, 0
+4008097f:	1139      	s32i.n	a3, a1, 4
+40080981:	1138      	l32i.n	a3, a1, 4
+40080983:	313030        	srai	a3, a3, 16
+40080986:	ffa042        	movi	a4, 255
+40080989:	103340        	and	a3, a3, a4
+4008098c:	0139      	s32i.n	a3, a1, 0
+4008098e:	0138      	l32i.n	a3, a1, 0
+40080990:	f01d      	retw.n
+	...
+
+40080994 <_Out_23908F94_p_Flush>:
+40080994:	002136        	entry	a1, 16
+40080997:	fff321        	l32r	a2, 40080964 <_Test_DC7FAF87_p_Setup+0x14>
+4008099a:	fffd95        	call4	40080974 <_FifoCount>
+4008099d:	073d      	mov.n	a3, a7
+4008099f:	040c      	movi.n	a4, 0
+400809a1:	02a437        	bge	a4, a3, 400809a7 <_Out_23908F94_p_Flush+0x13>
+400809a4:	fffc86        	j	4008099a <_Out_23908F94_p_Flush+0x6>
+400809a7:	f01d      	retw.n
+400809a9:	000000        	ill
+
+400809ac <_Out_23908F94_p_Char>:
+400809ac:	004136        	entry	a1, 32
+400809af:	006122        	s32i	a2, a1, 0
+400809b2:	ffec21        	l32r	a2, 40080964 <_Test_DC7FAF87_p_Setup+0x14>
+400809b5:	fffbd5        	call4	40080974 <_FifoCount>
+400809b8:	073d      	mov.n	a3, a7
+400809ba:	78a042        	movi	a4, 120
+400809bd:	07a437        	bge	a4, a3, 400809c8 <_Out_23908F94_p_Char+0x1c>
+400809c0:	fffc46        	j	400809b5 <_Out_23908F94_p_Char+0x9>
+400809c3:	000000        	ill
+400809c6:	323ff4        	lsi	f15, a15, 200
+400809c9:	410001        	l32r	a0, 40050dcc <_ebss+0x9c810>
+400809cc:	fe          	.byte 0xfe
+400809cd:	ff          	.byte 0xff
+400809ce:	0439      	s32i.n	a3, a4, 0
+400809d0:	f01d      	retw.n
+	...
+
+400809d4 <_Out_23908F94_p_String>:
+400809d4:	004136        	entry	a1, 32
+400809d7:	0129      	s32i.n	a2, a1, 0
+400809d9:	1139      	s32i.n	a3, a1, 4
+400809db:	ffe221        	l32r	a2, 40080964 <_Test_DC7FAF87_p_Setup+0x14>
+400809de:	030c      	movi.n	a3, 0
+400809e0:	2139      	s32i.n	a3, a1, 8
+400809e2:	1138      	l32i.n	a3, a1, 4
+400809e4:	2148      	l32i.n	a4, a1, 8
+400809e6:	23a437        	bge	a4, a3, 40080a0d <_Out_23908F94_p_String+0x39>
+400809e9:	2138      	l32i.n	a3, a1, 8
+400809eb:	0148      	l32i.n	a4, a1, 0
+400809ed:	343a      	add.n	a3, a4, a3
+400809ef:	000332        	l8ui	a3, a3, 0
+400809f2:	040c      	movi.n	a4, 0
+400809f4:	151347        	beq	a3, a4, 40080a0d <_Out_23908F94_p_String+0x39>
+400809f7:	2168      	l32i.n	a6, a1, 8
+400809f9:	0178      	l32i.n	a7, a1, 0
+400809fb:	806760        	add	a6, a7, a6
+400809fe:	000662        	l8ui	a6, a6, 0
+40080a01:	fffa95        	call4	400809ac <_Out_23908F94_p_Char>
+40080a04:	2138      	l32i.n	a3, a1, 8
+40080a06:	331b      	addi.n	a3, a3, 1
+40080a08:	2139      	s32i.n	a3, a1, 8
+40080a0a:	fff506        	j	400809e2 <_Out_23908F94_p_String+0xe>
+40080a0d:	f01d      	retw.n
+	...
+
+40080a10 <_Out_23908F94_p_Int>:
+40080a10:	006136        	entry	a1, 48
+40080a13:	0129      	s32i.n	a2, a1, 0
+40080a15:	1139      	s32i.n	a3, a1, 4
+40080a17:	ffd321        	l32r	a2, 40080964 <_Test_DC7FAF87_p_Setup+0x14>
+40080a1a:	030c      	movi.n	a3, 0
+40080a1c:	2139      	s32i.n	a3, a1, 8
+40080a1e:	0138      	l32i.n	a3, a1, 0
+40080a20:	040c      	movi.n	a4, 0
+40080a22:	12a347        	bge	a3, a4, 40080a38 <_Out_23908F94_p_Int+0x28>
+40080a25:	0138      	l32i.n	a3, a1, 0
+40080a27:	603030        	neg	a3, a3
+40080a2a:	3139      	s32i.n	a3, a1, 12
+40080a2c:	1138      	l32i.n	a3, a1, 4
+40080a2e:	330b      	addi.n	a3, a3, -1
+40080a30:	1139      	s32i.n	a3, a1, 4
+40080a32:	0001c6        	j	40080a3d <_Out_23908F94_p_Int+0x2d>
+40080a35:	000000        	ill
+40080a38:	0138      	l32i.n	a3, a1, 0
+40080a3a:	036132        	s32i	a3, a1, 12
+40080a3d:	2138      	l32i.n	a3, a1, 8
+40080a3f:	313a      	add.n	a3, a1, a3
+40080a41:	3148      	l32i.n	a4, a1, 12
+40080a43:	a50c      	movi.n	a5, 10
+40080a45:	f24450        	rems	a4, a4, a5
+40080a48:	30c442        	addi	a4, a4, 48
+40080a4b:	104342        	s8i	a4, a3, 16
+40080a4e:	3138      	l32i.n	a3, a1, 12
+40080a50:	a40c      	movi.n	a4, 10
+40080a52:	d23340        	quos	a3, a3, a4
+40080a55:	3139      	s32i.n	a3, a1, 12
+40080a57:	2138      	l32i.n	a3, a1, 8
+40080a59:	331b      	addi.n	a3, a3, 1
+40080a5b:	2139      	s32i.n	a3, a1, 8
+40080a5d:	3138      	l32i.n	a3, a1, 12
+40080a5f:	040c      	movi.n	a4, 0
+40080a61:	d89347        	bne	a3, a4, 40080a3d <_Out_23908F94_p_Int+0x2d>
+40080a64:	1138      	l32i.n	a3, a1, 4
+40080a66:	2148      	l32i.n	a4, a1, 8
+40080a68:	10a437        	bge	a4, a3, 40080a7c <_Out_23908F94_p_Int+0x6c>
+40080a6b:	062c      	movi.n	a6, 32
+40080a6d:	fff3d5        	call4	400809ac <_Out_23908F94_p_Char>
+40080a70:	1138      	l32i.n	a3, a1, 4
+40080a72:	330b      	addi.n	a3, a3, -1
+40080a74:	1139      	s32i.n	a3, a1, 4
+40080a76:	fffa86        	j	40080a64 <_Out_23908F94_p_Int+0x54>
+40080a79:	000000        	ill
+40080a7c:	0138      	l32i.n	a3, a1, 0
+40080a7e:	040c      	movi.n	a4, 0
+40080a80:	04a347        	bge	a3, a4, 40080a88 <_Out_23908F94_p_Int+0x78>
+40080a83:	d62c      	movi.n	a6, 45
+40080a85:	fff255        	call4	400809ac <_Out_23908F94_p_Char>
+40080a88:	2138      	l32i.n	a3, a1, 8
+40080a8a:	330b      	addi.n	a3, a3, -1
+40080a8c:	2139      	s32i.n	a3, a1, 8
+40080a8e:	2168      	l32i.n	a6, a1, 8
+40080a90:	616a      	add.n	a6, a1, a6
+40080a92:	100662        	l8ui	a6, a6, 16
+40080a95:	fff155        	call4	400809ac <_Out_23908F94_p_Char>
+40080a98:	2138      	l32i.n	a3, a1, 8
+40080a9a:	040c      	movi.n	a4, 0
+40080a9c:	e89347        	bne	a3, a4, 40080a88 <_Out_23908F94_p_Int+0x78>
+40080a9f:	f01d      	retw.n
+40080aa1:	000000        	ill
+
+40080aa4 <_Out_23908F94_p_Hex>:
+40080aa4:	006136        	entry	a1, 48
+40080aa7:	0129      	s32i.n	a2, a1, 0
+40080aa9:	1139      	s32i.n	a3, a1, 4
+40080aab:	ffae21        	l32r	a2, 40080964 <_Test_DC7FAF87_p_Setup+0x14>
+40080aae:	030c      	movi.n	a3, 0
+40080ab0:	2139      	s32i.n	a3, a1, 8
+40080ab2:	0138      	l32i.n	a3, a1, 0
+40080ab4:	f40c      	movi.n	a4, 15
+40080ab6:	103340        	and	a3, a3, a4
+40080ab9:	3139      	s32i.n	a3, a1, 12
+40080abb:	3138      	l32i.n	a3, a1, 12
+40080abd:	a40c      	movi.n	a4, 10
+40080abf:	11a347        	bge	a3, a4, 40080ad4 <_Out_23908F94_p_Hex+0x30>
+40080ac2:	2138      	l32i.n	a3, a1, 8
+40080ac4:	313a      	add.n	a3, a1, a3
+40080ac6:	3148      	l32i.n	a4, a1, 12
+40080ac8:	30c442        	addi	a4, a4, 48
+40080acb:	104342        	s8i	a4, a3, 16
+40080ace:	000386        	j	40080ae0 <_Out_23908F94_p_Hex+0x3c>
+40080ad1:	000000        	ill
+40080ad4:	2138      	l32i.n	a3, a1, 8
+40080ad6:	313a      	add.n	a3, a1, a3
+40080ad8:	3148      	l32i.n	a4, a1, 12
+40080ada:	37c442        	addi	a4, a4, 55
+40080add:	104342        	s8i	a4, a3, 16
+40080ae0:	0138      	l32i.n	a3, a1, 0
+40080ae2:	213430        	srai	a3, a3, 4
+40080ae5:	0139      	s32i.n	a3, a1, 0
+40080ae7:	2138      	l32i.n	a3, a1, 8
+40080ae9:	331b      	addi.n	a3, a3, 1
+40080aeb:	2139      	s32i.n	a3, a1, 8
+40080aed:	2138      	l32i.n	a3, a1, 8
+40080aef:	840c      	movi.n	a4, 8
+40080af1:	bd9347        	bne	a3, a4, 40080ab2 <_Out_23908F94_p_Hex+0xe>
+40080af4:	1138      	l32i.n	a3, a1, 4
+40080af6:	840c      	movi.n	a4, 8
+40080af8:	10a437        	bge	a4, a3, 40080b0c <_Out_23908F94_p_Hex+0x68>
+40080afb:	062c      	movi.n	a6, 32
+40080afd:	ffead5        	call4	400809ac <_Out_23908F94_p_Char>
+40080b00:	1138      	l32i.n	a3, a1, 4
+40080b02:	330b      	addi.n	a3, a3, -1
+40080b04:	1139      	s32i.n	a3, a1, 4
+40080b06:	fffa86        	j	40080af4 <_Out_23908F94_p_Hex+0x50>
+40080b09:	000000        	ill
+40080b0c:	2138      	l32i.n	a3, a1, 8
+40080b0e:	330b      	addi.n	a3, a3, -1
+40080b10:	2139      	s32i.n	a3, a1, 8
+40080b12:	2168      	l32i.n	a6, a1, 8
+40080b14:	616a      	add.n	a6, a1, a6
+40080b16:	100662        	l8ui	a6, a6, 16
+40080b19:	ffe915        	call4	400809ac <_Out_23908F94_p_Char>
+40080b1c:	2138      	l32i.n	a3, a1, 8
+40080b1e:	040c      	movi.n	a4, 0
+40080b20:	e89347        	bne	a3, a4, 40080b0c <_Out_23908F94_p_Hex+0x68>
+40080b23:	f01d      	retw.n
+40080b25:	000000        	ill
+40080b28:	800000        	add	a0, a0, a0
+40080b2b:	3f          	.byte 0x3f
+40080b2c:	200000        	or	a0, a0, a0
+40080b2f:	        	l32r	a4, 40051008 <_ebss+0x9ca4c>
+
+40080b30 <_Ten>:
+40080b30:	004136        	entry	a1, 32
+40080b33:	0129      	s32i.n	a2, a1, 0
+40080b35:	ff8b21        	l32r	a2, 40080964 <_Test_DC7FAF87_p_Setup+0x14>
+40080b38:	fffc31        	l32r	a3, 40080b28 <_Out_23908F94_p_Hex+0x84>
+40080b3b:	1139      	s32i.n	a3, a1, 4
+40080b3d:	fffb31        	l32r	a3, 40080b2c <_Out_23908F94_p_Hex+0x88>
+40080b40:	2139      	s32i.n	a3, a1, 8
+40080b42:	0138      	l32i.n	a3, a1, 0
+40080b44:	040c      	movi.n	a4, 0
+40080b46:	36a437        	bge	a4, a3, 40080b80 <_Ten+0x50>
+40080b49:	0138      	l32i.n	a3, a1, 0
+40080b4b:	140c      	movi.n	a4, 1
+40080b4d:	103340        	and	a3, a3, a4
+40080b50:	039c      	beqz.n	a3, 40080b64 <_Ten+0x34>
+40080b52:	2138      	l32i.n	a3, a1, 8
+40080b54:	1148      	l32i.n	a4, a1, 4
+40080b56:	fa0350        	wfr	f0, a3
+40080b59:	fa1450        	wfr	f1, a4
+40080b5c:	2a0010        	mul.s	f0, f0, f1
+40080b5f:	fa3240        	rfr	a3, f2
+40080b62:	1139      	s32i.n	a3, a1, 4
+40080b64:	2138      	l32i.n	a3, a1, 8
+40080b66:	2148      	l32i.n	a4, a1, 8
+40080b68:	fa0350        	wfr	f0, a3
+40080b6b:	fa1450        	wfr	f1, a4
+40080b6e:	2a0010        	mul.s	f0, f0, f1
+40080b71:	fa3240        	rfr	a3, f2
+40080b74:	2139      	s32i.n	a3, a1, 8
+40080b76:	0138      	l32i.n	a3, a1, 0
+40080b78:	213130        	srai	a3, a3, 1
+40080b7b:	0139      	s32i.n	a3, a1, 0
+40080b7d:	fff046        	j	40080b42 <_Ten+0x12>
+40080b80:	1138      	l32i.n	a3, a1, 4
+40080b82:	f01d      	retw.n
+40080b84:	fb0224        	lsi	f2, a2, 0x3ec
+40080b87:	3f          	.byte 0x3f
+
+40080b88 <_Out_23908F94_p_Real>:
+40080b88:	008136        	entry	a1, 64
+40080b8b:	0129      	s32i.n	a2, a1, 0
+40080b8d:	1139      	s32i.n	a3, a1, 4
+40080b8f:	2149      	s32i.n	a4, a1, 8
+40080b91:	ff7421        	l32r	a2, 40080964 <_Test_DC7FAF87_p_Setup+0x14>
+40080b94:	0138      	l32i.n	a3, a1, 0
+40080b96:	040c      	movi.n	a4, 0
+40080b98:	0b9347        	bne	a3, a4, 40080ba7 <_Out_23908F94_p_Real+0x1f>
+40080b9b:	fffa61        	l32r	a6, 40080b84 <_Ten+0x54>
+40080b9e:	04a072        	movi	a7, 4
+40080ba1:	ffe315        	call4	400809d4 <_Out_23908F94_p_String>
+40080ba4:	0044c6        	j	40080cbb <_Out_23908F94_p_Real+0x133>
+40080ba7:	0138      	l32i.n	a3, a1, 0
+40080ba9:	040c      	movi.n	a4, 0
+40080bab:	19a347        	bge	a3, a4, 40080bc8 <_Out_23908F94_p_Real+0x40>
+40080bae:	0138      	l32i.n	a3, a1, 0
+40080bb0:	fa0350        	wfr	f0, a3
+40080bb3:	fa0060        	neg.s	f0, f0
+40080bb6:	fa3040        	rfr	a3, f0
+40080bb9:	0139      	s32i.n	a3, a1, 0
+40080bbb:	130c      	movi.n	a3, 1
+40080bbd:	144132        	s8i	a3, a1, 20
+40080bc0:	000246        	j	40080bcd <_Out_23908F94_p_Real+0x45>
+40080bc3:	000000        	ill
+40080bc6:	0c3f00        	lsi	f0, a15, 48
+40080bc9:	413203        	lsi	f0, a2, 0x104
+40080bcc:	213814        	lsi	f1, a8, 132
+40080bcf:	740c      	movi.n	a4, 7
+40080bd1:	03a437        	bge	a4, a3, 40080bd8 <_Out_23908F94_p_Real+0x50>
+40080bd4:	730c      	movi.n	a3, 7
+40080bd6:	2139      	s32i.n	a3, a1, 8
+40080bd8:	2168      	l32i.n	a6, a1, 8
+40080bda:	fff555        	call4	40080b30 <_Ten>
+40080bdd:	073d      	mov.n	a3, a7
+40080bdf:	0148      	l32i.n	a4, a1, 0
+40080be1:	fa0350        	wfr	f0, a3
+40080be4:	fa1450        	wfr	f1, a4
+40080be7:	2a0010        	mul.s	f0, f0, f1
+40080bea:	fa3240        	rfr	a3, f2
+40080bed:	0139      	s32i.n	a3, a1, 0
+40080bef:	0138      	l32i.n	a3, a1, 0
+40080bf1:	fff441        	l32r	a4, 40080bc4 <_Out_23908F94_p_Real+0x3c>
+40080bf4:	fa0350        	wfr	f0, a3
+40080bf7:	fa1450        	wfr	f1, a4
+40080bfa:	0a0010        	add.s	f0, f0, f1
+40080bfd:	fa3240        	rfr	a3, f2
+40080c00:	fa0350        	wfr	f0, a3
+40080c03:	aa3000        	floor.s	a3, f0, 0
+40080c06:	4139      	s32i.n	a3, a1, 16
+40080c08:	030c      	movi.n	a3, 0
+40080c0a:	3139      	s32i.n	a3, a1, 12
+40080c0c:	3138      	l32i.n	a3, a1, 12
+40080c0e:	313a      	add.n	a3, a1, a3
+40080c10:	4148      	l32i.n	a4, a1, 16
+40080c12:	a50c      	movi.n	a5, 10
+40080c14:	f24450        	rems	a4, a4, a5
+40080c17:	30c442        	addi	a4, a4, 48
+40080c1a:	184342        	s8i	a4, a3, 24
+40080c1d:	4138      	l32i.n	a3, a1, 16
+40080c1f:	a40c      	movi.n	a4, 10
+40080c21:	d23340        	quos	a3, a3, a4
+40080c24:	4139      	s32i.n	a3, a1, 16
+40080c26:	3138      	l32i.n	a3, a1, 12
+40080c28:	331b      	addi.n	a3, a3, 1
+40080c2a:	3139      	s32i.n	a3, a1, 12
+40080c2c:	4138      	l32i.n	a3, a1, 16
+40080c2e:	040c      	movi.n	a4, 0
+40080c30:	d89347        	bne	a3, a4, 40080c0c <_Out_23908F94_p_Real+0x84>
+40080c33:	062c      	movi.n	a6, 32
+40080c35:	ffd755        	call4	400809ac <_Out_23908F94_p_Char>
+40080c38:	3138      	l32i.n	a3, a1, 12
+40080c3a:	333b      	addi.n	a3, a3, 3
+40080c3c:	1148      	l32i.n	a4, a1, 4
+40080c3e:	0ea437        	bge	a4, a3, 40080c50 <_Out_23908F94_p_Real+0xc8>
+40080c41:	062c      	movi.n	a6, 32
+40080c43:	ffd695        	call4	400809ac <_Out_23908F94_p_Char>
+40080c46:	1138      	l32i.n	a3, a1, 4
+40080c48:	330b      	addi.n	a3, a3, -1
+40080c4a:	1139      	s32i.n	a3, a1, 4
+40080c4c:	fffa06        	j	40080c38 <_Out_23908F94_p_Real+0xb0>
+40080c4f:	013200        	slli	a3, a2, 32
+40080c52:	d38c14        	lsi	f1, a12, 0x34c
+40080c55:	d62c      	movi.n	a6, 45
+40080c57:	ffd555        	call4	400809ac <_Out_23908F94_p_Char>
+40080c5a:	1138      	l32i.n	a3, a1, 4
+40080c5c:	330b      	addi.n	a3, a3, -1
+40080c5e:	1139      	s32i.n	a3, a1, 4
+40080c60:	000146        	j	40080c69 <_Out_23908F94_p_Real+0xe1>
+40080c63:	062c00        	lsi	f0, a12, 24
+40080c66:	ffd455        	call4	400809ac <_Out_23908F94_p_Char>
+40080c69:	3138      	l32i.n	a3, a1, 12
+40080c6b:	2148      	l32i.n	a4, a1, 8
+40080c6d:	13a437        	bge	a4, a3, 40080c84 <_Out_23908F94_p_Real+0xfc>
+40080c70:	3138      	l32i.n	a3, a1, 12
+40080c72:	330b      	addi.n	a3, a3, -1
+40080c74:	3139      	s32i.n	a3, a1, 12
+40080c76:	3168      	l32i.n	a6, a1, 12
+40080c78:	616a      	add.n	a6, a1, a6
+40080c7a:	180662        	l8ui	a6, a6, 24
+40080c7d:	ffd2d5        	call4	400809ac <_Out_23908F94_p_Char>
+40080c80:	fff946        	j	40080c69 <_Out_23908F94_p_Real+0xe1>
+40080c83:	e62c00        	lsi	f0, a12, 0x398
+40080c86:	ffd255        	call4	400809ac <_Out_23908F94_p_Char>
+40080c89:	2138      	l32i.n	a3, a1, 8
+40080c8b:	3148      	l32i.n	a4, a1, 12
+40080c8d:	0fa437        	bge	a4, a3, 40080ca0 <_Out_23908F94_p_Real+0x118>
+40080c90:	2138      	l32i.n	a3, a1, 8
+40080c92:	330b      	addi.n	a3, a3, -1
+40080c94:	2139      	s32i.n	a3, a1, 8
+40080c96:	30a062        	movi	a6, 48
+40080c99:	ffd115        	call4	400809ac <_Out_23908F94_p_Char>
+40080c9c:	fffa46        	j	40080c89 <_Out_23908F94_p_Real+0x101>
+40080c9f:	313800        	srai	a3, a0, 24
+40080ca2:	040c      	movi.n	a4, 0
+40080ca4:	13a437        	bge	a4, a3, 40080cbb <_Out_23908F94_p_Real+0x133>
+40080ca7:	3138      	l32i.n	a3, a1, 12
+40080ca9:	330b      	addi.n	a3, a3, -1
+40080cab:	3139      	s32i.n	a3, a1, 12
+40080cad:	3168      	l32i.n	a6, a1, 12
+40080caf:	806160        	add	a6, a1, a6
+40080cb2:	180662        	l8ui	a6, a6, 24
+40080cb5:	ffcf55        	call4	400809ac <_Out_23908F94_p_Char>
+40080cb8:	fff906        	j	40080ca0 <_Out_23908F94_p_Real+0x118>
+40080cbb:	f01d      	retw.n
+40080cbd:	000000        	ill
+
+40080cc0 <_Out_23908F94_p_Ln>:
+40080cc0:	002136        	entry	a1, 16
+40080cc3:	ff2821        	l32r	a2, 40080964 <_Test_DC7FAF87_p_Setup+0x14>
+40080cc6:	0da062        	movi	a6, 13
+40080cc9:	ffce15        	call4	400809ac <_Out_23908F94_p_Char>
+40080ccc:	a60c      	movi.n	a6, 10
+40080cce:	ffcdd5        	call4	400809ac <_Out_23908F94_p_Char>
+40080cd1:	f01d      	retw.n
+40080cd3:	001400        	movsp	a0, a4
+40080cd6:	        	lsi	f15, a15, 216
+
+40080cd8 <_Out_23908F94_p_SetBaudRate>:
+40080cd8:	004136        	entry	a1, 32
+40080cdb:	0129      	s32i.n	a2, a1, 0
+40080cdd:	ff2121        	l32r	a2, 40080964 <_Test_DC7FAF87_p_Setup+0x14>
+40080ce0:	fffd31        	l32r	a3, 40080cd4 <_Out_23908F94_p_Ln+0x14>
+40080ce3:	0148      	l32i.n	a4, a1, 0
+40080ce5:	0349      	s32i.n	a4, a3, 0
+40080ce7:	f01d      	retw.n
+40080ce9:	000000        	ill
+
+40080cec <_Out_23908F94_p_Setup>:
+40080cec:	002136        	entry	a1, 16
+40080cef:	ff1d21        	l32r	a2, 40080964 <_Test_DC7FAF87_p_Setup+0x14>
+40080cf2:	b6a262        	movi	a6, 0x2b6
+40080cf5:	fffe15        	call4	40080cd8 <_Out_23908F94_p_SetBaudRate>
+40080cf8:	f01d      	retw.n
+40080cfa:	a00000        	addx4	a0, a0, a0
+40080cfd:	000186        	j	40080d07 <_Main_init+0x7>
+
+40080d00 <_Main_init>:
+40080d00:	002136        	entry	a1, 16
+40080d03:	fdee21        	l32r	a2, 400804bc <_set_160mhz+0x14>
+40080d06:	030c      	movi.n	a3, 0
+40080d08:	fffd41        	l32r	a4, 40080cfc <_Out_23908F94_p_Setup+0x10>
+40080d0b:	0d2437        	blt	a4, a3, 40080d1c <_Main_init+0x1c>
+40080d0e:	0239      	s32i.n	a3, a2, 0
+40080d10:	0238      	l32i.n	a3, a2, 0
+40080d12:	331b      	addi.n	a3, a3, 1
+40080d14:	fffc06        	j	40080d08 <_Main_init+0x8>
+40080d17:	968000        	lsi	f0, a0, 0x258
+40080d1a:	0098      	l32i.n	a9, a0, 0
+40080d1c:	201110        	or	a1, a1, a1
+40080d1f:	ff7a55        	call4	400804c4 <_Main_6E69624D_s_text>
+40080d22:	201110        	or	a1, a1, a1
+40080d25:	fff995        	call4	40080cc0 <_Out_23908F94_p_Ln>
+40080d28:	fde661        	l32r	a6, 400804c0 <_set_160mhz+0x18>
+40080d2b:	10c662        	addi	a6, a6, 16
+40080d2e:	272c      	movi.n	a7, 34
+40080d30:	201110        	or	a1, a1, a1
+40080d33:	ffca15        	call4	400809d4 <_Out_23908F94_p_String>
+40080d36:	201110        	or	a1, a1, a1
+40080d39:	fff855        	call4	40080cc0 <_Out_23908F94_p_Ln>
+40080d3c:	201110        	or	a1, a1, a1
+40080d3f:	ffacd5        	call4	4008080c <_Test_DC7FAF87_p_Exec>
+40080d42:	203770        	or	a3, a7, a7
+40080d45:	006232        	s32i	a3, a2, 0
+40080d48:	201110        	or	a1, a1, a1
+40080d4b:	ffb515        	call4	4008089c <_Test_DC7FAF87_p_Completed>
+40080d4e:	073d      	mov.n	a3, a7
+40080d50:	0239      	s32i.n	a3, a2, 0
+40080d52:	201110        	or	a1, a1, a1
+40080d55:	fff695        	call4	40080cc0 <_Out_23908F94_p_Ln>
+40080d58:	201110        	or	a1, a1, a1
+40080d5b:	fff655        	call4	40080cc0 <_Out_23908F94_p_Ln>
+40080d5e:	fdd861        	l32r	a6, 400804c0 <_set_160mhz+0x18>
+40080d61:	34c662        	addi	a6, a6, 52
+40080d64:	a70c      	movi.n	a7, 10
+40080d66:	201110        	or	a1, a1, a1
+40080d69:	ffc695        	call4	400809d4 <_Out_23908F94_p_String>
+40080d6c:	201110        	or	a1, a1, a1
+40080d6f:	fff515        	call4	40080cc0 <_Out_23908F94_p_Ln>
+40080d72:	130c      	movi.n	a3, 1
+40080d74:	a39c      	beqz.n	a3, 40080d92 <_Main_init+0x92>
+40080d76:	a65c      	movi.n	a6, 90
+40080d78:	201110        	or	a1, a1, a1
+40080d7b:	ffc315        	call4	400809ac <_Out_23908F94_p_Char>
+40080d7e:	030c      	movi.n	a3, 0
+40080d80:	ffe641        	l32r	a4, 40080d18 <_Main_init+0x18>
+40080d83:	082437        	blt	a4, a3, 40080d8f <_Main_init+0x8f>
+40080d86:	0239      	s32i.n	a3, a2, 0
+40080d88:	0238      	l32i.n	a3, a2, 0
+40080d8a:	331b      	addi.n	a3, a3, 1
+40080d8c:	fffc06        	j	40080d80 <_Main_init+0x80>
+40080d8f:	fff7c6        	j	40080d72 <_Main_init+0x72>
+40080d92:	f01d      	retw.n
+40080d94:	053c      	movi.n	a5, 48
+40080d96:	4008      	l32i.n	a0, a0, 16
+
+40080d98 <_Assignments_init>:
+40080d98:	002136        	entry	a1, 16
+40080d9b:	fdd621        	l32r	a2, 400804f4 <_Main_6E69624D_s_text+0x30>
+40080d9e:	fffd61        	l32r	a6, 40080d94 <_Main_init+0x94>
+40080da1:	201110        	or	a1, a1, a1
+40080da4:	ffa355        	call4	400807dc <_Test_DC7FAF87_p_Register>
+40080da7:	f01d      	retw.n
+40080da9:	000000        	ill
+
+40080dac <_Test_init>:
+40080dac:	002136        	entry	a1, 16
+40080daf:	fe8a21        	l32r	a2, 400807d8 <_Assignments_4FA6587C_p_Run+0x29c>
+40080db2:	201110        	or	a1, a1, a1
+40080db5:	ffb995        	call4	40080950 <_Test_DC7FAF87_p_Setup>
+40080db8:	f01d      	retw.n
+	...
+
+40080dbc <_Out_init>:
+40080dbc:	002136        	entry	a1, 16
+40080dbf:	fee921        	l32r	a2, 40080964 <_Test_DC7FAF87_p_Setup+0x14>
+40080dc2:	201110        	or	a1, a1, a1
+40080dc5:	fff255        	call4	40080cec <_Out_23908F94_p_Setup>
+40080dc8:	f01d      	retw.n
+	...
+
+Disassembly of section .data:
+
+3ffb0000 <_sdata>:
+3ffb0000:	617453        	lsi	f5, a4, 0x184
+3ffb0003:	206b63        	lsi	f6, a11, 128
+3ffb0006:	646441        	l32r	a4, 3ff89198 <TIMG0_T0_WDTCONFIG0_REG+0x2a150>
+3ffb0009:	736572        	s32i	a7, a5, 0x1cc
+3ffb000c:	203a73        	lsi	f7, a10, 128
+3ffb000f:	534500        	max	a4, a5, a0
+3ffb0012:	323350        	orbc	b3, b3, b5
+3ffb0015:	624f20        	lsi	f2, a15, 0x188
+3ffb0018:	6f7265        	call8	4001f740 <_ebss+0x6b184>
+3ffb001b:	6e          	.byte 0x6e
+3ffb001c:	6f4320        	f64cmph	a4, a3, a2, 6
+3ffb001f:	706d      	lsi	f6, a0, 0
+3ffb0021:	6c69      	s32i.n	a6, a12, 24
+3ffb0023:	207265        	call8	3ffd0748 <_ebss+0x1c18c>
+3ffb0026:	736554        	lsi	f5, a5, 0x1cc
+3ffb0029:	532074        	lsi	f7, a0, 0x14c
+3ffb002c:	746975        	call12	400246c4 <_ebss+0x70108>
+3ffb002f:	002e65        	call8	3ffb0314 <_Test_DC7FAF87_s_bss+0x88>
+3ffb0032:	5b0000        	ult.s	b0, f0, f0
+3ffb0035:	656854        	lsi	f5, a8, 0x194
+3ffb0038:	6e4520        	f64rnd	a4, a5, a2, 2
+3ffb003b:	005d64        	lsi	f6, a13, 0
+	...
+
+3ffb0040 <_Assignments_s_str>:
+3ffb0040:	737341        	l32r	a4, 3ff8ce0c <TIMG0_T0_WDTCONFIG0_REG+0x2ddc4>
+3ffb0043:	6769      	s32i.n	a6, a7, 24
+3ffb0045:	6e          	.byte 0x6e
+3ffb0046:	656d      	lsi	f6, a5, 20
+3ffb0048:	6e          	.byte 0x6e
+3ffb0049:	3a7374        	lsi	f7, a3, 232
+3ffb004c:	000020        	lsi	f2, a0, 0
+3ffb004f:	685400        	lsi	f0, a4, 0x1a0
+3ffb0052:	7369      	s32i.n	a6, a3, 28
+3ffb0054:	736920        	maxu	a6, a9, a2
+3ffb0057:	206120        	or	a6, a1, a2
+3ffb005a:	736574        	lsi	f7, a5, 0x1cc
+3ffb005d:	000074        	lsi	f7, a0, 0
+3ffb0060:	6e49      	s32i.n	a4, a14, 24
+3ffb0062:	676574        	lsi	f7, a5, 0x19c
+3ffb0065:	207265        	call8	3ffd078c <_ebss+0x1c1d0>
+3ffb0068:	737341        	l32r	a4, 3ff8ce34 <TIMG0_T0_WDTCONFIG0_REG+0x2ddec>
+3ffb006b:	6769      	s32i.n	a6, a7, 24
+3ffb006d:	6e          	.byte 0x6e
+3ffb006e:	656d      	lsi	f6, a5, 20
+3ffb0070:	6e          	.byte 0x6e
+3ffb0071:	000074        	lsi	f7, a0, 0
+3ffb0074:	616552        	s32i	a5, a5, 0x184
+3ffb0077:	206c      	movi.n	a0, -30
+3ffb0079:	737341        	l32r	a4, 3ff8ce48 <TIMG0_T0_WDTCONFIG0_REG+0x2de00>
+3ffb007c:	6769      	s32i.n	a6, a7, 24
+3ffb007e:	6e          	.byte 0x6e
+3ffb007f:	656d      	lsi	f6, a5, 20
+3ffb0081:	6e          	.byte 0x6e
+3ffb0082:	530074        	lsi	f7, a0, 0x14c
+3ffb0085:	207465        	call8	3ffd07cc <_ebss+0x1c210>
+3ffb0088:	737341        	l32r	a4, 3ff8ce54 <TIMG0_T0_WDTCONFIG0_REG+0x2de0c>
+3ffb008b:	6769      	s32i.n	a6, a7, 24
+3ffb008d:	6e          	.byte 0x6e
+3ffb008e:	656d      	lsi	f6, a5, 20
+3ffb0090:	6e          	.byte 0x6e
+3ffb0091:	000074        	lsi	f7, a0, 0
+3ffb0094:	727241        	l32r	a4, 3ff8ca5c <TIMG0_T0_WDTCONFIG0_REG+0x2da14>
+3ffb0097:	207961        	l32r	a6, 3ff7827c <TIMG0_T0_WDTCONFIG0_REG+0x19234>
+3ffb009a:	737341        	l32r	a4, 3ff8ce68 <TIMG0_T0_WDTCONFIG0_REG+0x2de20>
+3ffb009d:	6769      	s32i.n	a6, a7, 24
+3ffb009f:	6e          	.byte 0x6e
+3ffb00a0:	656d      	lsi	f6, a5, 20
+3ffb00a2:	6e          	.byte 0x6e
+3ffb00a3:	000074        	lsi	f7, a0, 0
+3ffb00a6:	540000        	extui	a0, a0, 0, 6
+3ffb00a9:	6968      	l32i.n	a6, a9, 24
+3ffb00ab:	692073        	lsi	f7, a0, 0x1a4
+3ffb00ae:	612073        	lsi	f7, a0, 0x184
+3ffb00b1:	657420        	extui	a7, a2, 20, 7
+3ffb00b4:	007473        	lsi	f7, a4, 0
+3ffb00b7:	745300        	extui	a5, a0, 3, 8
+3ffb00ba:	6e6972        	s32i	a7, a9, 0x1b8
+3ffb00bd:	412067        	blt	a0, a6, 3ffb0102 <_Assignments_s_str+0xc2>
+3ffb00c0:	697373        	lsi	f7, a3, 0x1a4
+3ffb00c3:	6d6e67        	bbci	a14, 6, 3ffb0134 <_Assignments_s_str+0xf4>
+3ffb00c6:	746e65        	call8	400247ac <_ebss+0x701f0>
+3ffb00c9:	000000        	ill
+3ffb00cc:	6f6f42        	s32i	a4, a15, 0x1bc
+3ffb00cf:	656c      	movi.n	a5, -26
+3ffb00d1:	206e61        	l32r	a6, 3ff7828c <TIMG0_T0_WDTCONFIG0_REG+0x19244>
+3ffb00d4:	737361        	l32r	a6, 3ff8cea0 <TIMG0_T0_WDTCONFIG0_REG+0x2de58>
+3ffb00d7:	6769      	s32i.n	a6, a7, 24
+3ffb00d9:	6e          	.byte 0x6e
+3ffb00da:	656d      	lsi	f6, a5, 20
+3ffb00dc:	6e          	.byte 0x6e
+3ffb00dd:	000074        	lsi	f7, a0, 0
+3ffb00e0:	6f6f42        	s32i	a4, a15, 0x1bc
+3ffb00e3:	656c      	movi.n	a5, -26
+3ffb00e5:	206e61        	l32r	a6, 3ff782a0 <TIMG0_T0_WDTCONFIG0_REG+0x19258>
+3ffb00e8:	6c6146        	j	3ffcb271 <_ebss+0x16cb5>
+3ffb00eb:	206573        	lsi	f7, a5, 128
+3ffb00ee:	737361        	l32r	a6, 3ff8cebc <TIMG0_T0_WDTCONFIG0_REG+0x2de74>
+3ffb00f1:	6769      	s32i.n	a6, a7, 24
+3ffb00f3:	6e          	.byte 0x6e
+3ffb00f4:	656d      	lsi	f6, a5, 20
+3ffb00f6:	6e          	.byte 0x6e
+3ffb00f7:	000074        	lsi	f7, a0, 0
+3ffb00fa:	4d0000        	lsi	f0, a0, 0x134
+3ffb00fd:	6f6d65        	call8	4001f7d4 <_ebss+0x6b218>
+3ffb0100:	207972        	lsi	f7, a9, 128
+3ffb0103:	6e69      	s32i.n	a6, a14, 24
+3ffb0105:	7469      	s32i.n	a6, a4, 28
+3ffb0107:	6169      	s32i.n	a6, a1, 24
+3ffb0109:	696c      	movi.n	a9, -26
+3ffb010b:	617a      	add.n	a6, a1, a7
+3ffb010d:	6f6974        	lsi	f7, a9, 0x1bc
+3ffb0110:	6e          	.byte 0x6e
+3ffb0111:	000000        	ill
+3ffb0114:	636552        	s32i	a5, a5, 0x18c
+3ffb0117:	6f          	.byte 0x6f
+3ffb0118:	206472        	s32i	a7, a4, 128
+3ffb011b:	6e69      	s32i.n	a6, a14, 24
+3ffb011d:	676574        	lsi	f7, a5, 0x19c
+3ffb0120:	207265        	call8	3ffd0848 <_ebss+0x1c28c>
+3ffb0123:	737361        	l32r	a6, 3ff8cef0 <TIMG0_T0_WDTCONFIG0_REG+0x2dea8>
+3ffb0126:	6769      	s32i.n	a6, a7, 24
+3ffb0128:	6e          	.byte 0x6e
+3ffb0129:	656d      	lsi	f6, a5, 20
+3ffb012b:	6e          	.byte 0x6e
+3ffb012c:	000074        	lsi	f7, a0, 0
+3ffb012f:	655200        	extui	a5, a0, 18, 7
+3ffb0132:	726f63        	lsi	f6, a15, 0x1c8
+3ffb0135:	622064        	lsi	f6, a0, 0x188
+3ffb0138:	6f          	.byte 0x6f
+3ffb0139:	6f          	.byte 0x6f
+3ffb013a:	656c      	movi.n	a5, -26
+3ffb013c:	206e61        	l32r	a6, 3ff782f4 <TIMG0_T0_WDTCONFIG0_REG+0x192ac>
+3ffb013f:	737361        	l32r	a6, 3ff8cf0c <TIMG0_T0_WDTCONFIG0_REG+0x2dec4>
+3ffb0142:	6769      	s32i.n	a6, a7, 24
+3ffb0144:	6e          	.byte 0x6e
+3ffb0145:	656d      	lsi	f6, a5, 20
+3ffb0147:	6e          	.byte 0x6e
+3ffb0148:	000074        	lsi	f7, a0, 0
+3ffb014b:	655200        	extui	a5, a0, 18, 7
+3ffb014e:	726f63        	lsi	f6, a15, 0x1c8
+3ffb0151:	622064        	lsi	f6, a0, 0x188
+3ffb0154:	6f          	.byte 0x6f
+3ffb0155:	6f          	.byte 0x6f
+3ffb0156:	656c      	movi.n	a5, -26
+3ffb0158:	206e61        	l32r	a6, 3ff78310 <TIMG0_T0_WDTCONFIG0_REG+0x192c8>
+3ffb015b:	737361        	l32r	a6, 3ff8cf28 <TIMG0_T0_WDTCONFIG0_REG+0x2dee0>
+3ffb015e:	6769      	s32i.n	a6, a7, 24
+3ffb0160:	6e          	.byte 0x6e
+3ffb0161:	656d      	lsi	f6, a5, 20
+3ffb0163:	6e          	.byte 0x6e
+3ffb0164:	000074        	lsi	f7, a0, 0
+3ffb0167:	655200        	extui	a5, a0, 18, 7
+3ffb016a:	726f63        	lsi	f6, a15, 0x1c8
+3ffb016d:	622064        	lsi	f6, a0, 0x188
+3ffb0170:	6f          	.byte 0x6f
+3ffb0171:	6f          	.byte 0x6f
+3ffb0172:	656c      	movi.n	a5, -26
+3ffb0174:	206e61        	l32r	a6, 3ff7832c <TIMG0_T0_WDTCONFIG0_REG+0x192e4>
+3ffb0177:	737361        	l32r	a6, 3ff8cf44 <TIMG0_T0_WDTCONFIG0_REG+0x2defc>
+3ffb017a:	6769      	s32i.n	a6, a7, 24
+3ffb017c:	6e          	.byte 0x6e
+3ffb017d:	656d      	lsi	f6, a5, 20
+3ffb017f:	6e          	.byte 0x6e
+3ffb0180:	000074        	lsi	f7, a0, 0
+3ffb0183:	452000        	extui	a2, a0, 16, 5
+3ffb0186:	6e          	.byte 0x6e
+3ffb0187:	000064        	lsi	f6, a0, 0
+	...
+
+3ffb018c <_Test_s_str>:
+3ffb018c:	617453        	lsi	f5, a4, 0x184
+3ffb018f:	007472        	lsi	f7, a4, 0
+3ffb0192:	410000        	srli	a0, a0, 0
+3ffb0195:	657373        	lsi	f7, a3, 0x194
+3ffb0198:	207472        	lsi	f7, a4, 128
+3ffb019b:	696146        	j	3ffca724 <_ebss+0x16168>
+3ffb019e:	656c      	movi.n	a5, -26
+3ffb01a0:	203a64        	lsi	f6, a10, 128
+3ffb01a3:	655400        	extui	a5, a0, 20, 7
+3ffb01a6:	207473        	lsi	f7, a4, 128
+3ffb01a9:	6d6f43        	lsi	f4, a15, 0x1b4
+3ffb01ac:	656c70        	extui	a6, a7, 28, 7
+3ffb01af:	646574        	lsi	f7, a5, 0x190
+3ffb01b2:	2e          	.byte 0x2e
+3ffb01b3:	000020        	lsi	f2, a0, 0
+3ffb01b6:	4e0000        	f64rnd	a0, a0, a0, 0
+3ffb01b9:	626d75        	call12	40012890 <_ebss+0x5e2d4>
+3ffb01bc:	207265        	call8	3ffd08e4 <_ebss+0x1c328>
+3ffb01bf:	6f          	.byte 0x6f
+3ffb01c0:	542066        	bnei	a0, 2, 3ffb0218 <_Test_s_str+0x8c>
+3ffb01c3:	747365        	call8	400248f8 <_ebss+0x7033c>
+3ffb01c6:	725020        	lsi	f2, a0, 0x1c8
+3ffb01c9:	6f          	.byte 0x6f
+3ffb01ca:	646563        	lsi	f6, a5, 0x190
+3ffb01cd:	657275        	call12	400158f4 <_ebss+0x61338>
+3ffb01d0:	203a73        	lsi	f7, a10, 128
+3ffb01d3:	754e00        	extui	a4, a0, 30, 8
+3ffb01d6:	626d      	lsi	f6, a2, 8
+3ffb01d8:	207265        	call8	3ffd0900 <_ebss+0x1c344>
+3ffb01db:	6f          	.byte 0x6f
+3ffb01dc:	412066        	bnei	a0, 2, 3ffb0221 <_Test_s_str+0x95>
+3ffb01df:	657373        	lsi	f7, a3, 0x194
+3ffb01e2:	697472        	lsi	f7, a4, 0x1a4
+3ffb01e5:	6f          	.byte 0x6f
+3ffb01e6:	6e          	.byte 0x6e
+3ffb01e7:	616d20        	lsi	f2, a13, 0x184
+3ffb01ea:	3a6564        	lsi	f6, a5, 232
+3ffb01ed:	000020        	lsi	f2, a0, 0
+3ffb01f0:	656854        	lsi	f5, a8, 0x194
+3ffb01f3:	206572        	s32i	a7, a5, 128
+3ffb01f6:	7369      	s32i.n	a6, a3, 28
+3ffb01f8:	000020        	lsi	f2, a0, 0
+3ffb01fb:	6f2000        	f64cmph	a2, a0, a0, 6
+3ffb01fe:	657362        	lsi	f6, a3, 0x194
+3ffb0201:	657672        	lsi	f7, a6, 0x194
+3ffb0204:	002e64        	lsi	f6, a14, 0
+3ffb0207:	6f4e00        	f64cmph	a4, a14, a0, 6
+3ffb020a:	724520        	lsi	f2, a5, 0x1c8
+3ffb020d:	726f72        	s32i	a7, a15, 0x1c8
+3ffb0210:	4c2021        	l32r	a2, 3ff83290 <TIMG0_T0_WDTCONFIG0_REG+0x24248>
+3ffb0213:	6669      	s32i.n	a6, a6, 24
+3ffb0215:	692065        	call8	4001941c <_ebss+0x64e60>
+3ffb0218:	672073        	lsi	f7, a0, 0x19c
+3ffb021b:	6f          	.byte 0x6f
+3ffb021c:	6f          	.byte 0x6f
+3ffb021d:	212164        	lsi	f6, a1, 132
+3ffb0220:	000000        	ill
+	...
+
+3ffb0224 <_Out_s_str>:
+3ffb0224:	302020        	xor	a2, a0, a2
+	...
+
+Disassembly of section .bss:
+
+3ffb0228 <_Main_6E69624D_s_bss>:
+3ffb0228:	000000        	ill
+	...
+
+3ffb022c <_Assignments_4FA6587C_s_bss>:
+	...
+
+3ffb028c <_Test_DC7FAF87_s_bss>:
+	...
+
+3ffb05b8 <_Out_23908F94_s_bss>:
+3ffb05b8:	000000        	ill
+	...
+
+3ffb05bc <_bos>:
+	...
+
+Disassembly of section .xtensa.info:
+
+00000000 <.xtensa.info>:
+   0:	000c      	movi.n	a0, 0
+   2:	200000        	or	a0, a0, a0
+   5:	000000        	ill
+   8:	000001        	l32r	a0, fffc0008 <_etext+0xbff3f23c>
+   b:	745800        	extui	a5, a0, 8, 8
+   e:	736e65        	call8	736f4 <init_data+0x736f4>
+  11:	495f61        	l32r	a6, fffd2590 <_etext+0xbff517c4>
+  14:	6e          	.byte 0x6e
+  15:	006f66        	bnei	a15, 6, 19 <init_data+0x19>
+  18:	455355        	call4	45550 <init_data+0x45550>
+  1b:	5f          	.byte 0x5f
+  1c:	534241        	l32r	a4, fffd4d24 <_etext+0xbff53f58>
+  1f:	4f          	.byte 0x4f
+  20:	554c      	movi.n	a5, 69
+  22:	5f4554        	lsi	f5, a5, 0x17c
+  25:	494c      	movi.n	a9, 68
+  27:	524554        	lsi	f5, a5, 0x148
+  2a:	534c41        	l32r	a4, fffd4d5c <_etext+0xbff53f90>
+  2d:	303d      	lsi	f3, a0, 0
+  2f:	410a      	add.n	a4, a1, a0
+  31:	3d4942        	s8i	a4, a9, 61
+  34:	000a30        	lsi	f3, a10, 0
+	...
+
+Disassembly of section .debug_line:
+
+00000000 <.debug_line>:
+       0:	000134        	lsi	f3, a1, 0
+       3:	000200        	lsi	f0, a2, 0
+       6:	000022        	l8ui	a2, a0, 0
+       9:	010100        	slli	a0, a1, 32
+       c:	0efb      	addi.n	a0, a14, 15
+       e:	000d      	mov.n	a0, a0
+      10:	010101        	l32r	a0, fffc0414 <_etext+0xbff3f648>
+      13:	000001        	l32r	a0, fffc0014 <_etext+0xbff3f248>
+      16:	000100        	lsi	f0, a1, 0
+      19:	690100        	lsi	f0, a1, 0x1a4
+      1c:	6e          	.byte 0x6e
+      1d:	7469      	s32i.n	a6, a4, 28
+      1f:	690000        	lsi	f0, a0, 0x1a4
+      22:	6e          	.byte 0x6e
+      23:	7469      	s32i.n	a6, a4, 28
+      25:	2e          	.byte 0x2e
+      26:	010053        	lsi	f5, a0, 4
+      29:	000000        	ill
+      2c:	020500        	andb	b0, b5, b0
+      2f:	080410        	lsx	f0, a4, a1
+      32:	2c0340        	lsi	f4, a3, 176
+      35:	080301        	l32r	a0, fffc2044 <_etext+0xbff41278>
+      38:	1409      	s32i.n	a0, a4, 4
+      3a:	030100        	rsr.lend	a0
+      3d:	030901        	l32r	a0, fffc0c64 <_etext+0xbff3fe98>
+      40:	030100        	rsr.lend	a0
+      43:	020901        	l32r	a0, fffc0868 <_etext+0xbff3fa9c>
+      46:	030100        	rsr.lend	a0
+      49:	030901        	l32r	a0, fffc0c70 <_etext+0xbff3fea4>
+      4c:	030100        	rsr.lend	a0
+      4f:	030901        	l32r	a0, fffc0c74 <_etext+0xbff3fea8>
+      52:	030100        	rsr.lend	a0
+      55:	030902        	l8ui	a0, a9, 3
+      58:	030100        	rsr.lend	a0
+      5b:	030901        	l32r	a0, fffc0c80 <_etext+0xbff3feb4>
+      5e:	030100        	rsr.lend	a0
+      61:	030904        	lsi	f0, a9, 12
+      64:	030100        	rsr.lend	a0
+      67:	030901        	l32r	a0, fffc0c8c <_etext+0xbff3fec0>
+      6a:	030100        	rsr.lend	a0
+      6d:	030901        	l32r	a0, fffc0c94 <_etext+0xbff3fec8>
+      70:	030100        	rsr.lend	a0
+      73:	030901        	l32r	a0, fffc0c98 <_etext+0xbff3fecc>
+      76:	030100        	rsr.lend	a0
+      79:	020901        	l32r	a0, fffc08a0 <_etext+0xbff3fad4>
+      7c:	030100        	rsr.lend	a0
+      7f:	030901        	l32r	a0, fffc0ca4 <_etext+0xbff3fed8>
+      82:	030100        	rsr.lend	a0
+      85:	030901        	l32r	a0, fffc0cac <_etext+0xbff3fee0>
+      88:	030100        	rsr.lend	a0
+      8b:	030901        	l32r	a0, fffc0cb0 <_etext+0xbff3fee4>
+      8e:	030100        	rsr.lend	a0
+      91:	020901        	l32r	a0, fffc08b8 <_etext+0xbff3faec>
+      94:	030100        	rsr.lend	a0
+      97:	020915        	call4	2128 <init_data+0x2128>
+      9a:	030100        	rsr.lend	a0
+      9d:	030901        	l32r	a0, fffc0cc4 <_etext+0xbff3fef8>
+      a0:	030100        	rsr.lend	a0
+      a3:	030901        	l32r	a0, fffc0cc8 <_etext+0xbff3fefc>
+      a6:	030100        	rsr.lend	a0
+      a9:	030901        	l32r	a0, fffc0cd0 <_etext+0xbff3ff04>
+      ac:	030100        	rsr.lend	a0
+      af:	020901        	l32r	a0, fffc08d4 <_etext+0xbff3fb08>
+      b2:	030100        	rsr.lend	a0
+      b5:	030901        	l32r	a0, fffc0cdc <_etext+0xbff3ff10>
+      b8:	030100        	rsr.lend	a0
+      bb:	030901        	l32r	a0, fffc0ce0 <_etext+0xbff3ff14>
+      be:	030100        	rsr.lend	a0
+      c1:	030901        	l32r	a0, fffc0ce8 <_etext+0xbff3ff1c>
+      c4:	030100        	rsr.lend	a0
+      c7:	020901        	l32r	a0, fffc08ec <_etext+0xbff3fb20>
+      ca:	030100        	rsr.lend	a0
+      cd:	030901        	l32r	a0, fffc0cf4 <_etext+0xbff3ff28>
+      d0:	030100        	rsr.lend	a0
+      d3:	090b      	addi.n	a0, a9, -1
+      d5:	010002        	l8ui	a0, a0, 1
+      d8:	091303        	lsi	f0, a3, 36
+      db:	001d      	mov.n	a1, a0
+      dd:	010301        	l32r	a0, fffc04ec <_etext+0xbff3f720>
+      e0:	0309      	s32i.n	a0, a3, 0
+      e2:	030100        	rsr.lend	a0
+      e5:	020901        	l32r	a0, fffc090c <_etext+0xbff3fb40>
+      e8:	030100        	rsr.lend	a0
+      eb:	030901        	l32r	a0, fffc0d10 <_etext+0xbff3ff44>
+      ee:	030100        	rsr.lend	a0
+      f1:	020901        	l32r	a0, fffc0918 <_etext+0xbff3fb4c>
+      f4:	030100        	rsr.lend	a0
+      f7:	030901        	l32r	a0, fffc0d1c <_etext+0xbff3ff50>
+      fa:	030100        	rsr.lend	a0
+      fd:	020901        	l32r	a0, fffc0924 <_etext+0xbff3fb58>
+     100:	030100        	rsr.lend	a0
+     103:	090b      	addi.n	a0, a9, -1
+     105:	010011        	l32r	a1, fffc0508 <_etext+0xbff3f73c>
+     108:	090403        	lsi	f0, a4, 36
+     10b:	010003        	lsi	f0, a0, 4
+     10e:	090103        	lsi	f0, a1, 36
+     111:	010003        	lsi	f0, a0, 4
+     114:	090103        	lsi	f0, a1, 36
+     117:	010003        	lsi	f0, a0, 4
+     11a:	090303        	lsi	f0, a3, 36
+     11d:	010002        	l8ui	a0, a0, 1
+     120:	090103        	lsi	f0, a1, 36
+     123:	010003        	lsi	f0, a0, 4
+     126:	090103        	lsi	f0, a1, 36
+     129:	010002        	l8ui	a0, a0, 1
+     12c:	090203        	lsi	f0, a2, 36
+     12f:	010002        	l8ui	a0, a0, 1
+     132:	0209      	s32i.n	a0, a2, 0
+     134:	010000        	slli	a0, a0, 32
+     137:	018701        	l32r	a0, fffc0754 <_etext+0xbff3f988>
+     13a:	020000        	andb	b0, b0, b0
+     13d:	002300        	lsi	f0, a3, 0
+     140:	010000        	slli	a0, a0, 32
+     143:	0efb01        	l32r	a0, fffc3d30 <_etext+0xbff42f64>
+     146:	000d      	mov.n	a0, a0
+     148:	010101        	l32r	a0, fffc054c <_etext+0xbff3f780>
+     14b:	000001        	l32r	a0, fffc014c <_etext+0xbff3f380>
+     14e:	000100        	lsi	f0, a1, 0
+     151:	620100        	lsi	f0, a1, 0x188
+     154:	6c6975        	call12	6c7ec <init_data+0x6c7ec>
+     157:	000064        	lsi	f6, a0, 0
+     15a:	614d      	lsi	f4, a1, 4
+     15c:	6e69      	s32i.n	a6, a14, 24
+     15e:	2e          	.byte 0x2e
+     15f:	010053        	lsi	f5, a0, 4
+     162:	000000        	ill
+     165:	020500        	andb	b0, b5, b0
+     168:	0804c4        	lsi	f12, a4, 32
+     16b:	190340        	lsi	f4, a3, 100
+     16e:	010301        	l32r	a0, fffc057c <_etext+0xbff3f7b0>
+     171:	0309      	s32i.n	a0, a3, 0
+     173:	030100        	rsr.lend	a0
+     176:	030901        	l32r	a0, fffc0d9c <_etext+0xbff3ffd0>
+     179:	030100        	rsr.lend	a0
+     17c:	020901        	l32r	a0, fffc09a0 <_etext+0xbff3fbd4>
+     17f:	030100        	rsr.lend	a0
+     182:	030901        	l32r	a0, fffc0da8 <_etext+0xbff3ffdc>
+     185:	030100        	rsr.lend	a0
+     188:	060901        	l32r	a0, fffc19ac <_etext+0xbff40be0>
+     18b:	030100        	rsr.lend	a0
+     18e:	030901        	l32r	a0, fffc0db4 <_etext+0xbff3ffe8>
+     191:	030100        	rsr.lend	a0
+     194:	020901        	l32r	a0, fffc09b8 <_etext+0xbff3fbec>
+     197:	030100        	rsr.lend	a0
+     19a:	060901        	l32r	a0, fffc19c0 <_etext+0xbff40bf4>
+     19d:	030100        	rsr.lend	a0
+     1a0:	030901        	l32r	a0, fffc0dc4 <_etext+0xbff3fff8>
+     1a3:	030100        	rsr.lend	a0
+     1a6:	030901        	l32r	a0, fffc0dcc <_etext+0xbff40000>
+     1a9:	030100        	rsr.lend	a0
+     1ac:	060901        	l32r	a0, fffc19d0 <_etext+0xbff40c04>
+     1af:	030100        	rsr.lend	a0
+     1b2:	060901        	l32r	a0, fffc19d8 <_etext+0xbff40c0c>
+     1b5:	090100        	l32e	a0, a1, -64
+     1b8:	000002        	l8ui	a0, a0, 0
+     1bb:	000101        	l32r	a0, fffc01c0 <_etext+0xbff3f3f4>
+     1be:	000205        	call0	1e0 <init_data+0x1e0>
+     1c1:	080d      	mov.n	a0, a8
+     1c3:	2d0340        	lsi	f4, a3, 180
+     1c6:	010301        	l32r	a0, fffc05d4 <_etext+0xbff3f808>
+     1c9:	0309      	s32i.n	a0, a3, 0
+     1cb:	030100        	rsr.lend	a0
+     1ce:	030901        	l32r	a0, fffc0df4 <_etext+0xbff40028>
+     1d1:	030100        	rsr.lend	a0
+     1d4:	020902        	l8ui	a0, a9, 2
+     1d7:	030100        	rsr.lend	a0
+     1da:	030901        	l32r	a0, fffc0e00 <_etext+0xbff40034>
+     1dd:	030100        	rsr.lend	a0
+     1e0:	030901        	l32r	a0, fffc0e04 <_etext+0xbff40038>
+     1e3:	030100        	rsr.lend	a0
+     1e6:	020901        	l32r	a0, fffc0a0c <_etext+0xbff3fc40>
+     1e9:	030100        	rsr.lend	a0
+     1ec:	020901        	l32r	a0, fffc0a10 <_etext+0xbff3fc44>
+     1ef:	030100        	rsr.lend	a0
+     1f2:	020901        	l32r	a0, fffc0a18 <_etext+0xbff3fc4c>
+     1f5:	030100        	rsr.lend	a0
+     1f8:	080902        	l8ui	a0, a9, 8
+     1fb:	030100        	rsr.lend	a0
+     1fe:	060901        	l32r	a0, fffc1a24 <_etext+0xbff40c58>
+     201:	030100        	rsr.lend	a0
+     204:	060901        	l32r	a0, fffc1a28 <_etext+0xbff40c5c>
+     207:	030100        	rsr.lend	a0
+     20a:	030901        	l32r	a0, fffc0e30 <_etext+0xbff40064>
+     20d:	030100        	rsr.lend	a0
+     210:	030901        	l32r	a0, fffc0e34 <_etext+0xbff40068>
+     213:	030100        	rsr.lend	a0
+     216:	020901        	l32r	a0, fffc0a3c <_etext+0xbff3fc70>
+     219:	030100        	rsr.lend	a0
+     21c:	060901        	l32r	a0, fffc1a40 <_etext+0xbff40c74>
+     21f:	030100        	rsr.lend	a0
+     222:	060901        	l32r	a0, fffc1a48 <_etext+0xbff40c7c>
+     225:	030100        	rsr.lend	a0
+     228:	060901        	l32r	a0, fffc1a4c <_etext+0xbff40c80>
+     22b:	030100        	rsr.lend	a0
+     22e:	030901        	l32r	a0, fffc0e54 <_etext+0xbff40088>
+     231:	030100        	rsr.lend	a0
+     234:	030901        	l32r	a0, fffc0e58 <_etext+0xbff4008c>
+     237:	030100        	rsr.lend	a0
+     23a:	060901        	l32r	a0, fffc1a60 <_etext+0xbff40c94>
+     23d:	030100        	rsr.lend	a0
+     240:	020901        	l32r	a0, fffc0a64 <_etext+0xbff3fc98>
+     243:	030100        	rsr.lend	a0
+     246:	020901        	l32r	a0, fffc0a6c <_etext+0xbff3fca0>
+     249:	030100        	rsr.lend	a0
+     24c:	060901        	l32r	a0, fffc1a70 <_etext+0xbff40ca4>
+     24f:	030100        	rsr.lend	a0
+     252:	060901        	l32r	a0, fffc1a78 <_etext+0xbff40cac>
+     255:	030100        	rsr.lend	a0
+     258:	030901        	l32r	a0, fffc0e7c <_etext+0xbff400b0>
+     25b:	030100        	rsr.lend	a0
+     25e:	030901        	l32r	a0, fffc0e84 <_etext+0xbff400b8>
+     261:	030100        	rsr.lend	a0
+     264:	020901        	l32r	a0, fffc0a88 <_etext+0xbff3fcbc>
+     267:	030100        	rsr.lend	a0
+     26a:	060901        	l32r	a0, fffc1a90 <_etext+0xbff40cc4>
+     26d:	030100        	rsr.lend	a0
+     270:	060902        	l8ui	a0, a9, 6
+     273:	030100        	rsr.lend	a0
+     276:	020901        	l32r	a0, fffc0a9c <_etext+0xbff3fcd0>
+     279:	030100        	rsr.lend	a0
+     27c:	020901        	l32r	a0, fffc0aa0 <_etext+0xbff3fcd4>
+     27f:	030100        	rsr.lend	a0
+     282:	020901        	l32r	a0, fffc0aa8 <_etext+0xbff3fcdc>
+     285:	030100        	rsr.lend	a0
+     288:	060901        	l32r	a0, fffc1aac <_etext+0xbff40ce0>
+     28b:	030100        	rsr.lend	a0
+     28e:	020902        	l8ui	a0, a9, 2
+     291:	030100        	rsr.lend	a0
+     294:	030901        	l32r	a0, fffc0eb8 <_etext+0xbff400ec>
+     297:	030100        	rsr.lend	a0
+     29a:	030901        	l32r	a0, fffc0ec0 <_etext+0xbff400f4>
+     29d:	030100        	rsr.lend	a0
+     2a0:	020901        	l32r	a0, fffc0ac4 <_etext+0xbff3fcf8>
+     2a3:	030100        	rsr.lend	a0
+     2a6:	020901        	l32r	a0, fffc0acc <_etext+0xbff3fd00>
+     2a9:	030100        	rsr.lend	a0
+     2ac:	020901        	l32r	a0, fffc0ad0 <_etext+0xbff3fd04>
+     2af:	030100        	rsr.lend	a0
+     2b2:	030902        	l8ui	a0, a9, 3
+     2b5:	030100        	rsr.lend	a0
+     2b8:	030902        	l8ui	a0, a9, 3
+     2bb:	090100        	l32e	a0, a1, -64
+     2be:	000002        	l8ui	a0, a0, 0
+     2c1:	450101        	l32r	a0, fffd16c8 <_etext+0xbff508fc>
+     2c4:	000006        	j	2c8 <init_data+0x2c8>
+     2c7:	2a0002        	l8ui	a0, a0, 42
+     2ca:	000000        	ill
+     2cd:	fb0101        	l32r	a0, ffffeed4 <_etext+0xbff7e108>
+     2d0:	0e          	.byte 0xe
+     2d1:	000d      	mov.n	a0, a0
+     2d3:	010101        	l32r	a0, fffc06d8 <_etext+0xbff3f90c>
+     2d6:	000001        	l32r	a0, fffc02d8 <_etext+0xbff3f50c>
+     2d9:	000100        	lsi	f0, a1, 0
+     2dc:	620100        	lsi	f0, a1, 0x188
+     2df:	6c6975        	call12	6c974 <init_data+0x6c974>
+     2e2:	000064        	lsi	f6, a0, 0
+     2e5:	737341        	l32r	a4, fffdd0b4 <_etext+0xbff5c2e8>
+     2e8:	6769      	s32i.n	a6, a7, 24
+     2ea:	6e          	.byte 0x6e
+     2eb:	656d      	lsi	f6, a5, 20
+     2ed:	6e          	.byte 0x6e
+     2ee:	2e7374        	lsi	f7, a3, 184
+     2f1:	010053        	lsi	f5, a0, 4
+     2f4:	000000        	ill
+     2f7:	020500        	andb	b0, b5, b0
+     2fa:	04f8      	l32i.n	a15, a4, 0
+     2fc:	4008      	l32i.n	a0, a0, 16
+     2fe:	012a03        	lsi	f0, a10, 4
+     301:	090103        	lsi	f0, a1, 36
+     304:	010003        	lsi	f0, a0, 4
+     307:	090103        	lsi	f0, a1, 36
+     30a:	010002        	l8ui	a0, a0, 1
+     30d:	090103        	lsi	f0, a1, 36
+     310:	010003        	lsi	f0, a0, 4
+     313:	090103        	lsi	f0, a1, 36
+     316:	010003        	lsi	f0, a0, 4
+     319:	090103        	lsi	f0, a1, 36
+     31c:	010006        	j	720 <init_data+0x720>
+     31f:	090503        	lsi	f0, a5, 36
+     322:	010003        	lsi	f0, a0, 4
+     325:	090103        	lsi	f0, a1, 36
+     328:	010003        	lsi	f0, a0, 4
+     32b:	090103        	lsi	f0, a1, 36
+     32e:	010002        	l8ui	a0, a0, 1
+     331:	090103        	lsi	f0, a1, 36
+     334:	010002        	l8ui	a0, a0, 1
+     337:	090103        	lsi	f0, a1, 36
+     33a:	010003        	lsi	f0, a0, 4
+     33d:	090103        	lsi	f0, a1, 36
+     340:	010002        	l8ui	a0, a0, 1
+     343:	090103        	lsi	f0, a1, 36
+     346:	010003        	lsi	f0, a0, 4
+     349:	090103        	lsi	f0, a1, 36
+     34c:	010003        	lsi	f0, a0, 4
+     34f:	090103        	lsi	f0, a1, 36
+     352:	010002        	l8ui	a0, a0, 1
+     355:	090103        	lsi	f0, a1, 36
+     358:	010002        	l8ui	a0, a0, 1
+     35b:	090103        	lsi	f0, a1, 36
+     35e:	010002        	l8ui	a0, a0, 1
+     361:	090103        	lsi	f0, a1, 36
+     364:	010002        	l8ui	a0, a0, 1
+     367:	090103        	lsi	f0, a1, 36
+     36a:	010002        	l8ui	a0, a0, 1
+     36d:	090103        	lsi	f0, a1, 36
+     370:	010002        	l8ui	a0, a0, 1
+     373:	090103        	lsi	f0, a1, 36
+     376:	010002        	l8ui	a0, a0, 1
+     379:	090103        	lsi	f0, a1, 36
+     37c:	010002        	l8ui	a0, a0, 1
+     37f:	090103        	lsi	f0, a1, 36
+     382:	010002        	l8ui	a0, a0, 1
+     385:	090103        	lsi	f0, a1, 36
+     388:	010002        	l8ui	a0, a0, 1
+     38b:	090803        	lsi	f0, a8, 36
+     38e:	000a      	add.n	a0, a0, a0
+     390:	010301        	l32r	a0, fffc079c <_etext+0xbff3f9d0>
+     393:	0309      	s32i.n	a0, a3, 0
+     395:	030100        	rsr.lend	a0
+     398:	030901        	l32r	a0, fffc0fbc <_etext+0xbff401f0>
+     39b:	030100        	rsr.lend	a0
+     39e:	030901        	l32r	a0, fffc0fc4 <_etext+0xbff401f8>
+     3a1:	030100        	rsr.lend	a0
+     3a4:	020901        	l32r	a0, fffc0bc8 <_etext+0xbff3fdfc>
+     3a7:	030100        	rsr.lend	a0
+     3aa:	060901        	l32r	a0, fffc1bd0 <_etext+0xbff40e04>
+     3ad:	030100        	rsr.lend	a0
+     3b0:	020901        	l32r	a0, fffc0bd4 <_etext+0xbff3fe08>
+     3b3:	030100        	rsr.lend	a0
+     3b6:	030901        	l32r	a0, fffc0fdc <_etext+0xbff40210>
+     3b9:	030100        	rsr.lend	a0
+     3bc:	020901        	l32r	a0, fffc0be0 <_etext+0xbff3fe14>
+     3bf:	030100        	rsr.lend	a0
+     3c2:	030901        	l32r	a0, fffc0fe8 <_etext+0xbff4021c>
+     3c5:	030100        	rsr.lend	a0
+     3c8:	030901        	l32r	a0, fffc0fec <_etext+0xbff40220>
+     3cb:	030100        	rsr.lend	a0
+     3ce:	030901        	l32r	a0, fffc0ff4 <_etext+0xbff40228>
+     3d1:	030100        	rsr.lend	a0
+     3d4:	030901        	l32r	a0, fffc0ff8 <_etext+0xbff4022c>
+     3d7:	030100        	rsr.lend	a0
+     3da:	020901        	l32r	a0, fffc0c00 <_etext+0xbff3fe34>
+     3dd:	030100        	rsr.lend	a0
+     3e0:	030901        	l32r	a0, fffc1004 <_etext+0xbff40238>
+     3e3:	030100        	rsr.lend	a0
+     3e6:	030901        	l32r	a0, fffc100c <_etext+0xbff40240>
+     3e9:	030100        	rsr.lend	a0
+     3ec:	020901        	l32r	a0, fffc0c10 <_etext+0xbff3fe44>
+     3ef:	030100        	rsr.lend	a0
+     3f2:	020901        	l32r	a0, fffc0c18 <_etext+0xbff3fe4c>
+     3f5:	030100        	rsr.lend	a0
+     3f8:	020901        	l32r	a0, fffc0c1c <_etext+0xbff3fe50>
+     3fb:	030100        	rsr.lend	a0
+     3fe:	030901        	l32r	a0, fffc1024 <_etext+0xbff40258>
+     401:	030100        	rsr.lend	a0
+     404:	020901        	l32r	a0, fffc0c28 <_etext+0xbff3fe5c>
+     407:	030100        	rsr.lend	a0
+     40a:	030901        	l32r	a0, fffc1030 <_etext+0xbff40264>
+     40d:	030100        	rsr.lend	a0
+     410:	030901        	l32r	a0, fffc1034 <_etext+0xbff40268>
+     413:	030100        	rsr.lend	a0
+     416:	030901        	l32r	a0, fffc103c <_etext+0xbff40270>
+     419:	030100        	rsr.lend	a0
+     41c:	030901        	l32r	a0, fffc1040 <_etext+0xbff40274>
+     41f:	030100        	rsr.lend	a0
+     422:	030901        	l32r	a0, fffc1048 <_etext+0xbff4027c>
+     425:	030100        	rsr.lend	a0
+     428:	030901        	l32r	a0, fffc104c <_etext+0xbff40280>
+     42b:	030100        	rsr.lend	a0
+     42e:	020901        	l32r	a0, fffc0c54 <_etext+0xbff3fe88>
+     431:	030100        	rsr.lend	a0
+     434:	030901        	l32r	a0, fffc1058 <_etext+0xbff4028c>
+     437:	030100        	rsr.lend	a0
+     43a:	020901        	l32r	a0, fffc0c60 <_etext+0xbff3fe94>
+     43d:	030100        	rsr.lend	a0
+     440:	020901        	l32r	a0, fffc0c64 <_etext+0xbff3fe98>
+     443:	030100        	rsr.lend	a0
+     446:	020901        	l32r	a0, fffc0c6c <_etext+0xbff3fea0>
+     449:	030100        	rsr.lend	a0
+     44c:	020902        	l8ui	a0, a9, 2
+     44f:	030100        	rsr.lend	a0
+     452:	030901        	l32r	a0, fffc1078 <_etext+0xbff402ac>
+     455:	030100        	rsr.lend	a0
+     458:	030901        	l32r	a0, fffc107c <_etext+0xbff402b0>
+     45b:	030100        	rsr.lend	a0
+     45e:	020901        	l32r	a0, fffc0c84 <_etext+0xbff3feb8>
+     461:	030100        	rsr.lend	a0
+     464:	020901        	l32r	a0, fffc0c88 <_etext+0xbff3febc>
+     467:	030100        	rsr.lend	a0
+     46a:	030901        	l32r	a0, fffc1090 <_etext+0xbff402c4>
+     46d:	030100        	rsr.lend	a0
+     470:	020901        	l32r	a0, fffc0c94 <_etext+0xbff3fec8>
+     473:	030100        	rsr.lend	a0
+     476:	030902        	l8ui	a0, a9, 3
+     479:	030100        	rsr.lend	a0
+     47c:	020902        	l8ui	a0, a9, 2
+     47f:	030100        	rsr.lend	a0
+     482:	030901        	l32r	a0, fffc10a8 <_etext+0xbff402dc>
+     485:	030100        	rsr.lend	a0
+     488:	020901        	l32r	a0, fffc0cac <_etext+0xbff3fee0>
+     48b:	030100        	rsr.lend	a0
+     48e:	030901        	l32r	a0, fffc10b4 <_etext+0xbff402e8>
+     491:	030100        	rsr.lend	a0
+     494:	020901        	l32r	a0, fffc0cb8 <_etext+0xbff3feec>
+     497:	030100        	rsr.lend	a0
+     49a:	020901        	l32r	a0, fffc0cc0 <_etext+0xbff3fef4>
+     49d:	030100        	rsr.lend	a0
+     4a0:	030901        	l32r	a0, fffc10c4 <_etext+0xbff402f8>
+     4a3:	030100        	rsr.lend	a0
+     4a6:	020901        	l32r	a0, fffc0ccc <_etext+0xbff3ff00>
+     4a9:	030100        	rsr.lend	a0
+     4ac:	050902        	l8ui	a0, a9, 5
+     4af:	030100        	rsr.lend	a0
+     4b2:	020902        	l8ui	a0, a9, 2
+     4b5:	030100        	rsr.lend	a0
+     4b8:	030901        	l32r	a0, fffc10dc <_etext+0xbff40310>
+     4bb:	030100        	rsr.lend	a0
+     4be:	020901        	l32r	a0, fffc0ce4 <_etext+0xbff3ff18>
+     4c1:	030100        	rsr.lend	a0
+     4c4:	030901        	l32r	a0, fffc10e8 <_etext+0xbff4031c>
+     4c7:	030100        	rsr.lend	a0
+     4ca:	020901        	l32r	a0, fffc0cf0 <_etext+0xbff3ff24>
+     4cd:	030100        	rsr.lend	a0
+     4d0:	030901        	l32r	a0, fffc10f4 <_etext+0xbff40328>
+     4d3:	030100        	rsr.lend	a0
+     4d6:	020901        	l32r	a0, fffc0cfc <_etext+0xbff3ff30>
+     4d9:	030100        	rsr.lend	a0
+     4dc:	030901        	l32r	a0, fffc1100 <_etext+0xbff40334>
+     4df:	030100        	rsr.lend	a0
+     4e2:	020901        	l32r	a0, fffc0d08 <_etext+0xbff3ff3c>
+     4e5:	030100        	rsr.lend	a0
+     4e8:	030901        	l32r	a0, fffc110c <_etext+0xbff40340>
+     4eb:	030100        	rsr.lend	a0
+     4ee:	020901        	l32r	a0, fffc0d14 <_etext+0xbff3ff48>
+     4f1:	030100        	rsr.lend	a0
+     4f4:	030901        	l32r	a0, fffc1118 <_etext+0xbff4034c>
+     4f7:	030100        	rsr.lend	a0
+     4fa:	020901        	l32r	a0, fffc0d20 <_etext+0xbff3ff54>
+     4fd:	030100        	rsr.lend	a0
+     500:	030901        	l32r	a0, fffc1124 <_etext+0xbff40358>
+     503:	030100        	rsr.lend	a0
+     506:	020901        	l32r	a0, fffc0d2c <_etext+0xbff3ff60>
+     509:	030100        	rsr.lend	a0
+     50c:	030901        	l32r	a0, fffc1130 <_etext+0xbff40364>
+     50f:	030100        	rsr.lend	a0
+     512:	030901        	l32r	a0, fffc1138 <_etext+0xbff4036c>
+     515:	030100        	rsr.lend	a0
+     518:	020901        	l32r	a0, fffc0d3c <_etext+0xbff3ff70>
+     51b:	030100        	rsr.lend	a0
+     51e:	030901        	l32r	a0, fffc1144 <_etext+0xbff40378>
+     521:	030100        	rsr.lend	a0
+     524:	030901        	l32r	a0, fffc1148 <_etext+0xbff4037c>
+     527:	030100        	rsr.lend	a0
+     52a:	030901        	l32r	a0, fffc1150 <_etext+0xbff40384>
+     52d:	030100        	rsr.lend	a0
+     530:	030901        	l32r	a0, fffc1154 <_etext+0xbff40388>
+     533:	030100        	rsr.lend	a0
+     536:	030901        	l32r	a0, fffc115c <_etext+0xbff40390>
+     539:	030100        	rsr.lend	a0
+     53c:	030901        	l32r	a0, fffc1160 <_etext+0xbff40394>
+     53f:	030100        	rsr.lend	a0
+     542:	030901        	l32r	a0, fffc1168 <_etext+0xbff4039c>
+     545:	030100        	rsr.lend	a0
+     548:	020901        	l32r	a0, fffc0d6c <_etext+0xbff3ffa0>
+     54b:	030100        	rsr.lend	a0
+     54e:	020901        	l32r	a0, fffc0d74 <_etext+0xbff3ffa8>
+     551:	030100        	rsr.lend	a0
+     554:	030901        	l32r	a0, fffc1178 <_etext+0xbff403ac>
+     557:	030100        	rsr.lend	a0
+     55a:	020901        	l32r	a0, fffc0d80 <_etext+0xbff3ffb4>
+     55d:	030100        	rsr.lend	a0
+     560:	050902        	l8ui	a0, a9, 5
+     563:	030100        	rsr.lend	a0
+     566:	020902        	l8ui	a0, a9, 2
+     569:	030100        	rsr.lend	a0
+     56c:	030901        	l32r	a0, fffc1190 <_etext+0xbff403c4>
+     56f:	030100        	rsr.lend	a0
+     572:	030901        	l32r	a0, fffc1198 <_etext+0xbff403cc>
+     575:	030100        	rsr.lend	a0
+     578:	020901        	l32r	a0, fffc0d9c <_etext+0xbff3ffd0>
+     57b:	030100        	rsr.lend	a0
+     57e:	060901        	l32r	a0, fffc1da4 <_etext+0xbff40fd8>
+     581:	030100        	rsr.lend	a0
+     584:	030901        	l32r	a0, fffc11a8 <_etext+0xbff403dc>
+     587:	030100        	rsr.lend	a0
+     58a:	030901        	l32r	a0, fffc11b0 <_etext+0xbff403e4>
+     58d:	030100        	rsr.lend	a0
+     590:	020901        	l32r	a0, fffc0db4 <_etext+0xbff3ffe8>
+     593:	030100        	rsr.lend	a0
+     596:	030901        	l32r	a0, fffc11bc <_etext+0xbff403f0>
+     599:	030100        	rsr.lend	a0
+     59c:	030901        	l32r	a0, fffc11c0 <_etext+0xbff403f4>
+     59f:	030100        	rsr.lend	a0
+     5a2:	020901        	l32r	a0, fffc0dc8 <_etext+0xbff3fffc>
+     5a5:	030100        	rsr.lend	a0
+     5a8:	040902        	l8ui	a0, a9, 4
+     5ab:	030100        	rsr.lend	a0
+     5ae:	020902        	l8ui	a0, a9, 2
+     5b1:	030100        	rsr.lend	a0
+     5b4:	030901        	l32r	a0, fffc11d8 <_etext+0xbff4040c>
+     5b7:	030100        	rsr.lend	a0
+     5ba:	030901        	l32r	a0, fffc11e0 <_etext+0xbff40414>
+     5bd:	030100        	rsr.lend	a0
+     5c0:	020901        	l32r	a0, fffc0de4 <_etext+0xbff40018>
+     5c3:	030100        	rsr.lend	a0
+     5c6:	060901        	l32r	a0, fffc1dec <_etext+0xbff41020>
+     5c9:	030100        	rsr.lend	a0
+     5cc:	030901        	l32r	a0, fffc11f0 <_etext+0xbff40424>
+     5cf:	030100        	rsr.lend	a0
+     5d2:	030901        	l32r	a0, fffc11f8 <_etext+0xbff4042c>
+     5d5:	030100        	rsr.lend	a0
+     5d8:	020901        	l32r	a0, fffc0dfc <_etext+0xbff40030>
+     5db:	030100        	rsr.lend	a0
+     5de:	020901        	l32r	a0, fffc0e04 <_etext+0xbff40038>
+     5e1:	030100        	rsr.lend	a0
+     5e4:	030901        	l32r	a0, fffc1208 <_etext+0xbff4043c>
+     5e7:	030100        	rsr.lend	a0
+     5ea:	020901        	l32r	a0, fffc0e10 <_etext+0xbff40044>
+     5ed:	030100        	rsr.lend	a0
+     5f0:	050902        	l8ui	a0, a9, 5
+     5f3:	030100        	rsr.lend	a0
+     5f6:	020902        	l8ui	a0, a9, 2
+     5f9:	030100        	rsr.lend	a0
+     5fc:	030901        	l32r	a0, fffc1220 <_etext+0xbff40454>
+     5ff:	030100        	rsr.lend	a0
+     602:	030901        	l32r	a0, fffc1228 <_etext+0xbff4045c>
+     605:	030100        	rsr.lend	a0
+     608:	020901        	l32r	a0, fffc0e2c <_etext+0xbff40060>
+     60b:	030100        	rsr.lend	a0
+     60e:	060901        	l32r	a0, fffc1e34 <_etext+0xbff41068>
+     611:	030100        	rsr.lend	a0
+     614:	030901        	l32r	a0, fffc1238 <_etext+0xbff4046c>
+     617:	030100        	rsr.lend	a0
+     61a:	030901        	l32r	a0, fffc1240 <_etext+0xbff40474>
+     61d:	030100        	rsr.lend	a0
+     620:	020901        	l32r	a0, fffc0e44 <_etext+0xbff40078>
+     623:	030100        	rsr.lend	a0
+     626:	020901        	l32r	a0, fffc0e4c <_etext+0xbff40080>
+     629:	030100        	rsr.lend	a0
+     62c:	030901        	l32r	a0, fffc1250 <_etext+0xbff40484>
+     62f:	030100        	rsr.lend	a0
+     632:	020901        	l32r	a0, fffc0e58 <_etext+0xbff4008c>
+     635:	030100        	rsr.lend	a0
+     638:	050902        	l8ui	a0, a9, 5
+     63b:	030100        	rsr.lend	a0
+     63e:	020902        	l8ui	a0, a9, 2
+     641:	030100        	rsr.lend	a0
+     644:	030901        	l32r	a0, fffc1268 <_etext+0xbff4049c>
+     647:	030100        	rsr.lend	a0
+     64a:	030901        	l32r	a0, fffc1270 <_etext+0xbff404a4>
+     64d:	030100        	rsr.lend	a0
+     650:	030901        	l32r	a0, fffc1274 <_etext+0xbff404a8>
+     653:	030100        	rsr.lend	a0
+     656:	060901        	l32r	a0, fffc1e7c <_etext+0xbff410b0>
+     659:	030100        	rsr.lend	a0
+     65c:	030901        	l32r	a0, fffc1280 <_etext+0xbff404b4>
+     65f:	030100        	rsr.lend	a0
+     662:	030901        	l32r	a0, fffc1288 <_etext+0xbff404bc>
+     665:	030100        	rsr.lend	a0
+     668:	030901        	l32r	a0, fffc128c <_etext+0xbff404c0>
+     66b:	030100        	rsr.lend	a0
+     66e:	030901        	l32r	a0, fffc1294 <_etext+0xbff404c8>
+     671:	030100        	rsr.lend	a0
+     674:	030902        	l8ui	a0, a9, 3
+     677:	030100        	rsr.lend	a0
+     67a:	030901        	l32r	a0, fffc12a0 <_etext+0xbff404d4>
+     67d:	030100        	rsr.lend	a0
+     680:	020901        	l32r	a0, fffc0ea4 <_etext+0xbff400d8>
+     683:	030100        	rsr.lend	a0
+     686:	030901        	l32r	a0, fffc12ac <_etext+0xbff404e0>
+     689:	030100        	rsr.lend	a0
+     68c:	020901        	l32r	a0, fffc0eb0 <_etext+0xbff400e4>
+     68f:	030100        	rsr.lend	a0
+     692:	030901        	l32r	a0, fffc12b8 <_etext+0xbff404ec>
+     695:	030100        	rsr.lend	a0
+     698:	030902        	l8ui	a0, a9, 3
+     69b:	030100        	rsr.lend	a0
+     69e:	030901        	l32r	a0, fffc12c4 <_etext+0xbff404f8>
+     6a1:	030100        	rsr.lend	a0
+     6a4:	020901        	l32r	a0, fffc0ec8 <_etext+0xbff400fc>
+     6a7:	030100        	rsr.lend	a0
+     6aa:	030902        	l8ui	a0, a9, 3
+     6ad:	030100        	rsr.lend	a0
+     6b0:	020902        	l8ui	a0, a9, 2
+     6b3:	030100        	rsr.lend	a0
+     6b6:	030901        	l32r	a0, fffc12dc <_etext+0xbff40510>
+     6b9:	030100        	rsr.lend	a0
+     6bc:	030901        	l32r	a0, fffc12e0 <_etext+0xbff40514>
+     6bf:	030100        	rsr.lend	a0
+     6c2:	020901        	l32r	a0, fffc0ee8 <_etext+0xbff4011c>
+     6c5:	030100        	rsr.lend	a0
+     6c8:	060901        	l32r	a0, fffc1eec <_etext+0xbff41120>
+     6cb:	030100        	rsr.lend	a0
+     6ce:	030901        	l32r	a0, fffc12f4 <_etext+0xbff40528>
+     6d1:	030100        	rsr.lend	a0
+     6d4:	030901        	l32r	a0, fffc12f8 <_etext+0xbff4052c>
+     6d7:	030100        	rsr.lend	a0
+     6da:	030901        	l32r	a0, fffc1300 <_etext+0xbff40534>
+     6dd:	030100        	rsr.lend	a0
+     6e0:	030901        	l32r	a0, fffc1304 <_etext+0xbff40538>
+     6e3:	030100        	rsr.lend	a0
+     6e6:	030901        	l32r	a0, fffc130c <_etext+0xbff40540>
+     6e9:	030100        	rsr.lend	a0
+     6ec:	020901        	l32r	a0, fffc0f10 <_etext+0xbff40144>
+     6ef:	030100        	rsr.lend	a0
+     6f2:	020901        	l32r	a0, fffc0f18 <_etext+0xbff4014c>
+     6f5:	030100        	rsr.lend	a0
+     6f8:	060901        	l32r	a0, fffc1f1c <_etext+0xbff41150>
+     6fb:	030100        	rsr.lend	a0
+     6fe:	030901        	l32r	a0, fffc1324 <_etext+0xbff40558>
+     701:	030100        	rsr.lend	a0
+     704:	030901        	l32r	a0, fffc1328 <_etext+0xbff4055c>
+     707:	030100        	rsr.lend	a0
+     70a:	030901        	l32r	a0, fffc1330 <_etext+0xbff40564>
+     70d:	030100        	rsr.lend	a0
+     710:	020901        	l32r	a0, fffc0f34 <_etext+0xbff40168>
+     713:	030100        	rsr.lend	a0
+     716:	020901        	l32r	a0, fffc0f3c <_etext+0xbff40170>
+     719:	030100        	rsr.lend	a0
+     71c:	060902        	l8ui	a0, a9, 6
+     71f:	030100        	rsr.lend	a0
+     722:	020902        	l8ui	a0, a9, 2
+     725:	030100        	rsr.lend	a0
+     728:	030901        	l32r	a0, fffc134c <_etext+0xbff40580>
+     72b:	030100        	rsr.lend	a0
+     72e:	030901        	l32r	a0, fffc1354 <_etext+0xbff40588>
+     731:	030100        	rsr.lend	a0
+     734:	030901        	l32r	a0, fffc1358 <_etext+0xbff4058c>
+     737:	030100        	rsr.lend	a0
+     73a:	030901        	l32r	a0, fffc1360 <_etext+0xbff40594>
+     73d:	030100        	rsr.lend	a0
+     740:	060901        	l32r	a0, fffc1f64 <_etext+0xbff41198>
+     743:	030100        	rsr.lend	a0
+     746:	030901        	l32r	a0, fffc136c <_etext+0xbff405a0>
+     749:	030100        	rsr.lend	a0
+     74c:	030901        	l32r	a0, fffc1370 <_etext+0xbff405a4>
+     74f:	030100        	rsr.lend	a0
+     752:	020901        	l32r	a0, fffc0f78 <_etext+0xbff401ac>
+     755:	030100        	rsr.lend	a0
+     758:	020901        	l32r	a0, fffc0f7c <_etext+0xbff401b0>
+     75b:	030100        	rsr.lend	a0
+     75e:	030901        	l32r	a0, fffc1384 <_etext+0xbff405b8>
+     761:	030100        	rsr.lend	a0
+     764:	020901        	l32r	a0, fffc0f88 <_etext+0xbff401bc>
+     767:	030100        	rsr.lend	a0
+     76a:	050902        	l8ui	a0, a9, 5
+     76d:	030100        	rsr.lend	a0
+     770:	020902        	l8ui	a0, a9, 2
+     773:	030100        	rsr.lend	a0
+     776:	030901        	l32r	a0, fffc139c <_etext+0xbff405d0>
+     779:	030100        	rsr.lend	a0
+     77c:	030901        	l32r	a0, fffc13a0 <_etext+0xbff405d4>
+     77f:	030100        	rsr.lend	a0
+     782:	030901        	l32r	a0, fffc13a8 <_etext+0xbff405dc>
+     785:	030100        	rsr.lend	a0
+     788:	030901        	l32r	a0, fffc13ac <_etext+0xbff405e0>
+     78b:	030100        	rsr.lend	a0
+     78e:	060901        	l32r	a0, fffc1fb4 <_etext+0xbff411e8>
+     791:	030100        	rsr.lend	a0
+     794:	030901        	l32r	a0, fffc13b8 <_etext+0xbff405ec>
+     797:	030100        	rsr.lend	a0
+     79a:	030901        	l32r	a0, fffc13c0 <_etext+0xbff405f4>
+     79d:	030100        	rsr.lend	a0
+     7a0:	030901        	l32r	a0, fffc13c4 <_etext+0xbff405f8>
+     7a3:	030100        	rsr.lend	a0
+     7a6:	020901        	l32r	a0, fffc0fcc <_etext+0xbff40200>
+     7a9:	030100        	rsr.lend	a0
+     7ac:	030901        	l32r	a0, fffc13d0 <_etext+0xbff40604>
+     7af:	030100        	rsr.lend	a0
+     7b2:	020901        	l32r	a0, fffc0fd8 <_etext+0xbff4020c>
+     7b5:	030100        	rsr.lend	a0
+     7b8:	040902        	l8ui	a0, a9, 4
+     7bb:	030100        	rsr.lend	a0
+     7be:	020902        	l8ui	a0, a9, 2
+     7c1:	030100        	rsr.lend	a0
+     7c4:	030901        	l32r	a0, fffc13e8 <_etext+0xbff4061c>
+     7c7:	030100        	rsr.lend	a0
+     7ca:	030901        	l32r	a0, fffc13f0 <_etext+0xbff40624>
+     7cd:	030100        	rsr.lend	a0
+     7d0:	030901        	l32r	a0, fffc13f4 <_etext+0xbff40628>
+     7d3:	030100        	rsr.lend	a0
+     7d6:	030901        	l32r	a0, fffc13fc <_etext+0xbff40630>
+     7d9:	030100        	rsr.lend	a0
+     7dc:	060901        	l32r	a0, fffc2000 <_etext+0xbff41234>
+     7df:	030100        	rsr.lend	a0
+     7e2:	030901        	l32r	a0, fffc1408 <_etext+0xbff4063c>
+     7e5:	030100        	rsr.lend	a0
+     7e8:	030901        	l32r	a0, fffc140c <_etext+0xbff40640>
+     7eb:	030100        	rsr.lend	a0
+     7ee:	030901        	l32r	a0, fffc1414 <_etext+0xbff40648>
+     7f1:	030100        	rsr.lend	a0
+     7f4:	020901        	l32r	a0, fffc1018 <_etext+0xbff4024c>
+     7f7:	030100        	rsr.lend	a0
+     7fa:	030901        	l32r	a0, fffc1420 <_etext+0xbff40654>
+     7fd:	030100        	rsr.lend	a0
+     800:	020901        	l32r	a0, fffc1024 <_etext+0xbff40258>
+     803:	030100        	rsr.lend	a0
+     806:	040902        	l8ui	a0, a9, 4
+     809:	030100        	rsr.lend	a0
+     80c:	020902        	l8ui	a0, a9, 2
+     80f:	030100        	rsr.lend	a0
+     812:	030901        	l32r	a0, fffc1438 <_etext+0xbff4066c>
+     815:	030100        	rsr.lend	a0
+     818:	030901        	l32r	a0, fffc143c <_etext+0xbff40670>
+     81b:	030100        	rsr.lend	a0
+     81e:	030901        	l32r	a0, fffc1444 <_etext+0xbff40678>
+     821:	030100        	rsr.lend	a0
+     824:	030901        	l32r	a0, fffc1448 <_etext+0xbff4067c>
+     827:	030100        	rsr.lend	a0
+     82a:	060901        	l32r	a0, fffc2050 <_etext+0xbff41284>
+     82d:	030100        	rsr.lend	a0
+     830:	030901        	l32r	a0, fffc1454 <_etext+0xbff40688>
+     833:	030100        	rsr.lend	a0
+     836:	030901        	l32r	a0, fffc145c <_etext+0xbff40690>
+     839:	030100        	rsr.lend	a0
+     83c:	030901        	l32r	a0, fffc1460 <_etext+0xbff40694>
+     83f:	030100        	rsr.lend	a0
+     842:	020901        	l32r	a0, fffc1068 <_etext+0xbff4029c>
+     845:	030100        	rsr.lend	a0
+     848:	030901        	l32r	a0, fffc146c <_etext+0xbff406a0>
+     84b:	030100        	rsr.lend	a0
+     84e:	020901        	l32r	a0, fffc1074 <_etext+0xbff402a8>
+     851:	030100        	rsr.lend	a0
+     854:	040902        	l8ui	a0, a9, 4
+     857:	030100        	rsr.lend	a0
+     85a:	020902        	l8ui	a0, a9, 2
+     85d:	030100        	rsr.lend	a0
+     860:	030901        	l32r	a0, fffc1484 <_etext+0xbff406b8>
+     863:	030100        	rsr.lend	a0
+     866:	030901        	l32r	a0, fffc148c <_etext+0xbff406c0>
+     869:	030100        	rsr.lend	a0
+     86c:	030901        	l32r	a0, fffc1490 <_etext+0xbff406c4>
+     86f:	030100        	rsr.lend	a0
+     872:	030901        	l32r	a0, fffc1498 <_etext+0xbff406cc>
+     875:	030100        	rsr.lend	a0
+     878:	060901        	l32r	a0, fffc209c <_etext+0xbff412d0>
+     87b:	030100        	rsr.lend	a0
+     87e:	030901        	l32r	a0, fffc14a4 <_etext+0xbff406d8>
+     881:	030100        	rsr.lend	a0
+     884:	030901        	l32r	a0, fffc14a8 <_etext+0xbff406dc>
+     887:	030100        	rsr.lend	a0
+     88a:	030901        	l32r	a0, fffc14b0 <_etext+0xbff406e4>
+     88d:	030100        	rsr.lend	a0
+     890:	030901        	l32r	a0, fffc14b4 <_etext+0xbff406e8>
+     893:	030100        	rsr.lend	a0
+     896:	030901        	l32r	a0, fffc14bc <_etext+0xbff406f0>
+     899:	030100        	rsr.lend	a0
+     89c:	020901        	l32r	a0, fffc10c0 <_etext+0xbff402f4>
+     89f:	030100        	rsr.lend	a0
+     8a2:	020901        	l32r	a0, fffc10c8 <_etext+0xbff402fc>
+     8a5:	030100        	rsr.lend	a0
+     8a8:	060901        	l32r	a0, fffc20cc <_etext+0xbff41300>
+     8ab:	030100        	rsr.lend	a0
+     8ae:	020901        	l32r	a0, fffc10d4 <_etext+0xbff40308>
+     8b1:	030100        	rsr.lend	a0
+     8b4:	030901        	l32r	a0, fffc14d8 <_etext+0xbff4070c>
+     8b7:	030100        	rsr.lend	a0
+     8ba:	030901        	l32r	a0, fffc14e0 <_etext+0xbff40714>
+     8bd:	030100        	rsr.lend	a0
+     8c0:	030901        	l32r	a0, fffc14e4 <_etext+0xbff40718>
+     8c3:	030100        	rsr.lend	a0
+     8c6:	030901        	l32r	a0, fffc14ec <_etext+0xbff40720>
+     8c9:	030100        	rsr.lend	a0
+     8cc:	030901        	l32r	a0, fffc14f0 <_etext+0xbff40724>
+     8cf:	030100        	rsr.lend	a0
+     8d2:	060901        	l32r	a0, fffc20f8 <_etext+0xbff4132c>
+     8d5:	030100        	rsr.lend	a0
+     8d8:	060901        	l32r	a0, fffc20fc <_etext+0xbff41330>
+     8db:	090100        	l32e	a0, a1, -64
+     8de:	000002        	l8ui	a0, a0, 0
+     8e1:	000101        	l32r	a0, fffc08e8 <_etext+0xbff3fb1c>
+     8e4:	980205        	call0	fff98908 <_etext+0xbff17b3c>
+     8e7:	080d      	mov.n	a0, a8
+     8e9:	d20340        	quos	a0, a3, a4
+     8ec:	030102        	l8ui	a0, a1, 3
+     8ef:	030901        	l32r	a0, fffc1514 <_etext+0xbff40748>
+     8f2:	030100        	rsr.lend	a0
+     8f5:	030901        	l32r	a0, fffc151c <_etext+0xbff40750>
+     8f8:	030100        	rsr.lend	a0
+     8fb:	030901        	l32r	a0, fffc1520 <_etext+0xbff40754>
+     8fe:	030100        	rsr.lend	a0
+     901:	060901        	l32r	a0, fffc2128 <_etext+0xbff4135c>
+     904:	090100        	l32e	a0, a1, -64
+     907:	000005        	call0	908 <init_data+0x908>
+     90a:	320101        	l32r	a0, fffcd110 <_etext+0xbff4c344>
+     90d:	000003        	lsi	f0, a0, 0
+     910:	230002        	l8ui	a0, a0, 35
+     913:	000000        	ill
+     916:	fb0101        	l32r	a0, fffff51c <_etext+0xbff7e750>
+     919:	0e          	.byte 0xe
+     91a:	000d      	mov.n	a0, a0
+     91c:	010101        	l32r	a0, fffc0d20 <_etext+0xbff3ff54>
+     91f:	000001        	l32r	a0, fffc0920 <_etext+0xbff3fb54>
+     922:	000100        	lsi	f0, a1, 0
+     925:	620100        	lsi	f0, a1, 0x188
+     928:	6c6975        	call12	6cfc0 <init_data+0x6cfc0>
+     92b:	000064        	lsi	f6, a0, 0
+     92e:	736554        	lsi	f5, a5, 0x1cc
+     931:	532e74        	lsi	f7, a14, 0x14c
+     934:	000100        	lsi	f0, a1, 0
+     937:	000000        	ill
+     93a:	dc0205        	call0	fffdc95c <_etext+0xbff5bb90>
+     93d:	400807        	bnone	a8, a0, 981 <init_data+0x981>
+     940:	012203        	lsi	f0, a2, 4
+     943:	090103        	lsi	f0, a1, 36
+     946:	010003        	lsi	f0, a0, 4
+     949:	090103        	lsi	f0, a1, 36
+     94c:	010002        	l8ui	a0, a0, 1
+     94f:	090103        	lsi	f0, a1, 36
+     952:	010003        	lsi	f0, a0, 4
+     955:	090103        	lsi	f0, a1, 36
+     958:	010006        	j	d5c <init_data+0xd5c>
+     95b:	090103        	lsi	f0, a1, 36
+     95e:	010002        	l8ui	a0, a0, 1
+     961:	090103        	lsi	f0, a1, 36
+     964:	010003        	lsi	f0, a0, 4
+     967:	090103        	lsi	f0, a1, 36
+     96a:	010003        	lsi	f0, a0, 4
+     96d:	090103        	lsi	f0, a1, 36
+     970:	010002        	l8ui	a0, a0, 1
+     973:	090103        	lsi	f0, a1, 36
+     976:	010003        	lsi	f0, a0, 4
+     979:	090103        	lsi	f0, a1, 36
+     97c:	010002        	l8ui	a0, a0, 1
+     97f:	090103        	lsi	f0, a1, 36
+     982:	010002        	l8ui	a0, a0, 1
+     985:	090103        	lsi	f0, a1, 36
+     988:	010002        	l8ui	a0, a0, 1
+     98b:	090103        	lsi	f0, a1, 36
+     98e:	010002        	l8ui	a0, a0, 1
+     991:	090103        	lsi	f0, a1, 36
+     994:	010002        	l8ui	a0, a0, 1
+     997:	090103        	lsi	f0, a1, 36
+     99a:	010002        	l8ui	a0, a0, 1
+     99d:	090203        	lsi	f0, a2, 36
+     9a0:	010002        	l8ui	a0, a0, 1
+     9a3:	090803        	lsi	f0, a8, 36
+     9a6:	010007        	bnone	a0, a0, 9ab <init_data+0x9ab>
+     9a9:	090103        	lsi	f0, a1, 36
+     9ac:	010003        	lsi	f0, a0, 4
+     9af:	090103        	lsi	f0, a1, 36
+     9b2:	010003        	lsi	f0, a0, 4
+     9b5:	090103        	lsi	f0, a1, 36
+     9b8:	010003        	lsi	f0, a0, 4
+     9bb:	090103        	lsi	f0, a1, 36
+     9be:	010002        	l8ui	a0, a0, 1
+     9c1:	090103        	lsi	f0, a1, 36
+     9c4:	010006        	j	dc8 <init_data+0xdc8>
+     9c7:	090103        	lsi	f0, a1, 36
+     9ca:	010006        	j	dce <init_data+0xdce>
+     9cd:	090103        	lsi	f0, a1, 36
+     9d0:	010002        	l8ui	a0, a0, 1
+     9d3:	090103        	lsi	f0, a1, 36
+     9d6:	010002        	l8ui	a0, a0, 1
+     9d9:	090203        	lsi	f0, a2, 36
+     9dc:	010002        	l8ui	a0, a0, 1
+     9df:	090103        	lsi	f0, a1, 36
+     9e2:	010002        	l8ui	a0, a0, 1
+     9e5:	090103        	lsi	f0, a1, 36
+     9e8:	010002        	l8ui	a0, a0, 1
+     9eb:	090103        	lsi	f0, a1, 36
+     9ee:	010003        	lsi	f0, a0, 4
+     9f1:	090103        	lsi	f0, a1, 36
+     9f4:	010002        	l8ui	a0, a0, 1
+     9f7:	090103        	lsi	f0, a1, 36
+     9fa:	010002        	l8ui	a0, a0, 1
+     9fd:	090103        	lsi	f0, a1, 36
+     a00:	010003        	lsi	f0, a0, 4
+     a03:	090103        	lsi	f0, a1, 36
+     a06:	010002        	l8ui	a0, a0, 1
+     a09:	090103        	lsi	f0, a1, 36
+     a0c:	010002        	l8ui	a0, a0, 1
+     a0f:	090103        	lsi	f0, a1, 36
+     a12:	010003        	lsi	f0, a0, 4
+     a15:	090103        	lsi	f0, a1, 36
+     a18:	010002        	l8ui	a0, a0, 1
+     a1b:	090103        	lsi	f0, a1, 36
+     a1e:	010002        	l8ui	a0, a0, 1
+     a21:	090203        	lsi	f0, a2, 36
+     a24:	010003        	lsi	f0, a0, 4
+     a27:	090103        	lsi	f0, a1, 36
+     a2a:	010002        	l8ui	a0, a0, 1
+     a2d:	090803        	lsi	f0, a8, 36
+     a30:	010005        	call0	1a34 <init_data+0x1a34>
+     a33:	090103        	lsi	f0, a1, 36
+     a36:	010003        	lsi	f0, a0, 4
+     a39:	090103        	lsi	f0, a1, 36
+     a3c:	010002        	l8ui	a0, a0, 1
+     a3f:	090103        	lsi	f0, a1, 36
+     a42:	010002        	l8ui	a0, a0, 1
+     a45:	090103        	lsi	f0, a1, 36
+     a48:	010002        	l8ui	a0, a0, 1
+     a4b:	090103        	lsi	f0, a1, 36
+     a4e:	010003        	lsi	f0, a0, 4
+     a51:	090103        	lsi	f0, a1, 36
+     a54:	010002        	l8ui	a0, a0, 1
+     a57:	090103        	lsi	f0, a1, 36
+     a5a:	010002        	l8ui	a0, a0, 1
+     a5d:	090103        	lsi	f0, a1, 36
+     a60:	010003        	lsi	f0, a0, 4
+     a63:	090103        	lsi	f0, a1, 36
+     a66:	010003        	lsi	f0, a0, 4
+     a69:	090103        	lsi	f0, a1, 36
+     a6c:	010003        	lsi	f0, a0, 4
+     a6f:	090103        	lsi	f0, a1, 36
+     a72:	010002        	l8ui	a0, a0, 1
+     a75:	090103        	lsi	f0, a1, 36
+     a78:	010006        	j	e7c <init_data+0xe7c>
+     a7b:	090103        	lsi	f0, a1, 36
+     a7e:	010003        	lsi	f0, a0, 4
+     a81:	090103        	lsi	f0, a1, 36
+     a84:	010002        	l8ui	a0, a0, 1
+     a87:	090103        	lsi	f0, a1, 36
+     a8a:	010002        	l8ui	a0, a0, 1
+     a8d:	090103        	lsi	f0, a1, 36
+     a90:	010006        	j	e94 <init_data+0xe94>
+     a93:	090103        	lsi	f0, a1, 36
+     a96:	010002        	l8ui	a0, a0, 1
+     a99:	090103        	lsi	f0, a1, 36
+     a9c:	010002        	l8ui	a0, a0, 1
+     a9f:	090103        	lsi	f0, a1, 36
+     aa2:	010006        	j	ea6 <init_data+0xea6>
+     aa5:	090103        	lsi	f0, a1, 36
+     aa8:	010006        	j	eac <init_data+0xeac>
+     aab:	090103        	lsi	f0, a1, 36
+     aae:	010006        	j	eb2 <init_data+0xeb2>
+     ab1:	090103        	lsi	f0, a1, 36
+     ab4:	010002        	l8ui	a0, a0, 1
+     ab7:	090103        	lsi	f0, a1, 36
+     aba:	010002        	l8ui	a0, a0, 1
+     abd:	090103        	lsi	f0, a1, 36
+     ac0:	010002        	l8ui	a0, a0, 1
+     ac3:	090203        	lsi	f0, a2, 36
+     ac6:	010002        	l8ui	a0, a0, 1
+     ac9:	090803        	lsi	f0, a8, 36
+     acc:	010004        	lsi	f0, a0, 4
+     acf:	090103        	lsi	f0, a1, 36
+     ad2:	010003        	lsi	f0, a0, 4
+     ad5:	090103        	lsi	f0, a1, 36
+     ad8:	010003        	lsi	f0, a0, 4
+     adb:	090103        	lsi	f0, a1, 36
+     ade:	010006        	j	ee2 <init_data+0xee2>
+     ae1:	090103        	lsi	f0, a1, 36
+     ae4:	010006        	j	ee8 <init_data+0xee8>
+     ae7:	090103        	lsi	f0, a1, 36
+     aea:	010003        	lsi	f0, a0, 4
+     aed:	090103        	lsi	f0, a1, 36
+     af0:	010003        	lsi	f0, a0, 4
+     af3:	090103        	lsi	f0, a1, 36
+     af6:	010003        	lsi	f0, a0, 4
+     af9:	090103        	lsi	f0, a1, 36
+     afc:	010006        	j	f00 <init_data+0xf00>
+     aff:	090103        	lsi	f0, a1, 36
+     b02:	010006        	j	f06 <init_data+0xf06>
+     b05:	090103        	lsi	f0, a1, 36
+     b08:	010003        	lsi	f0, a0, 4
+     b0b:	090103        	lsi	f0, a1, 36
+     b0e:	010003        	lsi	f0, a0, 4
+     b11:	090103        	lsi	f0, a1, 36
+     b14:	010002        	l8ui	a0, a0, 1
+     b17:	090103        	lsi	f0, a1, 36
+     b1a:	010006        	j	f1e <init_data+0xf1e>
+     b1d:	090103        	lsi	f0, a1, 36
+     b20:	010003        	lsi	f0, a0, 4
+     b23:	090103        	lsi	f0, a1, 36
+     b26:	010003        	lsi	f0, a0, 4
+     b29:	090103        	lsi	f0, a1, 36
+     b2c:	010006        	j	f30 <init_data+0xf30>
+     b2f:	090103        	lsi	f0, a1, 36
+     b32:	010006        	j	f36 <init_data+0xf36>
+     b35:	090103        	lsi	f0, a1, 36
+     b38:	010003        	lsi	f0, a0, 4
+     b3b:	090103        	lsi	f0, a1, 36
+     b3e:	010003        	lsi	f0, a0, 4
+     b41:	090103        	lsi	f0, a1, 36
+     b44:	010003        	lsi	f0, a0, 4
+     b47:	090103        	lsi	f0, a1, 36
+     b4a:	010006        	j	f4e <init_data+0xf4e>
+     b4d:	090103        	lsi	f0, a1, 36
+     b50:	010002        	l8ui	a0, a0, 1
+     b53:	090103        	lsi	f0, a1, 36
+     b56:	010002        	l8ui	a0, a0, 1
+     b59:	090103        	lsi	f0, a1, 36
+     b5c:	010006        	j	f60 <init_data+0xf60>
+     b5f:	090103        	lsi	f0, a1, 36
+     b62:	010002        	l8ui	a0, a0, 1
+     b65:	090103        	lsi	f0, a1, 36
+     b68:	010002        	l8ui	a0, a0, 1
+     b6b:	090103        	lsi	f0, a1, 36
+     b6e:	010003        	lsi	f0, a0, 4
+     b71:	090103        	lsi	f0, a1, 36
+     b74:	010006        	j	f78 <init_data+0xf78>
+     b77:	090103        	lsi	f0, a1, 36
+     b7a:	010003        	lsi	f0, a0, 4
+     b7d:	090103        	lsi	f0, a1, 36
+     b80:	010003        	lsi	f0, a0, 4
+     b83:	090103        	lsi	f0, a1, 36
+     b86:	010003        	lsi	f0, a0, 4
+     b89:	090103        	lsi	f0, a1, 36
+     b8c:	010006        	j	f90 <init_data+0xf90>
+     b8f:	090103        	lsi	f0, a1, 36
+     b92:	010003        	lsi	f0, a0, 4
+     b95:	090103        	lsi	f0, a1, 36
+     b98:	010003        	lsi	f0, a0, 4
+     b9b:	090103        	lsi	f0, a1, 36
+     b9e:	010006        	j	fa2 <init_data+0xfa2>
+     ba1:	090103        	lsi	f0, a1, 36
+     ba4:	010003        	lsi	f0, a0, 4
+     ba7:	090103        	lsi	f0, a1, 36
+     baa:	010003        	lsi	f0, a0, 4
+     bad:	090103        	lsi	f0, a1, 36
+     bb0:	010002        	l8ui	a0, a0, 1
+     bb3:	090103        	lsi	f0, a1, 36
+     bb6:	010006        	j	fba <init_data+0xfba>
+     bb9:	090203        	lsi	f0, a2, 36
+     bbc:	010006        	j	fc0 <init_data+0xfc0>
+     bbf:	090103        	lsi	f0, a1, 36
+     bc2:	010006        	j	fc6 <init_data+0xfc6>
+     bc5:	090103        	lsi	f0, a1, 36
+     bc8:	010003        	lsi	f0, a0, 4
+     bcb:	090103        	lsi	f0, a1, 36
+     bce:	010003        	lsi	f0, a0, 4
+     bd1:	090103        	lsi	f0, a1, 36
+     bd4:	010002        	l8ui	a0, a0, 1
+     bd7:	090203        	lsi	f0, a2, 36
+     bda:	010006        	j	fde <init_data+0xfde>
+     bdd:	090103        	lsi	f0, a1, 36
+     be0:	010002        	l8ui	a0, a0, 1
+     be3:	090803        	lsi	f0, a8, 36
+     be6:	010002        	l8ui	a0, a0, 1
+     be9:	090103        	lsi	f0, a1, 36
+     bec:	010003        	lsi	f0, a0, 4
+     bef:	090103        	lsi	f0, a1, 36
+     bf2:	010003        	lsi	f0, a0, 4
+     bf5:	090103        	lsi	f0, a1, 36
+     bf8:	010002        	l8ui	a0, a0, 1
+     bfb:	090103        	lsi	f0, a1, 36
+     bfe:	010002        	l8ui	a0, a0, 1
+     c01:	090103        	lsi	f0, a1, 36
+     c04:	010002        	l8ui	a0, a0, 1
+     c07:	090103        	lsi	f0, a1, 36
+     c0a:	010002        	l8ui	a0, a0, 1
+     c0d:	090103        	lsi	f0, a1, 36
+     c10:	010002        	l8ui	a0, a0, 1
+     c13:	090103        	lsi	f0, a1, 36
+     c16:	010002        	l8ui	a0, a0, 1
+     c19:	0209      	s32i.n	a0, a2, 0
+     c1b:	010000        	slli	a0, a0, 32
+     c1e:	050001        	l32r	a0, fffc2020 <_etext+0xbff41254>
+     c21:	0dac02        	movi	a0, 0xfffffc0d
+     c24:	4008      	l32i.n	a0, a0, 16
+     c26:	01c503        	ssip	f0, a5, 4
+     c29:	010301        	l32r	a0, fffc1038 <_etext+0xbff4026c>
+     c2c:	0309      	s32i.n	a0, a3, 0
+     c2e:	030100        	rsr.lend	a0
+     c31:	030901        	l32r	a0, fffc1858 <_etext+0xbff40a8c>
+     c34:	030100        	rsr.lend	a0
+     c37:	060901        	l32r	a0, fffc245c <_etext+0xbff41690>
+     c3a:	090100        	l32e	a0, a1, -64
+     c3d:	000004        	lsi	f0, a0, 0
+     c40:	830101        	l32r	a0, fffe1844 <_etext+0xbff60a78>
+     c43:	0008      	l32i.n	a0, a0, 0
+     c45:	000200        	lsi	f0, a2, 0
+     c48:	000022        	l8ui	a2, a0, 0
+     c4b:	010100        	slli	a0, a1, 32
+     c4e:	0efb      	addi.n	a0, a14, 15
+     c50:	000d      	mov.n	a0, a0
+     c52:	010101        	l32r	a0, fffc1058 <_etext+0xbff4028c>
+     c55:	000001        	l32r	a0, fffc0c58 <_etext+0xbff3fe8c>
+     c58:	000100        	lsi	f0, a1, 0
+     c5b:	620100        	lsi	f0, a1, 0x188
+     c5e:	6c6975        	call12	6d2f4 <init_data+0x6d2f4>
+     c61:	000064        	lsi	f6, a0, 0
+     c64:	4f          	.byte 0x4f
+     c65:	2e7475        	call12	2f3ac <init_data+0x2f3ac>
+     c68:	010053        	lsi	f5, a0, 4
+     c6b:	000000        	ill
+     c6e:	020500        	andb	b0, b5, b0
+     c71:	0968      	l32i.n	a6, a9, 0
+     c73:	4008      	l32i.n	a0, a0, 16
+     c75:	011903        	lsi	f0, a9, 4
+     c78:	090103        	lsi	f0, a1, 36
+     c7b:	010003        	lsi	f0, a0, 4
+     c7e:	090103        	lsi	f0, a1, 36
+     c81:	010003        	lsi	f0, a0, 4
+     c84:	090503        	lsi	f0, a5, 36
+     c87:	010006        	j	108b <init_data+0x108b>
+     c8a:	090103        	lsi	f0, a1, 36
+     c8d:	010003        	lsi	f0, a0, 4
+     c90:	090103        	lsi	f0, a1, 36
+     c93:	010003        	lsi	f0, a0, 4
+     c96:	090103        	lsi	f0, a1, 36
+     c99:	010003        	lsi	f0, a0, 4
+     c9c:	090103        	lsi	f0, a1, 36
+     c9f:	010002        	l8ui	a0, a0, 1
+     ca2:	090103        	lsi	f0, a1, 36
+     ca5:	010002        	l8ui	a0, a0, 1
+     ca8:	090103        	lsi	f0, a1, 36
+     cab:	010002        	l8ui	a0, a0, 1
+     cae:	090103        	lsi	f0, a1, 36
+     cb1:	010003        	lsi	f0, a0, 4
+     cb4:	090103        	lsi	f0, a1, 36
+     cb7:	010003        	lsi	f0, a0, 4
+     cba:	090103        	lsi	f0, a1, 36
+     cbd:	010003        	lsi	f0, a0, 4
+     cc0:	090103        	lsi	f0, a1, 36
+     cc3:	010002        	l8ui	a0, a0, 1
+     cc6:	090103        	lsi	f0, a1, 36
+     cc9:	010002        	l8ui	a0, a0, 1
+     ccc:	090803        	lsi	f0, a8, 36
+     ccf:	010004        	lsi	f0, a0, 4
+     cd2:	090103        	lsi	f0, a1, 36
+     cd5:	010003        	lsi	f0, a0, 4
+     cd8:	090203        	lsi	f0, a2, 36
+     cdb:	010003        	lsi	f0, a0, 4
+     cde:	090103        	lsi	f0, a1, 36
+     ce1:	010003        	lsi	f0, a0, 4
+     ce4:	090103        	lsi	f0, a1, 36
+     ce7:	010002        	l8ui	a0, a0, 1
+     cea:	090103        	lsi	f0, a1, 36
+     ced:	010002        	l8ui	a0, a0, 1
+     cf0:	090103        	lsi	f0, a1, 36
+     cf3:	010003        	lsi	f0, a0, 4
+     cf6:	090203        	lsi	f0, a2, 36
+     cf9:	010003        	lsi	f0, a0, 4
+     cfc:	090803        	lsi	f0, a8, 36
+     cff:	010005        	call0	1d00 <init_data+0x1d00>
+     d02:	090103        	lsi	f0, a1, 36
+     d05:	010003        	lsi	f0, a0, 4
+     d08:	090103        	lsi	f0, a1, 36
+     d0b:	010003        	lsi	f0, a0, 4
+     d0e:	090203        	lsi	f0, a2, 36
+     d11:	010003        	lsi	f0, a0, 4
+     d14:	090103        	lsi	f0, a1, 36
+     d17:	010003        	lsi	f0, a0, 4
+     d1a:	090103        	lsi	f0, a1, 36
+     d1d:	010002        	l8ui	a0, a0, 1
+     d20:	090103        	lsi	f0, a1, 36
+     d23:	010003        	lsi	f0, a0, 4
+     d26:	090103        	lsi	f0, a1, 36
+     d29:	010003        	lsi	f0, a0, 4
+     d2c:	090203        	lsi	f0, a2, 36
+     d2f:	0008      	l32i.n	a0, a0, 0
+     d31:	010301        	l32r	a0, fffc1140 <_etext+0xbff40374>
+     d34:	0309      	s32i.n	a0, a3, 0
+     d36:	030100        	rsr.lend	a0
+     d39:	030901        	l32r	a0, fffc1960 <_etext+0xbff40b94>
+     d3c:	030100        	rsr.lend	a0
+     d3f:	020901        	l32r	a0, fffc1564 <_etext+0xbff40798>
+     d42:	030100        	rsr.lend	a0
+     d45:	0908      	l32i.n	a0, a9, 0
+     d47:	010004        	lsi	f0, a0, 4
+     d4a:	090103        	lsi	f0, a1, 36
+     d4d:	010003        	lsi	f0, a0, 4
+     d50:	090103        	lsi	f0, a1, 36
+     d53:	010002        	l8ui	a0, a0, 1
+     d56:	090103        	lsi	f0, a1, 36
+     d59:	010002        	l8ui	a0, a0, 1
+     d5c:	090103        	lsi	f0, a1, 36
+     d5f:	010003        	lsi	f0, a0, 4
+     d62:	090103        	lsi	f0, a1, 36
+     d65:	010002        	l8ui	a0, a0, 1
+     d68:	090203        	lsi	f0, a2, 36
+     d6b:	010002        	l8ui	a0, a0, 1
+     d6e:	090103        	lsi	f0, a1, 36
+     d71:	010002        	l8ui	a0, a0, 1
+     d74:	090103        	lsi	f0, a1, 36
+     d77:	010002        	l8ui	a0, a0, 1
+     d7a:	090103        	lsi	f0, a1, 36
+     d7d:	010003        	lsi	f0, a0, 4
+     d80:	090103        	lsi	f0, a1, 36
+     d83:	010002        	l8ui	a0, a0, 1
+     d86:	090103        	lsi	f0, a1, 36
+     d89:	010002        	l8ui	a0, a0, 1
+     d8c:	090103        	lsi	f0, a1, 36
+     d8f:	010002        	l8ui	a0, a0, 1
+     d92:	090103        	lsi	f0, a1, 36
+     d95:	010003        	lsi	f0, a0, 4
+     d98:	090103        	lsi	f0, a1, 36
+     d9b:	010002        	l8ui	a0, a0, 1
+     d9e:	090203        	lsi	f0, a2, 36
+     da1:	010003        	lsi	f0, a0, 4
+     da4:	090103        	lsi	f0, a1, 36
+     da7:	010002        	l8ui	a0, a0, 1
+     daa:	090103        	lsi	f0, a1, 36
+     dad:	010002        	l8ui	a0, a0, 1
+     db0:	090103        	lsi	f0, a1, 36
+     db3:	010003        	lsi	f0, a0, 4
+     db6:	090103        	lsi	f0, a1, 36
+     db9:	010003        	lsi	f0, a0, 4
+     dbc:	090103        	lsi	f0, a1, 36
+     dbf:	010003        	lsi	f0, a0, 4
+     dc2:	090103        	lsi	f0, a1, 36
+     dc5:	010002        	l8ui	a0, a0, 1
+     dc8:	090103        	lsi	f0, a1, 36
+     dcb:	010002        	l8ui	a0, a0, 1
+     dce:	090103        	lsi	f0, a1, 36
+     dd1:	010002        	l8ui	a0, a0, 1
+     dd4:	090203        	lsi	f0, a2, 36
+     dd7:	010003        	lsi	f0, a0, 4
+     dda:	090803        	lsi	f0, a8, 36
+     ddd:	010003        	lsi	f0, a0, 4
+     de0:	090103        	lsi	f0, a1, 36
+     de3:	010003        	lsi	f0, a0, 4
+     de6:	090103        	lsi	f0, a1, 36
+     de9:	010002        	l8ui	a0, a0, 1
+     dec:	090103        	lsi	f0, a1, 36
+     def:	010002        	l8ui	a0, a0, 1
+     df2:	090103        	lsi	f0, a1, 36
+     df5:	010003        	lsi	f0, a0, 4
+     df8:	090103        	lsi	f0, a1, 36
+     dfb:	010002        	l8ui	a0, a0, 1
+     dfe:	090103        	lsi	f0, a1, 36
+     e01:	010002        	l8ui	a0, a0, 1
+     e04:	090103        	lsi	f0, a1, 36
+     e07:	010002        	l8ui	a0, a0, 1
+     e0a:	090103        	lsi	f0, a1, 36
+     e0d:	010002        	l8ui	a0, a0, 1
+     e10:	090103        	lsi	f0, a1, 36
+     e13:	010003        	lsi	f0, a0, 4
+     e16:	090103        	lsi	f0, a1, 36
+     e19:	010002        	l8ui	a0, a0, 1
+     e1c:	090103        	lsi	f0, a1, 36
+     e1f:	010003        	lsi	f0, a0, 4
+     e22:	090103        	lsi	f0, a1, 36
+     e25:	010002        	l8ui	a0, a0, 1
+     e28:	090103        	lsi	f0, a1, 36
+     e2b:	010002        	l8ui	a0, a0, 1
+     e2e:	090103        	lsi	f0, a1, 36
+     e31:	010002        	l8ui	a0, a0, 1
+     e34:	090103        	lsi	f0, a1, 36
+     e37:	010002        	l8ui	a0, a0, 1
+     e3a:	090203        	lsi	f0, a2, 36
+     e3d:	010006        	j	1241 <init_data+0x1241>
+     e40:	090103        	lsi	f0, a1, 36
+     e43:	010002        	l8ui	a0, a0, 1
+     e46:	090303        	lsi	f0, a3, 36
+     e49:	010003        	lsi	f0, a0, 4
+     e4c:	090103        	lsi	f0, a1, 36
+     e4f:	010002        	l8ui	a0, a0, 1
+     e52:	090103        	lsi	f0, a1, 36
+     e55:	010002        	l8ui	a0, a0, 1
+     e58:	090103        	lsi	f0, a1, 36
+     e5b:	010002        	l8ui	a0, a0, 1
+     e5e:	090103        	lsi	f0, a1, 36
+     e61:	010002        	l8ui	a0, a0, 1
+     e64:	090103        	lsi	f0, a1, 36
+     e67:	010003        	lsi	f0, a0, 4
+     e6a:	090103        	lsi	f0, a1, 36
+     e6d:	010003        	lsi	f0, a0, 4
+     e70:	090103        	lsi	f0, a1, 36
+     e73:	010003        	lsi	f0, a0, 4
+     e76:	090103        	lsi	f0, a1, 36
+     e79:	010002        	l8ui	a0, a0, 1
+     e7c:	090103        	lsi	f0, a1, 36
+     e7f:	010002        	l8ui	a0, a0, 1
+     e82:	090103        	lsi	f0, a1, 36
+     e85:	010003        	lsi	f0, a0, 4
+     e88:	090103        	lsi	f0, a1, 36
+     e8b:	010002        	l8ui	a0, a0, 1
+     e8e:	090103        	lsi	f0, a1, 36
+     e91:	010002        	l8ui	a0, a0, 1
+     e94:	090103        	lsi	f0, a1, 36
+     e97:	010002        	l8ui	a0, a0, 1
+     e9a:	090103        	lsi	f0, a1, 36
+     e9d:	010002        	l8ui	a0, a0, 1
+     ea0:	090103        	lsi	f0, a1, 36
+     ea3:	010002        	l8ui	a0, a0, 1
+     ea6:	090103        	lsi	f0, a1, 36
+     ea9:	010002        	l8ui	a0, a0, 1
+     eac:	090203        	lsi	f0, a2, 36
+     eaf:	010003        	lsi	f0, a0, 4
+     eb2:	090103        	lsi	f0, a1, 36
+     eb5:	010002        	l8ui	a0, a0, 1
+     eb8:	090103        	lsi	f0, a1, 36
+     ebb:	010002        	l8ui	a0, a0, 1
+     ebe:	090103        	lsi	f0, a1, 36
+     ec1:	010003        	lsi	f0, a0, 4
+     ec4:	090103        	lsi	f0, a1, 36
+     ec7:	010002        	l8ui	a0, a0, 1
+     eca:	090103        	lsi	f0, a1, 36
+     ecd:	010003        	lsi	f0, a0, 4
+     ed0:	090103        	lsi	f0, a1, 36
+     ed3:	010002        	l8ui	a0, a0, 1
+     ed6:	090103        	lsi	f0, a1, 36
+     ed9:	010002        	l8ui	a0, a0, 1
+     edc:	090103        	lsi	f0, a1, 36
+     edf:	010002        	l8ui	a0, a0, 1
+     ee2:	090203        	lsi	f0, a2, 36
+     ee5:	010006        	j	12e9 <init_data+0x12e9>
+     ee8:	090103        	lsi	f0, a1, 36
+     eeb:	010002        	l8ui	a0, a0, 1
+     eee:	090103        	lsi	f0, a1, 36
+     ef1:	010002        	l8ui	a0, a0, 1
+     ef4:	090103        	lsi	f0, a1, 36
+     ef7:	010003        	lsi	f0, a0, 4
+     efa:	090103        	lsi	f0, a1, 36
+     efd:	010002        	l8ui	a0, a0, 1
+     f00:	090303        	lsi	f0, a3, 36
+     f03:	010003        	lsi	f0, a0, 4
+     f06:	090103        	lsi	f0, a1, 36
+     f09:	010002        	l8ui	a0, a0, 1
+     f0c:	090103        	lsi	f0, a1, 36
+     f0f:	010002        	l8ui	a0, a0, 1
+     f12:	090103        	lsi	f0, a1, 36
+     f15:	010002        	l8ui	a0, a0, 1
+     f18:	090103        	lsi	f0, a1, 36
+     f1b:	010002        	l8ui	a0, a0, 1
+     f1e:	090103        	lsi	f0, a1, 36
+     f21:	010002        	l8ui	a0, a0, 1
+     f24:	090103        	lsi	f0, a1, 36
+     f27:	010003        	lsi	f0, a0, 4
+     f2a:	090103        	lsi	f0, a1, 36
+     f2d:	010003        	lsi	f0, a0, 4
+     f30:	090103        	lsi	f0, a1, 36
+     f33:	010002        	l8ui	a0, a0, 1
+     f36:	090103        	lsi	f0, a1, 36
+     f39:	010002        	l8ui	a0, a0, 1
+     f3c:	090103        	lsi	f0, a1, 36
+     f3f:	010003        	lsi	f0, a0, 4
+     f42:	090803        	lsi	f0, a8, 36
+     f45:	010005        	call0	1f48 <init_data+0x1f48>
+     f48:	090103        	lsi	f0, a1, 36
+     f4b:	010003        	lsi	f0, a0, 4
+     f4e:	090103        	lsi	f0, a1, 36
+     f51:	010002        	l8ui	a0, a0, 1
+     f54:	090103        	lsi	f0, a1, 36
+     f57:	010002        	l8ui	a0, a0, 1
+     f5a:	090103        	lsi	f0, a1, 36
+     f5d:	010003        	lsi	f0, a0, 4
+     f60:	090103        	lsi	f0, a1, 36
+     f63:	010002        	l8ui	a0, a0, 1
+     f66:	090203        	lsi	f0, a2, 36
+     f69:	010002        	l8ui	a0, a0, 1
+     f6c:	090103        	lsi	f0, a1, 36
+     f6f:	010002        	l8ui	a0, a0, 1
+     f72:	090103        	lsi	f0, a1, 36
+     f75:	010002        	l8ui	a0, a0, 1
+     f78:	090103        	lsi	f0, a1, 36
+     f7b:	010003        	lsi	f0, a0, 4
+     f7e:	090103        	lsi	f0, a1, 36
+     f81:	010002        	l8ui	a0, a0, 1
+     f84:	090103        	lsi	f0, a1, 36
+     f87:	010002        	l8ui	a0, a0, 1
+     f8a:	090103        	lsi	f0, a1, 36
+     f8d:	010002        	l8ui	a0, a0, 1
+     f90:	090103        	lsi	f0, a1, 36
+     f93:	010003        	lsi	f0, a0, 4
+     f96:	090103        	lsi	f0, a1, 36
+     f99:	010002        	l8ui	a0, a0, 1
+     f9c:	090103        	lsi	f0, a1, 36
+     f9f:	010002        	l8ui	a0, a0, 1
+     fa2:	090103        	lsi	f0, a1, 36
+     fa5:	010002        	l8ui	a0, a0, 1
+     fa8:	090103        	lsi	f0, a1, 36
+     fab:	010003        	lsi	f0, a0, 4
+     fae:	090103        	lsi	f0, a1, 36
+     fb1:	010003        	lsi	f0, a0, 4
+     fb4:	090203        	lsi	f0, a2, 36
+     fb7:	010006        	j	13bb <init_data+0x13bb>
+     fba:	090103        	lsi	f0, a1, 36
+     fbd:	010002        	l8ui	a0, a0, 1
+     fc0:	090103        	lsi	f0, a1, 36
+     fc3:	010002        	l8ui	a0, a0, 1
+     fc6:	090103        	lsi	f0, a1, 36
+     fc9:	010002        	l8ui	a0, a0, 1
+     fcc:	090103        	lsi	f0, a1, 36
+     fcf:	010003        	lsi	f0, a0, 4
+     fd2:	090203        	lsi	f0, a2, 36
+     fd5:	010003        	lsi	f0, a0, 4
+     fd8:	090103        	lsi	f0, a1, 36
+     fdb:	010002        	l8ui	a0, a0, 1
+     fde:	090103        	lsi	f0, a1, 36
+     fe1:	010003        	lsi	f0, a0, 4
+     fe4:	090103        	lsi	f0, a1, 36
+     fe7:	010002        	l8ui	a0, a0, 1
+     fea:	090103        	lsi	f0, a1, 36
+     fed:	010002        	l8ui	a0, a0, 1
+     ff0:	090103        	lsi	f0, a1, 36
+     ff3:	010002        	l8ui	a0, a0, 1
+     ff6:	090103        	lsi	f0, a1, 36
+     ff9:	010002        	l8ui	a0, a0, 1
+     ffc:	090103        	lsi	f0, a1, 36
+     fff:	010002        	l8ui	a0, a0, 1
+    1002:	090103        	lsi	f0, a1, 36
+    1005:	010002        	l8ui	a0, a0, 1
+    1008:	090203        	lsi	f0, a2, 36
+    100b:	010003        	lsi	f0, a0, 4
+    100e:	090103        	lsi	f0, a1, 36
+    1011:	010002        	l8ui	a0, a0, 1
+    1014:	090103        	lsi	f0, a1, 36
+    1017:	010002        	l8ui	a0, a0, 1
+    101a:	090103        	lsi	f0, a1, 36
+    101d:	010003        	lsi	f0, a0, 4
+    1020:	090103        	lsi	f0, a1, 36
+    1023:	010002        	l8ui	a0, a0, 1
+    1026:	090103        	lsi	f0, a1, 36
+    1029:	010003        	lsi	f0, a0, 4
+    102c:	090103        	lsi	f0, a1, 36
+    102f:	010002        	l8ui	a0, a0, 1
+    1032:	090103        	lsi	f0, a1, 36
+    1035:	010002        	l8ui	a0, a0, 1
+    1038:	090103        	lsi	f0, a1, 36
+    103b:	010002        	l8ui	a0, a0, 1
+    103e:	090303        	lsi	f0, a3, 36
+    1041:	010006        	j	1445 <init_data+0x1445>
+    1044:	090103        	lsi	f0, a1, 36
+    1047:	010002        	l8ui	a0, a0, 1
+    104a:	090103        	lsi	f0, a1, 36
+    104d:	010002        	l8ui	a0, a0, 1
+    1050:	090103        	lsi	f0, a1, 36
+    1053:	010002        	l8ui	a0, a0, 1
+    1056:	090103        	lsi	f0, a1, 36
+    1059:	010002        	l8ui	a0, a0, 1
+    105c:	090103        	lsi	f0, a1, 36
+    105f:	010002        	l8ui	a0, a0, 1
+    1062:	090103        	lsi	f0, a1, 36
+    1065:	010003        	lsi	f0, a0, 4
+    1068:	090103        	lsi	f0, a1, 36
+    106b:	010003        	lsi	f0, a0, 4
+    106e:	090103        	lsi	f0, a1, 36
+    1071:	010002        	l8ui	a0, a0, 1
+    1074:	090103        	lsi	f0, a1, 36
+    1077:	010002        	l8ui	a0, a0, 1
+    107a:	090103        	lsi	f0, a1, 36
+    107d:	010003        	lsi	f0, a0, 4
+    1080:	090503        	lsi	f0, a5, 36
+    1083:	000d      	mov.n	a0, a0
+    1085:	010301        	l32r	a0, fffc1494 <_etext+0xbff406c8>
+    1088:	0309      	s32i.n	a0, a3, 0
+    108a:	030100        	rsr.lend	a0
+    108d:	020901        	l32r	a0, fffc18b4 <_etext+0xbff40ae8>
+    1090:	030100        	rsr.lend	a0
+    1093:	030901        	l32r	a0, fffc1cb8 <_etext+0xbff40eec>
+    1096:	030100        	rsr.lend	a0
+    1099:	030901        	l32r	a0, fffc1cc0 <_etext+0xbff40ef4>
+    109c:	030100        	rsr.lend	a0
+    109f:	020901        	l32r	a0, fffc18c4 <_etext+0xbff40af8>
+    10a2:	030100        	rsr.lend	a0
+    10a5:	030901        	l32r	a0, fffc1ccc <_etext+0xbff40f00>
+    10a8:	030100        	rsr.lend	a0
+    10ab:	020902        	l8ui	a0, a9, 2
+    10ae:	030100        	rsr.lend	a0
+    10b1:	020901        	l32r	a0, fffc18d8 <_etext+0xbff40b0c>
+    10b4:	030100        	rsr.lend	a0
+    10b7:	020901        	l32r	a0, fffc18dc <_etext+0xbff40b10>
+    10ba:	030100        	rsr.lend	a0
+    10bd:	030901        	l32r	a0, fffc1ce4 <_etext+0xbff40f18>
+    10c0:	030100        	rsr.lend	a0
+    10c3:	020901        	l32r	a0, fffc18e8 <_etext+0xbff40b1c>
+    10c6:	030100        	rsr.lend	a0
+    10c9:	020901        	l32r	a0, fffc18f0 <_etext+0xbff40b24>
+    10cc:	030100        	rsr.lend	a0
+    10cf:	030901        	l32r	a0, fffc1cf4 <_etext+0xbff40f28>
+    10d2:	030100        	rsr.lend	a0
+    10d5:	020901        	l32r	a0, fffc18fc <_etext+0xbff40b30>
+    10d8:	030100        	rsr.lend	a0
+    10db:	020901        	l32r	a0, fffc1900 <_etext+0xbff40b34>
+    10de:	030100        	rsr.lend	a0
+    10e1:	020901        	l32r	a0, fffc1908 <_etext+0xbff40b3c>
+    10e4:	030100        	rsr.lend	a0
+    10e7:	030901        	l32r	a0, fffc1d0c <_etext+0xbff40f40>
+    10ea:	030100        	rsr.lend	a0
+    10ed:	030901        	l32r	a0, fffc1d14 <_etext+0xbff40f48>
+    10f0:	030100        	rsr.lend	a0
+    10f3:	030901        	l32r	a0, fffc1d18 <_etext+0xbff40f4c>
+    10f6:	030100        	rsr.lend	a0
+    10f9:	030901        	l32r	a0, fffc1d20 <_etext+0xbff40f54>
+    10fc:	030100        	rsr.lend	a0
+    10ff:	020902        	l8ui	a0, a9, 2
+    1102:	030100        	rsr.lend	a0
+    1105:	020901        	l32r	a0, fffc192c <_etext+0xbff40b60>
+    1108:	030100        	rsr.lend	a0
+    110b:	020901        	l32r	a0, fffc1930 <_etext+0xbff40b64>
+    110e:	030100        	rsr.lend	a0
+    1111:	030901        	l32r	a0, fffc1d38 <_etext+0xbff40f6c>
+    1114:	030100        	rsr.lend	a0
+    1117:	030901        	l32r	a0, fffc1d3c <_etext+0xbff40f70>
+    111a:	030100        	rsr.lend	a0
+    111d:	030901        	l32r	a0, fffc1d44 <_etext+0xbff40f78>
+    1120:	030100        	rsr.lend	a0
+    1123:	030901        	l32r	a0, fffc1d48 <_etext+0xbff40f7c>
+    1126:	030100        	rsr.lend	a0
+    1129:	020901        	l32r	a0, fffc1950 <_etext+0xbff40b84>
+    112c:	030100        	rsr.lend	a0
+    112f:	020901        	l32r	a0, fffc1954 <_etext+0xbff40b88>
+    1132:	030100        	rsr.lend	a0
+    1135:	030901        	l32r	a0, fffc1d5c <_etext+0xbff40f90>
+    1138:	030100        	rsr.lend	a0
+    113b:	020901        	l32r	a0, fffc1960 <_etext+0xbff40b94>
+    113e:	030100        	rsr.lend	a0
+    1141:	030902        	l8ui	a0, a9, 3
+    1144:	030100        	rsr.lend	a0
+    1147:	020901        	l32r	a0, fffc196c <_etext+0xbff40ba0>
+    114a:	030100        	rsr.lend	a0
+    114d:	0908      	l32i.n	a0, a9, 0
+    114f:	010006        	j	1553 <init_data+0x1553>
+    1152:	090103        	lsi	f0, a1, 36
+    1155:	010003        	lsi	f0, a0, 4
+    1158:	090103        	lsi	f0, a1, 36
+    115b:	010002        	l8ui	a0, a0, 1
+    115e:	090103        	lsi	f0, a1, 36
+    1161:	010002        	l8ui	a0, a0, 1
+    1164:	090103        	lsi	f0, a1, 36
+    1167:	010002        	l8ui	a0, a0, 1
+    116a:	090103        	lsi	f0, a1, 36
+    116d:	010003        	lsi	f0, a0, 4
+    1170:	090103        	lsi	f0, a1, 36
+    1173:	010002        	l8ui	a0, a0, 1
+    1176:	090103        	lsi	f0, a1, 36
+    1179:	010002        	l8ui	a0, a0, 1
+    117c:	090103        	lsi	f0, a1, 36
+    117f:	010003        	lsi	f0, a0, 4
+    1182:	090103        	lsi	f0, a1, 36
+    1185:	010003        	lsi	f0, a0, 4
+    1188:	090103        	lsi	f0, a1, 36
+    118b:	010003        	lsi	f0, a0, 4
+    118e:	090103        	lsi	f0, a1, 36
+    1191:	010003        	lsi	f0, a0, 4
+    1194:	090203        	lsi	f0, a2, 36
+    1197:	010003        	lsi	f0, a0, 4
+    119a:	090103        	lsi	f0, a1, 36
+    119d:	010002        	l8ui	a0, a0, 1
+    11a0:	090103        	lsi	f0, a1, 36
+    11a3:	010002        	l8ui	a0, a0, 1
+    11a6:	090103        	lsi	f0, a1, 36
+    11a9:	010003        	lsi	f0, a0, 4
+    11ac:	090103        	lsi	f0, a1, 36
+    11af:	010002        	l8ui	a0, a0, 1
+    11b2:	090103        	lsi	f0, a1, 36
+    11b5:	010003        	lsi	f0, a0, 4
+    11b8:	090103        	lsi	f0, a1, 36
+    11bb:	010003        	lsi	f0, a0, 4
+    11be:	090103        	lsi	f0, a1, 36
+    11c1:	010003        	lsi	f0, a0, 4
+    11c4:	090103        	lsi	f0, a1, 36
+    11c7:	010002        	l8ui	a0, a0, 1
+    11ca:	090103        	lsi	f0, a1, 36
+    11cd:	010002        	l8ui	a0, a0, 1
+    11d0:	090103        	lsi	f0, a1, 36
+    11d3:	010003        	lsi	f0, a0, 4
+    11d6:	090203        	lsi	f0, a2, 36
+    11d9:	0008      	l32i.n	a0, a0, 0
+    11db:	010301        	l32r	a0, fffc15e8 <_etext+0xbff4081c>
+    11de:	0209      	s32i.n	a0, a2, 0
+    11e0:	030100        	rsr.lend	a0
+    11e3:	030902        	l8ui	a0, a9, 3
+    11e6:	030100        	rsr.lend	a0
+    11e9:	020901        	l32r	a0, fffc1a10 <_etext+0xbff40c44>
+    11ec:	030100        	rsr.lend	a0
+    11ef:	020901        	l32r	a0, fffc1a14 <_etext+0xbff40c48>
+    11f2:	030100        	rsr.lend	a0
+    11f5:	030901        	l32r	a0, fffc1e1c <_etext+0xbff41050>
+    11f8:	030100        	rsr.lend	a0
+    11fb:	020901        	l32r	a0, fffc1a20 <_etext+0xbff40c54>
+    11fe:	030100        	rsr.lend	a0
+    1201:	020902        	l8ui	a0, a9, 2
+    1204:	030100        	rsr.lend	a0
+    1207:	020901        	l32r	a0, fffc1a2c <_etext+0xbff40c60>
+    120a:	030100        	rsr.lend	a0
+    120d:	030901        	l32r	a0, fffc1e34 <_etext+0xbff41068>
+    1210:	030100        	rsr.lend	a0
+    1213:	020901        	l32r	a0, fffc1a38 <_etext+0xbff40c6c>
+    1216:	030100        	rsr.lend	a0
+    1219:	020901        	l32r	a0, fffc1a40 <_etext+0xbff40c74>
+    121c:	030100        	rsr.lend	a0
+    121f:	030901        	l32r	a0, fffc1e44 <_etext+0xbff41078>
+    1222:	030100        	rsr.lend	a0
+    1225:	030901        	l32r	a0, fffc1e4c <_etext+0xbff41080>
+    1228:	030100        	rsr.lend	a0
+    122b:	030901        	l32r	a0, fffc1e50 <_etext+0xbff41084>
+    122e:	030100        	rsr.lend	a0
+    1231:	030901        	l32r	a0, fffc1e58 <_etext+0xbff4108c>
+    1234:	030100        	rsr.lend	a0
+    1237:	020901        	l32r	a0, fffc1a5c <_etext+0xbff40c90>
+    123a:	030100        	rsr.lend	a0
+    123d:	020901        	l32r	a0, fffc1a64 <_etext+0xbff40c98>
+    1240:	030100        	rsr.lend	a0
+    1243:	030901        	l32r	a0, fffc1e68 <_etext+0xbff4109c>
+    1246:	030100        	rsr.lend	a0
+    1249:	030901        	l32r	a0, fffc1e70 <_etext+0xbff410a4>
+    124c:	030100        	rsr.lend	a0
+    124f:	030901        	l32r	a0, fffc1e74 <_etext+0xbff410a8>
+    1252:	030100        	rsr.lend	a0
+    1255:	030901        	l32r	a0, fffc1e7c <_etext+0xbff410b0>
+    1258:	030100        	rsr.lend	a0
+    125b:	030901        	l32r	a0, fffc1e80 <_etext+0xbff410b4>
+    125e:	030100        	rsr.lend	a0
+    1261:	030901        	l32r	a0, fffc1e88 <_etext+0xbff410bc>
+    1264:	030100        	rsr.lend	a0
+    1267:	030901        	l32r	a0, fffc1e8c <_etext+0xbff410c0>
+    126a:	030100        	rsr.lend	a0
+    126d:	020901        	l32r	a0, fffc1a94 <_etext+0xbff40cc8>
+    1270:	030100        	rsr.lend	a0
+    1273:	020901        	l32r	a0, fffc1a98 <_etext+0xbff40ccc>
+    1276:	030100        	rsr.lend	a0
+    1279:	020902        	l8ui	a0, a9, 2
+    127c:	030100        	rsr.lend	a0
+    127f:	020901        	l32r	a0, fffc1aa4 <_etext+0xbff40cd8>
+    1282:	030100        	rsr.lend	a0
+    1285:	020901        	l32r	a0, fffc1aac <_etext+0xbff40ce0>
+    1288:	030100        	rsr.lend	a0
+    128b:	020901        	l32r	a0, fffc1ab0 <_etext+0xbff40ce4>
+    128e:	030100        	rsr.lend	a0
+    1291:	020901        	l32r	a0, fffc1ab8 <_etext+0xbff40cec>
+    1294:	030100        	rsr.lend	a0
+    1297:	030901        	l32r	a0, fffc1ebc <_etext+0xbff410f0>
+    129a:	030100        	rsr.lend	a0
+    129d:	030901        	l32r	a0, fffc1ec4 <_etext+0xbff410f8>
+    12a0:	030100        	rsr.lend	a0
+    12a3:	030901        	l32r	a0, fffc1ec8 <_etext+0xbff410fc>
+    12a6:	030100        	rsr.lend	a0
+    12a9:	020901        	l32r	a0, fffc1ad0 <_etext+0xbff40d04>
+    12ac:	030100        	rsr.lend	a0
+    12af:	020901        	l32r	a0, fffc1ad4 <_etext+0xbff40d08>
+    12b2:	030100        	rsr.lend	a0
+    12b5:	030901        	l32r	a0, fffc1edc <_etext+0xbff41110>
+    12b8:	030100        	rsr.lend	a0
+    12bb:	020901        	l32r	a0, fffc1ae0 <_etext+0xbff40d14>
+    12be:	030100        	rsr.lend	a0
+    12c1:	020901        	l32r	a0, fffc1ae8 <_etext+0xbff40d1c>
+    12c4:	030100        	rsr.lend	a0
+    12c7:	020901        	l32r	a0, fffc1aec <_etext+0xbff40d20>
+    12ca:	030100        	rsr.lend	a0
+    12cd:	020901        	l32r	a0, fffc1af4 <_etext+0xbff40d28>
+    12d0:	030100        	rsr.lend	a0
+    12d3:	020901        	l32r	a0, fffc1af8 <_etext+0xbff40d2c>
+    12d6:	030100        	rsr.lend	a0
+    12d9:	020901        	l32r	a0, fffc1b00 <_etext+0xbff40d34>
+    12dc:	030100        	rsr.lend	a0
+    12df:	030901        	l32r	a0, fffc1f04 <_etext+0xbff41138>
+    12e2:	030100        	rsr.lend	a0
+    12e5:	020901        	l32r	a0, fffc1b0c <_etext+0xbff40d40>
+    12e8:	030100        	rsr.lend	a0
+    12eb:	030902        	l8ui	a0, a9, 3
+    12ee:	030100        	rsr.lend	a0
+    12f1:	020901        	l32r	a0, fffc1b18 <_etext+0xbff40d4c>
+    12f4:	030100        	rsr.lend	a0
+    12f7:	020901        	l32r	a0, fffc1b1c <_etext+0xbff40d50>
+    12fa:	030100        	rsr.lend	a0
+    12fd:	020901        	l32r	a0, fffc1b24 <_etext+0xbff40d58>
+    1300:	030100        	rsr.lend	a0
+    1303:	030901        	l32r	a0, fffc1f28 <_etext+0xbff4115c>
+    1306:	030100        	rsr.lend	a0
+    1309:	020901        	l32r	a0, fffc1b30 <_etext+0xbff40d64>
+    130c:	030100        	rsr.lend	a0
+    130f:	030901        	l32r	a0, fffc1f34 <_etext+0xbff41168>
+    1312:	030100        	rsr.lend	a0
+    1315:	020901        	l32r	a0, fffc1b3c <_etext+0xbff40d70>
+    1318:	030100        	rsr.lend	a0
+    131b:	020901        	l32r	a0, fffc1b40 <_etext+0xbff40d74>
+    131e:	030100        	rsr.lend	a0
+    1321:	020901        	l32r	a0, fffc1b48 <_etext+0xbff40d7c>
+    1324:	030100        	rsr.lend	a0
+    1327:	040902        	l8ui	a0, a9, 4
+    132a:	030100        	rsr.lend	a0
+    132d:	030901        	l32r	a0, fffc1f54 <_etext+0xbff41188>
+    1330:	030100        	rsr.lend	a0
+    1333:	020901        	l32r	a0, fffc1b58 <_etext+0xbff40d8c>
+    1336:	030100        	rsr.lend	a0
+    1339:	020901        	l32r	a0, fffc1b60 <_etext+0xbff40d94>
+    133c:	030100        	rsr.lend	a0
+    133f:	030901        	l32r	a0, fffc1f64 <_etext+0xbff41198>
+    1342:	030100        	rsr.lend	a0
+    1345:	020901        	l32r	a0, fffc1b6c <_etext+0xbff40da0>
+    1348:	030100        	rsr.lend	a0
+    134b:	020901        	l32r	a0, fffc1b70 <_etext+0xbff40da4>
+    134e:	030100        	rsr.lend	a0
+    1351:	020901        	l32r	a0, fffc1b78 <_etext+0xbff40dac>
+    1354:	030100        	rsr.lend	a0
+    1357:	040902        	l8ui	a0, a9, 4
+    135a:	030100        	rsr.lend	a0
+    135d:	020901        	l32r	a0, fffc1b84 <_etext+0xbff40db8>
+    1360:	030100        	rsr.lend	a0
+    1363:	030903        	lsi	f0, a9, 12
+    1366:	030100        	rsr.lend	a0
+    1369:	020901        	l32r	a0, fffc1b90 <_etext+0xbff40dc4>
+    136c:	030100        	rsr.lend	a0
+    136f:	020901        	l32r	a0, fffc1b94 <_etext+0xbff40dc8>
+    1372:	030100        	rsr.lend	a0
+    1375:	030901        	l32r	a0, fffc1f9c <_etext+0xbff411d0>
+    1378:	030100        	rsr.lend	a0
+    137b:	020901        	l32r	a0, fffc1ba0 <_etext+0xbff40dd4>
+    137e:	030100        	rsr.lend	a0
+    1381:	020901        	l32r	a0, fffc1ba8 <_etext+0xbff40ddc>
+    1384:	030100        	rsr.lend	a0
+    1387:	020901        	l32r	a0, fffc1bac <_etext+0xbff40de0>
+    138a:	030100        	rsr.lend	a0
+    138d:	020901        	l32r	a0, fffc1bb4 <_etext+0xbff40de8>
+    1390:	030100        	rsr.lend	a0
+    1393:	020901        	l32r	a0, fffc1bb8 <_etext+0xbff40dec>
+    1396:	030100        	rsr.lend	a0
+    1399:	030901        	l32r	a0, fffc1fc0 <_etext+0xbff411f4>
+    139c:	030100        	rsr.lend	a0
+    139f:	030901        	l32r	a0, fffc1fc4 <_etext+0xbff411f8>
+    13a2:	030100        	rsr.lend	a0
+    13a5:	040902        	l8ui	a0, a9, 4
+    13a8:	030100        	rsr.lend	a0
+    13ab:	020901        	l32r	a0, fffc1bd0 <_etext+0xbff40e04>
+    13ae:	030100        	rsr.lend	a0
+    13b1:	030902        	l8ui	a0, a9, 3
+    13b4:	030100        	rsr.lend	a0
+    13b7:	020901        	l32r	a0, fffc1bdc <_etext+0xbff40e10>
+    13ba:	030100        	rsr.lend	a0
+    13bd:	020901        	l32r	a0, fffc1be4 <_etext+0xbff40e18>
+    13c0:	030100        	rsr.lend	a0
+    13c3:	030901        	l32r	a0, fffc1fe8 <_etext+0xbff4121c>
+    13c6:	030100        	rsr.lend	a0
+    13c9:	020901        	l32r	a0, fffc1bf0 <_etext+0xbff40e24>
+    13cc:	030100        	rsr.lend	a0
+    13cf:	020901        	l32r	a0, fffc1bf4 <_etext+0xbff40e28>
+    13d2:	030100        	rsr.lend	a0
+    13d5:	020901        	l32r	a0, fffc1bfc <_etext+0xbff40e30>
+    13d8:	030100        	rsr.lend	a0
+    13db:	030901        	l32r	a0, fffc2000 <_etext+0xbff41234>
+    13de:	030100        	rsr.lend	a0
+    13e1:	030901        	l32r	a0, fffc2008 <_etext+0xbff4123c>
+    13e4:	030100        	rsr.lend	a0
+    13e7:	040903        	lsi	f0, a9, 16
+    13ea:	030100        	rsr.lend	a0
+    13ed:	020901        	l32r	a0, fffc1c14 <_etext+0xbff40e48>
+    13f0:	030100        	rsr.lend	a0
+    13f3:	020901        	l32r	a0, fffc1c18 <_etext+0xbff40e4c>
+    13f6:	030100        	rsr.lend	a0
+    13f9:	030901        	l32r	a0, fffc2020 <_etext+0xbff41254>
+    13fc:	030100        	rsr.lend	a0
+    13ff:	020901        	l32r	a0, fffc1c24 <_etext+0xbff40e58>
+    1402:	030100        	rsr.lend	a0
+    1405:	020901        	l32r	a0, fffc1c2c <_etext+0xbff40e60>
+    1408:	030100        	rsr.lend	a0
+    140b:	020901        	l32r	a0, fffc1c30 <_etext+0xbff40e64>
+    140e:	030100        	rsr.lend	a0
+    1411:	020901        	l32r	a0, fffc1c38 <_etext+0xbff40e6c>
+    1414:	030100        	rsr.lend	a0
+    1417:	030901        	l32r	a0, fffc203c <_etext+0xbff41270>
+    141a:	030100        	rsr.lend	a0
+    141d:	030901        	l32r	a0, fffc2044 <_etext+0xbff41278>
+    1420:	030100        	rsr.lend	a0
+    1423:	030901        	l32r	a0, fffc2048 <_etext+0xbff4127c>
+    1426:	030100        	rsr.lend	a0
+    1429:	030903        	lsi	f0, a9, 12
+    142c:	030100        	rsr.lend	a0
+    142f:	0908      	l32i.n	a0, a9, 0
+    1431:	010005        	call0	2434 <init_data+0x2434>
+    1434:	090103        	lsi	f0, a1, 36
+    1437:	010003        	lsi	f0, a0, 4
+    143a:	090103        	lsi	f0, a1, 36
+    143d:	010003        	lsi	f0, a0, 4
+    1440:	090103        	lsi	f0, a1, 36
+    1443:	010003        	lsi	f0, a0, 4
+    1446:	090103        	lsi	f0, a1, 36
+    1449:	010003        	lsi	f0, a0, 4
+    144c:	090103        	lsi	f0, a1, 36
+    144f:	010002        	l8ui	a0, a0, 1
+    1452:	090103        	lsi	f0, a1, 36
+    1455:	010003        	lsi	f0, a0, 4
+    1458:	090803        	lsi	f0, a8, 36
+    145b:	010007        	bnone	a0, a0, 1460 <init_data+0x1460>
+    145e:	090103        	lsi	f0, a1, 36
+    1461:	010003        	lsi	f0, a0, 4
+    1464:	090103        	lsi	f0, a1, 36
+    1467:	010002        	l8ui	a0, a0, 1
+    146a:	090103        	lsi	f0, a1, 36
+    146d:	010003        	lsi	f0, a0, 4
+    1470:	090103        	lsi	f0, a1, 36
+    1473:	010003        	lsi	f0, a0, 4
+    1476:	090103        	lsi	f0, a1, 36
+    1479:	010002        	l8ui	a0, a0, 1
+    147c:	090103        	lsi	f0, a1, 36
+    147f:	010002        	l8ui	a0, a0, 1
+    1482:	090803        	lsi	f0, a8, 36
+    1485:	010005        	call0	2488 <init_data+0x2488>
+    1488:	090103        	lsi	f0, a1, 36
+    148b:	010003        	lsi	f0, a0, 4
+    148e:	090103        	lsi	f0, a1, 36
+    1491:	010003        	lsi	f0, a0, 4
+    1494:	090103        	lsi	f0, a1, 36
+    1497:	010003        	lsi	f0, a0, 4
+    149a:	090103        	lsi	f0, a1, 36
+    149d:	010003        	lsi	f0, a0, 4
+    14a0:	0409      	s32i.n	a0, a4, 0
+    14a2:	010000        	slli	a0, a0, 32
+    14a5:	050001        	l32r	a0, fffc28a8 <_etext+0xbff41adc>
+    14a8:	0dbc02        	l32ai	a0, a12, 52
+    14ab:	4008      	l32i.n	a0, a0, 16
+    14ad:	03eb03        	lsi	f0, a11, 12
+    14b0:	010301        	l32r	a0, fffc18bc <_etext+0xbff40af0>
+    14b3:	0309      	s32i.n	a0, a3, 0
+    14b5:	030100        	rsr.lend	a0
+    14b8:	030901        	l32r	a0, fffc20dc <_etext+0xbff41310>
+    14bb:	030100        	rsr.lend	a0
+    14be:	060901        	l32r	a0, fffc2ce4 <_etext+0xbff41f18>
+    14c1:	090100        	l32e	a0, a1, -64
+    14c4:	000004        	lsi	f0, a0, 0
+    14c7:	01          	.byte 0x1
+    14c8:	01          	.byte 0x1
+
+Disassembly of section .debug_info:
+
+00000000 <.debug_info>:
+   0:	000022        	l8ui	a2, a0, 0
+   3:	000200        	lsi	f0, a2, 0
+   6:	000000        	ill
+   9:	010400        	slli	a0, a4, 32
+   c:	000000        	ill
+   f:	041000        	extui	a1, a0, 0, 1
+  12:	4008      	l32i.n	a0, a0, 16
+  14:	04bc      	beqz.n	a4, 48 <init_data+0x48>
+  16:	4008      	l32i.n	a0, a0, 16
+  18:	000000        	ill
+  1b:	000c00        	lsi	f0, a12, 0
+  1e:	400000        	ssr	a0
+  21:	000000        	ill
+  24:	1e8001        	l32r	a0, fffc7a24 <_etext+0xbff46c58>
+  27:	000000        	ill
+  2a:	140002        	l8ui	a0, a0, 20
+  2d:	000000        	ill
+  30:	380104        	mula.ad.ll	a1, m2
+  33:	000001        	l32r	a0, fffc0034 <_etext+0xbff3f268>
+  36:	000000        	ill
+  39:	004e00        	break	14, 0
+  3c:	0c0000        	lsi	f0, a0, 48
+  3f:	000000        	ill
+  42:	000040        	lsi	f4, a0, 0
+  45:	800100        	add	a0, a1, a0
+  48:	1e          	.byte 0x1e
+  49:	000000        	ill
+  4c:	260002        	l8ui	a0, a0, 38
+  4f:	000000        	ill
+  52:	c30104        	lsi	f0, a1, 0x30c
+  55:	000002        	l8ui	a0, a0, 0
+  58:	000020        	lsi	f2, a0, 0
+  5b:	005b00        	lsi	f0, a11, 0
+  5e:	0c0000        	lsi	f0, a0, 48
+  61:	000000        	ill
+  64:	000040        	lsi	f4, a0, 0
+  67:	800100        	add	a0, a1, a0
+  6a:	1e          	.byte 0x1e
+  6b:	000000        	ill
+  6e:	380002        	l8ui	a0, a0, 56
+  71:	000000        	ill
+  74:	0c0104        	lsi	f0, a1, 48
+  77:	0009      	s32i.n	a0, a0, 0
+  79:	004000        	break	0, 0
+  7c:	6f0000        	f64cmph	a0, a0, a0, 6
+  7f:	000000        	ill
+  82:	000c      	movi.n	a0, 0
+  84:	400000        	ssr	a0
+  87:	000000        	ill
+  8a:	1e8001        	l32r	a0, fffc7a8c <_etext+0xbff46cc0>
+  8d:	000000        	ill
+  90:	4a0002        	l8ui	a0, a0, 74
+  93:	000000        	ill
+  96:	420104        	lsi	f0, a1, 0x108
+  99:	000c      	movi.n	a0, 0
+  9b:	006000        	rsil	a0, 0
+  9e:	7c0000        	lsi	f0, a0, 0x1f0
+  a1:	000000        	ill
+  a4:	000c      	movi.n	a0, 0
+  a6:	400000        	ssr	a0
+  a9:	000000        	ill
+  ac:	01          	.byte 0x1
+  ad:	80          	.byte 0x80
+
+Disassembly of section .debug_abbrev:
+
+00000000 <.debug_abbrev>:
+   0:	001101        	l32r	a0, fffc0044 <_etext+0xbff3f278>
+   3:	110610        	slli	a0, a6, 15
+   6:	011201        	l32r	a0, fffc0450 <_etext+0xbff3f684>
+   9:	1b0e03        	lsi	f0, a14, 108
+   c:	0e          	.byte 0xe
+   d:	130e25        	call8	130f0 <init_data+0x130f0>
+  10:	000005        	call0	14 <init_data+0x14>
+  13:	110100        	slli	a0, a1, 16
+  16:	061000        	lsi	f0, a0, 24
+  19:	030655        	call4	3080 <init_data+0x3080>
+  1c:	0e          	.byte 0xe
+  1d:	0e1b      	addi.n	a0, a14, 1
+  1f:	130e25        	call8	13100 <init_data+0x13100>
+  22:	000005        	call0	24 <init_data+0x24>
+  25:	110100        	slli	a0, a1, 16
+  28:	061000        	lsi	f0, a0, 24
+  2b:	030655        	call4	3090 <init_data+0x3090>
+  2e:	0e          	.byte 0xe
+  2f:	0e1b      	addi.n	a0, a14, 1
+  31:	130e25        	call8	13114 <init_data+0x13114>
+  34:	000005        	call0	38 <init_data+0x38>
+  37:	110100        	slli	a0, a1, 16
+  3a:	061000        	lsi	f0, a0, 24
+  3d:	030655        	call4	30a4 <init_data+0x30a4>
+  40:	0e          	.byte 0xe
+  41:	0e1b      	addi.n	a0, a14, 1
+  43:	130e25        	call8	13124 <init_data+0x13124>
+  46:	000005        	call0	48 <init_data+0x48>
+  49:	110100        	slli	a0, a1, 16
+  4c:	061000        	lsi	f0, a0, 24
+  4f:	030655        	call4	30b4 <init_data+0x30b4>
+  52:	0e          	.byte 0xe
+  53:	0e1b      	addi.n	a0, a14, 1
+  55:	130e25        	call8	13138 <init_data+0x13138>
+  58:	000005        	call0	5c <init_data+0x5c>
+	...
+
+Disassembly of section .debug_aranges:
+
+00000000 <.debug_aranges>:
+   0:	001c      	movi.n	a0, 16
+   2:	020000        	andb	b0, b0, b0
+   5:	000000        	ill
+   8:	040000        	extui	a0, a0, 0, 1
+   b:	000000        	ill
+   e:	100000        	and	a0, a0, a0
+  11:	400804        	lsi	f0, a8, 0x100
+  14:	00ac      	beqz.n	a0, 38 <init_data+0x38>
+	...
+  1e:	240000        	extui	a0, a0, 0, 3
+  21:	000000        	ill
+  24:	260002        	l8ui	a0, a0, 38
+  27:	000000        	ill
+  2a:	000004        	lsi	f0, a0, 0
+  2d:	000000        	ill
+  30:	04bc      	beqz.n	a4, 64 <init_data+0x64>
+  32:	4008      	l32i.n	a0, a0, 16
+  34:	0038      	l32i.n	a3, a0, 0
+  36:	fc0000        	lsi	f0, a0, 0x3f0
+  39:	080c      	movi.n	a8, 0
+  3b:	009840        	all4	b4, b8:b9:b10:b11
+	...
+  46:	240000        	extui	a0, a0, 0, 3
+  49:	000000        	ill
+  4c:	480002        	l8ui	a0, a0, 72
+  4f:	000000        	ill
+  52:	000004        	lsi	f0, a0, 0
+  55:	000000        	ill
+  58:	0804f4        	lsi	f15, a4, 32
+  5b:	02e440        	andb	b14, b4, b4
+  5e:	940000        	extui	a0, a0, 0, 10
+  61:	080d      	mov.n	a0, a8
+  63:	001840        	movsp	a4, a8
+	...
+  6e:	240000        	extui	a0, a0, 0, 3
+  71:	000000        	ill
+  74:	6a0002        	l8ui	a0, a0, 106
+  77:	000000        	ill
+  7a:	000004        	lsi	f0, a0, 0
+  7d:	000000        	ill
+  80:	07d8      	l32i.n	a13, a7, 0
+  82:	4008      	l32i.n	a0, a0, 16
+  84:	018c      	beqz.n	a1, 88 <init_data+0x88>
+  86:	ac0000        	lsi	f0, a0, 0x2b0
+  89:	080d      	mov.n	a0, a8
+  8b:	001040        	movsp	a4, a0
+	...
+  96:	240000        	extui	a0, a0, 0, 3
+  99:	000000        	ill
+  9c:	8c0002        	l8ui	a0, a0, 140
+  9f:	000000        	ill
+  a2:	000004        	lsi	f0, a0, 0
+  a5:	000000        	ill
+  a8:	080964        	lsi	f6, a9, 32
+  ab:	039840        	lsi	f4, a8, 12
+  ae:	bc0000        	lsi	f0, a0, 0x2f0
+  b1:	080d      	mov.n	a0, a8
+  b3:	001040        	movsp	a4, a0
+	...
+
+Disassembly of section .debug_str:
+
+00000000 <.debug_str>:
+   0:	6e69      	s32i.n	a6, a14, 24
+   2:	7469      	s32i.n	a6, a4, 28
+   4:	2f          	.byte 0x2f
+   5:	6e69      	s32i.n	a6, a14, 24
+   7:	7469      	s32i.n	a6, a4, 28
+   9:	2e          	.byte 0x2e
+   a:	2f0053        	lsi	f5, a0, 188
+   d:	657355        	call4	65744 <init_data+0x65744>
+  10:	2f7372        	lsi	f7, a3, 188
+  13:	727574        	lsi	f7, a5, 0x1c8
+  16:	317567        	bbci	a5, 22, 4b <init_data+0x4b>
+  19:	2f          	.byte 0x2f
+  1a:	766544        	lsi	f4, a5, 0x1d8
+  1d:	2f          	.byte 0x2f
+  1e:	6f          	.byte 0x6f
+  1f:	726562        	s32i	a6, a5, 0x1c8
+  22:	6f          	.byte 0x6f
+  23:	6e          	.byte 0x6e
+  24:	2f          	.byte 0x2f
+  25:	707365        	call8	7075c <init_data+0x7075c>
+  28:	2d3233        	lsi	f3, a2, 180
+  2b:	6f          	.byte 0x6f
+  2c:	726562        	s32i	a6, a5, 0x1c8
+  2f:	6f          	.byte 0x6f
+  30:	6e          	.byte 0x6e
+  31:	632d      	lsi	f2, a3, 12
+  33:	6f          	.byte 0x6f
+  34:	706d      	lsi	f6, a0, 0
+  36:	6c69      	s32i.n	a6, a12, 24
+  38:	2f7265        	call8	2f760 <init_data+0x2f760>
+  3b:	736554        	lsi	f5, a5, 0x1cc
+  3e:	470074        	lsi	f7, a0, 0x11c
+  41:	4e          	.byte 0x4e
+  42:	412055        	call4	41248 <init_data+0x41248>
+  45:	322053        	lsi	f5, a0, 200
+  48:	2e          	.byte 0x2e
+  49:	2e3133        	lsi	f3, a1, 184
+  4c:	620031        	l32r	a3, fffd884c <_etext+0xbff57a80>
+  4f:	6c6975        	call12	6c6e4 <init_data+0x6c6e4>
+  52:	4d2f64        	lsi	f6, a15, 0x134
+  55:	6e6961        	l32r	a6, fffdb9fc <_etext+0xbff5ac30>
+  58:	2e          	.byte 0x2e
+  59:	620053        	lsi	f5, a0, 0x188
+  5c:	6c6975        	call12	6c6f4 <init_data+0x6c6f4>
+  5f:	412f64        	lsi	f6, a15, 0x104
+  62:	697373        	lsi	f7, a3, 0x1a4
+  65:	6d6e67        	bbci	a14, 6, d6 <init_data+0xd6>
+  68:	746e65        	call8	74750 <init_data+0x74750>
+  6b:	532e73        	lsi	f7, a14, 0x14c
+  6e:	756200        	extui	a6, a0, 18, 8
+  71:	6c69      	s32i.n	a6, a12, 24
+  73:	542f64        	lsi	f6, a15, 0x150
+  76:	747365        	call8	747ac <init_data+0x747ac>
+  79:	2e          	.byte 0x2e
+  7a:	620053        	lsi	f5, a0, 0x188
+  7d:	6c6975        	call12	6c714 <init_data+0x6c714>
+  80:	4f2f64        	lsi	f6, a15, 0x13c
+  83:	2e7475        	call12	2e7c8 <init_data+0x2e7c8>
+  86:	53          	.byte 0x53
+	...
+
+Disassembly of section .debug_ranges:
+
+00000000 <.debug_ranges>:
+   0:	ff          	.byte 0xff
+   1:	ff          	.byte 0xff
+   2:	ff          	.byte 0xff
+   3:	ff          	.byte 0xff
+   4:	000000        	ill
+   7:	04bc00        	extui	a11, a0, 12, 1
+   a:	4008      	l32i.n	a0, a0, 16
+   c:	0804f4        	lsi	f15, a4, 32
+   f:	0cfc40        	lsi	f4, a12, 48
+  12:	4008      	l32i.n	a0, a0, 16
+  14:	080d94        	lsi	f9, a13, 32
+  17:	000040        	lsi	f4, a0, 0
+  1a:	000000        	ill
+  1d:	000000        	ill
+  20:	ff          	.byte 0xff
+  21:	ff          	.byte 0xff
+  22:	ff          	.byte 0xff
+  23:	ff          	.byte 0xff
+  24:	000000        	ill
+  27:	04f400        	extui	a15, a0, 4, 1
+  2a:	4008      	l32i.n	a0, a0, 16
+  2c:	07d8      	l32i.n	a13, a7, 0
+  2e:	4008      	l32i.n	a0, a0, 16
+  30:	080d94        	lsi	f9, a13, 32
+  33:	0dac40        	lsi	f4, a12, 52
+  36:	4008      	l32i.n	a0, a0, 16
+	...
+  40:	ff          	.byte 0xff
+  41:	ff          	.byte 0xff
+  42:	ff          	.byte 0xff
+  43:	ff          	.byte 0xff
+  44:	000000        	ill
+  47:	07d800        	lsi	f0, a8, 28
+  4a:	4008      	l32i.n	a0, a0, 16
+  4c:	080964        	lsi	f6, a9, 32
+  4f:	0dac40        	lsi	f4, a12, 52
+  52:	4008      	l32i.n	a0, a0, 16
+  54:	0dbc      	beqz.n	a13, 88 <init_data+0x88>
+  56:	4008      	l32i.n	a0, a0, 16
+	...
+  60:	ff          	.byte 0xff
+  61:	ff          	.byte 0xff
+  62:	ff          	.byte 0xff
+  63:	ff          	.byte 0xff
+  64:	000000        	ill
+  67:	096400        	l32e	a0, a4, -40
+  6a:	4008      	l32i.n	a0, a0, 16
+  6c:	0cfc      	bnez.n	a12, a0 <init_data+0xa0>
+  6e:	4008      	l32i.n	a0, a0, 16
+  70:	0dbc      	beqz.n	a13, a4 <init_data+0xa4>
+  72:	4008      	l32i.n	a0, a0, 16
+  74:	0dcc      	bnez.n	a13, 78 <init_data+0x78>
+  76:	4008      	l32i.n	a0, a0, 16
+	...

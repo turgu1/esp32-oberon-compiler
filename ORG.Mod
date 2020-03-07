@@ -5,7 +5,7 @@ MODULE ORG;
   IMPORT SYSTEM, Files, Texts, ORS, ORB, Out, Reals;
   
   (* Code generator for Oberon compiler for ESP32 processor.
-     Procedural interface to Parser OSAP; result in stream "CodeW".
+     Procedural interface to Parser ORP; result in stream "CodeW".
      Procedure Close writes code-files in assembly language *)
 
   CONST 
@@ -79,6 +79,8 @@ MODULE ORG;
       name: ORS.Ident;
       rdo*:  BOOLEAN  (*read only*)
     END ;
+
+    LabelRange* = RECORD low*, high*, label*: INTEGER END ;
 
     BrStr = ARRAY 5 OF CHAR;
 
@@ -395,6 +397,22 @@ MODULE ORG;
     Texts.WriteString(CodeW, a);
     Texts.WriteLn(    CodeW);
   END PutRA;
+
+  PROCEDURE PutRL(op: ARRAY OF CHAR; r, label: INTEGER; forward: BOOLEAN);
+  BEGIN 
+    Texts.WriteString(CodeW, "    ");
+    Texts.WriteString(CodeW, op);
+    Texts.WriteString(CodeW, " a");
+    Texts.WriteInt(   CodeW, r, 0);
+    Texts.WriteString(CodeW, ", ");
+    Texts.WriteInt(CodeW, label, 0);
+    IF forward THEN
+      Texts.Write(CodeW, "f")
+    ELSE
+      Texts.Write(CodeW, "b")
+    END;
+    Texts.WriteLn(    CodeW);
+  END PutRL;
 
   PROCEDURE PutRRR(op: ARRAY OF CHAR; r1, r2, r3: INTEGER);
   BEGIN
@@ -1114,6 +1132,8 @@ MODULE ORG;
     IF (y.lev > 0) & (y.lev # curlev) & (y.class # ORB.Const) THEN 
       ORS.Mark("not accessible ")
     END;
+    x.lf := 0;
+    x.lt := 0;
     x.name := y.name
   END MakeItem;
 
@@ -1671,6 +1691,62 @@ MODULE ORG;
     END 
   END SetOp;
 
+    (* Case Statements *)
+
+  PROCEDURE CaseHead*(VAR x: Item; VAR L0, L1: INTEGER); (* L0 = Jump Table High bound addr, L1 = ELSE clause *)
+  BEGIN load(x);  (*value of case expression*)
+    PutRL("movi", RH, L0, FORWARD);       (* Get address of case table *)
+    PutRRI("l32i", RH+1, RH, 0);          (* Low bound *)
+    PutRR("mov", RH+2, RH+1);             (* Save it for later *)
+    PutBranchRR("bge", x.r, RH+1, label, FORWARD);
+    PutJump("j", L1, FORWARD);            (* Else clause if lower *)
+    PutLabel(label); INC(label);
+    PutRRI("l32i", RH+1, RH, 4);
+    PutBranchRR("blt", x.r, RH+1, label, FORWARD);
+    PutJump("j", L1, FORWARD);            (* Else clause if higher *)
+    PutLabel(label); INC(label);
+    PutRRI("addi", RH, RH, 8);            (* Compute index in table *)
+    PutRRR("sub", x.r, x.r, RH+2);
+    PutRRR("add", RH, RH, x.r);
+    PutRRI("l32i", RH, RH, 0);            (* Get address *)
+    PutR("jx", RH);
+    decR;
+  END CaseHead;
+
+  PROCEDURE CaseTail*(L0, L1, n: INTEGER; VAR tab: ARRAY OF LabelRange);  (* L0: Jump Table label, L1 = label for else *)
+    VAR i, j, l1: INTEGER;
+
+    PROCEDURE PutEntry(label: INTEGER);
+    BEGIN 
+      Texts.WriteString(CodeW, "    .int ");
+      Texts.WriteInt(CodeW, label, 0);
+      Texts.Write(CodeW, "b");
+      Texts.WriteLn(CodeW);
+    END PutEntry;
+
+  BEGIN
+    Texts.WriteString(CodeW, ".align 4"); Texts.WriteLn(CodeW);
+    PutLabel(L0);
+    IF n > 0 THEN 
+      Texts.WriteString(CodeW, "    .int "); Texts.WriteInt(CodeW, tab[0].low, 0);        Texts.WriteLn(CodeW);  (* Low Bound *)
+      Texts.WriteString(CodeW, "    .int "); Texts.WriteInt(CodeW, tab[n-1].high + 1, 0); Texts.WriteLn(CodeW); (* High Bound *)
+    ELSIF L1 > 0 THEN  (* L1 will be negative if no ELSE case present *)
+      Texts.WriteString(CodeW, "    .int  0"); Texts.WriteLn(CodeW);  (* Low Bound *)
+      Texts.WriteString(CodeW, "    .int -1"); Texts.WriteLn(CodeW); (* High Bound *)
+    ELSE ORS.Mark("empty case") END;
+
+    (* IF L1 = 0 THEN L1 := pc; Trap(7, 1) END ;  create else ???? *)
+    
+    IF L1 < 0 THEN l1 := -L1 ELSE l1 := L1 END;
+    IF n > 0 THEN
+      j := tab[0].low;
+      FOR i := 0 TO n-1 DO  (*construct jump table*)
+        WHILE j < tab[i].low DO PutEntry(l1); INC(j) END;  (* else *)
+        WHILE j <= tab[i].high DO PutEntry(tab[i].label); INC(j) END
+      END
+    END
+  END CaseTail;
+
   (* Code generation for relations *)
 
   (* The relations are the following:
@@ -1993,7 +2069,7 @@ MODULE ORG;
   PROCEDURE FJump*(L: INTEGER);
   BEGIN 
     e("FJump");
-    PutJump("j", L, TRUE);
+    PutJump("j", L, FORWARD);
   END FJump;
 
   PROCEDURE CFJump*(VAR x: Item);

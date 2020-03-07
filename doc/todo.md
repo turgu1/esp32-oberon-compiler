@@ -1,6 +1,6 @@
 # Compiler changes
 
-- [ ] Add INTEGER/BYTE/CHAR in CASE statements
+- [x] Add INTEGER/BYTE/CHAR in CASE statements
 - [ ] Add AND/BOR/XOR for INTEGER/BYTE functions
 - [ ] Revisit ORG.ChrToStr/ORG.StrToChr functions
 - [ ] Implement Const Char as a string parameter

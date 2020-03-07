@@ -5,6 +5,8 @@ MODULE ORP; (*N. Wirth 1.7.97 / 8.2.2020  Oberon compiler for RISC in Oberon-07*
     ORB for definition of data structures and for handling import and export, and
     ORG to produce binary code. ORP performs type checking and data allocation.
     Parser is target-independent, except for part of the handling of allocations.*)
+  
+  CONST NofCases = 256; (* Max nomber of case labels in a CASE statement *)
 
   TYPE PtrBase = POINTER TO PtrBaseDesc;
     PtrBaseDesc = RECORD  (*list of names of pointer base types*)
@@ -103,6 +105,21 @@ MODULE ORP; (*N. Wirth 1.7.97 / 8.2.2020  Oberon compiler for RISC in Oberon-07*
   BEGIN (*t1 is an extension of t0*)
     RETURN (t0 = t1) OR (t1 # NIL) & IsExtension(t0, t1.base)
   END IsExtension;
+
+ PROCEDURE CheckCaseExpr(VAR x: ORG.Item);
+  BEGIN
+    IF ~(x.type.form IN {ORB.Int, ORB.Byte, ORB.Char}) THEN ORS.Mark("invalid type"); x.type := ORB.intType END
+  END CheckCaseExpr;
+
+  PROCEDURE CheckReceiver(proc: ORB.Object; deref: BOOLEAN);
+  BEGIN
+    IF ~deref & (proc.type.dsc.class # ORB.Par) THEN ORS.Mark("incompatible receiver") END
+  END CheckReceiver;
+
+  PROCEDURE DisallowMethods(rec: ORB.Type);  (*disallow binding methods to rec and its base types*)
+  BEGIN
+    WHILE rec # NIL DO rec.typobj.val := 1; rec := rec.base END
+  END DisallowMethods;
 
   (* expressions *)
 
@@ -503,10 +520,11 @@ MODULE ORP; (*N. Wirth 1.7.97 / 8.2.2020  Oberon compiler for RISC in Oberon-07*
 
   PROCEDURE StatSequence;
     VAR obj: ORB.Object;
-      orgtype: ORB.Type; (*original type of case var*)
+      (*orgtype: ORB.Type; original type of case var*)
       x, y, z, w: ORG.Item;
       L0, L1, rx, callType: INTEGER;
 
+(*
     PROCEDURE TypeCase(obj: ORB.Object; VAR x: ORG.Item);
       VAR typobj: ORB.Object;
     BEGIN
@@ -518,13 +536,119 @@ MODULE ORP; (*N. Wirth 1.7.97 / 8.2.2020  Oberon compiler for RISC in Oberon-07*
       ELSE ORG.CFJump(x); ORS.Mark("type id expected")
       END
      END TypeCase;
+*)
+    PROCEDURE TypeCasePart;
+      VAR obj: ORB.Object; L0: INTEGER;
+        x: ORG.Item;
 
-    PROCEDURE SkipCase;
+      PROCEDURE TypeCase(obj: ORB.Object; VAR x: ORG.Item);
+        VAR typobj: ORB.Object; 
+          orgtype: ORB.Type;  (*original type of case var*)
+      BEGIN
+        IF sym = ORS.ident THEN
+          qualident(typobj); ORG.MakeItem(x, obj, level); orgtype := obj.type;
+          IF typobj.class # ORB.Typ THEN ORS.Mark("not a type") END ;
+          TypeTest(x, typobj.type, FALSE); obj.type := typobj.type;
+          ORG.CFJump(x); Check(ORS.colon, ": expected"); StatSequence;
+          obj.type := orgtype
+        ELSE ORS.Mark("type id expected"); Check(ORS.colon, ": expected"); StatSequence
+        END
+      END TypeCase;
+
+    BEGIN qualident(obj); Check(ORS.of, "OF expected"); ORG.GetLabel(L0); x.lf := 0;
+      WHILE (sym < ORS.end) OR (sym = ORS.bar) DO
+        IF sym = ORS.bar THEN ORS.Get(sym) ELSE 
+          IF x.lf # 0 THEN ORG.PutLabel(x.lf); ORG.ClearLabels(x) END;
+          TypeCase(obj, x); ORG.FJump(L0) 
+        END
+      END ;
+      IF x.lf # 0 THEN ORG.PutLabel(x.lf) END;
+      IF sym = ORS.else THEN ORS.Get(sym); StatSequence END ;
+      ORG.PutLabel(L0)
+    END TypeCasePart;
+
+(*
+        IF sym = ORS.ident THEN
+          qualident(obj); orgtype := obj.type;
+          IF (orgtype.form = ORB.Pointer) OR 
+             (orgtype.form = ORB.Record) & 
+             (obj.class = ORB.Par) THEN
+            Check(ORS.of, "OF expected"); 
+            ORG.ClearLabels(x);
+            TypeCase(obj, x); 
+            ORG.GetLabel(L0);
+            WHILE sym = ORS.bar DO
+              ORS.Get(sym); ORG.FJump(L0); 
+              ORG.PutLabel(x.lf); ORG.ClearLabels(x);
+              obj.type := orgtype; TypeCase(obj, x)
+            END ;
+            ORG.PutLabel(x.lf);
+            ORG.PutLabel(L0); obj.type := orgtype
+
+            -----
+
+          ELSE ORS.Mark("numeric case not implemented");
+            Check(ORS.of, "OF expected"); SkipCase;
+            WHILE sym = ORS.bar DO SkipCase END
+          END
+        ELSE ORS.Mark("ident expected")
+  *)
+    PROCEDURE NumericCasePart;
+      VAR x: ORG.Item; L0, L1, L2, n, labelform: INTEGER;
+        tab: ARRAY NofCases OF ORG.LabelRange;  (*ordered table of label ranges*)
+      PROCEDURE NumericCase(LabelForm: INTEGER; VAR n: INTEGER; VAR tab: ARRAY OF ORG.LabelRange);
+        VAR x, y: ORG.Item; i: INTEGER; continue: BOOLEAN;
+
+        PROCEDURE CaseLabel(VAR x: ORG.Item);
+        BEGIN expression(x); CheckConst(x);
+          IF (x.type.form = ORB.String) & (x.b = 2) THEN ORG.StrToChar(x)
+          ELSIF ~(x.type.form IN {ORB.Int, ORB.Char}) OR (x.a < 0) OR (x.a > 255) THEN
+            ORS.Mark("invalid case label"); x.type := ORB.intType
+          END
+        END CaseLabel;
+
+      BEGIN
+        REPEAT CaseLabel(x);
+          IF x.type.form # LabelForm THEN ORS.Mark("invalid label form") END ;
+          IF sym = ORS.upto THEN ORS.Get(sym); CaseLabel(y);
+            IF (x.type.form # y.type.form) OR (x.a >= y.a) THEN ORS.Mark("invalid label range"); y := x END
+          ELSE y := x
+          END ;
+          IF n < NofCases THEN  (*enter label range into ordered table*)
+            i := n; continue := TRUE;
+            WHILE continue & (i > 0) DO
+              IF tab[i-1].low > y.a THEN tab[i] := tab[i-1]; DEC(i)
+              ELSE continue := FALSE;
+                IF tab[i-1].high >= x.a THEN ORS.Mark("overlapping case labels") END
+              END
+            END ;
+            tab[i].low := x.a; tab[i].high := y.a; tab[i].label := ORG.Here(); INC(n)
+          ELSE ORS.Mark("too many case labels")
+          END ;
+          IF sym = ORS.comma THEN ORS.Get(sym)
+          ELSIF (sym < ORS.comma) OR (sym = ORS.semicolon) THEN ORS.Mark("comma?")
+          END
+        UNTIL (sym > ORS.comma) & (sym # ORS.semicolon);
+        Check(ORS.colon, ": expected"); StatSequence
+      END NumericCase;
+
+    BEGIN expression(x); CheckCaseExpr(x); ORG.GetLabel(L1); ORG.GetLabel(L0); ORG.CaseHead(x, L0, L1);
+      Check(ORS.of, "OF expected"); n := 0; ORG.GetLabel(L2); labelform := x.type.form;
+      WHILE (sym < ORS.end) OR (sym = ORS.bar) DO
+        IF sym = ORS.bar THEN ORS.Get(sym) ELSE NumericCase(labelform, n, tab); ORG.FJump(L2) END
+      END ;
+      IF sym = ORS.else THEN ORS.Get(sym); ORG.PutLabel(L1); StatSequence; ORG.FJump(L2) ELSE L1 := -L1 END ;
+      ORG.CaseTail(L0, L1, n, tab); 
+      IF L1 < 0 THEN ORG.PutLabel(-L1) END;
+      ORG.PutLabel(L2)
+    END NumericCasePart;
+(*
+     PROCEDURE SkipCase;
     BEGIN 
       WHILE sym # ORS.colon DO ORS.Get(sym) END ;
       ORS.Get(sym); StatSequence
     END SkipCase;
-
+ *)
   BEGIN (* StatSequence *)
     REPEAT (*sync*) obj := NIL;
       IF ~((sym >= ORS.ident)  & (sym <= ORS.for) OR (sym >= ORS.semicolon)) THEN
@@ -647,28 +771,11 @@ MODULE ORP; (*N. Wirth 1.7.97 / 8.2.2020  Oberon compiler for RISC in Oberon-07*
         END
       ELSIF sym = ORS.case THEN (* ----- CASE ----- *)
         ORS.Get(sym);
-        IF sym = ORS.ident THEN
-          qualident(obj); orgtype := obj.type;
-          IF (orgtype.form = ORB.Pointer) OR 
-             (orgtype.form = ORB.Record) & 
-             (obj.class = ORB.Par) THEN
-            Check(ORS.of, "OF expected"); 
-            ORG.ClearLabels(x);
-            TypeCase(obj, x); 
-            ORG.GetLabel(L0);
-            WHILE sym = ORS.bar DO
-              ORS.Get(sym); ORG.FJump(L0); 
-              (* ORG.Fixup(x); *) ORG.PutLabel(x.lf); ORG.ClearLabels(x);
-              obj.type := orgtype; TypeCase(obj, x)
-            END ;
-            (* ORG.Fixup(x); *) ORG.PutLabel(x.lf);
-            ORG.PutLabel(L0); obj.type := orgtype
-          ELSE ORS.Mark("numeric case not implemented");
-            Check(ORS.of, "OF expected"); SkipCase;
-            WHILE sym = ORS.bar DO SkipCase END
-          END
-        ELSE ORS.Mark("ident expected")
-        END ;
+        IF sym = ORS.ident THEN obj := ORB.thisObj() END ;
+        IF (obj # NIL) & (obj.type # NIL) &
+          ((obj.type.form = ORB.Pointer) OR (obj.type.form = ORB.Record) & (obj.class = ORB.Par)) THEN TypeCasePart
+        ELSE NumericCasePart
+        END;
         Check(ORS.end, "no END")
       END ;
       ORG.CheckRegs;
