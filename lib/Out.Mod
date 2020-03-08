@@ -18,8 +18,6 @@ CONST
   CR        = 0DX;
   LF        = 0AX;
 
-PROCEDURE Open*; BEGIN END Open;
-
 PROCEDURE FifoCount(): INTEGER;
 VAR 
   c, r : INTEGER;
@@ -150,11 +148,11 @@ BEGIN
   SYSTEM.PUT(ClkDiv, baudRate)
 END SetBaudRate;
 
-PROCEDURE Setup*;
+PROCEDURE Open*;
 BEGIN
   SetBaudRate(Baud115K);
 END Setup;
 
 BEGIN
-  Setup;
+  Open;
 END Out.

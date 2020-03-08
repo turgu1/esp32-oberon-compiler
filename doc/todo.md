@@ -22,7 +22,7 @@
 - [ ] PlatformIO integration
 - [ ] Makefile cleanup
 - [ ] Standard Modules
-  + [x] Out
+  + [] Out -> Needs a standard Real procedure.
   + [x] Strings
   + [ ] Math
 - [ ] Library

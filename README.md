@@ -2,9 +2,9 @@
 
 This is an ongoing effort to build an ESP32 Oberon Compiler, using the Oberon-07 Compiler from [Project Oberon](http://www.projectoberon.com) by Niklaus Wirth and Jürg Gutknecht and some code from project [Oberon Extended](https://github.com/andreaspirklbauer/Oberon-extended) by Mr. Andreas Pirklbauer. Test cases are being designed in part using the [OberonC](https://github.com/lboasso) effort by Luca Boasso.
 
-The code is being ported to [OBNC](https://miasap.se/obnc/) and will generate ELF object code through ESP32 assembly language generation. I'm currently targetting a 'bear metal' version, supplying everything necessary for building applications, relying only on the assembler linker and loader provided with [ESP-IDF](https://docs.espressif.com/projects/esp-idf/en/latest/). GDB and OpenOCD are also used to allow remote debugging through JTAG. This is the intent. A large portion of the compiler is in a workable condition at this point in time.
+The code is being ported to [OBNC](https://miasap.se/obnc/) and will generate ELF object code through ESP32 assembly language generation. I'm currently targeting a 'bear metal' version, supplying everything necessary for building applications, relying only on the assembler linker and loader provided with [ESP-IDF](https://docs.espressif.com/projects/esp-idf/en/latest/). GDB and OpenOCD are also used to allow remote debugging through JTAG. This is the intent. A large portion of the compiler is in a workable condition at this point in time.
 
-The folder `test-bearmetal` demonstrates the feasability of independant coding from ESP-IDF. It is a working piece of assembly code that I made that can be compiled and pushed to an ESP32. It gets a led blink every half a second and pushes some message on the serial port. This was the starting point to start modeling an executable architecture based on the ESP32 for Oberon.
+The folder `test-bearmetal` demonstrates the feasibility of independent coding from ESP-IDF. It is a working piece of assembly code that I made that can be compiled and pushed to an ESP32. It gets a led blink every half a second and pushes some message on the serial port. This was the starting point to start modeling an executable architecture based on the ESP32 for Oberon.
 
 In a Nutshell, the steps I'm taking to get a working compiler are the following:
 
@@ -24,14 +24,14 @@ In a Nutshell, the steps I'm taking to get a working compiler are the following:
 14. Add language functionalities (mainly SYSTEM procedures) required in support of the ESP32 architecture
 15. Create other Oakridge compliant Modules 
 16. Build a PlatformIO Custom Development Platform
-17. Develop modules for some of the ESP32 subsystems
+17. Develop modules for some ESP32 subsystems
 18. Enjoy
 
 I'm now doing a round robin between steps 8, 9, 10, 11 and 12
 
 ## Modifications
 
-Some of the modifications to the Project Oberon compiler source code (up to step 5):
+Some modifications to the Project Oberon compiler source code (up to step 5):
 
 Strict Oberon-07 definition (obnc):
 
@@ -68,7 +68,7 @@ Some potential bugs corrected:
 
 - The .smb file output has been modified to get exported variable offsets instead of an export sequence number. The code generator is relying on the ELF linker to resolve the location of data sections. The imported variables are accessed through their offset.
 
-- The ESP32 doesn't supply a floating point division instruction. A function called by the generated code is added.
+- The ESP32 doesn't supply a floating-point division instruction. A function called by the generated code is added.
 
 - The Module Static Base address (SB) is loaded in register a2 
 
@@ -78,7 +78,7 @@ Some potential bugs corrected:
      i := F(3.0); P(i)
 ```
 
-- There is no Condition Codes in the ESP32, but a variety of branch instructions based on the content of register parameters. This, combined with the assembly language output of the compiler, requires sensible changes to the fixup algorithm and conditional instructions generation used in ORG. Using labels in the assembly language, fixups are no longer required.
+- There is no Condition Codes in the ESP32, but a variety of branch instructions based on the content of register parameters. This, combined with the assembly language output of the compiler, requires sensible changes to the fix up algorithm and conditional instruction generation used in ORG. Using labels in the assembly language, fix ups are no longer required.
 
 - Trap is using a routine that you can find in the init.S startup code that save registers and reason for trap before restarting the program.
 
@@ -86,7 +86,7 @@ Some potential bugs corrected:
 
 ### OBNC
 
-The OBNC Oberon-07 version 0.16.1 is used to build this compiler. The author is using it on both Linux and MacOs platforms without any major issue. It must be built using the following commands and option (after having changed current directory to obnc):
+The OBNC Oberon-07 version 0.16.1 is used to build this compiler. The author is using it on both Linux and MacOs platforms without any major issue. It must be built using the following commands and option (after having changed current directory to OBNC):
 
 ```
 $ ./build --c-real-type=float
@@ -101,6 +101,6 @@ The OBNC Oberon-07 compiler is required with the extension libraries to parse co
     
 ### ESP32 Oberon Compiler
 
-There is a simple Makefile that will automate the creation of the Oberon executable. To build, simply use the command `make` to compile it. The result will be the executable file named `Oberon`.
+For now, there is a simple Makefile that will automate the creation of the Oberon executable. To build, simply use the command `make` to compile it. The result will be the executable file named `Oberon`.
 
 Guy
