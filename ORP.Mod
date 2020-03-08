@@ -561,7 +561,7 @@ MODULE ORP; (*N. Wirth 1.7.97 / 8.2.2020  Oberon compiler for RISC in Oberon-07*
           IF x.lf # 0 THEN ORG.PutLabel(x.lf); ORG.ClearLabels(x) END;
           TypeCase(obj, x); ORG.FJump(L0) 
         END
-      END ;
+      END;
       IF x.lf # 0 THEN ORG.PutLabel(x.lf) END;
       IF sym = ORS.else THEN ORS.Get(sym); StatSequence END ;
       ORG.PutLabel(L0)
@@ -773,7 +773,9 @@ MODULE ORP; (*N. Wirth 1.7.97 / 8.2.2020  Oberon compiler for RISC in Oberon-07*
         ORS.Get(sym);
         IF sym = ORS.ident THEN obj := ORB.thisObj() END ;
         IF (obj # NIL) & (obj.type # NIL) &
-          ((obj.type.form = ORB.Pointer) OR (obj.type.form = ORB.Record) & (obj.class = ORB.Par)) THEN TypeCasePart
+           ((obj.type.form = ORB.Pointer) OR 
+            (obj.type.form = ORB.Record) & 
+            (obj.class = ORB.Par)) THEN TypeCasePart
         ELSE NumericCasePart
         END;
         Check(ORS.end, "no END")

@@ -1694,7 +1694,9 @@ MODULE ORG;
     (* Case Statements *)
 
   PROCEDURE CaseHead*(VAR x: Item; VAR L0, L1: INTEGER); (* L0 = Jump Table High bound addr, L1 = ELSE clause *)
-  BEGIN load(x);  (*value of case expression*)
+  BEGIN 
+    CheckFreeRegs(4);
+    load(x);  (*value of case expression*)
     PutRL("movi", RH, L0, FORWARD);       (* Get address of case table *)
     PutRRI("l32i", RH+1, RH, 0);          (* Low bound *)
     PutRR("mov", RH+2, RH+1);             (* Save it for later *)
@@ -1740,7 +1742,7 @@ MODULE ORG;
     IF L1 < 0 THEN l1 := -L1 ELSE l1 := L1 END;
     IF n > 0 THEN
       j := tab[0].low;
-      FOR i := 0 TO n-1 DO  (*construct jump table*)
+      FOR i := 0 TO n-1 DO  (* construct jump table *)
         WHILE j < tab[i].low DO PutEntry(l1); INC(j) END;  (* else *)
         WHILE j <= tab[i].high DO PutEntry(tab[i].label); INC(j) END
       END

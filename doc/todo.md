@@ -1,7 +1,8 @@
 # Compiler changes
 
 - [x] Add INTEGER/BYTE/CHAR in CASE statements
-- [ ] Add AND/BOR/XOR for INTEGER/BYTE functions
+- [ ] Add bit-wise AND/BOR/XOR/NOT for INTEGER/BYTE functions
+- [ ] Add MIN/MAX for INTEGER/BYTE/REAL Functions
 - [ ] Revisit ORG.ChrToStr/ORG.StrToChr functions
 - [ ] Implement Const Char as a string parameter
 - [ ] Revisit Types descriptor
@@ -11,6 +12,7 @@
 - [ ] Revisit Logging module
 - [ ] ORG.{load,store} procedures optimization
 - [ ] Revisit Procedure calls (function parameters) optimization
+- [ ] Modify Trap system to use BREAK instruction
  
 # Compiler Support
 
