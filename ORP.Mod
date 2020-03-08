@@ -1,7 +1,8 @@
-MODULE ORP; (*N. Wirth 1.7.97 / 8.2.2020  Oberon compiler for RISC in Oberon-07*)
+MODULE ORP; (*N. Wirth 1.7.97 / 8.2.2020  Oberon compiler for ESP32 in Oberon-07*)
   IMPORT Texts, Out, Logger, ORS, ORB, ORG;
-  (*Author: Niklaus Wirth, 2014.
-    Parser of Oberon-RISC compiler. Uses Scanner ORS to obtain symbols (tokens),
+  (*Author: Niklaus Wirth, 2014. Modification from Guy Turcotte and Andreas Pirklbauer.
+    Parser of Oberon-RISC compiler modified for the ESP32. 
+    Uses Scanner ORS to obtain symbols (tokens),
     ORB for definition of data structures and for handling import and export, and
     ORG to produce binary code. ORP performs type checking and data allocation.
     Parser is target-independent, except for part of the handling of allocations.*)

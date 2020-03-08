@@ -746,6 +746,7 @@ MODULE ORG;
   
   PROCEDURE PutJumpStr(op, label: ARRAY OF CHAR);
   BEGIN 
+    e("PutJumpStr");
     Texts.WriteString(CodeW, "    ");
     Texts.WriteString(CodeW, op);
     Texts.Write(CodeW, " ");
@@ -759,6 +760,7 @@ MODULE ORG;
 
   PROCEDURE ExportName(name, kind, moduleId: ARRAY OF CHAR;  moduleKey: INTEGER);
   BEGIN
+    e("ExportName");
     Texts.Write(AsW, "_");
     Texts.WriteString(AsW, moduleId);
     Texts.Write(AsW, "_");
@@ -771,6 +773,7 @@ MODULE ORG;
 
   PROCEDURE SectionName(sectionPrefix, moduleId: ARRAY OF CHAR;  moduleKey: INTEGER);
   BEGIN
+    e("SectionName");
     Texts.Write(AsW, ".");
     Texts.WriteString(AsW, sectionPrefix);
     Texts.Write(AsW, "_");
@@ -792,6 +795,7 @@ MODULE ORG;
   VAR
     c: INTEGER;
   BEGIN
+    e("negated");
     c := cond;
     IF c >= 100 THEN
       c := cond - 100;
@@ -846,6 +850,7 @@ MODULE ORG;
 
   PROCEDURE GetLocalSB;
   BEGIN 
+    e("GetLocalSB");
     Texts.WriteString(CodeW, "    movi a2, _");
     Texts.WriteString(CodeW, thisModuleId);
     Texts.WriteString(CodeW, "_s_bss");
@@ -857,6 +862,7 @@ MODULE ORG;
     moduleId: ORS.Ident;
     moduleKey: INTEGER;
   BEGIN
+    e("GetSB base:"); eInt(base);
     IF base # 0 THEN
       Texts.WriteString(CodeW, "    movi a");
       Texts.WriteInt(CodeW, RH, 0);
@@ -880,6 +886,7 @@ MODULE ORG;
   VAR
     temp: INTEGER;
   BEGIN 
+    e("PutMoveRRI");
     IF (offset > max) OR (offset < 0) THEN
       IF (r1 = RH) OR (r2 = RH) THEN temp := RH+1 ELSE temp := RH END;
       IF (offset < 0) OR (offset > 32512) THEN
@@ -1086,7 +1093,9 @@ MODULE ORG;
   (* Items: Conversion from constants or from Objects on the Heap to Items on the Stack *)
 
   PROCEDURE MakeConstItem*(VAR x: Item; typ: ORB.Type; val: INTEGER);
-  BEGIN x.mode := ORB.Const; x.type := typ; x.a := val
+  BEGIN 
+    e("MakeConstItem");
+    x.mode := ORB.Const; x.type := typ; x.a := val
   END MakeConstItem;
 
   PROCEDURE MakeRealItem*(VAR x: Item; val: REAL);
@@ -1101,6 +1110,7 @@ MODULE ORG;
   PROCEDURE MakeStringItem*(VAR x: Item; len: INTEGER); (*copies string from ORS-buffer to ORG-string array*)
     VAR i: INTEGER;
   BEGIN 
+    e("MakeStringItem");
     x.mode := ORB.Const; 
     x.type := ORB.strType; 
     x.a := strx; x.b := len; i := 0;
@@ -1118,6 +1128,7 @@ MODULE ORG;
     Out.String("MakeItem, Object:"); Out.Ln;
     ShowObject(y, 4);
     *)
+    e("MakeItem");
     x.mode := y.class; 
     x.type := y.type; 
     x.a    := y.val; 
@@ -1141,7 +1152,7 @@ MODULE ORG;
 
   PROCEDURE Field*(VAR x: Item; y: ORB.Object);   (* x := x.y *)
   BEGIN
-    e("field");
+    e("Field");
     IF x.mode = ORB.Var THEN
       IF x.r >= 0 THEN x.a := x.a + y.val
       ELSE loadAdr(x); x.mode := RegI; x.a := y.val
@@ -1154,7 +1165,7 @@ MODULE ORG;
   PROCEDURE Index*(VAR x, y: Item);   (* x := x[y] *)
     VAR size, limit: INTEGER;
   BEGIN 
-    e("index");
+    e("Index");
     size := x.type.base.size; 
     limit := x.type.len;
     IF (y.mode = ORB.Const) & (limit >= 0) THEN
@@ -1218,6 +1229,7 @@ MODULE ORG;
 
   PROCEDURE DeRef*(VAR x: Item);
   BEGIN
+    e("DoRef");
     IF x.mode = ORB.Var THEN
       CheckFreeRegs(1);
       IF x.r > 0 THEN (*local*) 
@@ -1260,6 +1272,7 @@ MODULE ORG;
   PROCEDURE FindPtrFlds(typ: ORB.Type; off: INTEGER; VAR dcw: INTEGER);
     VAR fld: ORB.Object; i, s: INTEGER;
   BEGIN
+    e("FindPtrFlds");
     IF (typ.form = ORB.Pointer) OR (typ.form = ORB.NilTyp) THEN 
       data[dcw] := off; 
       INC(dcw)
@@ -1280,6 +1293,7 @@ MODULE ORG;
   PROCEDURE BuildTD*(T: ORB.Type; VAR dc: INTEGER);
     VAR dcw, k, s: INTEGER;  (*dcw = word address*)
   BEGIN 
+    e("BuildTD");
     dcw := dc DIV 4; 
     s := T.size; (*convert size for heap allocation*)
     IF s <= 24 THEN 
@@ -1318,6 +1332,7 @@ MODULE ORG;
 
   PROCEDURE TypeTest*(VAR x: Item; T: ORB.Type; varpar, isguard: BOOLEAN);
   BEGIN
+    e("TypeTest");
     IF T = NIL THEN
       IF x.mode >= Reg THEN decR END ;
       SetCC(x, 7)
@@ -1347,14 +1362,14 @@ MODULE ORG;
   PROCEDURE Not*(VAR x: Item);   (* x := ~x *)
     VAR t: INTEGER;
   BEGIN
-    e("not");
+    e("Not");
     IF x.mode # Cond THEN loadCond(x) END ;
     x.r := negated(x.r); t := x.lt; x.lt := x.lf; x.lf := t
   END Not;
 
   PROCEDURE And1*(VAR x: Item);   (* x := x & *)
   BEGIN
-    e("and1");
+    e("And1");
     IF x.mode # Cond THEN loadCond(x) END ;
     IF x.lf = 0 THEN x.lf := label; INC(label) END;
     PutCondBranch(negated(x.r), x.lf, FORWARD);
@@ -1363,7 +1378,7 @@ MODULE ORG;
 
   PROCEDURE And2*(VAR x, y: Item);
   BEGIN
-    e("and2");
+    e("And2");
     IF y.mode # Cond THEN loadCond(y) END ;
     IF y.lt = 0 THEN y.lt := label; INC(label) END;
     x.lt := y.lt; x.r := y.r
@@ -1396,7 +1411,7 @@ MODULE ORG;
 
   PROCEDURE Neg*(VAR x: Item);   (* x := -x *)
   BEGIN
-    e("neg");
+    e("Neg");
     IF x.type.form = ORB.Int THEN
       IF x.mode = ORB.Const THEN x.a := -x.a
       ELSE 
@@ -1423,7 +1438,7 @@ MODULE ORG;
 
   PROCEDURE AddOp*(op: INTEGER; VAR x, y: Item);   (* x := x +- y *)
   BEGIN
-    e("addop");
+    e("AddOp");
     IF op = ORS.plus THEN
       IF (x.mode = ORB.Const) & (y.mode = ORB.Const) THEN
         x.a := x.a + y.a
@@ -1474,7 +1489,7 @@ MODULE ORG;
   PROCEDURE MulOp*(VAR x, y: Item);   (* x := x * y *)
     VAR ex: INTEGER;
   BEGIN
-    e("mulop");
+    e("MulOp");
     IF (x.mode = ORB.Const) & (y.mode = ORB.Const) THEN x.a := x.a * y.a
     ELSIF (y.mode = ORB.Const) & (y.a >= 2) & (log2(y.a, ex) = 1) THEN 
       load(x);
@@ -1505,7 +1520,7 @@ MODULE ORG;
   PROCEDURE DivOp*(op: INTEGER; VAR x, y: Item);   (* x := x op y *)
     VAR ex: INTEGER;
   BEGIN
-    e("divop");
+    e("DivOp");
     IF op = ORS.div THEN
       IF (x.mode = ORB.Const) & (y.mode = ORB.Const) THEN
         IF y.a > 0 THEN
@@ -1565,7 +1580,7 @@ MODULE ORG;
 
   PROCEDURE RealOp*(op: INTEGER; VAR x, y: Item);   (* x := x op y *)
   BEGIN 
-    e("realop");
+    e("RealOp");
     load(x); load(y);
     PutSR("wfr", 0, x.r);
     PutSR("wfr", 1, y.r);
@@ -1584,6 +1599,7 @@ MODULE ORG;
 
   PROCEDURE Singleton*(VAR x: Item);  (* x := {x} *)
   BEGIN
+    e("Singleton");
     IF x.mode = ORB.Const THEN x.a := LSL(1, x.a) 
     ELSE
       load(x);
@@ -1595,7 +1611,7 @@ MODULE ORG;
 
   PROCEDURE Set*(VAR x, y: Item);   (* x := {x .. y} *)
   BEGIN
-    e("set");
+    e("Set");
     IF (x.mode = ORB.Const) & (y.mode = ORB.Const) THEN
       IF x.a <= y.a THEN 
         x.a := LSL(2, y.a) - LSL(1, x.a) 
@@ -1650,7 +1666,7 @@ MODULE ORG;
   PROCEDURE SetOp*(op: INTEGER; VAR x, y: Item);   (* x := x op y *)
     VAR xset, yset: SET; (*x.type.form = Set*)
   BEGIN
-    e("setup");
+    e("SetOp");
     IF (x.mode = ORB.Const) & (y.mode = ORB.Const) THEN
       xset := SYSTEM.VAL(SET, x.a); 
       yset := SYSTEM.VAL(SET, y.a);
@@ -1695,6 +1711,7 @@ MODULE ORG;
 
   PROCEDURE CaseHead*(VAR x: Item; VAR L0, L1: INTEGER); (* L0 = Jump Table High bound addr, L1 = ELSE clause *)
   BEGIN 
+    e("CaseHead");
     CheckFreeRegs(4);
     load(x);  (*value of case expression*)
     PutRL("movi", RH, L0, FORWARD);       (* Get address of case table *)
@@ -1727,6 +1744,7 @@ MODULE ORG;
     END PutEntry;
 
   BEGIN
+    e("CaseTail");
     Texts.WriteString(CodeW, ".align 4"); Texts.WriteLn(CodeW);
     PutLabel(L0);
     IF n > 0 THEN 
@@ -1826,11 +1844,14 @@ MODULE ORG;
   (* Code generation of Assignments *)
 
   PROCEDURE StrToChar*(VAR x: Item);
-  BEGIN x.type := ORB.charType; DEC(strx, 4); x.a := ORD(str[x.a])
+  BEGIN 
+    e("StrToChar");
+    x.type := ORB.charType; DEC(strx, 4); x.a := ORD(str[x.a])
   END StrToChar;
 
   PROCEDURE CharToStr*(VAR x: Item);
   BEGIN 
+    e("CharToStr");
     x.type := ORB.strType; str[strx] := CHR(x.a); x.a := strx; x.b := 1; INC(strx);
     WHILE strx MOD 4 # 0 DO str[strx] := 0X; INC(strx) END
   END CharToStr;
@@ -1841,7 +1862,7 @@ MODULE ORG;
       max: INTEGER;
   BEGIN
     load(y);
-    e("store ");
+    e("Store ");
     IF x.type.size = 1 THEN op := "s8i"; max := 255 ELSE op := "s32i"; max := 1020 END ;
     IF x.mode = ORB.Var THEN
       eStr("(var) "); eStr(x.name);
@@ -1875,7 +1896,7 @@ MODULE ORG;
   PROCEDURE StoreStruct*(VAR x, y: Item); (* x := y, frame = 0 *)
   VAR size: INTEGER;
   BEGIN
-    e("store struct");
+    e("StoreStruct");
     IF y.type.size # 0 THEN
       loadAdr(x); loadAdr(y);
       IF (x.type.form = ORB.Array) &  (x.type.len > 0) THEN
@@ -1923,7 +1944,7 @@ MODULE ORG;
   PROCEDURE CopyString*(VAR x, y: Item);  (* x := y *) 
   VAR len: INTEGER;
   BEGIN 
-    e("copy string");
+    e("CopyString");
     CheckFreeRegs(4);
     loadAdr(x); 
     len := x.type.len;
@@ -1951,6 +1972,7 @@ MODULE ORG;
   
   PROCEDURE OpenArrayParam*(VAR x: Item);
   BEGIN loadAdr(x);
+    e("OpenArrayParam");
     IF x.type.len >= 0 THEN 
       PutRI("movi", RH, x.type.len) 
     ELSE
@@ -1961,7 +1983,9 @@ MODULE ORG;
 
   PROCEDURE VarParam*(VAR x: Item; ftype: ORB.Type);
   VAR xmd: INTEGER;
-  BEGIN xmd := x.mode; loadAdr(x);
+  BEGIN 
+    e("VarParam");
+    xmd := x.mode; loadAdr(x);
     IF (ftype.form = ORB.Array) & (ftype.len < 0) THEN (*open array*)
       IF x.type.len >= 0 THEN 
         PutRI("movi", RH, x.type.len) 
@@ -1980,11 +2004,14 @@ MODULE ORG;
   END VarParam;
 
   PROCEDURE ValueParam*(VAR x: Item);
-  BEGIN load(x)
+  BEGIN 
+    e("ValueParam");
+    load(x)
   END ValueParam;
 
   PROCEDURE StringParam*(VAR x: Item);
   BEGIN 
+    e("StringParam");
     loadStringAdr(x); 
     PutRI("movi", RH, x.b);
     incR  (*len*)
@@ -1994,11 +2021,13 @@ MODULE ORG;
 
   PROCEDURE For0*(VAR x, y: Item);
   BEGIN 
+    e("For0");
     load(y)
   END For0;
 
   PROCEDURE For1*(VAR x, y, z, w: Item; VAR L: INTEGER); (* for x := y to z by w *)
   BEGIN 
+    e("For1");
     IF z.mode = ORB.Const THEN 
       PutRI("movi", RH, z.a);
       incR
@@ -2020,6 +2049,7 @@ MODULE ORG;
 
   PROCEDURE For2*(VAR x, y, w: Item);
   BEGIN 
+    e("For2");
     load(x); 
     IF (w.a >= -128) & (w.a <= 127) THEN
       IF w.a # 0 THEN PutRRI("addi", x.r, x.r, w.a) END
@@ -2245,6 +2275,7 @@ MODULE ORG;
     VAR a, r, l: INTEGER;
   BEGIN
     (* interrupt procedures requires to be put in iram to be fast.  To be implemented *)
+    e("Enter");
     frame := 0;
     IF ~ProcPresent THEN
       ProcPresent := TRUE;
@@ -2283,6 +2314,7 @@ MODULE ORG;
 
   PROCEDURE Return*(procid: ORS.Ident; form: INTEGER; VAR x: Item; size: INTEGER; int: BOOLEAN; intLevel: INTEGER);
   BEGIN
+    e("Return");
     IF form # ORB.NoTyp THEN load(x) END;
     IF ~int THEN (*procedure epilog*)
       PutSingle("retw");
@@ -2308,7 +2340,7 @@ MODULE ORG;
       loadOp, storeOp: ARRAY 5 OF CHAR; 
       max, zr: INTEGER;
   BEGIN (*frame = 0*)
-    e("inc/dec" );
+    e("Increment" );
     IF x.type = ORB.byteType THEN
       eStr(" (byte)"); 
       loadOp := "l8ui"; storeOp := "s8i"; max :=  255
@@ -2369,6 +2401,7 @@ MODULE ORG;
   PROCEDURE Include*(inorex: INTEGER; VAR x, y: Item);
     VAR zr: INTEGER;
   BEGIN 
+    e("Include");
     loadAdr(x); 
     zr := RH; 
     PutRRI("l32i", RH, x.r, 0); incR;
@@ -2413,6 +2446,7 @@ MODULE ORG;
 
   PROCEDURE New*(VAR x: Item);
   BEGIN 
+    e("New");
     loadAdr(x); 
     loadTypTagAdr(x.type.base); 
     Trap(7, TrNew); 
@@ -2422,6 +2456,7 @@ MODULE ORG;
   PROCEDURE Pack*(VAR x, y: Item);
     VAR z: Item;
   BEGIN 
+    e("Pack");
     z := x; 
     load(x); 
     load(y);
@@ -2433,7 +2468,9 @@ MODULE ORG;
 
   PROCEDURE Unpk*(VAR x, y: Item);
     VAR z, e0: Item;
-  BEGIN  z := x; load(x); e0.mode := Reg; e0.r := RH; e0.type := ORB.intType;
+  BEGIN  
+    e("Unpk");
+    z := x; load(x); e0.mode := Reg; e0.r := RH; e0.type := ORB.intType;
     PutRRI("srai", RH, x.r, 23); 
     PutRRI("addi", RH, RH, -127); 
     Store(y, e0); incR;
@@ -2444,19 +2481,26 @@ MODULE ORG;
 
   PROCEDURE Led*(VAR x: Item);
   BEGIN (*load(x); Put1(Mov, RH, 0, -60); Put2(Str, x.r, RH, 0); decR*)
+    e("Led");
     ORS.Mark("Not implemented")
   END Led;
 
   PROCEDURE Get*(VAR x, y: Item);
-  BEGIN load(x); x.type := y.type; x.mode := RegI; x.a := 0; Store(y, x)
+  BEGIN 
+    e("Get");
+    load(x); x.type := y.type; x.mode := RegI; x.a := 0; Store(y, x)
   END Get;
 
   PROCEDURE Put*(VAR x, y: Item);
-  BEGIN load(x); x.type := y.type; x.mode := RegI; x.a := 0; Store(x, y)
+  BEGIN 
+    e("Put");
+    load(x); x.type := y.type; x.mode := RegI; x.a := 0; Store(x, y)
   END Put;
 
   PROCEDURE Copy*(VAR x, y, z: Item);
-  BEGIN load(x); load(y);
+  BEGIN 
+    e("Copy");
+    load(x); load(y);
     IF z.mode = ORB.Const THEN
       IF z.a > 0 THEN
         load(z) 
@@ -2482,13 +2526,16 @@ MODULE ORG;
   END Copy;
 
   PROCEDURE LDPSR*(VAR x: Item);
-  BEGIN (*x.mode = Const*)  
+  BEGIN 
+    e("LDPSR");
+    (*x.mode = Const*)  
     (* Put3(0, 15, x.a + 20H) *)
     ORS.Mark("LDPSR not implemented")
   END LDPSR;
 
   PROCEDURE LDREG*(VAR x, y: Item);
   BEGIN
+    e("LDREG");
     IF y.mode = ORB.Const THEN 
       PutRI("movi", x.a, y.a);
     ELSE 
@@ -2502,6 +2549,7 @@ MODULE ORG;
 
   PROCEDURE Abs*(VAR x: Item);
   BEGIN
+    e("ABS");
     IF x.mode = ORB.Const THEN 
       x.a := ABS(x.a)
     ELSE 
@@ -2517,6 +2565,7 @@ MODULE ORG;
 
   PROCEDURE Odd*(VAR x: Item);
   BEGIN 
+    e("Odd");
     load(x);
     PutRI("movi", RH, 1);
     PutRRR("and", x.r, x.r, RH); 
@@ -2524,6 +2573,7 @@ MODULE ORG;
 
   PROCEDURE Floor*(VAR x: Item);
   BEGIN 
+    e("Floor");
     load(x); 
     PutSR("wfr", 0, x.r);
     PutRSI("floor.s", x.r, 0, 0);
@@ -2531,6 +2581,7 @@ MODULE ORG;
 
   PROCEDURE Float*(VAR x: Item);
   BEGIN 
+    e("Float");
     load(x); 
     PutSRI("float.s", 0, x.r, 0);
     PutRS("rfr", x.r, 0);
@@ -2538,6 +2589,7 @@ MODULE ORG;
 
   PROCEDURE Ord*(VAR x: Item);
   BEGIN
+    e("Ord");
     IF x.mode IN {ORB.Var, ORB.Par, RegI, Cond} THEN load(x) END
   END Ord;
 
@@ -2559,6 +2611,7 @@ MODULE ORG;
 
   PROCEDURE Shift*(fct: INTEGER; VAR x, y: Item);
   BEGIN 
+    e("Shift");
     load(x);
     IF fct = 0 THEN  (* LSL *)
       IF y.mode = ORB.Const THEN
@@ -2593,24 +2646,28 @@ MODULE ORG;
 
   PROCEDURE ADC*(VAR x, y: Item);
   BEGIN 
+    e("ADC");
     (* load(x); load(y); Put0(Add+2000H, x.r, x.r, y.r); decR *)
     ORS.Mark("ADC not implemented")
   END ADC;
 
   PROCEDURE SBC*(VAR x, y: Item);
   BEGIN 
+    e("SBC");
     (* load(x); load(y); Put0(Sub+2000H, x.r, x.r, y.r); decR *)
     ORS.Mark("SBC not implemented")
   END SBC;
 
   PROCEDURE UML*(VAR x, y: Item);
   BEGIN 
+    e("UML");
     (* load(x); load(y); Put0(Mul+2000H, x.r, x.r, y.r); decR *)
     ORS.Mark("UML not implemented")
   END UML;
 
   PROCEDURE Bit*(VAR x, y: Item);
   BEGIN 
+    e("Bit");
     load(x); 
     PutRRI("l32i", x.r, x.r, 0);
     load(y);
@@ -2618,19 +2675,24 @@ MODULE ORG;
   END Bit;
 
   PROCEDURE Register*(VAR x: Item);
-  BEGIN (*x.mode = Const*)
+  BEGIN 
+    e("Register");
+    (*x.mode = Const*)
     (* Put0(Mov, RH, 0, x.a MOD 10H); x.mode := Reg; x.r := RH; incR *)
     ORS.Mark("REG not implemented")
   END Register;
 
   PROCEDURE H*(VAR x: Item);
-  BEGIN (*x.mode = Const*)
+  BEGIN 
+    e("H");
+    (*x.mode = Const*)
     (* Put0(Mov + U + x.a MOD 2 * V, RH, 0, 0); x.mode := Reg; x.r := RH; incR *)
     ORS.Mark("H not implemented")
   END H;
 
   PROCEDURE Adr*(VAR x: Item);
   BEGIN 
+    e("Adr");
     IF x.mode IN {ORB.Var, ORB.Par, RegI} THEN loadAdr(x)
     ELSIF (x.mode = ORB.Const) & (x.type.form = ORB.Proc) THEN load(x)
     ELSIF (x.mode = ORB.Const) & (x.type.form = ORB.String) THEN loadStringAdr(x)
@@ -2640,6 +2702,7 @@ MODULE ORG;
 
   PROCEDURE Condition*(VAR x: Item);
   BEGIN 
+    e("Condition");
     (*x.mode = Const*) (* SetCC(x, x.a) *)
     ORS.Mark("COND not implemented")
   END Condition;
