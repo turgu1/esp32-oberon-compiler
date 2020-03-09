@@ -889,15 +889,31 @@ MODULE ORG;
     END
   END GetExtSB;
 
-  PROCEDURE GetTypesDescrSB;
+  PROCEDURE GetTypesDescrSB(base: INTEGER);
+  VAR
+    moduleId: ORS.Ident;
+    moduleKey: INTEGER;
   BEGIN
-    e("GetTypesDescrSB");
-    Texts.WriteString(CodeW, "    movi a");
-    Texts.WriteInt(CodeW, RH, 0);
-    Texts.WriteString(CodeW, ", _");
-    Texts.WriteString(CodeW, thisModuleId);
-    Texts.WriteString(CodeW, "_s_types");
-    Texts.WriteLn(CodeW);
+    e("GetTypesDescrSB base:");eInt(base);
+    IF base = 0 THEN
+      Texts.WriteString(CodeW, "    movi a");
+      Texts.WriteInt(CodeW, RH, 0);
+      Texts.WriteString(CodeW, ", _");
+      Texts.WriteString(CodeW, thisModuleId);
+      Texts.WriteString(CodeW, "_s_types");
+      Texts.WriteLn(CodeW);
+    ELSE
+      Texts.WriteString(CodeW, "    movi a");
+      Texts.WriteInt(CodeW, RH, 0);
+      ModuleInfo(base, moduleId, moduleKey);
+      eStr(" moduleId:"); eStr(moduleId);
+      Texts.WriteString(CodeW, ", _");
+      Texts.WriteString(CodeW, moduleId);
+      Texts.WriteString(CodeW, "_");
+      WriteHex(CodeW, moduleKey);
+      Texts.WriteString(CodeW, "_s_data_types");
+      Texts.WriteLn(CodeW);
+    END
   END GetTypesDescrSB;
 
   (* 
@@ -1095,7 +1111,7 @@ MODULE ORG;
     e("loadTypTagAdr");
     offset := T.len;
     CheckFreeRegs(1);
-    GetTypesDescrSB;
+    GetTypesDescrSB(-T.mno);
     IF offset > 127 THEN
       CheckFreeRegs(2);
       PutRI("movi", RH+1, offset);
@@ -2966,7 +2982,7 @@ PROCEDURE Abs*(VAR x: Item);
 
     (* types description section *)
     IF tdx > 0 THEN
-      SectionHeader("data_types", moduleId, moduleKey, FALSE);
+      SectionHeader("data_types", moduleId, moduleKey, TRUE);
       Texts.WriteString(AsW, "_");
       Texts.WriteString(AsW, moduleId);
       Texts.WriteString(AsW, "_s_types:");

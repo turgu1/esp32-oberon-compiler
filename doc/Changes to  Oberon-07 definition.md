@@ -1,6 +1,14 @@
 # Changes to the Oberon-07 definition
 
-This document explains the changes made to the ESP32 Oberon-07 compiler in regard of the Niklaus Wirth language definition and implementation in Project Oberon.
+This document explains the changes made to the ESP32 Oberon-07 compiler in regard of the Niklaus Wirth language definition and implementation in Project Oberon. Note that using any of these changes will brake the portability of your code with the Project Oberon system.
+
+## Identifiers
+
+The underscore character is allowed inside an identifier. The first character must be a letter (lower or upper case).
+
+```
+ident = letter {letter | digit | "_" }.
+```
 
 ## Standard procedures
 

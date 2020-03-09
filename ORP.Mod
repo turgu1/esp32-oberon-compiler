@@ -803,7 +803,9 @@ MODULE ORP; (*N. Wirth 1.7.97 / 8.2.2020  Oberon compiler for ESP32 in Oberon-07
         ELSE NumericCasePart
         END;
         Check(ORS.end, "no END")
-      ELSIF sym = ORS.asm THEN ORG.assembler; ORS.Get(sym)
+      ELSIF sym = ORS.asm THEN 
+        Out.String("ASM..."); Out.Ln;
+        ORG.assembler; ORS.Get(sym)
       END ;
       ORG.CheckRegs;
       IF sym = ORS.semicolon THEN ORS.Get(sym)
