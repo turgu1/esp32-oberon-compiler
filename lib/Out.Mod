@@ -151,7 +151,7 @@ END SetBaudRate;
 PROCEDURE Open*;
 BEGIN
   SetBaudRate(Baud115K);
-END Setup;
+END Open;
 
 BEGIN
   Open;
