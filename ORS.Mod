@@ -21,7 +21,7 @@ MODULE ORS; (* NW 19.9.93 / 15.3.2017  Scanner in Oberon-07*)
 
   CONST 
     IdLen*        =  32;
-    NKW           =  36;  (*nof keywords*)
+    NKW           =  37;  (*nof keywords*)
     maxExp        =  38; 
     stringBufSize = 256;
   
@@ -43,9 +43,10 @@ MODULE ORS; (* NW 19.9.93 / 15.3.2017  Scanner in Oberon-07*)
     else*   = 55; elsif*     = 56; until*     = 57; return* = 58;
     array*  = 60; record*    = 61; pointer*   = 62; const*  = 63; type*   = 64;
     var*    = 65; procedure* = 66; begin*     = 67; import* = 68; module* = 69; 
-    eot     = 70; debugon    = 71; debugoff   = 72;
+    eot     = 70; debugon    = 71; debugoff   = 72; asm*    = 73;
 
-  TYPE Ident* = ARRAY IdLen OF CHAR;
+  TYPE 
+    Ident* = ARRAY IdLen OF CHAR;
 
   VAR 
     ival*, slen*: INTEGER;  (*results of Get*)
@@ -65,7 +66,7 @@ MODULE ORS; (* NW 19.9.93 / 15.3.2017  Scanner in Oberon-07*)
         RECORD sym: INTEGER; id: ARRAY 12 OF CHAR END;
 
     debugging*: BOOLEAN;
-  
+    
   PROCEDURE CopyId*(VAR ident: Ident);
   BEGIN ident := id
   END CopyId;
@@ -76,11 +77,15 @@ MODULE ORS; (* NW 19.9.93 / 15.3.2017  Scanner in Oberon-07*)
 
   PROCEDURE GetCh();
   BEGIN
-    Texts.Read(R, ch);
-    IF ch = EOL THEN
-      INC(lineNbr); columnNbr := 1 
-    ELSIF (ch >= " ") OR (ch = TAB) THEN
-      INC(columnNbr)
+    IF R.eot THEN
+      ch := 0X;
+    ELSE
+      Texts.Read(R, ch);
+      IF ch = EOL THEN
+        INC(lineNbr); columnNbr := 1 
+      ELSIF (ch >= " ") OR (ch = TAB) THEN
+        INC(columnNbr)
+      END
     END
   END GetCh;
 
@@ -242,6 +247,38 @@ MODULE ORS; (* NW 19.9.93 / 15.3.2017  Scanner in Oberon-07*)
     IF ~R.eot THEN GetCh() ELSE Mark("unterminated comment") END
   END comment;
 
+  PROCEDURE GetAssemblerLine*(VAR line: ARRAY OF CHAR): BOOLEAN;
+  VAR
+    i, size : INTEGER;
+    theEnd : BOOLEAN;
+  BEGIN 
+    GetCh(); 
+    theEnd := FALSE;
+    i := 0; size := LEN(line);
+    WHILE ~R.eot & (ch <= " ") DO GetCh() END;
+    WHILE (i < (size - 7)) & ((ch = " ") OR (ch = TAB)) DO 
+      line[i] := ch; INC(i); GetCh() 
+    END;
+    IF ch = "E" THEN
+      line[i] := ch; INC(i); GetCh();
+      IF ch = "N" THEN
+        line[i] := ch; INC(i); GetCh();
+        IF ch = "D" THEN
+          line[i] := ch; INC(i); GetCh();
+          IF (ch = " ") OR (ch < " ") THEN
+            GetCh();
+            theEnd := TRUE
+          END
+        END
+      END
+    END;
+    IF ~theEnd THEN
+      WHILE ~ (R.eot OR (ch < " ") OR (i > (size - 2)))  DO line[i] := ch; INC(i); GetCh() END;
+      line[i] := 0X;
+    END;
+    RETURN ~theEnd
+  END GetAssemblerLine;
+
   PROCEDURE Get*(VAR sym: INTEGER);
   BEGIN
     REPEAT
@@ -336,6 +373,7 @@ BEGIN Texts.OpenWriter(W); k := 0; KWX[0] := 0; KWX[1] := 0;
   EnterKW(div, "DIV");
   EnterKW(mod, "MOD");
   EnterKW(for, "FOR");
+  EnterKW(asm, "ASM");
   KWX[3] := k;
   EnterKW(else, "ELSE");
   EnterKW(then, "THEN");

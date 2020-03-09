@@ -1,8 +1,10 @@
 # Compiler changes
 
 - [x] Add INTEGER/BYTE/CHAR in CASE statements
-- [ ] Add bit-wise AND/BOR/XOR/NOT for INTEGER/BYTE functions
-- [ ] Add MIN/MAX for INTEGER/BYTE/REAL Functions
+- [x] User's assembly language
+- [x] Add bit-wise AND/BOR/XOR/NOT for INTEGER/BYTE functions
+- [x] Add MIN/MAX for INTEGER/BYTE/REAL Functions
+- [x] Add SQRT function
 - [ ] Revisit ORG.ChrToStr/ORG.StrToChr functions
 - [ ] Implement Const Char as a string parameter
 - [ ] Revisit Types descriptor

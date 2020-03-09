@@ -6,7 +6,7 @@ An ESP32 Oberon program requires runtime support. The compiler is supplied with 
 
 - A Linker Script file that supply memory mapping information to the linker. It is located in `lib/ld/esp32.ld`.
 
-- Several Oberon modules that are located in `lib/modules` folder. They are described in the following sections
+- Several Oberon modules that are located in the `lib/modules` folder. They are described in the following sections
 
 
 ## Modules Initialization Sequence

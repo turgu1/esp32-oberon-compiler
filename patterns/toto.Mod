@@ -20,13 +20,7 @@ VAR
   p2: P2;
 DBGON  
 BEGIN 
-  p0.x := 0;
-  p1.y := 1;
   p0(P1).y := 3;
-  p0(P2).z := 5;
-  IF p1 IS P2 THEN
-    p0 := p2
-  END
 END Pattern13.
 DBGOFF
 (* 

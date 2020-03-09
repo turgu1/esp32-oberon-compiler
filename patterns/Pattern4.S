@@ -3,8 +3,6 @@
 
     .align 4
     .section .data_types_Pattern4_A8E2D4B5
-    .global _Pattern4_A8E2D4B5_s_data_types
-_Pattern4_A8E2D4B5_s_data_types:
 _Pattern4_s_types:
     .int 32,-1,-1,-1,12,-1
 
@@ -13,7 +11,7 @@ _Pattern4_s_types:
     .global _Pattern4_A8E2D4B5_s_bss
 _Pattern4_A8E2D4B5_s_bss:
 _Pattern4_s_bss:
-    .space 48
+    .space 24
 
 
 
@@ -24,17 +22,17 @@ _Pattern4_init:
     entry a1, 16
     movi a2, _Pattern4_s_bss
     movi a3, 10
-    s32i a3, a2, 32
-    l32i a3, a2, 24
+    s32i a3, a2, 8
+    l32i a3, a2, 0
     movi a4, 6
     s32i a4, a3, 0
-    l32i a3, a2, 24
+    l32i a3, a2, 0
     movi a4, 48
     s8i a4, a3, 11
-    l32i a3, a2, 24
-    l32i a4, a2, 28
+    l32i a3, a2, 0
+    l32i a4, a2, 4
     s32i a4, a3, 12
-    l32i a3, a2, 24
+    l32i a3, a2, 0
     l32i a3, a3, 12
     movi a4, 0
     s32i a4, a3, 12

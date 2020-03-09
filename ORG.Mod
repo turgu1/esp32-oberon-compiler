@@ -11,7 +11,7 @@ MODULE ORG;
   CONST 
     WordSize* = 4;
     SP = 1; SB = 2;   (* dedicated registers *)
-    maxStrx = 5000; maxTD = 160;
+    maxStrx = 5000; maxTD = 250;
 
     Reg = 10; RegI = 11; Cond = 12;  (* internal item modes *)
 
@@ -692,7 +692,7 @@ MODULE ORG;
     reverseArguments: BOOLEAN;
     thisCond: INTEGER;
   BEGIN 
-    e("PutCondBranch");
+    e("PutCondBranch RH:"); eInt(RH);
     
     reverseArguments := cond >= 100;
     thisCond := cond;
@@ -846,6 +846,19 @@ MODULE ORG;
     END
   END CheckFreeRegs;
 
+  (* verbatim assembly language input from the source code *)
+
+  PROCEDURE assembler*;
+  VAR
+    line : ARRAY 256 OF CHAR;
+  BEGIN 
+    Texts.WriteString(CodeW, "  ");
+    WHILE ORS.GetAssemblerLine(line) DO
+      Texts.WriteString(CodeW, line); 
+      Texts.WriteLn(CodeW);
+    END;
+  END assembler;
+
   (* loading of operands and addresses into registers *)
 
   PROCEDURE GetLocalSB;
@@ -875,6 +888,17 @@ MODULE ORG;
       Texts.WriteLn(CodeW);
     END
   END GetExtSB;
+
+  PROCEDURE GetTypesDescrSB;
+  BEGIN
+    e("GetTypesDescrSB");
+    Texts.WriteString(CodeW, "    movi a");
+    Texts.WriteInt(CodeW, RH, 0);
+    Texts.WriteString(CodeW, ", _");
+    Texts.WriteString(CodeW, thisModuleId);
+    Texts.WriteString(CodeW, "_s_types");
+    Texts.WriteLn(CodeW);
+  END GetTypesDescrSB;
 
   (* 
     Move (load or store) location r2+offset. The ESP32 uses l32i l8ui s32i s8ui
@@ -1065,8 +1089,21 @@ MODULE ORG;
   END loadCond;
 
   PROCEDURE loadTypTagAdr(T: ORB.Type);
-    VAR x: Item;
-  BEGIN x.mode := ORB.Var; x.a := T.len; x.r := -T.mno; loadAdr(x)
+    VAR 
+      offset : INTEGER;
+  BEGIN 
+    e("loadTypTagAdr");
+    offset := T.len;
+    CheckFreeRegs(1);
+    GetTypesDescrSB;
+    IF offset > 127 THEN
+      CheckFreeRegs(2);
+      PutRI("movi", RH+1, offset);
+      PutRRR("add", RH, RH, RH+1)
+    ELSIF offset # 0 THEN
+      PutRRI("addi", RH, RH, offset)
+    END;
+    incR
   END loadTypTagAdr;
 
   PROCEDURE loadStringAdr(VAR x: Item);
@@ -1124,11 +1161,7 @@ MODULE ORG;
 
   PROCEDURE MakeItem*(VAR x: Item; y: ORB.Object; curlev: INTEGER);
   BEGIN 
-    (*
-    Out.String("MakeItem, Object:"); Out.Ln;
-    ShowObject(y, 4);
-    *)
-    e("MakeItem");
+    e("MakeItem class:"); eInt(y.class); eStr(" val:"); eInt(y.val);
     x.mode := y.class; 
     x.type := y.type; 
     x.a    := y.val; 
@@ -1136,15 +1169,19 @@ MODULE ORG;
     IF y.class = ORB.Par THEN
       x.b := 0
     ELSIF (y.class = ORB.Const) & (y.type.form = ORB.String) THEN
-      x.b := y.lev  (*len*) ;
+      eStr(" len:");
+      x.b := y.lev  (* length *)
     ELSE
-      x.r := y.lev
+      eStr(" lev:");
+      x.r := y.lev    (* level *)
     END ;
+    eInt(y.lev);
     IF (y.lev > 0) & (y.lev # curlev) & (y.class # ORB.Const) THEN 
       ORS.Mark("not accessible ")
     END;
     x.lf := 0;
     x.lt := 0;
+    eStr(" name:"); eStr(y.name);
     x.name := y.name
   END MakeItem;
 
@@ -1262,7 +1299,7 @@ MODULE ORG;
   END DeRef;
 
   PROCEDURE Q(T: ORB.Type; VAR dcw: INTEGER);
-  BEGIN (*one entry of type descriptor extension table*)
+  BEGIN (* one entry of type descriptor extension table *)
     IF T.base # NIL THEN
       Q(T.base, dcw); data[dcw] := (T.mno*1000H + T.len) * 1000H + dcw - fixorgT;
       fixorgT := dcw; INC(dcw)
@@ -1305,10 +1342,10 @@ MODULE ORG;
     ELSE
       s := (s+263) DIV 256 * 256
     END ;
-    T.len := dc; (*len used as address*)
+    T.len := dc; (* len used as address offset in types section *)
     data[dcw] := s; 
     INC(dcw);  
-    k := T.nofpar;   (*extension level!*)
+    k := T.nofpar;   (* extension level! *)
     IF k > 3 THEN 
       ORS.Mark("ext level too large")
     ELSE 
@@ -1323,7 +1360,7 @@ MODULE ORG;
     data[dcw] := -1; 
     INC(dcw); 
     tdx := dcw; 
-    dc := dcw*4;
+    dc := dcw * 4;
     IF tdx >= maxTD THEN 
       ORS.Mark("too many record types"); 
       tdx := 0 
@@ -1332,29 +1369,38 @@ MODULE ORG;
 
   PROCEDURE TypeTest*(VAR x: Item; T: ORB.Type; varpar, isguard: BOOLEAN);
   BEGIN
-    e("TypeTest");
+    e("TypeTest RH:"); eInt(RH);
     IF T = NIL THEN
-      IF x.mode >= Reg THEN decR END ;
-      SetCC(x, 7)
-    ELSE (*fetch tag into RH*)
+      IF x.mode >= Reg THEN PutRI("movi", RH-1, 1) ELSE PutRI("movi", RH, 1); incR END;
+      SetCC(x, TR)
+    ELSE 
+      (*fetch tag into RH*)
       IF varpar THEN 
-        PutMoveRRI("l32i", 1020, RH, SP, x.a+4+frame)
+        PutMoveRRI("l32i", 1020, RH, SP, x.a + 4 + frame);
       ELSE 
-        load(x);
-        PutBranchR("beqz", RH, label, FORWARD);  (*NIL belongs to every pointer type*)
-        PutRRI("addi", RH, x.r, -8);
+        load(x); decR;
+        PutBranchR("bnez", RH, label, FORWARD);  
+        loadTypTagAdr(T); decR; (* NIL belongs to every pointer type *)
+        PutJump("j", label+1, FORWARD);
+        PutLabel(label); INC(label);
+        PutRRI("addi", RH, RH, -8);
         PutRRI("l32i", RH, RH, 0)
       END ;
       PutMoveRRI("l32i", 1020, RH, RH, T.nofpar * 4); incR;
-      loadTypTagAdr(T);  (*tag of T*)
-      (* Put0(Cmp, RH-1, RH-1, RH-2); *) decR; decR;
+      (* tag of T *)
       IF ~varpar THEN PutLabel(label); INC(label) END ;
+      loadTypTagAdr(T);  
       IF isguard THEN
-        IF check THEN Trap(NE, TrGuard); incR END
-      ELSE SetCC(x, EQ);
-        IF ~varpar THEN decR END
+        IF check THEN
+          Trap(NEQ, TrGuard) 
+        ELSE
+          decR; decR
+        END
+      ELSE
+        SetCC(x, EQU);
       END
-    END
+    END;
+    e("End of TypeTest RH:"); eInt(RH)
   END TypeTest;
 
   (* Code generation for Boolean operators *)
@@ -2609,6 +2655,45 @@ MODULE ORG;
     END 
   END Len;
 
+  PROCEDURE BitOp*(fct: INTEGER; VAR x, y: Item);
+  VAR op: ARRAY 5 OF CHAR;
+  BEGIN
+    IF fct = 0 THEN op := "and" 
+    ELSIF fct = 1 THEN op := "or" 
+    ELSIF fct = 2 THEN op := "xor"
+    END;
+
+    load(x); load(y);
+    PutRRR(op, x.r, x.r, y.r);
+    decR
+  END BitOp;
+
+  PROCEDURE BitNot*(VAR x: Item);
+  BEGIN
+    load(x);
+    PutRI("movi", RH, -1);
+    PutRRR("xor", x.r, x.r, RH);
+  END BitNot;
+
+  PROCEDURE MinMax*(fct: INTEGER; VAR x, y: Item);
+  VAR op: ARRAY 5 OF CHAR;
+  BEGIN 
+    IF fct = 0 THEN op := "min" 
+    ELSIF fct = 1 THEN op := "max" 
+    END;
+    load(x); load(y);
+    PutRRR(op, x.r, x.r, y.r);
+    decR
+  END MinMax;
+
+  PROCEDURE Sqrt*(VAR x: Item);
+  BEGIN 
+    load(x);
+    PutSR("wfr", 0, x.r);
+    PutA("call", "__fsqrt32");
+    PutRS("rfr", x.r, 1);
+  END Sqrt;
+
   PROCEDURE Shift*(fct: INTEGER; VAR x, y: Item);
   BEGIN 
     e("Shift");
@@ -2706,10 +2791,6 @@ MODULE ORG;
     (*x.mode = Const*) (* SetCC(x, x.a) *)
     ORS.Mark("COND not implemented")
   END Condition;
-
-  PROCEDURE SetDataSize*(dc: INTEGER);
-  BEGIN varsize := dc
-  END SetDataSize;
 
   PROCEDURE Header*;
   BEGIN 
@@ -2866,7 +2947,7 @@ MODULE ORG;
 
     (* types description section *)
     IF tdx > 0 THEN
-      SectionHeader("data_types", moduleId, moduleKey, TRUE);
+      SectionHeader("data_types", moduleId, moduleKey, FALSE);
       Texts.WriteString(AsW, "_");
       Texts.WriteString(AsW, moduleId);
       Texts.WriteString(AsW, "_s_types:");
@@ -2976,10 +3057,10 @@ MODULE ORG;
       obj := obj.next
     END ;
     Files.Write(R, 0); (* end of list *)
-    Files.WriteInt(R, tdx*4);
+    Files.WriteInt(R, tdx * 4);
     i := 0;
     WHILE i < tdx DO Files.WriteInt(R, data[i]); INC(i) END ; (*type descriptors*)
-    Files.WriteInt(R, varsize - tdx*4);  (*data*)
+    Files.WriteInt(R, varsize - tdx * 4);  (*data*)
     Files.WriteInt(R, strx);
     FOR i := 0 TO strx-1 DO Files.Write(R, ORD(str[i])) END ;  (*strings*)
     Files.WriteInt(R, pc);  (*code len*)
@@ -3030,7 +3111,8 @@ MODULE ORG;
     check   := generateCheckCode;
 
     tdx     := 0; 
-    strx    := 0; 
+    strx    := 0;
+    varsize := 0; 
     RH      := FirstRH; 
     fixorgP := 0; 
     fixorgD := 0; 
@@ -3042,7 +3124,12 @@ MODULE ORG;
     Texts.WriteLn(CodeW);
 
     ProcPresent := FALSE;
+
   END Open;
+
+  PROCEDURE SetDataSize*(dc: INTEGER);
+  BEGIN varsize := dc
+  END SetDataSize;
 
 BEGIN 
   relmap[0] := EQU; (* = *)

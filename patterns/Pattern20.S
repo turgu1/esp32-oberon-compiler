@@ -60,12 +60,12 @@ _q:
     movi a6, 1
     movi a7, 0
     call4 _qa
-    mov a3, a6
+    mov a3, a7
     s8i a3, a1, 8
     movi a6, 1
     movi a7, 0
     call4 _qb
-    mov a3, a6
+    mov a3, a7
     s8i a3, a1, 8
     retw
     .size _q, .-_q

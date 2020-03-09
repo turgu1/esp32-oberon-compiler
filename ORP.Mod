@@ -9,13 +9,16 @@ MODULE ORP; (*N. Wirth 1.7.97 / 8.2.2020  Oberon compiler for ESP32 in Oberon-07
   
   CONST NofCases = 256; (* Max nomber of case labels in a CASE statement *)
 
-  TYPE PtrBase = POINTER TO PtrBaseDesc;
+  TYPE 
+    PtrBase = POINTER TO PtrBaseDesc;
     PtrBaseDesc = RECORD  (*list of names of pointer base types*)
       name: ORS.Ident; type: ORB.Type; next: PtrBase
     END ;
   
-  VAR sym: INTEGER;   (*last symbol read*)
-    dc: INTEGER;    (*data counter*)
+  VAR 
+    sym: INTEGER;   (* last symbol read *)
+    tdc: INTEGER;   (* types descriptors size counter *)
+    dc : INTEGER;   (* data counter *) 
     level, exno: INTEGER;
     newSF: BOOLEAN;  (*option flag*)
     expression: PROCEDURE (VAR x:    ORG.Item);  (*to avoid forward reference*)
@@ -126,8 +129,12 @@ MODULE ORP; (*N. Wirth 1.7.97 / 8.2.2020  Oberon compiler for ESP32 in Oberon-07
 
   PROCEDURE TypeTest(VAR x: ORG.Item; T: ORB.Type; guard: BOOLEAN);
     VAR xt: ORB.Type;
-  BEGIN xt := x.type;
-    IF (T.form = xt.form ) & ((T.form = ORB.Pointer) OR (T.form = ORB.Record) & (x.mode = ORB.Par)) THEN
+  BEGIN 
+    xt := x.type;
+    IF (T.form = xt.form ) & 
+       ((T.form = ORB.Pointer) OR 
+        (T.form = ORB.Record) & 
+        (x.mode = ORB.Par)) THEN
       WHILE (xt # T) & (xt # NIL) DO xt := xt.base END ;
       IF xt # T THEN xt := x.type;
         IF xt.form = ORB.Pointer THEN
@@ -287,7 +294,9 @@ MODULE ORP; (*N. Wirth 1.7.97 / 8.2.2020  Oberon compiler for ESP32 in Oberon-07
     Check(ORS.rparen, "no )");
     IF n = npar THEN
       IF fct = 0 THEN (*ABS*)
-        IF x.type.form IN {ORB.Int, ORB.Real} THEN ORG.Abs(x); restyp := x.type ELSE ORS.Mark("bad type") END
+        IF x.type.form IN {ORB.Int, ORB.Real} THEN
+          ORG.Abs(x); restyp := x.type 
+        ELSE ORS.Mark("bad type") END
       ELSIF fct = 1 THEN (*ODD*)   CheckInt(x);  ORG.Odd(x)
       ELSIF fct = 2 THEN (*FLOOR*) CheckReal(x); ORG.Floor(x)
       ELSIF fct = 3 THEN (*FLT*)   CheckInt(x);  ORG.Float(x)
@@ -321,6 +330,18 @@ MODULE ORP; (*N. Wirth 1.7.97 / 8.2.2020  Oberon compiler for ESP32 in Oberon-07
         END
       ELSIF fct = 19 THEN (*COND*) CheckConst(x); CheckInt(x); ORG.Condition(x)
       ELSIF fct = 20 THEN (*H*) CheckConst(x); CheckInt(x); ORG.H(x)
+      ELSIF fct = 21 THEN (*NOT*) CheckInt(x); ORG.BitNot(x)
+      ELSIF fct IN {22, 23, 24} THEN (*AND, BOR, XOR*) 
+        CheckInt(x); CheckInt(y);
+        ORG.BitOp(fct-22, x, y);
+      ELSIF fct IN {25, 26} THEN (*MIN, MAX*) 
+        IF ((x.type.form = ORB.Real) & (y.type.form = ORB.Real)) OR
+           ((x.type.form IN {ORB.Int, ORB.Byte}) & (y.type.form IN {ORB.Int, ORB.Byte})) THEN
+          ORG.MinMax(fct-25, x, y);
+          restyp := x.type 
+        ELSE ORS.Mark("bad type") END
+      ELSIF fct = 27 THEN (*SQRT*) CheckReal(x); ORG.Sqrt(x)
+      ELSE ORS.Mark("bad type")
       END;
       x.type := restyp
     ELSE ORS.Mark("wrong nof params")
@@ -652,7 +673,7 @@ MODULE ORP; (*N. Wirth 1.7.97 / 8.2.2020  Oberon compiler for ESP32 in Oberon-07
  *)
   BEGIN (* StatSequence *)
     REPEAT (*sync*) obj := NIL;
-      IF ~((sym >= ORS.ident)  & (sym <= ORS.for) OR (sym >= ORS.semicolon)) THEN
+      IF ~((sym >= ORS.ident) & (sym <= ORS.for) OR (sym >= ORS.semicolon)) THEN
         ORS.Mark("statement expected");
         REPEAT ORS.Get(sym) UNTIL (sym >= ORS.ident)
       END;
@@ -780,6 +801,7 @@ MODULE ORP; (*N. Wirth 1.7.97 / 8.2.2020  Oberon compiler for ESP32 in Oberon-07
         ELSE NumericCasePart
         END;
         Check(ORS.end, "no END")
+      ELSIF sym = ORS.asm THEN ORG.assembler; ORS.Get(sym)
       END ;
       ORG.CheckRegs;
       IF sym = ORS.semicolon THEN ORS.Get(sym)
@@ -988,7 +1010,7 @@ MODULE ORP; (*N. Wirth 1.7.97 / 8.2.2020  Oberon compiler for ESP32 in Oberon-07
       ORS.Get(sym);
       WHILE sym = ORS.ident DO
         ORS.CopyId(id); ORS.Get(sym); CheckExport(expo);
-        IF sym = ORS.eql THEN ORS.Get(sym) ELSE ORS.Mark("= ?") END;
+        IF sym = ORS.eql THEN ORS.Get(sym) ELSE ORS.Mark("= missing") END;
         expression(x);
         IF (x.type.form = ORB.String) & (x.b = 2) THEN ORG.StrToChar(x) END ;
         ORB.NewObj(obj, id, ORB.Const); obj.expo := expo;
@@ -1002,18 +1024,18 @@ MODULE ORP; (*N. Wirth 1.7.97 / 8.2.2020  Oberon compiler for ESP32 in Oberon-07
       ORS.Get(sym);
       WHILE sym = ORS.ident DO
         ORS.CopyId(id); ORS.Get(sym); CheckExport(expo);
-        IF sym = ORS.eql THEN ORS.Get(sym) ELSE ORS.Mark("=?") END ;
+        IF sym = ORS.eql THEN ORS.Get(sym) ELSE ORS.Mark("= missing") END ;
         Type(tp);
         ORB.NewObj(obj, id, ORB.Typ); obj.type := tp; obj.expo := expo; obj.lev := level;
         IF tp.typobj = NIL THEN tp.typobj := obj END ;
         IF expo & (obj.type.form = ORB.Record) THEN obj.exno := exno; INC(exno) ELSE obj.exno := 0 END ;
         IF tp.form = ORB.Record THEN
-          ptbase := pbsList;  (*check whether this is base of a pointer type; search and fixup*)
+          ptbase := pbsList;  (* check whether this is base of a pointer type; search and fixup *)
           WHILE ptbase # NIL DO
             IF obj.name = ptbase.name THEN ptbase.type.base := obj.type END ;
             ptbase := ptbase.next
           END ;
-          IF level = 0 THEN ORG.BuildTD(tp, dc) END    (*type descriptor; len used as its address*)
+          IF level = 0 THEN ORG.BuildTD(tp, tdc) END    (*type descriptor; len used as its address*)
         END ;
         Check(ORS.semicolon, "; missing")
       END
@@ -1125,7 +1147,7 @@ MODULE ORP; (*N. Wirth 1.7.97 / 8.2.2020  Oberon compiler for ESP32 in Oberon-07
     ORS.Get(sym);
     IF sym = ORS.module THEN
       ORS.Get(sym);
-      dc := 0;
+      dc := 0; tdc := 0;
       ORB.Init; ORB.OpenScope;
       IF sym = ORS.ident THEN
         ORS.CopyId(modid); ORS.Get(sym);
@@ -1162,7 +1184,7 @@ MODULE ORP; (*N. Wirth 1.7.97 / 8.2.2020  Oberon compiler for ESP32 in Oberon-07
         Texts.WriteLn(W); Texts.WriteString(W, "compilation FAILED");
         Texts.WriteLn(W); Texts.Append(Logger.Log, W.buf)
       END;
-      IF verbose THEN Texts.WriteLn(W) ; Texts.Append(Logger.Log, W.buf) END;
+      IF verbose THEN Texts.WriteLn(W); Texts.Append(Logger.Log, W.buf) END;
       ORB.CloseScope; pbsList := NIL
     ELSE ORS.Mark("must start with MODULE")
     END

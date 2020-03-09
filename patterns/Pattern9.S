@@ -23,9 +23,9 @@ _F:
     blt a3, a4, 1f
     l32i a10, a1, 0
     call8 _F
-    mov a6, a10
+    mov a6, a11
     call4 _F
-    mov a3, a6
+    mov a3, a7
     s32i a3, a1, 0
 1:
     l32i a3, a1, 0
