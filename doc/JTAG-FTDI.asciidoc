@@ -17,7 +17,7 @@ JTAG     ESP32      FTDI      Cable Color
           VIN  <-->   5v <--> Red
 ```
 
-image::esp32-jtag.jpg[Screenshot,500,400,align="center"]
+image::esp32-jtag.JPG[Screenshot,500,400,align="center"]
 
 THE ESP-IDF framework is delivered with the OpenOCD software needed to supply access to the ESP32. 
 
