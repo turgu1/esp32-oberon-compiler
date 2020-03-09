@@ -1,4 +1,4 @@
-# Debugging with JTAG
+== Debugging with JTAG
 
 
 Here are some notes about connecting an ESP32 development board with a computer through a JTAG interface.
@@ -21,7 +21,7 @@ image::esp32-jtag.jpg[Screenshot,500,400,align="center"]
 
 THE ESP-IDF framework is delivered with the OpenOCD software needed to supply access to the ESP32. 
 
-# OpenOCD Configuration
+== OpenOCD Configuration
 
 The following configuration file is used for OpenOCD. It has been put in file $OPENOCD_SCRIPTS/board/doit-esp32.cfg in the OpenOCD folders:
 
@@ -39,7 +39,7 @@ set ESP32_FLASH_VOLTAGE 1.8
 source [find target/esp32.cfg]
 ```
 
-# GDB Configuration
+== GDB Configuration
 
 The following configuration file is used to automate the connexion with OpenOCD (on port 3333) and break the execution at the program entry point _init_start:
 
@@ -52,7 +52,7 @@ thb _init_start
 c
 ```
 
-# Starting OpenOCD
+== Starting OpenOCD
 
 OpenOCD must be launched prior to using GDB. The following command is used:
 
@@ -60,13 +60,13 @@ OpenOCD must be launched prior to using GDB. The following command is used:
 $ openocd -f board/doit-esp32.cfg
 ```
 
-# Starting GDB
+== Starting GDB
 
 ```sh
 $ xtensa-esp32-elf-gdb -x gdbinit build/tests.elf
 ```
 
-# References
+== References
 
 - ESP32 Espressif JTAG Debugging page [https://docs.espressif.com/projects/esp-idf/en/latest/api-guides/jtag-debugging/index.html]
 
