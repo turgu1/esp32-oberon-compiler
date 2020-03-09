@@ -852,7 +852,6 @@ MODULE ORG;
   VAR
     line : ARRAY 256 OF CHAR;
   BEGIN 
-    Texts.WriteString(CodeW, "  ");
     WHILE ORS.GetAssemblerLine(line) DO
       Texts.WriteString(CodeW, line); 
       Texts.WriteLn(CodeW);

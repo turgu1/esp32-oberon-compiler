@@ -380,7 +380,7 @@ MODULE ORP; (*N. Wirth 1.7.97 / 8.2.2020  Oberon compiler for ESP32 in Oberon-07
     IF (sym < ORS.char) OR (sym > ORS.ident) THEN ORS.Mark("expression expected");
       REPEAT 
         ORS.Get(sym)
-      UNTIL (sym >= ORS.char) & (sym <= ORS.for) OR (sym >= ORS.then)
+      UNTIL (sym >= ORS.char) & (sym <= ORS.asm) OR (sym >= ORS.then)
     END;
     IF sym = ORS.ident THEN
       qualident(obj);  
@@ -675,7 +675,7 @@ MODULE ORP; (*N. Wirth 1.7.97 / 8.2.2020  Oberon compiler for ESP32 in Oberon-07
  *)
   BEGIN (* StatSequence *)
     REPEAT (*sync*) obj := NIL;
-      IF ~((sym >= ORS.ident) & (sym <= ORS.for) OR (sym >= ORS.semicolon)) THEN
+      IF ~((sym >= ORS.ident) & (sym <= ORS.asm) OR (sym >= ORS.semicolon)) THEN
         ORS.Mark("statement expected");
         REPEAT ORS.Get(sym) UNTIL (sym >= ORS.ident)
       END;
@@ -701,7 +701,6 @@ MODULE ORP; (*N. Wirth 1.7.97 / 8.2.2020  Oberon compiler for ESP32 in Oberon-07
               ORG.StrToChar(y); ORG.Store(x, y)
             ELSE 
               ORS.Mark("illegal assignment");
-              Out.Ln; Out.Int(x.type.form, 0); Out.String(" vs "); Out.Int(y.type.form, 0); Out.Ln
             END
           ELSIF sym = ORS.eql THEN ORS.Mark("should be :="); ORS.Get(sym); expression(y)
           ELSIF sym = ORS.lparen THEN (* ----- procedure call ----- *)
@@ -804,7 +803,6 @@ MODULE ORP; (*N. Wirth 1.7.97 / 8.2.2020  Oberon compiler for ESP32 in Oberon-07
         END;
         Check(ORS.end, "no END")
       ELSIF sym = ORS.asm THEN 
-        Out.String("ASM..."); Out.Ln;
         ORG.assembler; ORS.Get(sym)
       END ;
       ORG.CheckRegs;

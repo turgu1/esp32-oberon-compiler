@@ -35,15 +35,15 @@ MODULE ORS; (* NW 19.9.93 / 15.3.2017  Scanner in Oberon-07*)
     in*     = 15; is*        = 16; arrow*     = 17; period* = 18;
     char*   = 20; int*       = 21; real*      = 22; false*  = 23; true*   = 24;
     nil*    = 25; string*    = 26; not*       = 27; lparen* = 28; lbrak*  = 29;
-    lbrace* = 30; ident*     = 31;
-    if*     = 32; while*     = 34; repeat*    = 35; case*   = 36; for*    = 37;
+    lbrace* = 30; ident*     = 31; if*        = 32; while*  = 34; repeat* = 35;
+    case*   = 36; for*       = 37; asm*       = 38;
     comma*  = 40; colon*     = 41; becomes*   = 42; upto*   = 43; rparen* = 44;
     rbrak*  = 45; rbrace*    = 46; then*      = 47; of*     = 48; do*     = 49;
     to*     = 50; by*        = 51; semicolon* = 52; end*    = 53; bar*    = 54;
     else*   = 55; elsif*     = 56; until*     = 57; return* = 58;
     array*  = 60; record*    = 61; pointer*   = 62; const*  = 63; type*   = 64;
     var*    = 65; procedure* = 66; begin*     = 67; import* = 68; module* = 69; 
-    eot     = 70; debugon    = 71; debugoff   = 72; asm*    = 73;
+    eot     = 70; debugon    = 71; debugoff   = 72; 
 
   TYPE 
     Ident* = ARRAY IdLen OF CHAR;
@@ -258,7 +258,7 @@ MODULE ORS; (* NW 19.9.93 / 15.3.2017  Scanner in Oberon-07*)
     GetCh(); 
     theEnd := FALSE;
     i := 0; size := LEN(line);
-    WHILE ~R.eot & (ch <= " ") DO GetCh() END;
+    WHILE ~R.eot & (ch < " ") DO GetCh() END;
     WHILE (i < (size - 7)) & ((ch = " ") OR (ch = TAB)) DO 
       line[i] := ch; INC(i); GetCh() 
     END;
@@ -373,7 +373,7 @@ BEGIN Texts.OpenWriter(W); k := 0; KWX[0] := 0; KWX[1] := 0;
   EnterKW(div, "DIV");
   EnterKW(mod, "MOD");
   EnterKW(for, "FOR");
-  EnterKW(asm, "ASM");
+  EnterKW(asm, "ASM"); (* ASM *)
   KWX[3] := k;
   EnterKW(else, "ELSE");
   EnterKW(then, "THEN");
@@ -388,14 +388,14 @@ BEGIN Texts.OpenWriter(W); k := 0; KWX[0] := 0; KWX[1] := 0;
   EnterKW(const, "CONST");
   EnterKW(until, "UNTIL");
   EnterKW(while, "WHILE");
-  EnterKW(debugon, "DBGON");
+  EnterKW(debugon, "DBGON"); (* DBGON *)
   KWX[5] := k;
   EnterKW(record, "RECORD");
   EnterKW(repeat, "REPEAT");
   EnterKW(return, "RETURN");
   EnterKW(import, "IMPORT");
   EnterKW(module, "MODULE");
-  EnterKW(debugoff, "DBGOFF");
+  EnterKW(debugoff, "DBGOFF"); (* DBGOFF *)
   KWX[6] := k;
   EnterKW(pointer, "POINTER");
   KWX[7] := k; KWX[8] := k;

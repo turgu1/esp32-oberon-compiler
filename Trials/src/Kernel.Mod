@@ -310,14 +310,19 @@ MODULE Kernel;
 
   END DisableWatchDog;
   
+  PROCEDURE PingWatchDog*;
+  BEGIN 
+
+  END PingWatchDog;
+  
   (* ----- Internal Clock ----- *)
 
-  PROCEDURE Time*(VAR time: ClockTime);
+  PROCEDURE GetTime*(VAR time: ClockTime);
   BEGIN
     SYSTEM.PUT(TIMG0_T0UPDATE_REG, 0);
     SYSTEM.GET(TIMG0_T0LO_REG, time.low);
     SYSTEM.GET(TIMG0_T0HI_REG, time.high)
-  END Time;
+  END GetTime;
 
   PROCEDURE Wait*(VAR duration: INTEGER);
   VAR
@@ -325,22 +330,32 @@ MODULE Kernel;
     done: BOOLEAN;
   BEGIN
     done := FALSE;
-    Time(target);
+    GetTime(target);
     ASM
-        l32i a3, a1, 16        # a3 = high
-        l32i a4, a1, 12        # a4 = low
-        l32i a5, a1, 0         # a5 = duration
-        add  a6, a4, a5        # a6 = low + wait_time
-        bgeu a6, a4, 99f       # branch if no overflow on high part
-        addi a3, a3, 1
-        99:
-        s32i a3, a1, 16        # Save high
+        l32i a3, a1, 12        # a3 := low
+        l32i a4, a1, 16        # a4 := high
+        l32i a5, a1, 0         # a5 := duration
+        add  a6, a3, a5        # a6 := low + wait_time
+        bgeu a6, a3, 98f       # branch if no overflow on high part
+        addi a4, a4, 1
+    98:
         s32i a6, a1, 12        # Save low
+        s32i a4, a1, 16        # Save high
     END ;
     REPEAT
-      Time(time);
+      GetTime(time);
+      ASM
+          l32i a3, a1, 8       # a3 := high just read
+          l32i a4, a1, 16      # a4 := high target
+          bltu a3, a4, 99f     # Branch if High portion of the timer is still too small
+          l32i a3, a1, 4       # a3 := low just read
+          l32i a4, a1, 12      # a4 := low target
+          bltu a3, a4, 99f     # Branch if Low portion of the timer is still too small
+          movi a3, 1           # done := TRUE
+          s8i  a3, a1, 20
+      99:
+      END
     UNTIL done;
-
   END Wait;
 
   PROCEDURE InitTimer;
