@@ -2591,9 +2591,28 @@ MODULE ORG;
     END
   END LDREG;
 
+  PROCEDURE WSR*(VAR x, y: Item);
+  BEGIN 
+    IF x.mode # ORB.Const THEN ORS.Mark("first parameter must be a constant") END;
+    IF (x.a < 0) OR (x.a > 255) THEN ORS.Mark("first parameter must be between 0 and 255") END;
+    load(y);
+    PutRI("wsr", y.r, x.a);
+    decR
+  END WSR;
+
   (*In-line code functions*)
 
-  PROCEDURE Abs*(VAR x: Item);
+  PROCEDURE RSR*(VAR x: Item);
+  BEGIN
+    IF x.mode # ORB.Const THEN ORS.Mark("must be a constant") END;
+    IF (x.a < 0) OR (x.a > 255) THEN ORS.Mark("param must be between 0 and 255") END;
+    PutRI("rsr", RH, x.a);
+    x.r := RH;
+    x.mode := Reg;
+    incR
+  END RSR;
+
+PROCEDURE Abs*(VAR x: Item);
   BEGIN
     e("ABS");
     IF x.mode = ORB.Const THEN 

@@ -341,6 +341,7 @@ MODULE ORP; (*N. Wirth 1.7.97 / 8.2.2020  Oberon compiler for ESP32 in Oberon-07
           restyp := x.type 
         ELSE ORS.Mark("bad type") END
       ELSIF fct = 27 THEN (*SQRT*) CheckReal(x); ORG.Sqrt(x)
+      ELSIF fct = 28 THEN (*RSR*) CheckInt(x); CheckConst(x); ORG.RSR(x)
       ELSE ORS.Mark("bad type")
       END;
       x.type := restyp
@@ -535,6 +536,7 @@ MODULE ORP; (*N. Wirth 1.7.97 / 8.2.2020  Oberon compiler for ESP32 in Oberon-07
       ELSIF pno = 12 THEN CheckInt(x); CheckInt(y); CheckInt(z); ORG.Copy(x, y, z)
       ELSIF pno = 13 THEN CheckConst(x); CheckInt(x); ORG.LDPSR(x)
       ELSIF pno = 14 THEN CheckInt(x); ORG.LDREG(x, y)
+      ELSIF pno = 15 THEN CheckInt(x); CheckConst(x); ORG.WSR(x, y)
       END
     ELSE ORS.Mark("wrong nof parameters")
     END

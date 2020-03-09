@@ -413,7 +413,7 @@ BEGIN
 
   system := NIL;   (* n = procno*10 + nofpar *)
 
-  enter("SQRT",     SFunc, realType, 271);  (*functions*)
+  enter("SQRT",     SFunc, realType, 271);
   enter("MAX",      SFunc, noType,   262);
   enter("MIN",      SFunc, noType,   252);
   enter("XOR",      SFunc, intType,  242);
@@ -455,14 +455,16 @@ BEGIN
   
   system := NIL;  (* initialize "unsafe" pseudo-module SYSTEM*)
 
-  enter("H",        SFunc, intType,  201);  (*functions*)
+  enter("RSR",      SFunc, intType,  281);  (*functions*)
+  enter("H",        SFunc, intType,  201);
   enter("COND",     SFunc, boolType, 191);
   enter("SIZE",     SFunc, intType,  181);
   enter("ADR",      SFunc, intType,  171);
   enter("VAL",      SFunc, intType,  162);
   enter("REG",      SFunc, intType,  151);
   enter("BIT",      SFunc, boolType, 142);
-  enter("LDREG",    SProc, noType,   142);  (*procedures*)
+  enter("WSR",      SProc, intType,  152);  (*procedures*)
+  enter("LDREG",    SProc, noType,   142);
   enter("LDPSR",    SProc, noType,   131);
   enter("COPY",     SProc, noType,   123);
   enter("PUT",      SProc, noType,   112);

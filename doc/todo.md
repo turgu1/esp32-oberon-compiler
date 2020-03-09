@@ -5,6 +5,7 @@
 - [x] Add bit-wise AND/BOR/XOR/NOT for INTEGER/BYTE functions
 - [x] Add MIN/MAX for INTEGER/BYTE/REAL Functions
 - [x] Add SQRT function
+- [x] Add WSR/RSR SYSTEM functions
 - [ ] Revisit ORG.ChrToStr/ORG.StrToChr functions
 - [ ] Implement Const Char as a string parameter
 - [ ] Revisit Types descriptor

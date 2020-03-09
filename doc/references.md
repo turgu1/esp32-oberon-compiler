@@ -9,5 +9,5 @@
 - [The Oakwood Guidelines for Oberon-2](http://www.edm2.com/index.php/The_Oakwood_Guidelines_for_Oberon-2_Compiler_Developers)
 - [User Manual - The GNU Assembler](https://sourceware.org/binutils/docs/as/)
 - [User Manual - GNU Linker](https://sourceware.org/binutils/docs/ld/)
-- [User Manual - Gnu Make](https://www.gnu.org/software/make/manual/)
-- [User Manual - Gnu Debugger](https://sourceware.org/gdb/current/onlinedocs/gdb/)
+- [User Manual - GNU Make](https://www.gnu.org/software/make/manual/)
+- [User Manual - GNU Debugger](https://sourceware.org/gdb/current/onlinedocs/gdb/)
