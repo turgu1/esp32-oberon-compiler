@@ -314,7 +314,7 @@ MODULE Kernel;
   BEGIN 
 
   END PingWatchDog;
-  
+
   (* ----- Internal Clock ----- *)
 
   PROCEDURE GetTime*(VAR time: ClockTime);
@@ -324,7 +324,19 @@ MODULE Kernel;
     SYSTEM.GET(TIMG0_T0HI_REG, time.high)
   END GetTime;
 
-  PROCEDURE Wait*(VAR duration: INTEGER);
+  PROCEDURE GetElapseTime*(VAR fromTime: ClockTime): INTEGER;
+  VAR 
+    time: ClockTime;
+    result: INTEGER;
+  BEGIN 
+    GetTime(time);
+    ASM
+
+    END
+  RETURN result
+  END GetElapseTime;
+
+  PROCEDURE Wait*(duration: INTEGER);
   VAR
     time, target: ClockTime;
     done: BOOLEAN;

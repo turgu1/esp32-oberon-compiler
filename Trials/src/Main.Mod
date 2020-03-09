@@ -1,7 +1,9 @@
 MODULE Main;
   IMPORT SYSTEM, Kernel, Out;
 
-  CONST VECBASE = 231;
+  CONST 
+    VECBASE   =     231;
+    OneSecond = 10000000;
   TYPE
     rec = RECORD a, b, c: INTEGER END;
   VAR 
