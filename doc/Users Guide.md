@@ -27,7 +27,7 @@ The ESP32 Oberon Compiler is supplied with a variaty of modules for use by appli
 
 ### Module Out
 
-This module is implementing the [Oakwood Guidelines](http://www.edm2.com/index.php/The_Oakwood_Guidelines_for_Oberon-2_Compiler_Developers) Out Module definition with some added/removed procedures. The procedure is using the UART0 serial port to transmit data sent by the users's application. By default, the connexion baud rate is set 115K in the Open procedure called by the module initialization. This module, for now, uses active loops to synchronise with the first in first out output buffer. The Oakwood's `LongReal` procedure is not available. The following procedures have been added:
+This module implements the [Oakwood Guidelines](http://www.edm2.com/index.php/The_Oakwood_Guidelines_for_Oberon-2_Compiler_Developers) Out Module definition with some added/removed procedures. The procedure is using the UART0 serial port to transmit data sent by the users's application. By default, the connexion baud rate is set 115K in the Open procedure called by the module initialization. This module, for now, uses active loops to synchronise with the first in first out output buffer. The Oakwood's `LongReal` procedure is not available. The following procedures have been added:
 
 - `PROCEDURE SetBaudRate*(baudRate: INTEGER);` Change baud rate according to the value passed as a parameter. The following usual baud rate are supplied as constants:
 
