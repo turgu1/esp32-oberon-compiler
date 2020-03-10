@@ -39,6 +39,7 @@ This module implements the [Oakwood Guidelines](http://www.edm2.com/index.php/Th
 
 - `PROCEDURE Flush;` Active loop waiting for the fifo output buffer to be empty.
 
+- `PROCEDURE RealFix*(x: REAL; n, k: INTEGER)` Write the real x in n field positions in fixed point notation with f fraction digits.
 
 ```Oberon
 MODULE Out;
@@ -56,7 +57,8 @@ MODULE Out;
   PROCEDURE String*(s: ARRAY OF CHAR);
   PROCEDURE Int*(x, n: INTEGER);
   PROCEDURE Hex*(x, n: INTEGER);
-  PROCEDURE Real*(x: REAL; n,k: INTEGER);
+  PROCEDURE Real*(x: REAL; n: INTEGER);
+  PROCEDURE RealFix*(x: REAL; n,k: INTEGER);
   PROCEDURE Ln*;
   PROCEDURE SetBaudRate*(baudRate: INTEGER);
 END Out.

@@ -31,8 +31,8 @@
 # ----
 
     .equ init_data, 0        # ESP32 loader is doing it
-    .equ math_support, 0
-    .equ trap_support, 0
+    .equ math_support, 1
+    .equ trap_support, 1
 
     .title Oberon ESP32 Startup code
     .sbttl Oberon ESP32 Compiler Version 0.1.0

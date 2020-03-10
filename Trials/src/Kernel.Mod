@@ -1,7 +1,7 @@
 (* ESP32 Kernel Functions *)
 
 MODULE Kernel;
-  IMPORT SYSTEM;
+  IMPORT SYSTEM, Out;
 
   CONST
     RTC_CNTL_CLK_CONF_REG  = 3FF48070H;
@@ -325,21 +325,33 @@ MODULE Kernel;
   END GetTime;
 
   PROCEDURE GetElapseTime*(VAR fromTime: ClockTime): INTEGER;
-  VAR 
-    time: ClockTime;
-    result: INTEGER;
+    VAR 
+      time: ClockTime;
+      result: INTEGER;
   BEGIN 
     GetTime(time);
     ASM
-
-    END
+        l32i a3, a1, 0   # a3 := address of fromTime
+        l32i a4, a1, 12  # a4 := time.high
+        l32i a5, a1, 8   # a5 := time.low
+        l32i a6, a3, 0   # a6 := fromTime.low
+        sub  a7, a5, a6  # a7 := time.low - fromTime.low 
+        bgeu a5, a7, 96f # branch if no borrow
+        addi a4, a4, -1
+    96:
+        l32i a5, a3, 4   # a5 := fromTime.high
+        beq a4, a5, 97f  # if time.high # fromTime.high then
+        movi a7, -1      #    overflow
+    97:
+        s32i a7, a1, 16  # Save value in result
+    END;
   RETURN result
   END GetElapseTime;
 
   PROCEDURE Wait*(duration: INTEGER);
-  VAR
-    time, target: ClockTime;
-    done: BOOLEAN;
+    VAR
+      time, target: ClockTime;
+      done: BOOLEAN;
   BEGIN
     done := FALSE;
     GetTime(target);
@@ -353,7 +365,7 @@ MODULE Kernel;
     98:
         s32i a6, a1, 12        # Save low
         s32i a4, a1, 16        # Save high
-    END ;
+    END;
     REPEAT
       GetTime(time);
       ASM
@@ -367,14 +379,26 @@ MODULE Kernel;
           s8i  a3, a1, 20
       99:
       END
-    UNTIL done;
+    UNTIL done
   END Wait;
 
   PROCEDURE InitTimer;
-  CONST
-    TIMER_CONFIG = 0C0004000H;
+    CONST
+      TIMER_CONFIG            = 0C0004000H;
+      TIMER_ENABLE_BIT        = 080000000H;
+      TIMER_ENABLE_CLR_MASQ   = 07FFFFFFFH;
+      TIMER_DIVIDER_BITS      = 01FFFE000H;
+      TIMER_DIVIDER_CLR_MASQ  = 0E0001FFFH;
+    VAR i: INTEGER;
   BEGIN
-    SYSTEM.PUT(TIMG0_T0CONFIG_REG, TIMER_CONFIG);
+    (* Base tick is 80Mhz. Divider set to get 1Mhz Timer ticks : 80 *)
+    (* Disable Timer *)
+    SYSTEM.GET(TIMG0_T0CONFIG_REG, i);
+    i := AND(i, TIMER_ENABLE_CLR_MASQ);
+    SYSTEM.PUT(TIMG0_T0CONFIG_REG, i);
+    (* Set divider and enable-it *)
+    i := BOR(i, LSL(80, 13) + TIMER_ENABLE_BIT);
+    SYSTEM.PUT(TIMG0_T0CONFIG_REG, i);
     SYSTEM.PUT(TIMG0_T0LOADLO_REG, 0);
     SYSTEM.PUT(TIMG0_T0LOADHI_REG, 0);
     SYSTEM.PUT(TIMG0_T0LOAD_REG,   0);

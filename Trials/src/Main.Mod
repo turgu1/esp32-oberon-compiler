@@ -1,25 +1,21 @@
 MODULE Main;
-  IMPORT SYSTEM, Kernel, Out;
-
-  CONST 
-    VECBASE   =     231;
-    OneSecond = 10000000;
-  TYPE
-    rec = RECORD a, b, c: INTEGER END;
-  VAR 
-    i: INTEGER;
-    time: Kernel.ClockTime;
-    
-
+  IMPORT SYSTEM, Out, Math;
+  VAR r: REAL;
 BEGIN
-  Kernel.Init;
-  
-  Out.String("ALLO!!!"); Out.Ln; Out.Flush;
-  i := SYSTEM.RSR(VECBASE);
-  Out.String("Vector base: "); Out.Hex(i,0); Out.Ln;
+  r := Math.sqrt(25.0);
+  Out.String("Value of sqrt(25.0): "); Out.Real(r, 15); Out.RealFix(r, 15, 8); Out.Ln;
 
-  WHILE TRUE DO
-    Kernel.Wait(10 * OneSecond);
-    Out.Char("Z");
-  END;
+  r := Math.exp(25.0);
+  Out.String("Value of exp(25.0): "); Out.Real(r, 15); Out.RealFix(r, 15, 8); Out.Ln;
+
+  r := Math.ln(25.0);
+  Out.String("Value of ln(25.0): "); Out.Real(r, 15); Out.RealFix(r, 15, 8); Out.Ln;
+  
+  r := Math.sin(1.0);
+  Out.String("Value of sin(1.0): "); Out.Real(r, 15); Out.RealFix(r, 15, 8); Out.Ln;
+
+  r := Math.cos(1.0);
+  Out.String("Value of cos(1.0): "); Out.Real(r, 15); Out.RealFix(r, 15, 8); Out.Ln;
+
+  WHILE TRUE DO  END;
 END Main.

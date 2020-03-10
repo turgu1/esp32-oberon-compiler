@@ -1,5 +1,6 @@
 .DS_Store
 .obnc/*
+.vscode/*
 
 Oberon
 ORTool

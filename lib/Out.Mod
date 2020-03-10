@@ -98,15 +98,46 @@ END Hex;
 
 PROCEDURE Ten(n: INTEGER): REAL;
 VAR t, p: REAL;
-BEGIN t := 1.0; p := 10.0;   (* compute 10^n *)
+BEGIN 
+  t := 1.0; p := 10.0;   (* compute 10^n *)
   WHILE n > 0 DO
     IF ODD(n) THEN t := p * t END;
-    p := p*p; n := n DIV 2
+    p := p * p; n := n DIV 2
   END ;
   RETURN t
 END Ten;
 
-PROCEDURE Real*(x: REAL; n,k: INTEGER);
+PROCEDURE Real* (x: REAL; n: INTEGER);
+  VAR e, i, k, m: INTEGER;
+    d: ARRAY 16 OF CHAR;
+BEGIN e := ASR(ORD(x), 23) MOD 100H;  (*binary exponent*)
+  IF e = 0 THEN
+    String("  0 ");
+    WHILE n >= 3 DO Char(" "); DEC(n) END
+  ELSIF e = 255 THEN String(" NaN ")
+  ELSE Char(" ");
+    WHILE n >= 15 DO DEC(n); Char(" ") END ;
+    (* 2 < n < 9 digits to be written*)
+    IF x < 0.0 THEN Char("-"); x := -x ELSE Char(" ") END ;
+    e := (e - 127) * 77 DIV 256 - 6;  (*decimal exponent*)
+    IF e >= 0 THEN x := x / Ten(e) ELSE x := Ten(-e) * x END ;
+    m := FLOOR(x + 0.5);
+    IF m >= 10000000 THEN INC(e); m := m DIV 10 END ;
+    i := 0; k := 13-n;
+    REPEAT
+      IF i = k THEN INC(m, 5) END ;    (*rounding*)
+      d[i] := CHR(m MOD 10 + 30H); m := m DIV 10; INC(i)
+    UNTIL m = 0;
+    DEC(i); Char(d[i]); Char(".");
+    IF i < n-7 THEN n := 0 ELSE n := 14 - n END ;
+    WHILE i > n DO DEC(i); Char(d[i]) END ;
+    Char("E"); INC(e, 6);
+    IF e < 0 THEN Char("-"); e := -e ELSE Char("+") END ;
+    Char(CHR(e DIV 10 + 30H)); Char(CHR(e MOD 10 + 30H))
+  END
+END Real;
+
+PROCEDURE RealFix*(x: REAL; n, k: INTEGER);
 VAR
   i, m: INTEGER; 
   neg: BOOLEAN;
@@ -129,14 +160,14 @@ BEGIN
       m := m DIV 10; INC(i) 
     UNTIL m = 0;
     Char(" ");
-    WHILE n > i+3 DO  Char(" "); DEC(n) END ;
+    WHILE n > i + 3 DO Char(" "); DEC(n) END ;
     IF neg THEN Char("-"); DEC(n) ELSE Char(" ") END;
     WHILE i > k DO DEC(i); Char(d[i]) END;
     Char(".");
     WHILE k > i DO DEC(k); Char("0") END;
     WHILE i > 0 DO DEC(i); Char(d[i]) END
   END
-END Real;
+END RealFix;
 
 PROCEDURE Ln*;
 BEGIN 

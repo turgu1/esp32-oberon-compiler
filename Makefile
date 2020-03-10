@@ -5,39 +5,46 @@ OBNC_CONFIG_C_REAL_TYPE=OBNC_CONFIG_FLOAT
 OBNC_CONFIG_C_INT_TYPE=OBNC_CONFIG_INT
 
 ODIR=.obnc
+SRC=src
+OUT=$(SRC)/$(ODIR)
 
 SIMS = \
-	$(ODIR)/Texts.sym\
-	$(ODIR)/Logger.sym\
-	$(ODIR)/ORS.sym\
-	$(ODIR)/ORB.sym\
-	$(ODIR)/ORG.sym\
-	$(ODIR)/ORP.sym\
-    $(ODIR)/Reals.sym
+	$(OUT)/Texts.sym \
+	$(OUT)/Logger.sym \
+	$(OUT)/ORS.sym \
+	$(OUT)/ORB.sym \
+	$(OUT)/ORG.sym \
+	$(OUT)/ORP.sym \
+    $(OUT)/Reals.sym
 
-$(ODIR)/%.sym: %.Mod
-	$(OC) $<
+$(OUT)/%.sym: $(SRC)/%.Mod
+	cd $(SRC); $(OC) $(<F)
 
-Oberon: $(SIMS) Oberon.Mod
-	$(LINK) -x Oberon.Mod
+Oberon: $(SIMS) $(SRC)/Oberon.Mod
+	cd $(SRC); $(LINK) Oberon.Mod
+	mv $(SRC)/Oberon ..
 
-ORTool: ORTool.Mod $(ODIR)/ORB.sym $(ODIR)/Texts.sym $(ODIR)/Logger.sym
-	$(LINK) ORTool.Mod
+ORTool: $(SRC)/ORTool.Mod $(OUT)/ORB.sym $(OUT)/Texts.sym $(OUT)/Logger.sym
+	cd $(SRC); $(LINK) ORTool.Mod
+	mv $(SRC)/ORTool ..
 
-$(ODIR)/Texts.sym: Texts.Mod
+$(OUT)/Texts.sym: $(SRC)/Texts.Mod
 
-$(ODIR)/Logger.sym: Logger.Mod $(ODIR)/Texts.sym
+$(OUT)/Logger.sym: $(SRC)/Logger.Mod $(OUT)/Texts.sym
 
-$(ODIR)/ORS.sym: ORS.Mod $(ODIR)/Texts.sym $(ODIR)/Logger.sym
+$(OUT)/ORS.sym: $(SRC)/ORS.Mod $(OUT)/Texts.sym $(OUT)/Logger.sym
 
-$(ODIR)/ORB.sym: ORB.Mod $(ODIR)/ORS.sym
+$(OUT)/ORB.sym: $(SRC)/ORB.Mod $(OUT)/ORS.sym
 
-$(ODIR)/ORG.sym: ORG.Mod $(ODIR)/ORS.sym $(ODIR)/ORB.sym $(ODIR)/Reals.sym
+$(OUT)/ORG.sym: $(SRC)/ORG.Mod $(OUT)/ORS.sym $(OUT)/ORB.sym $(OUT)/Reals.sym
 
-$(ODIR)/ORP.sym: ORP.Mod $(ODIR)/ORS.sym $(ODIR)/ORB.sym $(ODIR)/ORG.sym $(ODIR)/Texts.sym $(ODIR)/Logger.sym
+$(OUT)/ORP.sym: $(SRC)/ORP.Mod $(OUT)/ORS.sym $(OUT)/ORB.sym $(OUT)/ORG.sym $(OUT)/Texts.sym $(OUT)/Logger.sym
 
-$(ODIR)/Reals.sym: Reals.c
-	cp Reals.sym Reals.h .obnc
-	gcc -c Reals.c -o .obnc/Reals.o
-	touch .obnc/Reals.sym
+$(OUT)/Reals.sym: $(SRC)/Reals.c
+	cd $(SRC); cp Reals.sym Reals.h $(ODIR)
+	cd $(SRC); gcc -c Reals.c -o $(ODIR)/Reals.o
+	cd $(SRC); touch $(ODIR)/Reals.sym
 
+.PHONY: clean
+clean:
+	rm -rf $(OUT)/*

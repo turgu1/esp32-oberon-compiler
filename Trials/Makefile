@@ -35,9 +35,9 @@ INITO = $(BLDDIR)/init.o
 # The first module in the list is the main program
 SRC =  \
 	Main.Mod \
-	Out.Mod \
-	Kernel.Mod
-
+	Kernel.Mod \
+	Math.Mod \
+	Out.Mod
 
 SYMS = $(addprefix $(SRCDIR), $(SRC:.Mod=.smb))
 ASSS = $(addprefix $(BLDDIR), $(SRC:.Mod=.S))
@@ -56,8 +56,9 @@ test:
 
 # Rules to build files.
 
-$(BLDDIR)Main.S   $(SRCDIR)Main.smb:   $(SRCDIR)Main.Mod  $(SRCDIR)Out.smb $(SRCDIR)Kernel.smb
+$(BLDDIR)Main.S   $(SRCDIR)Main.smb:   $(SRCDIR)Main.Mod  $(SRCDIR)Out.smb $(SRCDIR)Math.smb $(SRCDIR)Kernel.smb
 $(BLDDIR)Out.S    $(SRCDIR)Out.smb:    $(SRCDIR)Out.Mod
+$(BLDDIR)Math.S   $(SRCDIR)Math.smb:   $(SRCDIR)Math.Mod
 $(BLDDIR)Kernel.S $(SRCDIR)Kernel.smb: $(SRCDIR)Kernel.Mod
 
 $(BLDDIR)%.S $(SRCDIR)%.smb : $(SRCDIR)%.Mod

@@ -1645,15 +1645,17 @@ MODULE ORG;
     load(x); load(y);
     PutSR("wfr", 0, x.r);
     PutSR("wfr", 1, y.r);
-    IF    op = ORS.plus  THEN PutSSS("add.s", 0, 0, 1)
-    ELSIF op = ORS.minus THEN PutSSS("sub.s", 0, 0, 1)
-    ELSIF op = ORS.times THEN PutSSS("mul.s", 0, 0, 1)
+    IF    op = ORS.plus  THEN PutSSS("add.s", 2, 0, 1)
+    ELSIF op = ORS.minus THEN PutSSS("sub.s", 2, 0, 1)
+    ELSIF op = ORS.times THEN PutSSS("mul.s", 2, 0, 1)
     ELSIF op = ORS.rdiv  THEN
       (* __fdiv32 is supplied in the startup code and compute f2 := f0 / f1 *) 
-      PutA("call", "__fdiv32");
+      PutRR("mov", RH, 0);
+      PutA("call0", "__fdiv32");
+      PutRR("mov", 0, RH);
     END;
-    PutRS("rfr", RH-2, 2);
-    decR; x.r := RH-1
+    decR; x.r := RH-1;
+    PutRS("rfr", x.r, 2);
   END RealOp;
 
   (* Code generation for set operators *)
@@ -2468,7 +2470,9 @@ MODULE ORG;
     PutRRI("l32i", RH, x.r, 0); incR;
     PutRI("movi", RH, 1);
     IF y.mode = ORB.Const THEN 
-      PutRRI("slli", RH, RH, y.a);
+      IF y.a # 0 THEN
+        PutRRI("slli", RH, RH, y.a)
+      END
     ELSE
       incR; 
       load(y); 
@@ -2724,7 +2728,9 @@ PROCEDURE Abs*(VAR x: Item);
   BEGIN 
     load(x);
     PutSR("wfr", 0, x.r);
-    PutA("call", "__fsqrt32");
+    PutRR("mov", RH, 0);
+    PutA("call0", "__fsqrt32");
+    PutRR("mov", 0, RH);
     PutRS("rfr", x.r, 1);
   END Sqrt;
 
