@@ -807,24 +807,24 @@ MODULE ORG;
     RETURN c
   END negated;
 
-  (* The __TRAP__ routine is located in the init.S startup code file:
+  (* SYSCALL for error messages
 
-     - Register A2 is saved on the stack
-     - Register A2 receive Trap number 
-     - Routine __TRAP__ is launched 
-     
-     Todo: Use BREAK instruction and interrupt vector instead of a jump instruction.
+     - Register A2 reveives code 2
+     - Register A3 receives reason  
      
      RH-1 and possibly RH-2 must contain the values to be compared with the
-     branch instruction. RH will become DEC(RH) or DEC(RH,2) accordingly. *)
+     branch instruction. RH will become DEC(RH) or DEC(RH,2) accordingly. 
+     
+     It will never return
+    *)
+
   PROCEDURE Trap(cond, num: INTEGER);
   BEGIN 
     e("Trap");
     PutCondBranch(negated(cond), label, FORWARD);
-    PutRRI("addi", 1, 1, -4);
-    PutRRI("s32i", 2, 1, 0);
-    PutRI("movi", 2, num);
-    PutJumpStr("j", "__TRAP__");
+    PutRI("movi", 2, 2);
+    PutRI("movi", 3, num);
+    PutA("syscall", "# Trap");
     PutLabel(label); 
     INC(label)
   END Trap;
@@ -2512,9 +2512,12 @@ MODULE ORG;
   PROCEDURE New*(VAR x: Item);
   BEGIN 
     e("New");
+    RH := 3;
     loadAdr(x); 
     loadTypTagAdr(x.type.base); 
-    Trap(7, TrNew); 
+    PutRI("movi", 2, 1);
+    PutA("syscall", "# New");
+    GetLocalSB;
     RH := FirstRH; UsedRegs := {}
   END New;
 

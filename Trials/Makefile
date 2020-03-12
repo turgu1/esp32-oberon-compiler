@@ -29,6 +29,9 @@ PORT = /dev/tty.SLAB_USBtoUART
 BLDDIR = ./build/
 SRCDIR = ./src/
 
+TEST=init/test.S
+TESTO= $(BLDDIR)/test.o
+
 INIT = init/init.S
 INITO = $(BLDDIR)/init.o
 
@@ -48,6 +51,7 @@ TARGETBIN = $(BLDDIR)tests.bin
 
 .PHONY: all
 all: $(TARGETELF)
+#all: $(TESTO)
 
 .PHONY: test
 test:
@@ -66,6 +70,9 @@ $(BLDDIR)%.S $(SRCDIR)%.smb : $(SRCDIR)%.Mod
 	@mv $(SRCDIR)$(patsubst %.smb,%.S,$(@F)) $(BLDDIR)
 
 $(OBJS): %.o: %.S
+	@$(CC) -x assembler-with-cpp $(ASFLAGS) $< -o $@
+
+$(TESTO): $(TEST)
 	@$(CC) -x assembler-with-cpp $(ASFLAGS) $< -o $@
 
 $(INITO): $(INIT)

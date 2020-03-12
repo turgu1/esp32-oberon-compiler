@@ -22,11 +22,11 @@ $(OUT)/%.sym: $(SRC)/%.Mod
 
 Oberon: $(SIMS) $(SRC)/Oberon.Mod
 	cd $(SRC); $(LINK) Oberon.Mod
-	mv $(SRC)/Oberon ..
+	mv $(SRC)/Oberon .
 
 ORTool: $(SRC)/ORTool.Mod $(OUT)/ORB.sym $(OUT)/Texts.sym $(OUT)/Logger.sym
 	cd $(SRC); $(LINK) ORTool.Mod
-	mv $(SRC)/ORTool ..
+	mv $(SRC)/ORTool .
 
 $(OUT)/Texts.sym: $(SRC)/Texts.Mod
 
