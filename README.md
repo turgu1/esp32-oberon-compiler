@@ -29,6 +29,14 @@ In a Nutshell, the steps I'm taking to get a working compiler are the following:
 
 I'm now doing a round robin between steps 8, 9, 10, 11 and 12
 
+The file named OBG.Mod is the main module generator of assembly language instructions. It has been almost completly rewritten, considering the assebly language approach taken instead of direct code generation. Using the assembler gives the following facilities:
+
+- Automated management of literal creation for indirect addressing of far reached memory locations. The ESP32 instruction set doesn't supply full 32 bits addressing of memory. The assembler automates this aspect.
+
+- Automated management of code fixing of forward branch instructions. This is accomplished through the use of local labels in the code.
+
+- Allow for user's coded assembly language instruction. An ASM statement has been added to the language in support for inline assembly language inside procedures. See the User's Guide for more details.
+
 ## Modifications
 
 Some modifications to the Project Oberon compiler source code (up to step 5):
@@ -62,7 +70,7 @@ All code related to fonts and graphics geometry deleted.
 Some potential bugs corrected:
 
 - Calls to T.notify without verifying if it is NIL.
-- Read Procedure modified to properly manage eot.
+- Read Procedure modified to better manage eot.
 
 ### Other changes:
 
