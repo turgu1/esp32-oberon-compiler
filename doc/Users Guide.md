@@ -2,7 +2,7 @@
 
 An ESP32 Oberon program requires runtime support. The compiler is supplied with many files that you can find in the lib folder:
 
-- An application startup function that is called by the ESP32 bootstrap once the application has been loaded in memory. It is located in `lib/init/init.S`. 
+- An application startup function that is called by the ESP32 bootstrap once the application has been loaded in memory. It is located in `lib/init/init.S`. This file contains many include instructions to add the other pieces of code present in the same folder. These files supply support for interupts management and floating point divide and square-toot functions.
 
 - A Linker Script file that supply memory mapping information to the linker. It is located in `lib/ld/esp32.ld`.
 
@@ -24,6 +24,17 @@ init.o Main.o Module1.o Module2.o
 ## Standard Module
 
 The ESP32 Oberon Compiler is supplied with a variaty of modules for use by applications. This section presents each of these modules and the specific aspects of their interface in relation with the targetted architecture.
+
+### Module Kernel
+
+Support for:
+
+- Heap allocation through the New function.
+- Garbage collection
+- General timing functions
+- Error trap support
+
+This module is currently being developped.
 
 ### Module Out
 
