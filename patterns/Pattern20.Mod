@@ -56,14 +56,14 @@ _qa:
     s32i a2, a1, 0
     s32i a3, a1, 4
     l8ui a2, a1, 0
-    beqz a2, 1f
+    beqz a2, L1
     l8ui a2, a1, 4
-    beqz a2, 3f
+    beqz a2, L3
     movi a2, 1
-    j 4f
-3:
+    j L4
+L3:
     movi a2, 0
-4:
+L4:
     retw
     .size _qa, .-_qa
 
@@ -73,14 +73,14 @@ _qb:
     s32i a2, a1, 0
     s32i a3, a1, 4
     l8ui a2, a1, 0
-    bnez a2, 5f
+    bnez a2, L5
     l8ui a2, a1, 4
-    beqz a2, 7f
+    beqz a2, L7
     movi a2, 1
-    j 8f
-7:
+    j L8
+L7:
     movi a2, 0
-8:
+L8:
     retw
     .size _qb, .-_qb
 
@@ -145,12 +145,12 @@ _Pattern20_init:
     s32i a3, a2, 0
     l32i a2, a15, 4
     l32i a3, a15, 8
-    bge a2, a3, 9f
+    bge a2, a3, L9
     movi a2, 1
-    j 10f
-9:
+    j L10
+L9:
     movi a2, 0
-10:
+L10:
     s8i a2, a15, 0
     movi a2, 1
     s8i a2, a15, 0

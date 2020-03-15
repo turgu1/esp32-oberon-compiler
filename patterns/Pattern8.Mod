@@ -49,7 +49,7 @@ _P:                        # PROCEDURE P
 _Pattern8_init:
     entry a1, 16
     movi a2, _Pattern8_s_bss
-    movi a6, 5                   # param x := 5
+    movi a6, 5                  # param x := 5
     mov a7, a2                  # param y := address of i
     call4 _P
     retw

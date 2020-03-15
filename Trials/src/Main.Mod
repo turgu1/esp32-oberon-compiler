@@ -1,21 +1,25 @@
 MODULE Main;
-  IMPORT SYSTEM, Out, Math;
-  VAR r: REAL;
+  IMPORT SYSTEM, Kernel, Out;
+  TYPE 
+    R = RECORD i, j: INTEGER END;
+    P = POINTER TO R;
+  VAR 
+    i: INTEGER;
+    p: P;
+
 BEGIN
-  r := Math.sqrt(25.0);
-  Out.String("Value of sqrt(25.0): "); Out.Real(r, 15); Out.RealFix(r, 15, 8); Out.Ln;
+  Kernel.Init;
 
-  r := Math.exp(25.0);
-  Out.String("Value of exp(25.0): "); Out.Real(r, 15); Out.RealFix(r, 15, 8); Out.Ln;
+  (* NEW(p); *)
 
-  r := Math.ln(25.0);
-  Out.String("Value of ln(25.0): "); Out.Real(r, 15); Out.RealFix(r, 15, 8); Out.Ln;
-  
-  r := Math.sin(1.0);
-  Out.String("Value of sin(1.0): "); Out.Real(r, 15); Out.RealFix(r, 15, 8); Out.Ln;
-
-  r := Math.cos(1.0);
-  Out.String("Value of cos(1.0): "); Out.Real(r, 15); Out.RealFix(r, 15, 8); Out.Ln;
+  WHILE TRUE DO
+    FOR i := 15 TO 0 BY -1 DO
+      Out.Char(0DX); Out.String("... "); Out.Int(i, 0); Out.Char(" "); 
+      Kernel.Wait(1000000);
+    END;
+    NEW(p);
+    Out.Ln;
+  END;
 
   WHILE TRUE DO  END;
 END Main.

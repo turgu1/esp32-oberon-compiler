@@ -27,10 +27,10 @@ _Pattern7_init:
     entry a1, 16
     movi a2, _Pattern7_s_bss
     movi a3, 0                 # a3 = 0  -> x := y
-1:
+L1:
     l32i a4, a2, 8             # a4 := n
     addi a4, a4, -1            # subtract 1
-    blt a4 a3, 2f              # branch if (n - 1) < x
+    blt a4 a3, L2              # branch if (n - 1) < x
     s32i a3, a2, 0             # save x
     l32i a3, a2, 4             # a3 := m
     slli a3, a3, 1             # a3 := m * 2
@@ -38,7 +38,7 @@ _Pattern7_init:
     l32i a3, a2, 0             # a3 := x
     addi a3, a3, 1             # a3 := x + 1
     j 1b                       # loop...
-2:
+L2:
     retw
     .size _Pattern7_init, .-_Pattern7_init
 

@@ -160,7 +160,20 @@ interrupt_handler xt_user_exc
     beqi    a0, CAUSE_ALLOCA,  _xt_to_alloca_exc
     beqi    a0, CAUSE_SYSCALL, _xt_to_syscall_exc
 
-end_interrupt_handler xt_user_exc 1
+# end_interrupt_handler xt_user_exc 1
+_xt_user_exit:
+    rsr     a0, EXCSAVE_1
+    rfe
+
+interrupt_handler xt_kernel 1
+
+    rsr     a0, EXCSAVE_1
+    rfe
+
+interrupt_handler xt_double_exc 1
+
+    rsr     a0, EXCSAVE_1
+    rfe
 
 /* --------------------------*/
 /* ---- Vectors ------------ */
@@ -179,6 +192,10 @@ interrupt_vector Level5InterruptVector xt_highint5 5
 interrupt_vector Level6InterruptVector xt_highint6 6
 
 interrupt_vector NMIExceptionVector    xt_nmi 7
+
+interrupt_vector KernelExceptionVector xt_kernel 1
+
+interrupt_vector DoubleExceptionVector xt_double_exc 1
 
 /* -------------------------- */
 /* ---- Default Handlers ---- */

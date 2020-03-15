@@ -81,6 +81,9 @@ $(INITO): $(INIT)
 $(TARGETELF): $(INITO) $(OBJS)
 	$(CC) $^ $(LDFLAGS) -o $@
 
+# $(TARGETELF): $(TESTO)
+# 	$(CC) $^ $(LDFLAGS) -o $@
+
 .PHONY: flash
 flash: $(TARGETELF)
 	esptool.py --chip=esp32 elf2image $(TARGETELF)

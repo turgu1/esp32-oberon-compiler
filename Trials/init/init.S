@@ -56,8 +56,9 @@
 
 _call_start_cpu0:
 
-    movi a0, _init_start      # Set Interrupt vector base address
-    wsr  a0, VECBASE
+    # No interrupt vectors for now - TBD
+    # movi a0, _init_start      # Set Interrupt vector base address
+    # wsr  a0, VECBASE
 
     movi a1, _tos              # Set Top of stack
     movi a0, 0                 # Initialize return adress to nothing
@@ -81,7 +82,7 @@ _call_start_cpu0:
     addi a3, a3, 4             # adjust a3 to next word
 1:
 
-.if init_data
+.if 0
     # Copy initialized data (not used, seems to be done by the ROM loader)
     movi a2, _edata            # Compute size in 4-byte chunks (a2)
     movi a3, _sdata            # a3 = address of _data
@@ -157,7 +158,10 @@ _set_160mhz:
 
     retw 
 
+#include "math_support.S"
+
+#if 0
 #include "interrupt_vectors.S"
 #include "syscall.S"
 #include "context.S"
-#include "math_support.S"
+#endif

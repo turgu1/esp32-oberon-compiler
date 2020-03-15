@@ -2,5 +2,5 @@ target remote :3333
 set remote hardware-watchpoint-limit 2
 mon reset halt
 flushregs
-thb _init_start
+thb _call_start_cpu0
 c

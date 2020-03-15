@@ -88,7 +88,7 @@ Some potential bugs corrected:
 
 - There is no Condition Codes in the ESP32, but a variety of branch instructions based on the content of register parameters. This, combined with the assembly language output of the compiler, requires sensible changes to the fix up algorithm and conditional instruction generation used in ORG. Using labels in the assembly language, fix ups are no longer required.
 
-- Trap is using a routine that you can find in the init.S startup code that save registers and reason for trap before restarting the program.
+- TRAP is using a routine that is located in the Kernel module that save registers and reason for trap before restarting the program. It is also used to get the NEW function execution. See the Kernel.OberonSyscallHandler procedure. At first, I've tried to get it run through the SYSCALL ESP32 instuction. Still not working so no interrupt function for now.
 
 ## Installation
 

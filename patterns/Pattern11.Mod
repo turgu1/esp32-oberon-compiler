@@ -38,13 +38,13 @@ _Pattern11_init:
     s32i a2, 15, 0           # s := {m}
     movi a2, -1
     l32i a3, 15, 8           # a3 := n
-    bgei a3, 31, 1f          # if a3 >= 31, done
+    bgei a3, 31, L1          # if a3 >= 31, done
     movi a4, -1
     addi a3, a3, 1
     ssl a3
     sll a3, a4
     xor a2, a2, a3           # a2 := {0..n}
-1:
+L1:
     s32i a2, 15, 0           # s := {0..n}
     l32i a2, 15, 4           # a2 := m
     movi a3, -1
@@ -56,20 +56,20 @@ _Pattern11_init:
     ssl a2
     sll a2, a3
     l32i a3, 15, 8           # a3 := n
-    bgei a3, 31, 2f
+    bgei a3, 31, L2
     movi a4, -1
     addi a3, a3, 1
     ssl a3
     sll a3, a4
     xor a2, a2, a3
-2:
+L2:
     s32i a2, 15, 0           # s := {m..n}
     movi a2, 10412           # a2 := {2, 3, 5, 7, 11, 13}
     l32i a3, 15, 8           # a3 := n
-    bbc a2 a3, 3f            # branch if n not in set
+    bbc a2 a3, L3            # branch if n not in set
     movi a2, 1
     s32i a2, 15, 4           # m := 1
-3:
+L3:
     retw
     .size _Pattern11_init, .-_Pattern11_init
 

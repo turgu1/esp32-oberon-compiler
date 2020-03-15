@@ -9,15 +9,17 @@ MEMORY {
   DRAM (RW) : ORIGIN = 0x3FFB0000, len = 192K
 }
 
+_heap_end = 0x3FFB0000 + 192K;
+
 SECTIONS {
 
   .iram.text : ALIGN(4)
   {
     . = ALIGN(16);
     _iram_start = ABSOLUTE(.);
-    /* Vectors go to IRAM */
+
+    /* Vectors go to IRAM 
     _init_start = ABSOLUTE(.);
-    /* Vectors according to builds/RF-2015.2-win32/esp108_v1_2_s5_512int_2/config.html */
     . = 0x0;
     KEEP(*(.WindowVectors.text));
     . = 0x180;
@@ -39,9 +41,11 @@ SECTIONS {
     . = 0x3C0;
     KEEP(*(.DoubleExceptionVector.text));
     . = 0x400;
+    */
 
     KEEP (*(.iram1))
 
+    . = ALIGN(4);
     _sitable = .;
     KEEP (*(.init_table*))
     _eitable = .;
@@ -82,6 +86,7 @@ SECTIONS {
     _tos = .;
     . = ALIGN(4);
     _ebss = .;
+    _heap_start = .;
   } >DRAM
 
   . = ALIGN(4);

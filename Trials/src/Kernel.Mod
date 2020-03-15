@@ -36,131 +36,218 @@ MODULE Kernel;
   TYPE Sector* = ARRAY SectorLength OF BYTE;
 
   VAR allocated*, NofSectors*: INTEGER;
-    heapOrg*, heapLim*: INTEGER; 
     stackOrg* ,  stackSize*, MemLim*: INTEGER;
     clock: INTEGER;
-    list0, list1, list2, list3: INTEGER;  (*lists of free blocks of size n*256, 128, 64, 32 bytes*)
     data: INTEGER; (*SPI data in*)
     sectorMap: ARRAY mapsize DIV 32 OF SET;
 *)  
+
+  VAR
+    (* Heap Management *)
+    list0, list1, list2, list3: INTEGER;  (*lists of free blocks of size n*256, 128, 64, 32 bytes*)
+    heapOrg*, heapLim*: INTEGER; 
+    allocated*: INTEGER;
+
 (* ---------- New: heap allocation ----------*)
-(*
-  PROCEDURE GetBlock(VAR p: LONGINT; len: LONGINT);
-    (*len is multiple of 256*)
-    VAR q0, q1, q2, size: LONGINT; done: BOOLEAN;
-  BEGIN q0 := 0; q1 := list0; done := FALSE;
+
+  PROCEDURE GetBlock(VAR p: INTEGER; len: INTEGER);
+    (* len is multiple of 256 *)
+    VAR q0, q1, q2, size: INTEGER; done: BOOLEAN;
+  BEGIN 
+    q0 := 0; 
+    q1 := list0; 
+    done := FALSE;
     WHILE ~done & (q1 # 0) DO
-      SYSTEM.GET(q1, size); SYSTEM.GET(q1+8, q2);
-      IF size < len THEN (*no fit*) q0 := q1; q1 := q2
-      ELSIF size = len THEN (*extract -> p*)
+      SYSTEM.GET(q1, size); 
+      SYSTEM.GET(q1 + 8, q2);
+      IF size < len THEN (* no fit *) 
+        q0 := q1; q1 := q2
+      ELSIF size = len THEN (* extract -> p *)
         done := TRUE; p := q1;
-        IF q0 # 0 THEN SYSTEM.PUT(q0+8, q2) ELSE list0 := q2 END
-      ELSE (*reduce size*)
-        done := TRUE; p := q1; q1 := q1 + len;
-        SYSTEM.PUT(q1, size-len); SYSTEM.PUT(q1+4, -1); SYSTEM.PUT(q1+8, q2);
-        IF q0 # 0 THEN SYSTEM.PUT(q0+8, q1) ELSE list0 := q1 END
+        IF q0 # 0 THEN 
+          SYSTEM.PUT(q0 + 8, q2) 
+        ELSE list0 := q2 END
+      ELSE (* reduce size *)
+        done := TRUE; 
+        p := q1; q1 := q1 + len;
+        SYSTEM.PUT(q1, size - len); 
+        SYSTEM.PUT(q1 + 4, -1); 
+        SYSTEM.PUT(q1 + 8, q2);
+        IF q0 # 0 THEN 
+          SYSTEM.PUT(q0 + 8, q1) 
+        ELSE list0 := q1 END
       END
-    END ;
+    END;
     IF ~done THEN p := 0 END
   END GetBlock;
 
-  PROCEDURE GetBlock128(VAR p: LONGINT);
-    VAR q: LONGINT;
+  PROCEDURE GetBlock128(VAR p: INTEGER);
+    VAR q: INTEGER;
   BEGIN
-    IF list1 # 0 THEN p := list1; SYSTEM.GET(list1+8, list1)
-    ELSE GetBlock(q, 256); SYSTEM.PUT(q+128, 128); SYSTEM.PUT(q+132, -1); SYSTEM.PUT(q+136, list1);
+    IF list1 # 0 THEN 
+      p := list1; 
+      SYSTEM.GET(list1 + 8, list1)
+    ELSE 
+      GetBlock(q, 256); 
+      SYSTEM.PUT(q + 128, 128); 
+      SYSTEM.PUT(q + 132, -1); 
+      SYSTEM.PUT(q + 136, list1);
       list1 := q + 128; p := q
     END
   END GetBlock128;
 
-  PROCEDURE GetBlock64(VAR p: LONGINT);
-    VAR q: LONGINT;
+  PROCEDURE GetBlock64(VAR p: INTEGER);
+    VAR q: INTEGER;
   BEGIN
-    IF list2 # 0 THEN p := list2; SYSTEM.GET(list2+8, list2)
-    ELSE GetBlock128(q); SYSTEM.PUT(q+64, 64); SYSTEM.PUT(q+68, -1); SYSTEM.PUT(q+72, list2);
+    IF list2 # 0 THEN 
+      p := list2; 
+      SYSTEM.GET(list2 + 8, list2)
+    ELSE 
+      GetBlock128(q); 
+      SYSTEM.PUT(q + 64, 64); 
+      SYSTEM.PUT(q + 68, -1); 
+      SYSTEM.PUT(q + 72, list2);
       list2 := q + 64; p := q
     END
   END GetBlock64;
 
-  PROCEDURE GetBlock32(VAR p: LONGINT);
-    VAR q: LONGINT;
+  PROCEDURE GetBlock32(VAR p: INTEGER);
+    VAR q: INTEGER;
   BEGIN
-    IF list3 # 0 THEN p := list3; SYSTEM.GET(list3+8, list3)
-    ELSE GetBlock64(q); SYSTEM.PUT(q+32, 32); SYSTEM.PUT(q+36, -1); SYSTEM.PUT(q+40, list3);
+    IF list3 # 0 THEN 
+      p := list3; 
+      SYSTEM.GET(list3 + 8, list3)
+    ELSE 
+      GetBlock64(q); 
+      SYSTEM.PUT(q + 32, 32); 
+      SYSTEM.PUT(q + 36, -1); 
+      SYSTEM.PUT(q + 40, list3);
       list3 := q + 32; p := q
     END
   END GetBlock32;
 
-   PROCEDURE New*(VAR ptr: LONGINT; tag: LONGINT);
-    (*called by NEW via MT[0]; ptr and tag are pointers*)
-    VAR p, size, lim: LONGINT;
-  BEGIN SYSTEM.GET(tag, size);
+   PROCEDURE New*(VAR ptr: INTEGER; tag: INTEGER);
+    (* called by NEW; ptr and tag are pointers *)
+    VAR p, size, lim: INTEGER;
+  BEGIN 
+    SYSTEM.GET(tag, size);
     IF size = 32 THEN GetBlock32(p)
     ELSIF size = 64 THEN GetBlock64(p)
     ELSIF size = 128 THEN GetBlock128(p)
-    ELSE GetBlock(p, (size+255) DIV 256 * 256)
-    END ;
+    ELSE GetBlock(p, (size + 255) DIV 256 * 256)
+    END;
     IF p = 0 THEN ptr := 0
-    ELSE ptr := p+8; SYSTEM.PUT(p, tag); lim := p + size; INC(p, 4); INC(allocated, size);
+    ELSE 
+      ptr := p + 8; 
+      SYSTEM.PUT(p, tag); 
+      lim := p + size; 
+      INC(p, 4); 
+      INC(allocated, size);
       WHILE p < lim DO SYSTEM.PUT(p, 0); INC(p, 4) END
     END
   END New;
-*)
 
 (* ---------- Garbage collector ----------*)
-(*
-  PROCEDURE Mark*(pref: LONGINT);
-    VAR pvadr, offadr, offset, tag, p, q, r: LONGINT;
-  BEGIN SYSTEM.GET(pref, pvadr); (*pointers < heapOrg considered NIL*)
+
+  PROCEDURE Mark*(pref: INTEGER);
+    VAR pvadr, offadr, offset, tag, p, q, r: INTEGER;
+  BEGIN 
+    SYSTEM.GET(pref, pvadr); (* pointers < heapOrg considered NIL *)
     WHILE pvadr # 0 DO
-      SYSTEM.GET(pvadr, p); SYSTEM.GET(p-4, offadr);
-      IF (p >= heapOrg) & (offadr = 0) THEN q := p;   (*mark elements in data structure with root p*)
-        REPEAT SYSTEM.GET(p-4, offadr);
-          IF offadr = 0 THEN SYSTEM.GET(p-8, tag); offadr := tag + 16 ELSE INC(offadr, 4) END ;
-          SYSTEM.PUT(p-4, offadr); SYSTEM.GET(offadr, offset);
-          IF offset # -1 THEN (*down*)
-            SYSTEM.GET(p+offset, r); SYSTEM.GET(r-4, offadr);
-            IF (r >= heapOrg) & (offadr = 0) THEN SYSTEM.PUT(p+offset, q); q := p; p := r END
-          ELSE (*up*) SYSTEM.GET(q-4, offadr); SYSTEM.GET(offadr, offset);
-            IF p # q THEN SYSTEM.GET(q+offset, r); SYSTEM.PUT(q+offset, p); p := q; q := r END
+      SYSTEM.GET(pvadr, p); 
+      SYSTEM.GET(p - 4, offadr);
+      IF (p >= heapOrg) & (offadr = 0) THEN 
+        q := p;   (* mark elements in data structure with root p *)
+        REPEAT 
+          SYSTEM.GET(p - 4, offadr);
+          IF offadr = 0 THEN
+            SYSTEM.GET(p - 8, tag); 
+            offadr := tag + 16
+          ELSE 
+            INC(offadr, 4) 
+          END;
+          SYSTEM.PUT(p - 4, offadr); 
+          SYSTEM.GET(offadr, offset);
+          IF offset # -1 THEN (* down *)
+            SYSTEM.GET(p + offset, r); 
+            SYSTEM.GET(r - 4, offadr);
+            IF (r >= heapOrg) & (offadr = 0) THEN 
+              SYSTEM.PUT(p + offset, q); 
+              q := p; p := r 
+            END
+          ELSE (* up *) 
+            SYSTEM.GET(q - 4, offadr); 
+            SYSTEM.GET(offadr, offset);
+            IF p # q THEN 
+              SYSTEM.GET(q + offset, r);
+              SYSTEM.PUT(q + offset, p); 
+              p := q; q := r 
+            END
           END
         UNTIL (p = q) & (offset = -1)
-      END ;
-      INC(pref, 4); SYSTEM.GET(pref, pvadr)
+      END;
+      INC(pref, 4); 
+      SYSTEM.GET(pref, pvadr)
     END
   END Mark;
 
   PROCEDURE Scan*;
-    VAR p, q, mark, tag, size: LONGINT;
-  BEGIN p := heapOrg;
-    REPEAT SYSTEM.GET(p+4, mark); q := p;
+    VAR p, q, mark, tag, size: INTEGER;
+  BEGIN 
+    p := heapOrg;
+    REPEAT SYSTEM.GET(p + 4, mark); q := p;
       WHILE mark = 0 DO
-        SYSTEM.GET(p, tag); SYSTEM.GET(tag, size); INC(p, size); SYSTEM.GET(p+4, mark)
-      END ;
-      size := p - q; DEC(allocated, size);  (*size of free block*)
+        SYSTEM.GET(p,    tag); 
+        SYSTEM.GET(tag, size); INC(p, size); 
+        SYSTEM.GET(p + 4, mark)
+      END;
+      size := p - q; 
+      DEC(allocated, size);  (* size of free block *)
       IF size > 0 THEN
         IF size MOD 64 # 0 THEN
-          SYSTEM.PUT(q, 32); SYSTEM.PUT(q+4, -1); SYSTEM.PUT(q+8, list3); list3 := q; INC(q, 32); DEC(size, 32)
-        END ;
+          SYSTEM.PUT(q,     32); 
+          SYSTEM.PUT(q + 4, -1); 
+          SYSTEM.PUT(q + 8, list3); 
+          list3 := q; 
+          INC(q, 32); DEC(size, 32)
+        END;
         IF size MOD 128 # 0 THEN
-          SYSTEM.PUT(q, 64); SYSTEM.PUT(q+4, -1); SYSTEM.PUT(q+8, list2); list2 := q; INC(q, 64); DEC(size, 64)
-        END ;
+          SYSTEM.PUT(q,     64); 
+          SYSTEM.PUT(q + 4, -1); 
+          SYSTEM.PUT(q + 8, list2); 
+          list2 := q; 
+          INC(q, 64); DEC(size, 64)
+        END;
         IF size MOD 256 # 0 THEN
-          SYSTEM.PUT(q, 128); SYSTEM.PUT(q+4, -1); SYSTEM.PUT(q+8,  list1); list1 := q; INC(q, 128); DEC(size, 128)
-        END ;
+          SYSTEM.PUT(q,     128); 
+          SYSTEM.PUT(q + 4, -1); 
+          SYSTEM.PUT(q + 8, list1); 
+          list1 := q; 
+          INC(q, 128); DEC(size, 128)
+        END;
         IF size > 0 THEN
-          SYSTEM.PUT(q, size); SYSTEM.PUT(q+4, -1); SYSTEM.PUT(q+8, list0); list0 := q; INC(q, size)
+          SYSTEM.PUT(q,     size); 
+          SYSTEM.PUT(q + 4, -1); 
+          SYSTEM.PUT(q + 8, list0); 
+          list0 := q; 
+          INC(q, size)
         END
-      END ;
-      IF mark > 0 THEN SYSTEM.GET(p, tag); SYSTEM.GET(tag, size); SYSTEM.PUT(p+4, 0); INC(p, size)
-      ELSE (*free*) SYSTEM.GET(p, size); INC(p, size)
+      END;
+      IF mark > 0 THEN 
+        SYSTEM.GET(p,     tag); 
+        SYSTEM.GET(tag,   size); 
+        SYSTEM.PUT(p + 4, 0); 
+        INC(p, size)
+      ELSE (*free*) 
+        SYSTEM.GET(p, size); 
+        INC(p, size)
       END
     UNTIL p >= heapLim
   END Scan;
-*)
+
 (* ---------- Disk storage management ----------*)
 (*
-  PROCEDURE SPIIdle(n: INTEGER); (*send n FFs slowly with no card selected*)
+  PROCEDURE SPIIdle(n: INTEGER); (* send n FFs slowly with no card selected *)
   BEGIN SYSTEM.PUT(spiCtrl, 0);
     WHILE n > 0 DO DEC(n); SYSTEM.PUT(spiData, -1);
       REPEAT UNTIL SYSTEM.BIT(spiCtrl, 0);
@@ -168,7 +255,7 @@ MODULE Kernel;
     END
   END SPIIdle;
 
-  PROCEDURE SPI(n: INTEGER); (*send&rcv byte slowly with card selected*)
+  PROCEDURE SPI(n: INTEGER); (* send&rcv byte slowly with card selected *)
   BEGIN SYSTEM.PUT(spiCtrl, CARD0); SYSTEM.PUT(spiData, n);
     REPEAT UNTIL SYSTEM.BIT(spiCtrl, 0);
     SYSTEM.GET(spiData, data)
@@ -176,28 +263,28 @@ MODULE Kernel;
 
   PROCEDURE SPICmd(n, arg: INTEGER);
     VAR i, crc: INTEGER;
-  BEGIN (*send cmd*)
-    REPEAT SPIIdle(1) UNTIL data = 255; (*flush while unselected*)
-    REPEAT SPI(255) UNTIL data = 255; (*flush while selected*)
+  BEGIN (* send cmd *)
+    REPEAT SPIIdle(1) UNTIL data = 255; (* flush while unselected *)
+    REPEAT SPI(255) UNTIL data = 255; (* flush while selected *)
     IF n = 8 THEN crc := 135 ELSIF n = 0 THEN crc := 149 ELSE crc := 255 END;
-    SPI(n MOD 64 + 64); (*send command*)
-    FOR i := 24 TO 0 BY -8 DO SPI(ROR(arg, i)) END; (*send arg*)
+    SPI(n MOD 64 + 64); (* send command *)
+    FOR i := 24 TO 0 BY -8 DO SPI(ROR(arg, i)) END; (* send arg *)
     SPI(crc); i := 32;
     REPEAT SPI(255); DEC(i) UNTIL (data < 80H) OR (i = 0)
   END SPICmd;
 
   PROCEDURE SDShift(VAR n: INTEGER);
     VAR data: INTEGER;
-  BEGIN SPICmd(58, 0);  (*CMD58 get card capacity bit*)
+  BEGIN SPICmd(58, 0);  (* CMD58 get card capacity bit *)
     SYSTEM.GET(spiData, data); SPI(-1);
-    IF (data # 0) OR ~SYSTEM.BIT(spiData, 6) THEN n := n * 512 END ;  (*non-SDHC card*)
-    SPI(-1); SPI(-1); SPIIdle(1)  (*flush response*)
+    IF (data # 0) OR ~SYSTEM.BIT(spiData, 6) THEN n := n * 512 END ;  (* non-SDHC card *)
+    SPI(-1); SPI(-1); SPIIdle(1)  (* flush response *)
   END SDShift;
 
   PROCEDURE ReadSD(src, dst: INTEGER);
     VAR i: INTEGER;
-  BEGIN SDShift(src); SPICmd(17, src); ASSERT(data = 0); (*CMD17 read one block*)
-    i := 0; (*wait for start data marker*)
+  BEGIN SDShift(src); SPICmd(17, src); ASSERT(data = 0); (* CMD17 read one block *)
+    i := 0; (* wait for start data marker *)
     REPEAT SPI(-1); INC(i) UNTIL data = 254;
     SYSTEM.PUT(spiCtrl, SPIFAST + CARD0);
     FOR i := 0 TO 508 BY 4 DO
@@ -205,21 +292,21 @@ MODULE Kernel;
       REPEAT UNTIL SYSTEM.BIT(spiCtrl, 0);
       SYSTEM.GET(spiData, data); SYSTEM.PUT(dst, data); INC(dst, 4)
     END;
-    SPI(255); SPI(255); SPIIdle(1) (*may be a checksum; deselect card*)
+    SPI(255); SPI(255); SPIIdle(1) (* may be a checksum; deselect card *)
   END ReadSD;
 
   PROCEDURE WriteSD(dst, src: INTEGER);
     VAR i, n: INTEGER; x: BYTE;
-  BEGIN SDShift(dst); SPICmd(24, dst); ASSERT(data = 0); (*CMD24 write one block*)
+  BEGIN SDShift(dst); SPICmd(24, dst); ASSERT(data = 0); (* CMD24 write one block *)
     SPI(254); (*write start data marker*)
     SYSTEM.PUT(spiCtrl, SPIFAST + CARD0);
     FOR i := 0 TO 508 BY 4 DO
       SYSTEM.GET(src, n); INC(src, 4); SYSTEM.PUT(spiData, n);
       REPEAT UNTIL SYSTEM.BIT(spiCtrl, 0)
     END;
-    SPI(255); SPI(255); (*dummy checksum*) i := 0;
+    SPI(255); SPI(255); (* dummy checksum *) i := 0;
     REPEAT SPI(-1); INC(i); UNTIL (data MOD 32 = 5) OR (i = 10000);
-    ASSERT(data MOD 32 = 5); SPIIdle(1) (*deselect card*)
+    ASSERT(data MOD 32 = 5); SPIIdle(1) (* deselect card *)
   END WriteSD;
 
   PROCEDURE InitSecMap*;
@@ -294,7 +381,9 @@ MODULE Kernel;
     SYSTEM.GET(12, MemLim); SYSTEM.GET(24, heapOrg);
     stackOrg := heapOrg; stackSize := 8000H; heapLim := MemLim;
     list1 := 0; list2 := 0; list3 := 0; list0 := heapOrg;
-    SYSTEM.PUT(list0, heapLim - heapOrg); SYSTEM.PUT(list0+4, -1); SYSTEM.PUT(list0+8, 0);
+    SYSTEM.PUT(list0, heapLim - heapOrg); 
+    SYSTEM.PUT(list0 + 4, -1); 
+    SYSTEM.PUT(list0 + 8, 0);
     allocated := 0; clock := 0; InitSecMap
   END Init;
 *)
@@ -331,19 +420,19 @@ MODULE Kernel;
   BEGIN 
     GetTime(time);
     ASM
-        l32i a3, a1, 0   # a3 := address of fromTime
-        l32i a4, a1, 12  # a4 := time.high
-        l32i a5, a1, 8   # a5 := time.low
-        l32i a6, a3, 0   # a6 := fromTime.low
-        sub  a7, a5, a6  # a7 := time.low - fromTime.low 
-        bgeu a5, a7, 96f # branch if no borrow
+        l32i a3, a1, 0         # a3 := address of fromTime
+        l32i a4, a1, 12        # a4 := time.high
+        l32i a5, a1, 8         # a5 := time.low
+        l32i a6, a3, 0         # a6 := fromTime.low
+        sub  a7, a5, a6        # a7 := time.low - fromTime.low 
+        bgeu a5, a7, 96f       # branch if no borrow
         addi a4, a4, -1
     96:
-        l32i a5, a3, 4   # a5 := fromTime.high
-        beq a4, a5, 97f  # if time.high # fromTime.high then
-        movi a7, -1      #    overflow
+        l32i a5, a3, 4         # a5 := fromTime.high
+        beq a4, a5, 97f        # if time.high # fromTime.high then
+        movi a7, -1            #    overflow
     97:
-        s32i a7, a1, 16  # Save value in result
+        s32i a7, a1, 16        # Save value in result
     END;
   RETURN result
   END GetElapseTime;
@@ -430,10 +519,54 @@ MODULE Kernel;
     SYSTEM.PUT(DPORT_CPU_PER_CONF_REG, 0);
   END SetCPUSpeed80Mhz;
 
+  (* Still not an interrupt handler. It is called through a call4
+     instruction *)
+  PROCEDURE [1] OberonSyscallHandler(tag: INTEGER; p1, p2: INTEGER);
+  BEGIN
+(* 
+    Out.Ln; 
+    Out.String("Tag: "); Out.Int(tag, 0);
+    Out.String(", p1: "); Out.Hex(p1, 0);
+    Out.String(", p2: "); Out.Hex(p2, 0); 
+ *)
+
+    IF tag = 1 THEN
+      New(p1, p2);
+      (* Out.Ln; Out.String("Allocated: "); Out.Int(allocated, 0); *)
+    ELSIF tag = 2 THEN
+      Out.Ln; 
+      Out.String("TRAP EXCEPTION: ");
+      Out.Int(p1, 0);
+      Out.Ln; Out.Flush;
+
+      ASM
+        j _call_start_cpu0
+      END
+    END;
+  END OberonSyscallHandler;
+
   PROCEDURE Init*;
+    VAR heapBottom, heapTop: INTEGER;
   BEGIN
     SetCPUSpeed160Mhz;
     InitTimer;
+
+    ASM 
+      movi a3, _heap_start
+      s32i a3, sp, 0
+      movi a3, _heap_end
+      s32i a3, sp, 4
+    END;
+
+    heapOrg := heapBottom;
+    heapLim := heapTop;
+    list1 := 0; list2 := 0; list3 := 0; list0 := heapOrg;
+    SYSTEM.PUT(list0, heapLim - heapOrg); 
+    SYSTEM.PUT(list0 + 4, -1); 
+    SYSTEM.PUT(list0 + 8, 0);
+    allocated := 0;
+
+    Out.String("Heap Top: "); Out.Hex(heapTop, 0); Out.Ln;
   END Init;
 
 END Kernel.

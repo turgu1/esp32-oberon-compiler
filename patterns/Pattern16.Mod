@@ -68,12 +68,12 @@ _Pattern16_init:
     s32i a3, a2, 0
     l32i a2, a15, 0
     l32i a3, a15, 4
-    blt a2, a3, 1f
+    blt a2, a3, L1
     addi a1, a1, -4
     s32i a2, a1, 0
     movi a2, 7
     j __TRAP__
-1:
+L1:
     l32i a2, a15, 8
     srai a3, a2, 23
     addi a3, a3, -127
@@ -89,26 +89,26 @@ _Pattern16_init:
     addi a2, a15, 96
     movi a3, _Pattern16_s_str
     movi a4, 3
-    loop a4, 2f
+    loop a4, L2
     l32i a5, a3, 0
     addi a3, a3, 4
     s32i a5, a2, 0
     addi a2, a2, 4
-2:
+L2:
     addi a4, a15, 96
     addi a5, a15, 112
-3:
+L3:
     l8ui a2, a4, 0
     addi a4, a4, 1
     l8ui a3, a5, 0
     addi a5, a5, 1
-    bne a2, a3, 4f
+    bne a2, a3, L4
     bnez a2, 3b
-4:
-    bge a2, a3, 5f
+L4:
+    bge a2, a3, L5
     movi a2, 1
     s32i a2, a15, 0
-5:
+L5:
     retw
     .size _Pattern16_init, .-_Pattern16_init
 

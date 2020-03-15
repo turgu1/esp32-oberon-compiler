@@ -32,16 +32,16 @@ _Pattern6_init:
     movi a2, _Pattern6_s_bss
     movi a3, 0                 # a4 := 0
     s32i a3, a2, 0             # i := 0
-1:
+L1:
     l32i a3, a2, 0             # a3 := i
     movi a4, 10                # a4 := 10
-    bge a3 a4, 2f              # branch if a3 >= 10
+    bge a3 a4, L2              # branch if a3 >= 10
     l32i a3, a2, 0             # a3 := i
     addi a3, a3, 2             # a3 := i + 2
     s32i a3, a2, 0             # i := i + 2
     j 1b                       # loop to while test
-2:
-3:
+L2:
+L3:
     l32i a3, a2, 0             # a3 := i
     addi a3, a3, -1            # a3 := i - 1
     s32i a3, a2, 0             # i := i - 1

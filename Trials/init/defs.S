@@ -36,6 +36,9 @@
     .equ XCHAL_PS_OWB_BITS,      4
     .equ XCHAL_EXCM_LEVEL,       3
 
+    .equ DEFAULT,                1
+
+#define PS_INTLEVEL(n)		((n)&PS_INTLEVEL_MASK)    
 #define STRUCT_BEGIN            .pushsection .text; .struct 0
 #define STRUCT_FIELD(ctype,size,asname,name)    asname: .space  size
 #define STRUCT_AFIELD(ctype,size,asname,name,n) asname: .space  (size)*(n)

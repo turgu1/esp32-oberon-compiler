@@ -33,46 +33,46 @@ _Pattern19_init:
     movi a15, _Pattern19_s_bss
     movi a2, 3
     movi a3, 5
-    blt a2, a3, 1f
+    blt a2, a3, L1
     addi a1, a1, -4
     s32i a2, a1, 0
     movi a2, 7
     j __TRAP__
-1:
+L1:
     movi a2, 3
     movi a3, 5
-    bge a2, a3, 2f
+    bge a2, a3, L2
     l8ui a2, a15, 8
-    bnez a2, 3f
+    bnez a2, L3
     addi a1, a1, -4
     s32i a2, a1, 0
     movi a2, 7
     j __TRAP__
-3:
-2:
+L3:
+L2:
     l32i a2, a15, 0
     l32i a3, a15, 4
-    beq a2, a3, 4f
+    beq a2, a3, L4
     addi a1, a1, -4
     s32i a2, a1, 0
     movi a2, 7
     j __TRAP__
-4:
+L4:
     l32i a2, a15, 0
     movi a3, 0
-    beq a2, a3, 5f
+    beq a2, a3, L5
     addi a1, a1, -4
     s32i a2, a1, 0
     movi a2, 7
     j __TRAP__
-5:
+L5:
     l8ui a2, a15, 8
-    bnez a2, 6f
+    bnez a2, L6
     addi a1, a1, -4
     s32i a2, a1, 0
     movi a2, 7
     j __TRAP__
-6:
+L6:
     retw
     .size _Pattern19_init, .-_Pattern19_init
 
