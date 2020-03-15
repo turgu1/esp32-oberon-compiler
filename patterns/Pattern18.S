@@ -24,27 +24,27 @@ _Pattern18_init:
     mov a3, a2
     movi a4, _Pattern18_s_str
     movi a5, 2
-    loop a5, 1f
+    loop a5, L1
     l32i a6, a4, 0
     addi a4, a4, 4
     s32i a6, a3, 0
     addi a3, a3, 4
-1:
+L1:
     mov a5, a2
     movi a6, _Pattern18_s_str
     addi a6, a6, 8
-2:
+L2:
     l8ui a3, a5, 0
     addi a5, a5, 1
     l8ui a4, a6, 0
     addi a6, a6, 1
-    bne a3, a4, 3f
-    bnez a3, 2b
-3:
-    bge a3, a4, 4f
+    bne a3, a4, L3
+    bnez a3, L2
+L3:
+    bge a3, a4, L4
     movi a3, 3
     s32i a3, a2, 512
-4:
+L4:
     retw
     .size _Pattern18_init, .-_Pattern18_init
 

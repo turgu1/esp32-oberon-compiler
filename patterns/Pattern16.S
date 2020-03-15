@@ -45,12 +45,11 @@ _Pattern16_init:
     s32i a4, a3, 0
     l32i a3, a2, 0
     l32i a4, a2, 4
-    blt a3, a4, 1f
-    addi a1, a1, -4
-    s32i a2, a1, 0
-    movi a2, 7
-    j __TRAP__
-1:
+    blt a3, a4, L1
+    movi a6, 2
+    movi a7, 7
+    call4 _OberonSyscallHandler
+L1:
     l32i a3, a2, 8
     srai a4, a3, 23
     addi a4, a4, -127
@@ -66,26 +65,26 @@ _Pattern16_init:
     addi a3, a2, 96
     movi a4, _Pattern16_s_str
     movi a5, 3
-    loop a5, 2f
+    loop a5, L2
     l32i a6, a4, 0
     addi a4, a4, 4
     s32i a6, a3, 0
     addi a3, a3, 4
-2:
+L2:
     addi a5, a2, 96
     addi a6, a2, 112
-3:
+L3:
     l8ui a3, a5, 0
     addi a5, a5, 1
     l8ui a4, a6, 0
     addi a6, a6, 1
-    bne a3, a4, 4f
-    bnez a3, 3b
-4:
-    bge a3, a4, 5f
+    bne a3, a4, L4
+    bnez a3, L3
+L4:
+    bge a3, a4, L5
     movi a3, 1
     s32i a3, a2, 0
-5:
+L5:
     retw
     .size _Pattern16_init, .-_Pattern16_init
 

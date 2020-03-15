@@ -30,20 +30,5 @@ BEGIN
 END Pattern13.
 DBGOFF
 (* 
-    .section .bss_module_Pattern13
-    .align 4
 
-p0: .space 4
-p1: .space 4
-p2: .space 4
-
-    .section .init_module_Pattern13
-    .align 4
-
-_module_Pattern13_init:
-    entry a1, 0
-    retw
-
-    .section .init_table_module_Pattern13
-    .int _module_Pattern13_init 
 *)

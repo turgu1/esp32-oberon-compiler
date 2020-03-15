@@ -405,7 +405,8 @@ MODULE ORG;
       INCL(UsedRegs, RH);
       INC(RH) 
     ELSE 
-      ORS.Mark("register stack overflow") 
+      ORS.Mark("register stack overflow");
+      Out.Ln; Out.String("   ==> RH: "); Out.Int(RH, 0)
     END
   END incR;
 
@@ -415,7 +416,8 @@ MODULE ORG;
       DEC(RH);
       EXCL(UsedRegs, RH)
     ELSE
-      ORS.Mark("register stack underflow") 
+      ORS.Mark("register stack underflow");
+      Out.Ln; Out.String("   ==> RH: "); Out.Int(RH, 0)
     END
   END decR;
 
@@ -1463,7 +1465,7 @@ MODULE ORG;
 
   PROCEDURE TypeTest*(VAR x: Item; T: ORB.Type; varpar, isguard: BOOLEAN);
   BEGIN
-    e("TypeTest RH:"); eInt(RH);
+    e("TypeTest RH:"); eInt(RH); eStr(" varpar:"); eInt(ORD(varpar)); eStr(" isguard:"); eInt(ORD(isguard));
     IF T = NIL THEN
       IF x.mode >= Reg THEN PutRI("movi", RH-1, 1) ELSE PutRI("movi", RH, 1); incR END;
       SetCC(x, TR)
@@ -1488,7 +1490,7 @@ MODULE ORG;
         IF check THEN
           Trap(NEQ, TrGuard) 
         ELSE
-          decR; decR
+          decR
         END
       ELSE
         SetCC(x, EQU);

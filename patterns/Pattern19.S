@@ -18,46 +18,41 @@ _Pattern19_init:
     movi a2, _Pattern19_s_bss
     movi a3, 3
     movi a4, 5
-    blt a3, a4, 1f
-    addi a1, a1, -4
-    s32i a2, a1, 0
-    movi a2, 7
-    j __TRAP__
-1:
+    blt a3, a4, L1
+    movi a6, 2
+    movi a7, 7
+    call4 _OberonSyscallHandler
+L1:
     movi a3, 3
     movi a4, 5
-    bge a3, a4, 2f
+    bge a3, a4, L2
     l8ui a3, a2, 8
-    bnez a3, 3f
-    addi a1, a1, -4
-    s32i a2, a1, 0
-    movi a2, 7
-    j __TRAP__
-3:
-2:
+    bnez a3, L3
+    movi a6, 2
+    movi a7, 7
+    call4 _OberonSyscallHandler
+L3:
+L2:
     l32i a3, a2, 0
     l32i a4, a2, 4
-    beq a3, a4, 4f
-    addi a1, a1, -4
-    s32i a2, a1, 0
-    movi a2, 7
-    j __TRAP__
-4:
+    beq a3, a4, L4
+    movi a6, 2
+    movi a7, 7
+    call4 _OberonSyscallHandler
+L4:
     l32i a3, a2, 0
     movi a4, 0
-    beq a3, a4, 5f
-    addi a1, a1, -4
-    s32i a2, a1, 0
-    movi a2, 7
-    j __TRAP__
-5:
+    beq a3, a4, L5
+    movi a6, 2
+    movi a7, 7
+    call4 _OberonSyscallHandler
+L5:
     l8ui a3, a2, 8
-    bnez a3, 6f
-    addi a1, a1, -4
-    s32i a2, a1, 0
-    movi a2, 7
-    j __TRAP__
-6:
+    bnez a3, L6
+    movi a6, 2
+    movi a7, 7
+    call4 _OberonSyscallHandler
+L6:
     retw
     .size _Pattern19_init, .-_Pattern19_init
 

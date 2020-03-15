@@ -38,21 +38,21 @@ _Pattern15_init:
     mov a3, a2
     movi a4, _Pattern15_s_str
     movi a5, 2
-    loop a5, 1f
+    loop a5, L1
     l32i a6, a4, 0
     addi a4, a4, 4
     s32i a6, a3, 0
     addi a3, a3, 4
-1:
+L1:
     mov a3, a2
     addi a4, a2, 32
     movi a5, 8
-    loop a5, 2f
+    loop a5, L2
     l32i a6, a4, 0
     addi a4, a4, 4
     s32i a6, a3, 0
     addi a3, a3, 4
-2:
+L2:
     addi a6, a2, 32
     movi a7, 32
     call4 _P

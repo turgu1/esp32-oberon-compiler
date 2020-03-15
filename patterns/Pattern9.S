@@ -20,14 +20,14 @@ _F:
     movi a2, _Pattern9_s_bss
     l32i a3, a1, 0
     movi a4, 1065353216
-    blt a3, a4, 1f
+    blt a3, a4, L1
     l32i a10, a1, 0
     call8 _F
     mov a6, a11
     call4 _F
     mov a3, a7
     s32i a3, a1, 0
-1:
+L1:
     l32i a3, a1, 0
     retw
     .size _F, .-_F

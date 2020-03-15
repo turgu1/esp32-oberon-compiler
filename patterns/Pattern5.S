@@ -18,59 +18,59 @@ _Pattern5_init:
     movi a2, _Pattern5_s_bss
     l32i a3, a2, 0
     movi a4, 0
-    bne a3, a4, 1f
+    bne a3, a4, L1
     mov a3, a2
     l32i a4, a3, 0
     addi a4, a4, 1
     s32i a4, a3, 0
-1:
+L1:
     l32i a3, a2, 0
     movi a4, 0
-    blt a3, a4, 2f
+    blt a3, a4, L2
     l32i a3, a2, 0
     movi a4, 100
-    bge a3, a4, 2f
-3:
+    bge a3, a4, L2
+L3:
     mov a3, a2
     l32i a4, a3, 0
     addi a4, a4, -1
     s32i a4, a3, 0
-2:
+L2:
     l32i a3, a2, 0
     movi a4, 1
     and a3, a3, a4
-    bnez a3, 4f
+    bnez a3, L4
     l32i a3, a2, 4
     l32i a4, a2, 0
-    bbc a3, a4, 5f
-4:
+    bbc a3, a4, L5
+L4:
     movi a3, -1000
     s32i a3, a2, 0
-5:
+L5:
     l32i a3, a2, 0
     movi a4, 0
-    bge a3, a4, 6f
+    bge a3, a4, L6
     movi a3, 0
     s32i a3, a2, 4
-    j 7f
-6:
+    j L7
+L6:
     l32i a3, a2, 0
     movi a4, 10
-    bge a3, a4, 8f
+    bge a3, a4, L8
     movi a3, 1
     s32i a3, a2, 4
-    j 7f
-8:
+    j L7
+L8:
     l32i a3, a2, 0
     movi a4, 100
-    bge a3, a4, 9f
+    bge a3, a4, L9
     movi a3, 2
     s32i a3, a2, 4
-    j 7f
-9:
+    j L7
+L9:
     movi a3, 4
     s32i a3, a2, 4
-7:
+L7:
     retw
     .size _Pattern5_init, .-_Pattern5_init
 
