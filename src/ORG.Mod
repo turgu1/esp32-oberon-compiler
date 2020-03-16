@@ -24,9 +24,10 @@ MODULE ORG;
     EQ  = 1; NE  =  9;  (* Zero / Not zero                     1 arg  *)
     BST = 2; BCL = 10;  (* Bit Set / Bit CLear                 2 args *)
     EQU = 3; NEQ = 11;  (* Equal  / Not equal                  2 args *)
+    BR  = 4; BR2 = 12;  (* Non conditional branch              0 args *)
     LT  = 5; GE  = 13;  (* Lower than / Greater or equal       2 args *)
     LE  = 6; GT  = 14;  (* Lower or equal / Greater than       2 args *)
-    TR  = 7; FL  = 15;  (* TRUE / FALSE  constant              0 args *)
+    TR  = 7; FL  = 15;  (* TRUE / FALSE  constant              1 args *)
 
     Marker1 = 025H; (* % *)
     Marker2 = 024H; (* $ *)
@@ -42,6 +43,7 @@ MODULE ORG;
     TrCall    = 5; (* illegal procedure call        *)
     TrZeroDiv = 6; (* integer division by zero      *)
     TrAssert  = 7; (* assertionviolated             *)
+
   TYPE 
     (*
 
@@ -131,6 +133,7 @@ MODULE ORG;
     BrOp: ARRAY 16 OF BrStr;  (* ESP32 branch instructions   *)
     BrReverse,                (* Parameters must be reversed *)
     BrOneParam,               (* One parameter instructions  *)
+    BrNoParam,                (* Unconditional branches      *)
     BrNotValid: SET;          (* Not valid entries           *)
 
     UsedRegs: SET;
@@ -232,30 +235,31 @@ MODULE ORG;
   END ShowMode;
 
   PROCEDURE ShowObject(o: ORB.Object; s: INTEGER);
-  PROCEDURE ShowType(t: ORB.Type; s: INTEGER);
 
-  BEGIN 
-    IF s <= 20 THEN
-      Spaces(s); Out.String("form: "  ); Out.Int(t.form,   0); ShowForm(t.form); Out.Ln;
-      Spaces(s); Out.String("ref: "   ); Out.Int(t.ref,    0); Out.Ln;
-      Spaces(s); Out.String("mno: "   ); Out.Int(t.mno,    0); Out.Ln;
-      Spaces(s); Out.String("nofPar: "); Out.Int(t.nofpar, 0); Out.Ln;
-      Spaces(s); Out.String("len: "   ); Out.Int(t.len,    0); Out.Ln;
-      Spaces(s); Out.String("size: "  ); Out.Int(t.size,   0); Out.Ln;
-      IF t.dsc # NIL THEN
-        Spaces(s); Out.String("dsc:"); Out.Ln;
-        ShowObject(t.dsc, s + 4);
-      END;
-      IF t.typobj # NIL THEN
-        Spaces(s); Out.String("typobj:"); Out.Ln;
-        ShowObject(t.typobj, s + 4);
-      END;
-      IF t.base # NIL THEN
-        Spaces(s); Out.String("base:"); Out.Ln;
-        ShowType(t.base, s + 4);
+    PROCEDURE ShowType(t: ORB.Type; s: INTEGER);
+    BEGIN 
+      IF s <= 20 THEN
+        Spaces(s); Out.String("form: "  ); Out.Int(t.form,   0); ShowForm(t.form); Out.Ln;
+        Spaces(s); Out.String("ref: "   ); Out.Int(t.ref,    0); Out.Ln;
+        Spaces(s); Out.String("mno: "   ); Out.Int(t.mno,    0); Out.Ln;
+        Spaces(s); Out.String("nofPar: "); Out.Int(t.nofpar, 0); Out.Ln;
+        Spaces(s); Out.String("len: "   ); Out.Int(t.len,    0); Out.Ln;
+        Spaces(s); Out.String("size: "  ); Out.Int(t.size,   0); Out.Ln;
+        IF t.dsc # NIL THEN
+          Spaces(s); Out.String("dsc:"); Out.Ln;
+          ShowObject(t.dsc, s + 4);
+        END;
+        IF t.typobj # NIL THEN
+          Spaces(s); Out.String("typobj:"); Out.Ln;
+          ShowObject(t.typobj, s + 4);
+        END;
+        IF t.base # NIL THEN
+          Spaces(s); Out.String("base:"); Out.Ln;
+          ShowType(t.base, s + 4);
+        END
       END
-    END
-  END ShowType;
+    END ShowType;
+
   BEGIN
     IF s <= 20 THEN
       Out.Ln;
@@ -750,6 +754,28 @@ MODULE ORG;
     Texts.WriteLn(CodeW);
   END PutBranchR;
 
+  PROCEDURE PutJump(op: ARRAY OF CHAR; label: INTEGER);
+  BEGIN 
+    e("PutJump");
+    Texts.WriteString(CodeW, "    ");
+    Texts.WriteString(CodeW, op);
+    Texts.Write(      CodeW, " ");
+    Texts.Write(      CodeW, "L");
+    Texts.WriteInt(   CodeW, label, 0);
+    Texts.WriteLn(CodeW);
+  END PutJump;
+  
+  PROCEDURE PutJumpStr(op, label: ARRAY OF CHAR);
+  BEGIN 
+    e("PutJumpStr");
+    Texts.WriteString(CodeW, "    ");
+    Texts.WriteString(CodeW, op);
+    Texts.Write(CodeW, " ");
+    Texts.WriteString(CodeW, label);
+    Texts.WriteLn(CodeW);
+  END PutJumpStr;
+  
+
   PROCEDURE PutCondBranch(cond, label: INTEGER);
   VAR 
     reverseArguments: BOOLEAN;
@@ -773,6 +799,8 @@ MODULE ORG;
       IF cond IN BrOneParam THEN
         PutBranchR(BrOp[thisCond], RH-1, label);
         decR
+      ELSIF cond IN BrNoParam THEN
+        PutJump("j", label)
       ELSE
         IF cond IN BrReverse THEN
           IF reverseArguments THEN
@@ -792,27 +820,6 @@ MODULE ORG;
     END      
   END PutCondBranch;
 
-  PROCEDURE PutJump(op: ARRAY OF CHAR; label: INTEGER);
-  BEGIN 
-    e("PutJump");
-    Texts.WriteString(CodeW, "    ");
-    Texts.WriteString(CodeW, op);
-    Texts.Write(      CodeW, " ");
-    Texts.Write(      CodeW, "L");
-    Texts.WriteInt(   CodeW, label, 0);
-    Texts.WriteLn(CodeW);
-  END PutJump;
-  
-  PROCEDURE PutJumpStr(op, label: ARRAY OF CHAR);
-  BEGIN 
-    e("PutJumpStr");
-    Texts.WriteString(CodeW, "    ");
-    Texts.WriteString(CodeW, op);
-    Texts.Write(CodeW, " ");
-    Texts.WriteString(CodeW, label);
-    Texts.WriteLn(CodeW);
-  END PutJumpStr;
-  
     (* Produce a unique section name of the following form:
        _<sectionPrefix>_<moduleId>_<kind>_<key>
    *)
@@ -1467,33 +1474,38 @@ MODULE ORG;
   BEGIN
     e("TypeTest RH:"); eInt(RH); eStr(" varpar:"); eInt(ORD(varpar)); eStr(" isguard:"); eInt(ORD(isguard));
     IF T = NIL THEN
-      IF x.mode >= Reg THEN PutRI("movi", RH-1, 1) ELSE PutRI("movi", RH, 1); incR END;
-      SetCC(x, TR)
+      IF x.mode >= Reg THEN DEC(RH) END;
+      SetCC(x, BR) (* Unconditional jump, no need to test *)
     ELSE 
       (*fetch tag into RH*)
       IF varpar THEN 
+        (* Pointer received as a parameter, get tag from next param *)
         PutMoveRRI("l32i", 1020, RH, SP, x.a + 4 + frame);
+        PutMoveRRI("l32i", 1020, RH, RH, T.nofpar * 4); incR;
+        (* tag of T *)
+        loadTypTagAdr(T);
       ELSE 
-        load(x); decR;
-        PutBranchR("bnez", RH, label);  
-        loadTypTagAdr(T); decR; (* NIL belongs to every pointer type *)
-        PutJump("j", label+1);
-        PutLabel(label); INC(label);
-        PutRRI("addi", RH, RH, -8);
-        PutRRI("l32i", RH, RH, 0)
-      END ;
-      PutMoveRRI("l32i", 1020, RH, RH, T.nofpar * 4); incR;
-      (* tag of T *)
-      IF ~varpar THEN PutLabel(label); INC(label) END ;
-      loadTypTagAdr(T);  
+        load(x);                        (* Load pointer content (address)    *)
+        PutRI("movi", RH,    0);
+        PutRI("mov",  RH+1, RH);
+        PutBranchR("beqz", x.r, label);  (* NIL belongs to every pointer type *)
+        PutRRI("addi", RH, x.r, -8);
+        PutRRI("l32i", RH, RH,  0);
+        PutMoveRRI("l32i", 1020, RH, RH, T.nofpar * 4); incR;
+        (* tag of T *)
+        loadTypTagAdr(T);
+        PutLabel(label); INC(label)
+      END;
+      (* Here, we need three register: maybe x + two types to compare *)
       IF isguard THEN
-        IF check THEN
-          Trap(NEQ, TrGuard) 
+        IF check THEN 
+          Trap(NEQ, TrGuard)
         ELSE
-          decR
+          decR; decR
         END
       ELSE
         SetCC(x, EQU);
+        IF ~varpar THEN decR END
       END
     END;
     e("End of TypeTest RH:"); eInt(RH)
@@ -3281,18 +3293,21 @@ BEGIN
     EQU = 3; NEQ = 11;  (* Equal  / Not equal                  2 args *)
     LT  = 5; GE  = 13;  (* Lower than / Greater or equal       2 args *)
     LE  = 6; GT  = 14;  (* Lower or equal / Greater than       2 args *)
-    TR  = 7; FL  = 15;  (* TRUE / FALSE  constant              0 args *)
+    TR  = 7; FL  = 15;  (* TRUE / FALSE  constant              1 args *)
 *)
 
-  BrOp[ 0] := "bltz";  BrOp[ 1] := "beqz"; BrOp[ 2] := "bbs";
-  BrOp[ 3] := "beq";   BrOp[ 4] := "";     BrOp[ 5] := "blt";
-  BrOp[ 6] := "bge";   BrOp[ 7] := "bnez"; BrOp[ 8] := "bgez";
-  BrOp[ 9] := "bnez";  BrOp[10] := "bbc";  BrOp[11] := "bne";
-  BrOp[12] := "";      BrOp[13] := "bge";  BrOp[14] := "blt";
-  BrOp[15] := "beqz";
+  BrOp[ 0] := "bltz";  BrOp[ 8] := "bgez";  
+  BrOp[ 1] := "beqz";  BrOp[ 9] := "bnez";  
+  BrOp[ 2] := "bbs";   BrOp[10] := "bbc";   
+  BrOp[ 3] := "beq";   BrOp[11] := "bne";   
+  BrOp[ 4] := "j";     BrOp[12] := "j";      
+  BrOp[ 5] := "blt";   BrOp[13] := "bge";   
+  BrOp[ 6] := "bge";   BrOp[14] := "blt";   
+  BrOp[ 7] := "bnez";  BrOp[15] := "beqz";  
 
   BrReverse  := {6, 14};
   BrOneParam := {0, 1, 7, 8, 9, 15};
+  BrNoParam  := {4, 12};
   BrNotValid := {4, 12};
 
   UsedRegs := {};

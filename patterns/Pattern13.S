@@ -31,49 +31,44 @@ _Pattern13_init:
     movi a4, 1
     s32i a4, a3, 4
     l32i a3, a2, 0
-    bnez a3, L1
-    movi a3, _Pattern13_s_types
-    addi a3, a3, 20
-    j L2
+    movi a4, 0
+    mov a5, 4
+    beqz a3, L1
+    addi a4, a3, -8
+    l32i a4, a4, 0
+    l32i a4, a4, 4
+    movi a5, _Pattern13_s_types
+    addi a5, a5, 20
 L1:
-    addi a3, a3, -8
-    l32i a3, a3, 0
-    l32i a3, a3, 4
-L2:
-    movi a4, _Pattern13_s_types
-    addi a4, a4, 20
     movi a4, 3
     s32i a4, a3, 4
     l32i a3, a2, 0
-    bnez a3, L3
-    movi a3, _Pattern13_s_types
-    addi a3, a3, 40
-    j L4
-L3:
-    addi a3, a3, -8
-    l32i a3, a3, 0
-    l32i a3, a3, 8
-L4:
-    movi a4, _Pattern13_s_types
-    addi a4, a4, 40
+    movi a4, 0
+    mov a5, 4
+    beqz a3, L2
+    addi a4, a3, -8
+    l32i a4, a4, 0
+    l32i a4, a4, 8
+    movi a5, _Pattern13_s_types
+    addi a5, a5, 40
+L2:
     movi a4, 5
     s32i a4, a3, 8
+    
     l32i a3, a2, 4
-    bnez a3, L5
-    movi a3, _Pattern13_s_types
-    addi a3, a3, 40
-    j L6
-L5:
-    addi a3, a3, -8
-    l32i a3, a3, 0
-    l32i a3, a3, 8
-L6:
-    movi a4, _Pattern13_s_types
-    addi a4, a4, 40
-    bne a3, a4, L7
+    movi a4, 0
+    mov a5, 4
+    beqz a3, L3
+    addi a4, a3, -8
+    l32i a4, a4, 0
+    l32i a4, a4, 8
+    movi a5, _Pattern13_s_types
+    addi a5, a5, 40
+L3:
+    bne a3, a4, L4
     l32i a3, a2, 8
     s32i a3, a2, 0
-L7:
+L4:
     retw
     .size _Pattern13_init, .-_Pattern13_init
 
