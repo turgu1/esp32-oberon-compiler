@@ -1,1 +1,0 @@
-xtensa-esp32-elf-gcc build//init.o build/Main.o build/Kernel.o build/Math.o build/Out.o -nostdlib -T./ld/esp32.ld -Wl,-Map=build/tests.elf.map -Wl,--cref -Wl,--gc-sections  -o build/tests.elf

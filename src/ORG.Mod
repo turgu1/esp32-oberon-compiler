@@ -35,7 +35,6 @@ MODULE ORG;
 
     (* Trap numbers *)
 
-    TrNew     = 0; (* New function *)
     TrIndex   = 1; (* array index out of range      *)
     TrGuard   = 2; (* type guard failure            *)
     TrCopy    = 3; (* array or string copy overflow *)
@@ -43,6 +42,12 @@ MODULE ORG;
     TrCall    = 5; (* illegal procedure call        *)
     TrZeroDiv = 6; (* integer division by zero      *)
     TrAssert  = 7; (* assertionviolated             *)
+
+    (* kind of register content *)
+    IMM = 1;  (* Immediate value *)
+    LOC = 2;  (* Memory address  *)
+    MEM = 3;  (* Memory content, value + displacement is the address  *)
+    UNK = 0;  (* Unknown *)
 
   TYPE 
     (*
@@ -89,12 +94,14 @@ MODULE ORG;
       information:
         - r: other register from which the content has been used to load current register. 
           if r = -1, no other register; if r = -99, entry not valid.
-        - a: is offset or immediate value when r = -1)
+        - a: is a labeled locattion
+        - k: kind of value: immediate, location)
       *)
     RegisterContent = ARRAY 16 OF 
       RECORD 
         r, i: INTEGER; 
-        a: ARRAY 256 OF CHAR 
+        a: ARRAY 256 OF CHAR;
+        k: INTEGER
       END;
 
   VAR 
@@ -140,11 +147,6 @@ MODULE ORG;
 
   (* Compiler generator debugging support tools *)
 
-  PROCEDURE Spaces(i: INTEGER);
-  BEGIN 
-    WHILE i > 0 DO Out.Char(" "); DEC(i) END
-  END Spaces;
-
   PROCEDURE e(s: ARRAY OF CHAR);
   BEGIN 
     IF ORS.debugging THEN
@@ -174,6 +176,11 @@ MODULE ORG;
       Out.Hex(i)
     END
   END eHex;
+(*
+  PROCEDURE Spaces(i: INTEGER);
+  BEGIN 
+    WHILE i > 0 DO Out.Char(" "); DEC(i) END
+  END Spaces;
 
   PROCEDURE ShowClass(c: INTEGER);
   BEGIN
@@ -298,27 +305,34 @@ MODULE ORG;
       ShowType(x.type, 4);
     END*)
   END ShowItem;
-
+*)
   (* Register optimization management *)
   PROCEDURE InitRc;
   VAR
     i: INTEGER;
   BEGIN 
-    FOR i := 0 TO 15 DO rc[i].r := -99 END
+    FOR i := 0 TO 15 DO rc[i].k := UNK END
   END InitRc;
 
-  PROCEDURE SetRcI(r, fromR, i: INTEGER);
+  PROCEDURE ClearRc(r: INTEGER);
+  BEGIN 
+    rc[r].k := UNK;
+  END ClearRc;
+
+  PROCEDURE SetRcI(r, fromR, i, k: INTEGER);
   BEGIN 
     rc[r].r    := fromR;
     rc[r].i    := i;
     rc[r].a[0] := 0X;
+    rc[r].k    := k;
   END SetRcI;
 
-  PROCEDURE SetRcA(r, fromR: INTEGER; a: ARRAY OF CHAR);
+  PROCEDURE SetRcA(r, fromR: INTEGER; a: ARRAY OF CHAR; k: INTEGER);
   BEGIN 
     rc[r].r    := fromR;
     rc[r].i    := -1;
     rc[r].a    := a;
+    rc[r].k    := k;
   END SetRcA;
 
   PROCEDURE ModuleInfo(idx: INTEGER; VAR moduleId: ORS.Ident; VAR moduleKey: INTEGER);
@@ -425,6 +439,7 @@ MODULE ORG;
     END
   END decR;
 
+(*
   PROCEDURE FirstFreeReg() : INTEGER;
   VAR
     i: INTEGER;
@@ -433,7 +448,7 @@ MODULE ORG;
     WHILE (i > FirstRH) & ~(i IN UsedRegs) DO DEC(i) END;
     RETURN i
   END FirstFreeReg;
-
+*)
   PROCEDURE CheckRegs*;
   BEGIN
     IF RH # FirstRH THEN 
@@ -669,7 +684,7 @@ MODULE ORG;
     Texts.WriteString(CodeW, ", ");
     Texts.WriteString(CodeW, n);
     Texts.WriteLn(CodeW);
-    SetRcA(r, -1, n);
+    SetRcA(r, -1, n, IMM);
   END PutDataExternal;
 
   PROCEDURE PutCallR(callType: INTEGER; r: INTEGER);
@@ -764,17 +779,6 @@ MODULE ORG;
     Texts.WriteInt(   CodeW, label, 0);
     Texts.WriteLn(CodeW);
   END PutJump;
-  
-  PROCEDURE PutJumpStr(op, label: ARRAY OF CHAR);
-  BEGIN 
-    e("PutJumpStr");
-    Texts.WriteString(CodeW, "    ");
-    Texts.WriteString(CodeW, op);
-    Texts.Write(CodeW, " ");
-    Texts.WriteString(CodeW, label);
-    Texts.WriteLn(CodeW);
-  END PutJumpStr;
-  
 
   PROCEDURE PutCondBranch(cond, label: INTEGER);
   VAR 
@@ -937,7 +941,7 @@ MODULE ORG;
     Texts.WriteString(CodeW, "    movi a2, ");
     Texts.WriteString(CodeW, name);
     Texts.WriteLn(CodeW);
-    SetRcA(2, -1, name)
+    SetRcA(2, 0, name, LOC)
   END GetLocalSB;
 
   PROCEDURE GetExtSB(base: INTEGER);
@@ -958,7 +962,7 @@ MODULE ORG;
       Texts.WriteString(CodeW, ", ");
       Texts.WriteString(CodeW, name);
       Texts.WriteLn(CodeW);
-      SetRcA(RH, -2, name)
+      SetRcA(RH, 0, name, LOC)
     END
   END GetExtSB;
 
@@ -989,7 +993,7 @@ MODULE ORG;
       Texts.WriteString(CodeW, name);
       Texts.WriteLn(CodeW);
     END;
-    SetRcA(RH, -2, name);
+    SetRcA(RH, 0, name, LOC);
   END GetTypesDescrSB;
 
   (* 
@@ -1013,11 +1017,11 @@ MODULE ORG;
         PutRRI("addmi", temp, r2, (offset DIV 256) * 256);
         PutRRI(op, r1, temp, offset MOD 256);
       END;
-      SetRcI(temp, -99, 0);
+      ClearRc(temp);
     ELSE
       PutRRI(op, r1, r2, offset)
     END;
-    SetRcI(r1, r2, offset);
+    SetRcI(r1, r2, offset, MEM);
   END PutMoveRRI;
 
   PROCEDURE load(VAR x: Item);
@@ -1045,7 +1049,7 @@ MODULE ORG;
             *)
             eStr(x.name);
             PutRA("movi", RH, x.name);
-            SetRcA(RH, -1, x.name);
+            SetRcA(RH, -1, x.name, LOC);
           ELSE 
             (* GetExtSB(x.r); *)
             eStr("(import) name:"); eStr(x.name); eStr(" module:"); eStr(moduleId); eStr(" key:"); eHex(moduleKey); 
@@ -1054,7 +1058,7 @@ MODULE ORG;
           END
         ELSE
           eStr("(const) "); eInt(x.a);
-          PutRI("movi", RH, x.a); SetRcI(RH, -1, x.a);
+          PutRI("movi", RH, x.a); SetRcI(RH, 0, x.a, IMM);
         END ;
         x.r := RH; incR
       ELSIF x.mode = ORB.Var THEN
@@ -1062,7 +1066,7 @@ MODULE ORG;
         IF x.r > 0 THEN (* local on the stack *) 
           eStr(" (stack) x.a:"); eInt(x.a); eStr(" frame:"); eInt(frame);
           PutMoveRRI(op, max, RH, SP, x.a + frame);
-          SetRcI(RH, SP, x.a + frame);
+          SetRcI(RH, SP, x.a + frame, MEM);
         ELSE  (* module globals or imported *)
           IF x.r = 0 THEN
             eStr("(SB) "); eInt(x.a); 
@@ -1078,12 +1082,12 @@ MODULE ORG;
         eStr("(par) x.a:"); eInt(x.a); eStr("frame:"); eInt(frame);
         PutMoveRRI("l32i", 1020, RH, SP, x.a + frame);
         PutMoveRRI(op, max, RH, RH, x.b);
-        SetRcI(RH, -99, 0);
+        ClearRc(RH);
         x.r := RH; incR
       ELSIF x.mode = RegI THEN
         eStr("(regi) x.a:"); eInt(x.a);
         PutMoveRRI(op, max, x.r, x.r, x.a);
-        SetRcI(x.r, -99, 0);
+        ClearRc(x.r);
       ELSIF x.mode = Cond THEN
         eStr("(cond");
         IF x.lf = 0 THEN x.lf := label; INC(label) END;
@@ -1091,7 +1095,7 @@ MODULE ORG;
         (* IF x.lt # 0 THEN PutLabel(x.lt) END; *)
         PutRI("movi", RH, 1); 
         PutJump("j", label);
-        PutLabel(x.lf);
+        PutLabel(x.lf); x.lf := 0;
         PutRI("movi", RH, 0); 
         PutLabel(label);
         INC(label);
@@ -1117,22 +1121,22 @@ MODULE ORG;
         ELSIF offset # 0 THEN
           PutRRI("addi", RH, SP, offset); 
         ELSE
-          PutRR("mov", RH, SP); (* TBC *)
+          PutRR("mov", RH, SP);
         END;
-        SetRcI(RH, SP, offset)
+        SetRcI(RH, SP, offset, LOC)
       ELSE 
         eStr(" (local/imported var) name:"); eStr(x.name); eStr(" x.a:"); eInt(x.a);
         IF x.a > 127 THEN
           PutRI("movi", RH+1, x.a);
           IF x.r = 0 THEN
             PutRRR("add", RH, SB, RH+1);
-            SetRcI(RH, SB, x.a);
+            SetRcI(RH, SB, x.a, LOC);
           ELSE
             GetExtSB(x.r); 
             PutRRR("add", RH, RH, RH+1);
-            SetRcI(RH, -1, 0);
+            ClearRc(RH);
           END;
-        ELSE
+        ELSE (* TBC *)
           IF x.r = 0 THEN
             IF x.a = 0 THEN
               PutRR("mov", RH, SB);
@@ -3066,15 +3070,15 @@ PROCEDURE Abs*(VAR x: Item);
     RETURN initPresent
   END WriteCode;
 
-  PROCEDURE Close*(VAR moduleId: ORS.Ident; moduleKey, nofent: INTEGER);
+  PROCEDURE Close*(VAR moduleId: ORS.Ident; moduleKey, nofent: INTEGER; outputFolder: ARRAY OF CHAR);
     VAR 
       obj: ORB.Object;
-      i, comsize, nofimps, nofptrs, size: INTEGER;
+      i, nofptrs: INTEGER;
       name: ORS.Ident;
       initPresent: BOOLEAN;
   BEGIN  (* exit code *)
 
-    ORB.MakeFileName(name, moduleId, ".S"); (* write code file *)
+    ORB.MakeFileName(name, outputFolder, moduleId, ".S"); (* write code file *)
     AsF := Files.New(name);
     
     Texts.OpenWriterToFile(AsW, AsF);
@@ -3158,7 +3162,7 @@ PROCEDURE Abs*(VAR x: Item);
       WHILE obj # NIL DO
         IF obj.class = ORB.Var THEN FindPtrs(obj.type, obj.val) END ;
         obj := obj.next
-      END ;
+      END;
     END;
 
     (* Procedures Code section *)
@@ -3188,88 +3192,7 @@ PROCEDURE Abs*(VAR x: Item);
     END;
 
     Texts.WriteLn(AsW);
-
-    Files.Register(AsF);
- 
-    (*
-    IF version = 0 THEN Put1(Mov, 0, 0, 0); Put3(BR, 7, 0)  (*RISC-0*)
-    ELSE Put2(Ldr, LNK, SP, 0); Put1(Add, SP, SP, 4); Put3(BR, 7, LNK)
-    END ;
-    obj := ORB.topScope.next; nofimps := 0; comsize := 4; nofptrs := 0;
-    WHILE obj # NIL DO
-      IF (obj.class = ORB.Mod) & (obj.dsc # ORB.system) THEN INC(nofimps) (*count imports*)
-      ELSIF (obj.exno # 0) & (obj.class = ORB.Const) & (obj.type.form = ORB.Proc)
-          & (obj.type.nofpar = 0) & (obj.type.base = ORB.noType) THEN i := 0; (*count commands*)
-        WHILE obj.name[i] # 0X DO INC(i) END ;
-        i := (i+4) DIV 4 * 4; INC(comsize, i+4)
-      ELSIF obj.class = ORB.Var THEN INC(nofptrs, NofPtrs(obj.type))  (*count pointers*)
-      END ;
-      obj := obj.next
-    END ;
-    size := varsize + strx + comsize + (pc + nofimps + nofent + nofptrs + 1)*4;  (*varsize includes type descriptors*)
-    
-    ORB.MakeFileName(name, modid, ".rsc"); (*write code file*)
-    F := Files.New(name);
-    Files.Set(R, F, 0); 
-    Files.WriteString(R, modid); 
-    Files.WriteInt(R, key); 
-    Files.Write(R, version);
-    Files.WriteInt(R, size);
-
-    obj := ORB.topScope.next;
-    WHILE (obj # NIL) & (obj.class = ORB.Mod) DO  (*imports*)
-      IF obj.dsc # ORB.system THEN 
-        Files.WriteString(R, obj(ORB.Module).orgname); 
-        Files.WriteInt(R, obj.val); (* ? Module Checksum *)
-      END ;
-      obj := obj.next
-    END ;
-    Files.Write(R, 0); (* end of list *)
-    Files.WriteInt(R, tdx * 4);
-    i := 0;
-    WHILE i < tdx DO Files.WriteInt(R, data[i]); INC(i) END ; (*type descriptors*)
-    Files.WriteInt(R, varsize - tdx * 4);  (*data*)
-    Files.WriteInt(R, strx);
-    FOR i := 0 TO strx-1 DO Files.Write(R, ORD(str[i])) END ;  (*strings*)
-    Files.WriteInt(R, pc);  (*code len*)
-    FOR i := 0 TO pc-1 DO Files.WriteInt(R, code[i]) END ;  (*program*)
-    obj := ORB.topScope.next;
-    WHILE obj # NIL DO  (*commands*)
-      IF (obj.exno # 0) & (obj.class = ORB.Const) & (obj.type.form = ORB.Proc) &
-          (obj.type.nofpar = 0) & (obj.type.base = ORB.noType) THEN
-        Files.WriteString(R, obj.name); Files.WriteInt(R, obj.val)
-      END ;
-      obj := obj.next
-    END ;
-    Files.Write(R, 0);
-    Files.WriteInt(R, nofent); Files.WriteInt(R, entry);
-    obj := ORB.topScope.next;
-    WHILE obj # NIL DO  (*entries*)
-      IF obj.exno # 0 THEN
-        IF (obj.class = ORB.Const) & (obj.type.form = ORB.Proc) OR (obj.class = ORB.Var) THEN
-          Files.WriteInt(R, obj.val);
-        ELSIF obj.class = ORB.Typ THEN
-          IF obj.type.form = ORB.Record THEN Files.WriteInt(R,  obj.type.len MOD 10000H)
-          ELSIF (obj.type.form = ORB.Pointer) & ((obj.type.base.typobj = NIL) OR (obj.type.base.typobj.exno = 0)) THEN
-            Files.WriteInt(R,  obj.type.base.len MOD 10000H)
-          END
-        END
-      END ;
-      obj := obj.next
-    END ;
-    obj := ORB.topScope.next;
-    WHILE obj # NIL DO  (*pointer variables*)
-      IF obj.class = ORB.Var THEN FindPtrs(R, obj.type, obj.val) END ;
-      obj := obj.next
-    END ;
-    Files.WriteInt(R, -1);
-    Files.WriteInt(R, fixorgP); 
-    Files.WriteInt(R, fixorgD); 
-    Files.WriteInt(R, fixorgT); 
-    Files.WriteInt(R, entry);
-    Files.Write(R, ORD("O")); 
-    Files.Register(F)
-    *)
+    Files.Register(AsF) 
   END Close;
 
   PROCEDURE Open*(modid: ORS.Ident; generateCheckCode: BOOLEAN);

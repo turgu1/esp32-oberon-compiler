@@ -5,30 +5,26 @@ MODULE Oberon;
 CONST
   DEBUG = FALSE;
 
-TYPE
-  Filename = ARRAY 256 OF CHAR;
-
 VAR
   argCount : INTEGER;
-  arg      : Filename;
   i        : INTEGER;
   res      : INTEGER;
-
+  outputFolder, filename, arg, importPath : ARRAY 256 OF CHAR;
 
   overrideSymbolFile : BOOLEAN;
   generateCheckCode  : BOOLEAN; 
   filePresent        : BOOLEAN;
   verbose            : BOOLEAN;
 
-  filename : Filename;
-
 PROCEDURE Usage;
 BEGIN
   Out.Ln;
-  Out.String("Usage: Oberon [-s][-c][-v] filename"); Out.Ln;
-  Out.String("-s : Update Symbols File"       ); Out.Ln;
-  Out.String("-c : Generate Verification Code"); Out.Ln;
-  Out.String("-v : Show compiler version and output information"); Out.Ln;
+  Out.String("Usage: Oberon [-c][-o folder][-p path][-s][-v] filename"); Out.Ln;
+  Out.String("-c : Generate Verification Code"                        ); Out.Ln;
+  Out.String("-o : Output folder of generated code"                   ); Out.Ln;
+  Out.String("-p : Folder Path for imported modules (e.g. f1:f2:f3)"  ); Out.Ln;
+  Out.String("-s : Update Symbols File"                               ); Out.Ln;
+  Out.String("-v : Show compiler version and output information"      ); Out.Ln;
 END Usage;
 
 BEGIN
@@ -46,7 +42,7 @@ BEGIN
     verbose            := FALSE;
     argCount           := extArgs.count;
 
-    IF (argCount > 0) & (argCount <= 4) THEN
+    IF (argCount > 0) THEN
       i := 0;
       WHILE i < argCount DO
         extArgs.Get(i, arg, res);
@@ -59,16 +55,40 @@ BEGIN
           Out.Ln;
         END;
 
-        IF (arg = "-s") THEN
+        IF (arg = "-c") THEN
+          generateCheckCode := TRUE;
+          IF DEBUG THEN
+            Out.String("Generating Check Code");
+            Out.Ln;
+          END
+        ELSIF (arg = "-o") THEN
+          INC(i);
+          IF i < argCount THEN
+            extArgs.Get(i, outputFolder, res);
+            IF DEBUG THEN
+              Out.String("Output Folder");
+              Out.Ln;
+            END
+          END
+        ELSIF (arg = "-p") THEN
+          INC(i);
+          IF i < argCount THEN
+            extArgs.Get(i, importPath, res);
+            IF DEBUG THEN
+              Out.String("Import Path");
+              Out.Ln;
+            END
+          END
+        ELSIF (arg = "-s") THEN
           overrideSymbolFile := TRUE;
           IF DEBUG THEN
             Out.String("Overriding Symbol File");
             Out.Ln;
           END
-        ELSIF (arg = "-c") THEN
-          generateCheckCode := TRUE;
+        ELSIF (arg = "-s") THEN
+          overrideSymbolFile := TRUE;
           IF DEBUG THEN
-            Out.String("Generating Check Code");
+            Out.String("Overriding Symbol File");
             Out.Ln;
           END
         ELSIF (arg = "-v") THEN
@@ -95,7 +115,13 @@ BEGIN
           Out.Ln;
         END;
         
-        ORP.Compile(filename, overrideSymbolFile, generateCheckCode, verbose);
+        ORP.Compile(
+          filename, 
+          overrideSymbolFile, 
+          generateCheckCode, 
+          verbose,
+          outputFolder,
+          importPath);
       ELSE
         Usage;
       END

@@ -14,6 +14,33 @@ MODULE Test;
     registryCount:   INTEGER;
     testProcs: ARRAY MaxTestProc OF TestProc;
 
+    nextCh, firstCh, maxCh: CHAR;
+
+  PROCEDURE Put(ch: CHAR);
+  BEGIN
+    Out.Char(ch); Out.Flush
+  END Put;
+
+  PROCEDURE End*;
+  BEGIN
+    Put(".");
+  END End;
+  
+  PROCEDURE First*(ch: CHAR);
+  BEGIN
+    firstCh := ch;
+    Put(ch);
+    nextCh := CHR(ORD(ch) + 1);
+    maxCh := CHR(ORD(ch) + 26)
+  END First;
+
+  PROCEDURE Next*;
+  BEGIN
+    Put(nextCh);
+    nextCh := CHR(ORD(nextCh) + 1);
+    IF nextCh >= maxCh THEN nextCh := firstCh END
+  END Next;
+
   PROCEDURE Register*(proc: TestProc);
   BEGIN
     Out.Ln;

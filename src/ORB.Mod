@@ -92,6 +92,25 @@ MODULE ORB;   (*NW 25.6.2014  / 1.3.2019  in Oberon-07*)
     nofmod, 
     Ref: INTEGER;
     typtab: ARRAY maxTypTab OF Type;
+    importPaths: ARRAY 10, 256 OF CHAR;
+
+  PROCEDURE DecodePath(impPath: ARRAY OF CHAR);
+    VAR i, j, k: INTEGER;
+  BEGIN
+    i := 0; j := 0; k := 0;
+    WHILE (i < 10) & (j < LEN(impPath)) & (impPath[j] # 0X) DO
+      IF impPath[j] = ":" THEN
+        importPaths[i][k] := 0X; k := 0; INC(i)
+      ELSE
+        importPaths[i][k] := impPath[j]; INC(k)
+      END;
+      INC(j)
+    END;
+    IF i < 10 THEN
+      importPaths[i][k] := 0X; INC(i);
+      WHILE i < 10 DO importPaths[i][0] := 0X; INC(i) END
+    END
+  END DecodePath;
 
   PROCEDURE NewObj*(VAR obj: Object; id: ORS.Ident; class: INTEGER);  (*insert new Object with name id*)
     VAR new, x: Object;
@@ -146,14 +165,30 @@ MODULE ORB;   (*NW 25.6.2014  / 1.3.2019  in Oberon-07*)
 
   (*------------------------------- Import ---------------------------------*)
 
-  PROCEDURE MakeFileName*(VAR FName: ORS.Ident; name, ext: ARRAY OF CHAR);
+  PROCEDURE MakeFileName*(VAR FName: ARRAY OF CHAR; folder, name, ext: ARRAY OF CHAR);
     VAR i, j: INTEGER;
   BEGIN i := 0; j := 0;  (*assume name suffix less than 4 characters*)
-    WHILE (i < ORS.IdLen-5) & (name[i] > 0X) DO FName[i] := name[i]; INC(i) END ;
-    REPEAT FName[i]:= ext[j]; INC(i); INC(j) UNTIL ext[j] = 0X;
-    FName[i] := 0X
+    WHILE (j < LEN(FName) - 5) & (folder[j] # 0X) DO FName[j] := folder[j]; INC(j) END;
+    IF (j > 0) & (FName[j - 1] # "/") THEN FName[j] := "/"; INC(j) END;
+    WHILE (j < LEN(FName) - 5) & (name[i] # 0X) DO FName[j] := name[i]; INC(i); INC(j) END ;
+    i := 0;
+    REPEAT FName[j] := ext[i]; INC(i); INC(j) UNTIL ext[i] = 0X;
+    FName[j] := 0X
   END MakeFileName;
   
+  PROCEDURE FindFileName*(VAR FName: ARRAY OF CHAR; name, ext: ARRAY OF CHAR);
+    VAR i: INTEGER;
+  BEGIN
+    MakeFileName(FName, "", name, ext);
+    IF Files.Old(FName) = NIL THEN
+      i := -1;
+      REPEAT 
+        INC(i);
+        MakeFileName(FName, importPaths[i], name, ext)
+      UNTIL (i >= 10) OR (importPaths[i][0] = 0X) OR (Files.Old(FName) # NIL)
+    END
+  END FindFileName;
+
   PROCEDURE ThisModule(name, orgname: ORS.Ident; non: BOOLEAN; key: INTEGER): Object;
     VAR mod: Module; obj, obj1: Object;
   BEGIN obj1 := topScope; obj := obj1.next;  (*search for module*)
@@ -232,14 +267,16 @@ MODULE ORB;   (*NW 25.6.2014  / 1.3.2019  in Oberon-07*)
     VAR key: INTEGER; class, k: INTEGER;
       obj: Object;  t: Type;
       thismod: Object;
-      modname, fname: ORS.Ident;
+      modname: ORS.Ident;
       F: Files.File; R: Files.Rider;
+      fname: ARRAY 256 OF CHAR;
   BEGIN
     IF modid1 = "SYSTEM" THEN
       thismod := ThisModule(modid, modid1, TRUE, key); DEC(nofmod);
       thismod.lev := 0; thismod.dsc := system; thismod.rdo := TRUE
     ELSE 
-      MakeFileName(fname, modid1, ".smb"); F := Files.Old(fname);
+      FindFileName(fname, modid1, ".smb"); 
+      F := Files.Old(fname);
       IF F # NIL THEN
         Files.Set(R, F, 0); Files.ReadInt(R, key); Files.ReadInt(R, key); Files.ReadString(R, modname);
         thismod := ThisModule(modid, modid1, TRUE, key); thismod.rdo := TRUE;
@@ -334,7 +371,7 @@ MODULE ORB;   (*NW 25.6.2014  / 1.3.2019  in Oberon-07*)
       obj, obj0: Object;
       filename: ORS.Ident;
       F, F1: Files.File; R, R1: Files.Rider;
-  BEGIN Ref := Record + 1; MakeFileName(filename, modid, ".smb");
+  BEGIN Ref := Record + 1; MakeFileName(filename, "", modid, ".smb");
     F := Files.New(filename); Files.Set(R, F, 0);
     Files.WriteInt(R, 0); (*placeholder*)
     Files.WriteInt(R, 0); (*placeholder for key to be inserted at the end*)
@@ -378,8 +415,10 @@ MODULE ORB;   (*NW 25.6.2014  / 1.3.2019  in Oberon-07*)
     END
   END Export;
 
-  PROCEDURE Init*;
-  BEGIN topScope := universe; nofmod := 1
+  PROCEDURE Init*(impPath: ARRAY OF CHAR);
+  BEGIN
+    DecodePath(impPath); 
+    topScope := universe; nofmod := 1
   END Init;
   
   PROCEDURE type(ref, form: INTEGER; size: INTEGER): Type;

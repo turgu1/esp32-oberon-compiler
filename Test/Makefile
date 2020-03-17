@@ -40,7 +40,8 @@ SRC =  \
 	SimpleMath.Mod \
 	Assignments.Mod \
 	Test.Mod \
-	Out.Mod
+	Out.Mod \
+	Kernel.Mod
 
 
 SYMS = $(addprefix $(SRCDIR), $(SRC:.Mod=.smb))
@@ -60,12 +61,13 @@ test:
 
 # Rules to build files.
 
-$(BLDDIR)Main.S $(SRCDIR)Main.smb: $(SRCDIR)Main.Mod $(SRCDIR)Test.smb $(SRCDIR)Out.smb
+$(BLDDIR)Main.S $(SRCDIR)Main.smb: $(SRCDIR)Main.Mod $(SRCDIR)Test.smb $(SRCDIR)Out.smb $(SRCDIR)Kernel.smb
 $(BLDDIR)Test.S $(SRCDIR)Test.smb: $(SRCDIR)Test.Mod $(SRCDIR)Out.smb
 $(BLDDIR)Assignments.S $(SRCDIR)Assignments.smb: $(SRCDIR)Assignments.Mod $(SRCDIR)Out.smb $(SRCDIR)Test.smb
 $(BLDDIR)SimpleMath.S $(SRCDIR)SimpleMath.smb: $(SRCDIR)SimpleMath.Mod $(SRCDIR)Out.smb $(SRCDIR)Test.smb
 $(BLDDIR)SimpleReal.S $(SRCDIR)SimpleReal.smb: $(SRCDIR)SimpleReal.Mod $(SRCDIR)Out.smb $(SRCDIR)Test.smb
 $(BLDDIR)DefFunc.S $(SRCDIR)DefFunc.smb: $(SRCDIR)DefFunc.Mod $(SRCDIR)Out.smb $(SRCDIR)Test.smb
+$(BLDDIR)Kernel.S $(SRCDIR)Kernel.smb: $(SRCDIR)Kernel.Mod $(SRCDIR)Out.smb
 $(BLDDIR)Out.S $(SRCDIR)Out.smb: $(SRCDIR)Out.Mod
 
 $(BLDDIR)%.S $(SRCDIR)%.smb : $(SRCDIR)%.Mod

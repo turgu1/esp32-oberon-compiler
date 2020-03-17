@@ -1,6 +1,6 @@
 MODULE Main;
 
-IMPORT SYSTEM, Test, Out;
+IMPORT SYSTEM, Test, Out, Kernel;
 
 VAR
   count : INTEGER;
@@ -14,6 +14,8 @@ BEGIN
 END ShowStackAdr;
 
 BEGIN
+  Kernel.Init;
+  
   FOR count := 0 TO 100000 DO END;
   ShowStackAdr;
   Out.Ln;

@@ -1,5 +1,5 @@
 MODULE ORP; (*N. Wirth 1.7.97 / 8.2.2020  Oberon compiler for ESP32 in Oberon-07*)
-  IMPORT Texts, Out, Logger, ORS, ORB, ORG;
+  IMPORT Texts, Logger, ORS, ORB, ORG;
   (*Author: Niklaus Wirth, 2014. Modification from Guy Turcotte and Andreas Pirklbauer.
     Parser of Oberon-RISC compiler modified for the ESP32. 
     Uses Scanner ORS to obtain symbols (tokens),
@@ -28,6 +28,8 @@ MODULE ORP; (*N. Wirth 1.7.97 / 8.2.2020  Oberon compiler for ESP32 in Oberon-07
     pbsList: PtrBase;   (*list of names of pointer base types*)
     dummy: ORB.Object;
     W: Texts.Writer;
+
+   outputFolder, importPath: ARRAY 256 OF CHAR;
 
   PROCEDURE Check(s: INTEGER; msg: ARRAY OF CHAR);
   BEGIN
@@ -114,17 +116,17 @@ MODULE ORP; (*N. Wirth 1.7.97 / 8.2.2020  Oberon compiler for ESP32 in Oberon-07
   BEGIN
     IF ~(x.type.form IN {ORB.Int, ORB.Byte, ORB.Char}) THEN ORS.Mark("invalid type"); x.type := ORB.intType END
   END CheckCaseExpr;
-
+(*
   PROCEDURE CheckReceiver(proc: ORB.Object; deref: BOOLEAN);
   BEGIN
     IF ~deref & (proc.type.dsc.class # ORB.Par) THEN ORS.Mark("incompatible receiver") END
   END CheckReceiver;
-
+ 
   PROCEDURE DisallowMethods(rec: ORB.Type);  (*disallow binding methods to rec and its base types*)
   BEGIN
     WHILE rec # NIL DO rec.typobj.val := 1; rec := rec.base END
   END DisallowMethods;
-
+ *)
   (* expressions *)
 
   PROCEDURE TypeTest(VAR x: ORG.Item; T: ORB.Type; guard: BOOLEAN);
@@ -1072,7 +1074,7 @@ MODULE ORP; (*N. Wirth 1.7.97 / 8.2.2020  Oberon compiler for ESP32 in Oberon-07
       type: ORB.Type;
       procid: ORS.Ident;
       x: ORG.Item;
-      locblksize, parblksize, L: INTEGER;
+      locblksize, parblksize: INTEGER;
       int: BOOLEAN;
       intLevel: INTEGER;
   BEGIN (* ProcedureDecl *) int := FALSE; ORS.Get(sym); 
@@ -1151,7 +1153,7 @@ MODULE ORP; (*N. Wirth 1.7.97 / 8.2.2020  Oberon compiler for ESP32 in Oberon-07
     IF sym = ORS.module THEN
       ORS.Get(sym);
       dc := 0; tdc := 0;
-      ORB.Init; ORB.OpenScope;
+      ORB.Init(importPath); ORB.OpenScope;
       IF sym = ORS.ident THEN
         ORS.CopyId(modid); ORS.Get(sym);
         IF verbose THEN Texts.WriteString(W, modid); Texts.Append(Logger.Log, W.buf) END
@@ -1181,7 +1183,7 @@ MODULE ORP; (*N. Wirth 1.7.97 / 8.2.2020  Oberon compiler for ESP32 in Oberon-07
         IF newSF & verbose THEN Texts.WriteString(W, " new symbol file") END
       END;
       IF ORS.errcnt = 0 THEN
-        ORG.Close(modid, key, exno);
+        ORG.Close(modid, key, exno, outputFolder);
         IF verbose THEN Texts.WriteInt(W, dc, 6); Texts.WriteHex(W, key) END
       ELSE 
         Texts.WriteLn(W); Texts.WriteString(W, "compilation FAILED");
@@ -1190,34 +1192,41 @@ MODULE ORP; (*N. Wirth 1.7.97 / 8.2.2020  Oberon compiler for ESP32 in Oberon-07
       IF verbose THEN Texts.WriteLn(W); Texts.Append(Logger.Log, W.buf) END;
       ORB.CloseScope; pbsList := NIL
     ELSE ORS.Mark("must start with MODULE")
-    END
+    END;
   END Module;
 
   PROCEDURE Compile*(filename : ARRAY OF CHAR; 
                      overrideSymbolFile,
                      generateCheckCode,
-                     verbose : BOOLEAN);
+                     verbose : BOOLEAN;
+                     outFolder, impPath : ARRAY OF CHAR);
     VAR (* beg, end, time: INTEGER; *)
       T: Texts.Text;
       (*S: Texts.Scanner; *)
   BEGIN 
     Texts.OpenWriter(W); 
     IF verbose THEN
-      Texts.WriteString(W, "ESP32 Oberon-07 Compiler Version ");Texts.WriteString(W, ORB.CompilerVersion);
+      Texts.WriteString(W, "ESP32 Oberon-07 Compiler Version ");
+      Texts.WriteString(W, ORB.CompilerVersion);
       Texts.WriteLn(W); Texts.Append(Logger.Log, W.buf);
     END;
     newSF := overrideSymbolFile;
+
+    outputFolder := outFolder;
+    importPath := impPath;
 
     NEW(T);
     Texts.Open(T, filename);
     IF T.len > 0 THEN 
       ORS.Init(T, 0);
-      Module(generateCheckCode, verbose)
+      Module(generateCheckCode, verbose);
+      ASSERT(ORS.errcnt = 0)
     ELSE
       Texts.WriteString(W, filename); 
       Texts.WriteString(W, " not found");
       Texts.WriteLn(W); 
-      Texts.Append(Logger.Log, W.buf)
+      Texts.Append(Logger.Log, W.buf);
+      ASSERT(FALSE)
     END
   END Compile;
 

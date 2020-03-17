@@ -1,5 +1,5 @@
-MODULE T;
-  IMPORT Test, Out;
+MODULE Sample;
+  IMPORT T.Test, Out;
 
   PROCEDURE Put(ch: CHAR);
   BEGIN
@@ -14,19 +14,19 @@ MODULE T;
 
     (* Operations *)
 
-    Put("A"); i := 25;
+    T.First("A"); i := 25;
 
-    Put(".");
+    T.End;
 
     (* Verifications *)
 
-    Put("a"); Test.Assert(i = 25, "Integer Assignment");
+    T.First("a"); T.Assert(i = 25, "Integer Assignment");
 
     (* The End *)
     
-    Put("."); Out.String(" End"); Out.Ln;
+    T.End; Out.String(" End"); Out.Ln;
   END Run;
 
 BEGIN
-  Test.Register(Run)
-END T.
+  T.Register(Run)
+END Sample.

@@ -24,6 +24,9 @@ MODULE Kernel;
     TIMG0_T0LOADHI_REG     = 3FF5F01CH;
     TIMG0_T0LOAD_REG       = 3FF5F020H;
 
+    OneSecond*             = 1000000;
+    OneMinute*             = OneSecond * 60;
+
   TYPE
     ClockTime* = RECORD low*, high*: INTEGER END;
 (*
@@ -149,13 +152,15 @@ MODULE Kernel;
 
 (* ---------- Garbage collector ----------*)
 
-  PROCEDURE Mark*(pref: INTEGER);
+  PROCEDURE Mark*(pref, count: INTEGER);
     VAR pvadr, offadr, offset, tag, p, q, r: INTEGER;
   BEGIN 
-    SYSTEM.GET(pref, pvadr); (* pointers < heapOrg considered NIL *)
-    WHILE pvadr # 0 DO
+    WHILE count > 0 DO
+      SYSTEM.GET(pref, pvadr); 
       SYSTEM.GET(pvadr, p); 
       SYSTEM.GET(p - 4, offadr);
+
+      (* pointers < heapOrg considered NIL *)
       IF (p >= heapOrg) & (offadr = 0) THEN 
         q := p;   (* mark elements in data structure with root p *)
         REPEAT 
@@ -187,7 +192,7 @@ MODULE Kernel;
         UNTIL (p = q) & (offset = -1)
       END;
       INC(pref, 4); 
-      SYSTEM.GET(pref, pvadr)
+      DEC(count)
     END
   END Mark;
 
