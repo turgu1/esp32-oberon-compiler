@@ -2,6 +2,12 @@
 
 The ESP32 Oberon Compiler accepts the following parameters:
 
+```
+Oberon [-c][-o folder][-p path][-s][-v] filename
+```
+
+Where:
+
 - **-c** : Add code to do the following additional checks at runtime:
 
   + Array index boundary limits
