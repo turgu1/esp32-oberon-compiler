@@ -1,0 +1,3 @@
+*.smb
+# Except this file
+!.gitignore

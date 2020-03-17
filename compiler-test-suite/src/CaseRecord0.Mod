@@ -18,5 +18,5 @@ BEGIN
     P1: p.b := p.a + p.b + p.b DIV 3; i:= p.a |
     P2: p.b := {0, 2}; i:= 2
   END;
-  Out.Int(i) (* 1 *)
+  Out.Int(i,0) (* 1 *)
 END CaseRecord0.

@@ -29,7 +29,7 @@ MODULE ORP; (*N. Wirth 1.7.97 / 8.2.2020  Oberon compiler for ESP32 in Oberon-07
     dummy: ORB.Object;
     W: Texts.Writer;
 
-   outputFolder, importPath: ARRAY 256 OF CHAR;
+    sourceFolder, outputFolder, importPath: ARRAY 256 OF CHAR;
 
   PROCEDURE Check(s: INTEGER; msg: ARRAY OF CHAR);
   BEGIN
@@ -1179,7 +1179,7 @@ MODULE ORP; (*N. Wirth 1.7.97 / 8.2.2020  Oberon compiler for ESP32 in Oberon-07
         ORS.Mark("period missing")
       END;
       IF ORS.errcnt = 0 THEN
-        ORB.Export(modid, newSF, key);
+        ORB.Export(modid, newSF, key, sourceFolder);
         IF newSF & verbose THEN Texts.WriteString(W, " new symbol file") END
       END;
       IF ORS.errcnt = 0 THEN
@@ -1194,6 +1194,17 @@ MODULE ORP; (*N. Wirth 1.7.97 / 8.2.2020  Oberon compiler for ESP32 in Oberon-07
     ELSE ORS.Mark("must start with MODULE")
     END;
   END Module;
+
+  PROCEDURE ExtractFolder(VAR folder: ARRAY OF CHAR; filename: ARRAY OF CHAR);
+  VAR i, j: INTEGER;
+  BEGIN 
+    i := 0;
+    WHILE (i < LEN(filename)) & (filename[i] # 0X) DO INC(i) END;
+    WHILE (i >= 0) & (filename[i] # "/") DO DEC(i) END;
+    j := 0;
+    WHILE (j < i) DO folder[j] := filename[j]; INC(j) END;
+    folder[j] := 0X;
+  END ExtractFolder;
 
   PROCEDURE Compile*(filename : ARRAY OF CHAR; 
                      overrideSymbolFile,
@@ -1214,6 +1225,8 @@ MODULE ORP; (*N. Wirth 1.7.97 / 8.2.2020  Oberon compiler for ESP32 in Oberon-07
 
     outputFolder := outFolder;
     importPath := impPath;
+    
+    ExtractFolder(sourceFolder, filename);
 
     NEW(T);
     Texts.Open(T, filename);

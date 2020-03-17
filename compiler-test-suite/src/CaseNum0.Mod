@@ -19,11 +19,11 @@ MODULE CaseNum0;
   PROCEDURE P2;
    VAR i: INTEGER;
   BEGIN
-      i := -1;
+      i := 1;
       CASE i OF
-       -1: Out.Int(-1, 0)
-       | 0: Out.Int(0, 0)
-       | +1: Out.Int(1, 0)
+       0: Out.Int(0, 0)
+       | 1: Out.Int(1, 0)
+       | 2: Out.Int(2, 0)
     END
   END P2;
 

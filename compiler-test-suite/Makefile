@@ -1,6 +1,9 @@
 OB = ../Oberon
 
-SRCS = \
+SRCDIR = src
+BLDDIR = build
+
+SRC = \
   ArrayAssignment.Mod \
   Arrays2.Mod \
   Arrays3.Mod \
@@ -23,7 +26,6 @@ SRCS = \
   OpenArrays.Mod \
   OpenArrays2.Mod \
   OpenArrays3.Mod \
-  Out.Mod \
   Out0.Mod \
   Out1.Mod \
   Out2.Mod \
@@ -143,13 +145,16 @@ SRCS = \
 
 #	Pattern13.Mod
 
-ASS = $(SRCS:.Mod=.S)
+SRCS = $(addprefix $(SRCDIR)/, $(SRC))
+SYMS = $(addprefix $(SRCDIR)/, $(SRC:.Mod=.smb))
+ASSS = $(addprefix $(BLDDIR)/, $(SRC:.Mod=.S))
 
-%.S : %.Mod
-	$(OB)  -s $(<F)
+$(BLDDIR)/%.S : $(SRCDIR)/%.Mod
+	$(OB) -o $(BLDDIR) -p ../lib -s $<
 
 .PHONY: all
-all: $(ASS)
+all: $(ASSS)
 
 clean:
-	rm *.S
+	rm build/*
+	rm src/*.smb

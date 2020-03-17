@@ -1,11 +1,11 @@
 MODULE CaseRecord2;
   IMPORT Out;
   TYPE 
-    P = POINTER TO R;
+    P  = POINTER TO R;
     P0 = POINTER TO R0;
     P1 = POINTER TO R1;
     P2 = POINTER TO R2;
-    R = RECORD a: INTEGER; next : P END ;
+    R  = RECORD a: INTEGER; next : P END ;
     R0 = RECORD (R) b: INTEGER; c : ARRAY 11 OF INTEGER END ;
     R1 = RECORD (R) b: REAL END ;
     R2 = RECORD (R) b: SET END ;
@@ -27,7 +27,7 @@ MODULE CaseRecord2;
           END;
     | P2: p.b := {0, 2}; i:= 4
   END;
-  Out.Int(i)
+  Out.Int(i,0)
   END Run;
 BEGIN
   NEW(p1);

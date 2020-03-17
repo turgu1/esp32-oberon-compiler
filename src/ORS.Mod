@@ -78,7 +78,7 @@ MODULE ORS; (* NW 19.9.93 / 15.3.2017  Scanner in Oberon-07*)
   PROCEDURE GetCh();
   BEGIN
     IF R.eot THEN
-      ch := 0X;
+      ch := 0FFX;
     ELSE
       Texts.Read(R, ch);
       IF ch = EOL THEN
@@ -283,8 +283,9 @@ MODULE ORS; (* NW 19.9.93 / 15.3.2017  Scanner in Oberon-07*)
   BEGIN
     REPEAT
       WHILE ~R.eot & (ch <= " ") DO GetCh() END;
-      IF R.eot THEN sym := eot
-      ELSIF ch < "A" THEN
+      (*IF R.eot THEN sym := eot
+      ELS *)
+      IF ch < "A" THEN
         IF ch < "0" THEN
           IF ch = 22X THEN String; sym := string
           ELSIF ch = "#" THEN GetCh(); sym := neq
@@ -321,12 +322,14 @@ MODULE ORS; (* NW 19.9.93 / 15.3.2017  Scanner in Oberon-07*)
         ELSE (* _ ` *) sym := null
         END ;
         GetCh()
-      ELSIF ch < "{" THEN Identifier(sym) ELSE
+      ELSIF ch < "{" THEN Identifier(sym) 
+      ELSE
         IF ch = "{" THEN sym := lbrace
         ELSIF ch = "}" THEN sym := rbrace
         ELSIF ch = "|" THEN sym := bar
         ELSIF ch = "~" THEN  sym := not
         ELSIF ch = 7FX THEN  sym := upto 
+        ELSIF ch = 0FFX THEN sym := eot
         ELSE sym := null
         END ;
         GetCh()

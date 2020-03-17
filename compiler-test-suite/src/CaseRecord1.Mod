@@ -1,4 +1,5 @@
 MODULE CaseRecord1;
+  IMPORT Out;
   TYPE 
     R = RECORD a: INTEGER END ;
     R0 = RECORD (R) b: INTEGER END ;
@@ -14,7 +15,7 @@ MODULE CaseRecord1;
       R1: r.b := 2.5; i:= 1 |
       R2: r.b := {0, 2}; i:= 2
     END;
-    Out.Int(i)
+    Out.Int(i, 0)
   END P;
 
 BEGIN

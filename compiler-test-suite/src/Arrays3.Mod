@@ -2,12 +2,14 @@ MODULE Arrays3;
   IMPORT Out;
   TYPE ARR = ARRAY 3 OF INTEGER;
        ARR2 = ARRAY 3, 2 OF INTEGER;
+       ARR3 = ARRAY 10 OF INTEGER;
   VAR
     x : ARRAY 3 OF INTEGER;
     y : ARR;
-    i : ARRAY 3, 2 OF INTEGER;
+    i : ARRAY 3 OF ARR3;
     k0, m0 : ARRAY 0 OF INTEGER;
     k1, m1 : ARRAY 3, 0 OF INTEGER;
+
   PROCEDURE P1(VAR b, c : ARRAY OF INTEGER; d : ARRAY OF INTEGER);
     VAR y2 : ARR;
         (*y3 : ARRAY 0 OF INTEGER;
@@ -22,22 +24,22 @@ MODULE Arrays3;
       (*y4:= b;  trap *)
   END P1;
 
-  PROCEDURE P4(b : ARRAY OF ARRAY OF INTEGER);
+  PROCEDURE P4(b : ARRAY OF ARR3);
     VAR k : INTEGER;
   BEGIN
     k := b[0][1];
     Out.Int(k, 0) (*8*)
   END P4;
 
-  PROCEDURE P3(VAR b : ARRAY OF ARRAY OF INTEGER);
+  PROCEDURE P3(VAR b : ARRAY OF ARR3);
   BEGIN b[0][1] := 8
   END P3;
 
-  PROCEDURE P5(VAR b : ARR2);
-    VAR c : ARRAY 3, 2 OF INTEGER;
+  PROCEDURE P5(VAR b : ARRAY OF ARR3);
+    VAR c : ARRAY 3 OF ARR3;
   BEGIN
     c[0][1] := 9;
-    b := c
+    c := b
   END P5;
 
 BEGIN
