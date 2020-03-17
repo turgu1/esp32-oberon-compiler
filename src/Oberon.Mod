@@ -85,12 +85,6 @@ BEGIN
             Out.String("Overriding Symbol File");
             Out.Ln;
           END
-        ELSIF (arg = "-s") THEN
-          overrideSymbolFile := TRUE;
-          IF DEBUG THEN
-            Out.String("Overriding Symbol File");
-            Out.Ln;
-          END
         ELSIF (arg = "-v") THEN
           verbose := TRUE;
           IF DEBUG THEN
@@ -111,7 +105,7 @@ BEGIN
         IF verbose THEN
           Out.String("Compiling "); 
           Out.String(filename); 
-          Out.String("..."); 
+          Out.String(" ..."); 
           Out.Ln;
         END;
         
