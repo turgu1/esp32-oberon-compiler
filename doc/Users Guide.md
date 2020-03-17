@@ -2,7 +2,7 @@
 
 The ESP32 Oberon Compiler accepts the following parameters:
 
-- **-c**  Add code to do the following additional checks at runtime:
+- **-c** : Add code to do the following additional checks at runtime:
 
   + Array index boundary limits
   + NIL pointers dereference
@@ -11,10 +11,10 @@ The ESP32 Oberon Compiler accepts the following parameters:
   + Array copy overflow
   + Illegal procedure call
 
-- **-o folder**  Output folder for the generated assembly language code. 
-- **-p path**  Search path for imported modules, as a list of folder names separated with character ":".
-- **-s**  Override Symbol file.
-- **-v**  Output compiler version number.
+- **-o folder** : Output folder for the generated assembly language code. 
+- **-p path** : Search path for imported modules, as a list of folder names separated with character ":".
+- **-s** : Override Symbol file.
+- **-v** : Output compiler version number.
 
 ## Runtime support files
 
