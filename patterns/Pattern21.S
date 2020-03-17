@@ -17,6 +17,10 @@ _Pattern21_A6E3D3E6_s_bss:
 _Pattern21_s_bss:
     .space 4
 
+    .align 4
+    .section .pointers_table_Pattern21_A6E3D3E6
+    .int _Pattern21_s_str + 0
+
 
 
     .align 4

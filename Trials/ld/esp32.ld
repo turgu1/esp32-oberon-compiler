@@ -49,6 +49,9 @@ SECTIONS {
     _sitable = .;
     KEEP (*(.init_table*))
     _eitable = .;
+    _sptable = .;
+    KEEP (*(.pointers_table*))
+    _eptable = .;
     *(.entry.text)
     *(.entry.trap_support)
     *(.text)

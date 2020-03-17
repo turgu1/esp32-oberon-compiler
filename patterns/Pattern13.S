@@ -16,6 +16,12 @@ _Pattern13_A5E3D3E8_s_bss:
 _Pattern13_s_bss:
     .space 12
 
+    .align 4
+    .section .pointers_table_Pattern13_A5E3D3E8
+    .int _Pattern13_s_str + 0
+    .int _Pattern13_s_str + 4
+    .int _Pattern13_s_str + 8
+
 
 
     .align 4
@@ -54,7 +60,6 @@ L1:
 L2:
     movi a4, 5
     s32i a4, a3, 8
-    
     l32i a3, a2, 4
     movi a4, 0
     mov a5, 4

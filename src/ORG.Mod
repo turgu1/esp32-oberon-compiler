@@ -2964,16 +2964,21 @@ PROCEDURE Abs*(VAR x: Item);
     RETURN n
   END NofPtrs;
 
-  PROCEDURE FindPtrs(VAR R: Files.Rider; typ: ORB.Type; adr: INTEGER);
+  PROCEDURE FindPtrs(typ: ORB.Type; adr: INTEGER);
     VAR fld: ORB.Object; i, s: INTEGER;
   BEGIN
-    IF (typ.form = ORB.Pointer) OR (typ.form = ORB.NilTyp) THEN Files.WriteInt(R, adr)
+    IF (typ.form = ORB.Pointer) OR (typ.form = ORB.NilTyp) THEN 
+      Texts.WriteString(AsW, "    .int _");
+      Texts.WriteString(AsW, thisModuleId);
+      Texts.WriteString(AsW, "_s_bss + ");
+      Texts.WriteInt(   AsW, adr, 0);
+      Texts.WriteLn(    AsW);
     ELSIF typ.form = ORB.Record THEN
       fld := typ.dsc;
-      WHILE fld # NIL DO FindPtrs(R, fld.type, fld.val + adr); fld := fld.next END
+      WHILE fld # NIL DO FindPtrs(fld.type, fld.val + adr); fld := fld.next END
     ELSIF typ.form = ORB.Array THEN
       s := typ.base.size;
-      FOR i := 0 TO typ.len-1 DO FindPtrs(R, typ.base, i*s + adr) END
+      FOR i := 0 TO typ.len - 1 DO FindPtrs(typ.base, (i * s) + adr) END
     END
   END FindPtrs;
 
@@ -3062,7 +3067,8 @@ PROCEDURE Abs*(VAR x: Item);
   END WriteCode;
 
   PROCEDURE Close*(VAR moduleId: ORS.Ident; moduleKey, nofent: INTEGER);
-    VAR obj: ORB.Object;
+    VAR 
+      obj: ORB.Object;
       i, comsize, nofimps, nofptrs, size: INTEGER;
       name: ORS.Ident;
       initPresent: BOOLEAN;
@@ -3138,6 +3144,22 @@ PROCEDURE Abs*(VAR x: Item);
       Texts.WriteInt(   AsW, 4, 0);
     END;
     Texts.WriteLn(    AsW);
+
+    (* pointers section *)
+    obj := ORB.topScope.next; nofptrs := 0;
+    WHILE obj # NIL DO
+      IF obj.class = ORB.Var THEN INC(nofptrs, NofPtrs(obj.type)) END ;
+      obj := obj.next
+    END ;
+
+    IF nofptrs > 0 THEN
+      SectionHeader("pointers_table", moduleId, moduleKey, FALSE);
+      obj := ORB.topScope.next;
+      WHILE obj # NIL DO
+        IF obj.class = ORB.Var THEN FindPtrs(obj.type, obj.val) END ;
+        obj := obj.next
+      END ;
+    END;
 
     (* Procedures Code section *)
     IF CodeW.buf.len > 0 THEN
