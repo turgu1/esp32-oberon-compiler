@@ -10,6 +10,8 @@ The underscore character is allowed inside an identifier. The first character mu
 ident = letter {letter | digit | "_" }.
 ```
 
+Identifiers are limited to 64 characters maximum in length, instead of 32.
+
 ## Standard procedures
 
 The following pre-defined functions have been added. They are using optimized ESP32 instructions and are useful in an IOT context:

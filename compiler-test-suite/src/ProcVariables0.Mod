@@ -44,37 +44,37 @@ MODULE ProcVariables0;
     p0 : P;
   BEGIN
     a0 := getNum8;
-    Out.Int(a0());
+    Out.Int(a0(), 10);
     a0 := getNum7;
-    Out.Int(a0());
+    Out.Int(a0(), 10);
 
     r0.i := 1;
     b0 := getPtr0;
     p0 := b0(r0);
-    Out.Int(p0.i);
+    Out.Int(p0.i, 10);
     b0 := getPtr1;
     p0 := b0(r0);
-    Out.Int(p0.i);
+    Out.Int(p0.i, 10);
     c0 := b0;
     p0 := c0(r0);
-    Out.Int(p0.i)
+    Out.Int(p0.i, 10)
   END Run;
 BEGIN
   Run;
   Out.Ln;
   a := getNum8;
-  Out.Int(a());
+  Out.Int(a(), 10);
   a := getNum7;
-  Out.Int(a());
+  Out.Int(a(), 10);
 
   r.i := 1;
   b := getPtr0;
   p := b(r);
-  Out.Int(p.i);
+  Out.Int(p.i, 10);
   b := getPtr1;
   p := b(r);
-  Out.Int(p.i);
+  Out.Int(p.i, 10);
   c := b;
   p := c(r);
-  Out.Int(p.i)
+  Out.Int(p.i, 10)
 END ProcVariables0.

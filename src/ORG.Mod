@@ -800,13 +800,13 @@ MODULE ORG;
       Out.Ln; Out.String("cond:"); Out.Int(thisCond, 0); Out.String(", RH:"); Out.Int(RH, 0); Out.Ln;
     ELSE
       e(BrOp[thisCond]);
-      IF cond IN BrOneParam THEN
+      IF thisCond IN BrOneParam THEN
         PutBranchR(BrOp[thisCond], RH-1, label);
         decR
-      ELSIF cond IN BrNoParam THEN
+      ELSIF thisCond IN BrNoParam THEN
         PutJump("j", label)
       ELSE
-        IF cond IN BrReverse THEN
+        IF thisCond IN BrReverse THEN
           IF reverseArguments THEN
             PutBranchRR(BrOp[thisCond], RH-2, RH-1, label)
           ELSE

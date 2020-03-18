@@ -13,11 +13,11 @@ MODULE ProcComparisons;
   END P1;
    
 BEGIN
-  IF P2 = P1 THEN Out.Int(0) END;
-  IF P2 = P2 THEN Out.Int(1) END;
-  IF P2 # P1 THEN Out.Int(2) END;
-  IF P2 # NIL THEN Out.Int(3) END;
-  IF P2 = NIL THEN Out.Int(4) END;
+  IF P2 = P1 THEN Out.Int(0, 10) END;
+  IF P2 = P2 THEN Out.Int(1, 10) END;
+  IF P2 # P1 THEN Out.Int(2, 10) END;
+  IF P2 # NIL THEN Out.Int(3, 10) END;
+  IF P2 = NIL THEN Out.Int(4, 10) END;
   x := P2 = P2;
   x := P2 = NIL
 END ProcComparisons.

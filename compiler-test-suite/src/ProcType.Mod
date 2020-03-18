@@ -5,7 +5,7 @@ MODULE ProcType;
   VAR p : P;
   
   PROCEDURE I(x: INTEGER);
-  BEGIN Out.Int(x)
+  BEGIN Out.Int(x, 10)
   END I;
 
   PROCEDURE callP(p: P);

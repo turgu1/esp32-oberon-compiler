@@ -24,7 +24,7 @@ MODULE ProcVariables1;
     a0[0] := F1;
     a0[1] := F2;
     FOR i := 0 TO 1 DO
-      Out.Int(a0[i](r))
+      Out.Int(a0[i](r), 10)
     END
   END Run;
 BEGIN
@@ -34,6 +34,6 @@ BEGIN
   a[0] := F1;
   a[1] := F2;
   FOR i := 0 TO 1 DO
-    Out.Int(a[i](r))
+    Out.Int(a[i](r), 10)
   END
 END ProcVariables1.

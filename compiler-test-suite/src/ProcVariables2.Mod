@@ -40,12 +40,12 @@ MODULE ProcVariables2;
     k0.p[1] := F2;
     r0 := k0;
     FOR i := 0 TO 1 DO
-      Out.Int(r0.p[i](r0.i))
+      Out.Int(r0.p[i](r0.i), 10)
     END;
   Out.Ln;
-  Out.Int(P1(1, F1));
+  Out.Int(P1(1, F1), 10);
   f0 := F2;
-  Out.Int(P2(1, f0))
+  Out.Int(P2(1, f0), 10)
   END Run;
 BEGIN
   Run;
@@ -55,10 +55,10 @@ BEGIN
   k.p[1] := F2;
   r := k;
   FOR i := 0 TO 1 DO
-    Out.Int(r.p[i](r.i))
+    Out.Int(r.p[i](r.i), 10)
   END;
   Out.Ln;
-  Out.Int(P1(1, F1));
+  Out.Int(P1(1, F1), 10);
   f := F2;
-  Out.Int(P2(1, f))
+  Out.Int(P2(1, f), 10)
 END ProcVariables2.

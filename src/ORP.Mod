@@ -7,8 +7,9 @@ MODULE ORP; (*N. Wirth 1.7.97 / 8.2.2020  Oberon compiler for ESP32 in Oberon-07
     ORG to produce binary code. ORP performs type checking and data allocation.
     Parser is target-independent, except for part of the handling of allocations.*)
   
-  CONST NofCases = 256; (* Max nomber of case labels in a CASE statement *)
-
+  CONST 
+    NofCases = 256; (* Max number of case labels in a CASE statement *)
+    DEBUG = TRUE;
   TYPE 
     PtrBase = POINTER TO PtrBaseDesc;
     PtrBaseDesc = RECORD  (*list of names of pointer base types*)
@@ -993,7 +994,7 @@ MODULE ORP; (*N. Wirth 1.7.97 / 8.2.2020  Oberon compiler for ESP32 in Oberon-07
         END ;
         ORS.Get(sym)
       ELSE Type(type.base);
-        IF (type.base.form # ORB.Record) OR (type.base.typobj = NIL) THEN ORS.Mark("must point to named record") END ;
+        IF ((type.base.form # ORB.Record) & (type.base.form # ORB.Proc)) OR (type.base.typobj = NIL) THEN ORS.Mark("must point to named record") END ;
         CheckRecLevel(level)
       END
     ELSIF sym = ORS.procedure THEN
@@ -1183,7 +1184,7 @@ MODULE ORP; (*N. Wirth 1.7.97 / 8.2.2020  Oberon compiler for ESP32 in Oberon-07
         ORB.Export(modid, newSF, key, sourceFolder);
         IF newSF & verbose THEN Texts.WriteString(W, " new symbol file") END
       END;
-      IF ORS.errcnt = 0 THEN
+      IF DEBUG OR (ORS.errcnt = 0) THEN
         IF outputFolder[0] = 0X THEN
           ORG.Close(modid, key, exno, sourceFolder);
         ELSE

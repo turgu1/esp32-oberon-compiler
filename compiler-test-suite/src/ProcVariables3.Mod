@@ -10,8 +10,8 @@ MODULE ProcVariables3;
 
   PROCEDURE X( x1,x2 : INTEGER);
   BEGIN
-    Out.Int(x1);
-    Out.Int(x2);
+    Out.Int(x1, 10);
+    Out.Int(x2, 10);
     Out.Ln;
   END X;
 
