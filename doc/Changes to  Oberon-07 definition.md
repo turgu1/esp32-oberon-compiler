@@ -72,9 +72,9 @@ If the case expression is of type INTEGER or CHAR, all case labels must be integ
 
 The following rules and restrictions apply:
 
-• Case labels of numeric case statements must have values between 0 and 255.
-• Case variables of type case statements must be simple identifiers that cannot be followed by selectors, i.e. they cannot be elements of a structure (array elements or record fields).
-• If the value of the case expression does not correspond to any case label in the source text, the statement sequence following the symbol ELSE is selected, if there is one, otherwise no action is taken (in the case of a type case statement) or the program is aborted (in the case of a numeric case statement).
+- Case labels of numeric case statements must have values between 0 and 255.
+- Case variables of type case statements must be simple identifiers that cannot be followed by selectors, i.e. they cannot be elements of a structure (array elements or record fields).
+- If the value of the case expression does not correspond to any case label in the source text, the statement sequence following the symbol ELSE is selected, if there is one, otherwise no action is taken (in the case of a type case statement) or the program is aborted (in the case of a numeric case statement).
 
 The ELSE clause has been re-introduced even though it is not part of the Oberon-07 language definition. This was done mainly for backward compatibility reasons. In general, we recommend using the ELSE clause only in well-justified cases, for example if the index range far exceeds the label range. But even in that case, one should first try to find a representation using explicit case label ranges, as shown in the example below (which assumes an index range of 0..255).
 
