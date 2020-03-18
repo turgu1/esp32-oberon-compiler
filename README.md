@@ -115,14 +115,14 @@ The ESP-IDF development framework must be present and setup in the user environm
     
 ### ESP32 Oberon Compiler and run-time
 
-For now, there is a simple Makefile that will automate the creation of the Oberon compiler executable. To build, simply use the command `make` to compile it. The result will be the executable file named `Oberon` in the main folder.
+For now, there is a simple Makefile in the main folder that will automate the creation of the Oberon compiler executable. To build, simply use the command `make` to compile it. The result will be the executable file named `Oberon` in the main folder.
 
-The runtime environment is located in the `lib/` sub-folder. It must also be built. Simply change current folder to `lib/` and then use the command `make`.
+The runtime environment is located in the `lib/` sub-folder. It must also be built after the compiler. Simply change current folder to `lib/` and then use the command `make`.
 
-You can then create your own program. The folder `Test` and `Trial` contains two programs with appropriate makefles to automate the built and the transmission of the application to a connected ESP32 board through USB. The `Makefile` present in these folders would give some lignts on how to organise your own program.
+You can then create your own program. The folder `Test` and `Trial` contains two programs with appropriate makefiles to automate the built and the transmission of the application to a connected ESP32 board through USB. The `Makefile` present in these folders would give some lignts on how to organise your own program.
 
 As stated, this is still under eavy development and is regularly being updated (like several times a day). There is still some bugs presents and many modules to control the ESP32 hardware interfaces remains to be added.
 
-The `compiler-test-suite/` is currently being constructed and is still not ready. The aim is to get all the programs there to be compiled and run in sequence on an ESP32 board. When completed, I would declare the compiler ready...
+The `compiler-test-suite/` is currently being constructed and is still not ready. The aim is to get all the programs there to be compiled and run in sequence on an ESP32 board. When completed, I would then declare the compiler ready...
 
 Guy
