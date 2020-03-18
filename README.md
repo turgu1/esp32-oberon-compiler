@@ -29,9 +29,9 @@ In a Nutshell, the steps I'm taking to get a working compiler are the following:
 17. Develop modules for some ESP32 subsystems
 18. Enjoy
 
-I'm now doing a round robin between steps 8, 9, 10, 11 and 12
+I'm now at step 13
 
-The file named OBG.Mod is the main module generator of assembly language instructions. It has been almost completly rewritten, considering the assebly language approach taken instead of direct code generation. Using the assembler gives the following facilities:
+The file named OBG.Mod is the main module generator of assembly language instructions. It has been almost completly rewritten, considering the assembly language approach taken instead of direct code generation. Using the assembler gives the following facilities:
 
 - Automated management of literal creation for indirect addressing of far reached memory locations. The ESP32 instruction set doesn't supply full 32 bits addressing of memory. The assembler automates this aspect.
 

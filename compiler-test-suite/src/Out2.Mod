@@ -18,23 +18,23 @@ MODULE Out2;
 
 BEGIN 
   a.x := 10;
-  Out.Int(a.x);
+  Out.Int(a.x, 10);
   b.r1.r0.x := 11;
-  Out.Int(b.r1.r0.x);
+  Out.Int(b.r1.r0.x, 10);
   i := 1;
   j := 2;
   s[i].u := 12;
-  Out.Int(s[i].u);
+  Out.Int(s[i].u, 10);
   s[1].w := 13;
-  Out.Int(s[1].w);
+  Out.Int(s[1].w, 10);
   s[i].v[j].x := 14;
-  Out.Int(s[i].v[j].x);
+  Out.Int(s[i].v[j].x, 10);
   s[1].v[2].x := 15;
-  Out.Int(s[1].v[2].x);
+  Out.Int(s[1].v[2].x, 10);
   s[0].v[i].y := 16;
-  Out.Int(s[0].v[i].y);
+  Out.Int(s[0].v[i].y, 10);
   s[0].r0.y := 17;
-  Out.Int(s[0].r0.y);
+  Out.Int(s[0].r0.y, 10);
   s[0].v2[i][j].y := 18;
-  Out.Int(s[0].v2[i][j].y);
+  Out.Int(s[0].v2[i][j].y, 10);
 END Out2.

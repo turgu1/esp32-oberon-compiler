@@ -7,7 +7,7 @@ MODULE Powers;  (*NW  25.1.2013 fo Oberon-07; Tabulate positive and negative pow
       c, r, t: INTEGER;
       d: ARRAY M OF INTEGER;
       f: ARRAY N OF INTEGER;
-  BEGIN n := ReadInt(); d[0] := 1; k := 1; exp := 1;
+  BEGIN n := 7; d[0] := 1; k := 1; exp := 1;
       WHILE exp < n DO
         (*compute d = 2^exp*)
         c := 0;  (*carry*) i := 0;
@@ -20,7 +20,7 @@ MODULE Powers;  (*NW  25.1.2013 fo Oberon-07; Tabulate positive and negative pow
         (*write d*) i := M;
         WHILE i > k DO i := i-1; Out.Char(" ") END ;
         WHILE i > 0 DO i := i-1; Out.Char(CHR(d[i] + 48)) END ;
-        Out.Int(exp);
+        Out.Int(exp, 10);
         (*compute  f = 2^-exp*)
         Out.Char(CHR(9)); Out.Char("0"); Out.Char(".");
         r := 0; i := 1;

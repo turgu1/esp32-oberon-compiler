@@ -23,9 +23,9 @@ BEGIN
   CASE p OF
     P0: p.b := 1.5 + p(P2).d + p(P2).z[2].b + FLT(p.a) +
                FLT(p.y(P1).c) + FLT(p(P1).c DIV 3);
-        Out.Int(FLOOR(p.b)); (* 17 *)
+        Out.Int(FLOOR(p.b), 0); (* 17 *)
         i:= p.a |
     P2: p.b := 1.8; i:= 2
   END;
-  Out.Int(i) (* 1 *)
+  Out.Int(i, 0) (* 1 *)
 END CaseRecord3.

@@ -135,13 +135,13 @@ BEGIN
   arr[0] := 8; arr[1] := 9;
   l := newList2(addAllList2A);
   l.addAll(l, arr);
-  Out.Int(l.size(l));
+  Out.Int(l.size(l), 10);
 
   l := newList2(addAllList2B);
   l.addAll(l, arr);
-  Out.Int(l.size(l));
+  Out.Int(l.size(l), 10);
 
   l := newList2(addAllList2C);
   l.addAll(l, arr);
-  Out.Int(l.size(l))
+  Out.Int(l.size(l), 10)
 END FragileBaseClass.

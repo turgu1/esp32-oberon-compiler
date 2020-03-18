@@ -22,28 +22,28 @@ MODULE Out0;
 
 BEGIN
   a[2] := 8;
-  Out.Int(a[2]);
+  Out.Int(a[2], 10);
   b[2][3] := 9;
-  Out.Int(b[2][3]);
+  Out.Int(b[2][3], 10);
   c[0][1][2][3] := 10;
-  Out.Int(c[0][1][2][3]);
+  Out.Int(c[0][1][2][3], 10);
   d.x[9] := 11;
-  Out.Int(d.x[9]);
+  Out.Int(d.x[9], 10);
   e.world := 12;
-  Out.Int(e.world);
+  Out.Int(e.world, 10);
   e.x[2][3].x[3] := 13;
-  Out.Int(e.x[2][3].x[3]);
+  Out.Int(e.x[2][3].x[3], 10);
   f := 14;
-  Out.Int(f);
+  Out.Int(f, 10);
   g[6] := 15;
-  Out.Int(g[6]);
+  Out.Int(g[6], 10);
   h[8].x[2] := 16;
-  Out.Int(h[8].x[2]);
+  Out.Int(h[8].x[2], 10);
   z.y := 17;
-  Out.Int(z.y);
+  Out.Int(z.y, 10);
   i := -z.y + c[0][1][2][3] + h[8].x[2] * e.x[2][3].x[3] -1;
-  Out.Int(i);
+  Out.Int(i, 10);
   j := 2;
   k := (i = j) OR (i >= j);
-  IF k THEN Out.Int(1) END
+  IF k THEN Out.Int(1, 10) END
 END Out0.

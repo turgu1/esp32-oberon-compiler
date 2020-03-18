@@ -43,5 +43,5 @@ BEGIN
   y0 := y1;
   y2[i].j := y3[i].j;
   i := 10;
-  Out.Int(i);
+  Out.Int(i, 10);
 END EmptyArrayAndRecord.

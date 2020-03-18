@@ -140,6 +140,7 @@ MODULE ORG;
     BrOp: ARRAY 16 OF BrStr;  (* ESP32 branch instructions   *)
     BrReverse,                (* Parameters must be reversed *)
     BrOneParam,               (* One parameter instructions  *)
+    BrTwoParam,               (* Two parameter instructions  *)
     BrNoParam: SET;           (* Unconditional branches      *)
 
     UsedRegs: SET;
@@ -794,7 +795,7 @@ MODULE ORG;
       ORS.Mark("Internal Error in PutCondBranch!! (cond off limits)");
       Out.Ln; Out.String("cond:"); Out.Int(thisCond, 0);
     ELSIF ((thisCond IN BrOneParam) & (RH < FirstRH + 1)) OR 
-          (~(thisCond IN BrOneParam) & (RH < FirstRH + 2)) THEN
+          ((thisCond IN BrTwoParam) & (RH < FirstRH + 2)) THEN
       ORS.Mark("Internal Error in PutCondBranch!! (Wrong registers mgmt)");
       Out.Ln; Out.String("cond:"); Out.Int(thisCond, 0); Out.String(", RH:"); Out.Int(RH, 0); Out.Ln;
     ELSE
@@ -3251,7 +3252,8 @@ BEGIN
 
   BrReverse  := {6, 14};
   BrOneParam := {0, 1, 7, 8, 9, 15};
+  BrTwoParam := {2, 3, 5, 6, 10, 11, 13, 14};
   BrNoParam  := {4, 12};
 
-  UsedRegs := {};
+  UsedRegs := {}
 END ORG.

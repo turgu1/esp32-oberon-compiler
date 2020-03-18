@@ -18,9 +18,9 @@ MODULE Out6;
     c : R2;
 BEGIN 
   a.x := 10;
-  Out.Int(a.x + a.x);
+  Out.Int(a.x + a.x, 10);
   b.r0.x := 11;
-  Out.Int(b.r0.x + b.r0.x);
+  Out.Int(b.r0.x + b.r0.x, 10);
   c.r0.x.y.x := 12;
-  Out.Int(c.r0.x.y.x + c.r0.x.y.x);
+  Out.Int(c.r0.x.y.x + c.r0.x.y.x, 10);
 END Out6.

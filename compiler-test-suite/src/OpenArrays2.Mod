@@ -7,10 +7,10 @@ MODULE OpenArrays2;
   
   PROCEDURE P1(VAR b : ARRAY OF INTEGER; c : ARR; VAR d : ARR; e : ARRAY OF INTEGER);
   BEGIN
-    Out.Int(b[i]);
-    Out.Int(c[i]);
-    Out.Int(d[i]);
-    Out.Int(e[i])
+    Out.Int(b[i], 10);
+    Out.Int(c[i], 10);
+    Out.Int(d[i], 10);
+    Out.Int(e[i], 10)
   END P1; 
 
 BEGIN

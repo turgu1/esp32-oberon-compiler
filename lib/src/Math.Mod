@@ -1,5 +1,19 @@
 MODULE Math;   (* Standard functions;  NW 12.10.2013 *)
 
+  CONST
+    E*         = 2.7182818285;
+    PI*        = 3.1415926536;
+    SQRT2*     = 1.4142135623;
+    SQRT3*     = 1.7320508076;
+    LOG10E*    = 0.4342944819;
+    LN3OVER2*  = 0.5493061443;
+    PIOVER2*   = 1.5707963268;
+    PIOVER3*   = 1.0471975512;
+    PIOVER4*   = 0.7853981634;
+    PIOVER6*   = 0.5235987756;
+    ONEOVERPI* = 0.3183098862;
+    TWOOVERPI* = 0.6366197724;
+
   PROCEDURE sqrt*(x: REAL): REAL;
   BEGIN 
     ASSERT(x >= 0.0);

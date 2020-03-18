@@ -7,17 +7,17 @@ MODULE OpenArrays3;
     x : ARRAY 3 OF INTEGER;
     e : ARRAY 10 OF R;
     y : ARRAY 3 OF R;
-    f : ARRAY 10 OF ARRAY 3 OF INTEGER;
+    f : ARRAY 10 OF ARR;
     z : ARRAY 3 OF ARR;
   
   PROCEDURE P0(VAR a : ARRAY OF INTEGER; b : ARRAY OF R; c : ARRAY OF ARR);
   BEGIN
     d := a;
-    Out.Int(d[1]);
+    Out.Int(d[1], 10);
     e := b;
-    Out.Int(e[1].i);
+    Out.Int(e[1].i, 10);
     f := c;
-    Out.Int(f[1][1])
+    Out.Int(f[1][1], 10)
   END P0; 
   
   PROCEDURE P1(VAR a : ARRAY OF INTEGER; b : ARRAY OF R; c : ARRAY OF ARR);
@@ -28,11 +28,11 @@ MODULE OpenArrays3;
   BEGIN
     d[1] := -1;  e[1].i := -1; f[1][1] := -1;
     d := a;
-    Out.Int(d[1]);
+    Out.Int(d[1], 10);
     e := b;
-    Out.Int(e[1].i);
+    Out.Int(e[1].i, 10);
     f := c;
-    Out.Int(f[1][1])
+    Out.Int(f[1][1], 10)
   END P1; 
 
 BEGIN

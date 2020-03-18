@@ -6,7 +6,7 @@ MODULE OpenArrays;
   PROCEDURE P2(a : ARRAY OF INTEGER; VAR b : ARRAY OF INTEGER);
     VAR k : INTEGER;
   BEGIN
-    Out.Int(b[0]); (* 1 *) 
+    Out.Int(b[0], 10); (* 1 *) 
    (* a[0] := 1; read only*)
    (* a[3] := 2;  read only*)
     b[0] := 2;
@@ -14,7 +14,7 @@ MODULE OpenArrays;
     k := a[0];
    (* k := a[3];  TRAP *) 
     k := b[0];
-    Out.Int(k); (* 2 *) 
+    Out.Int(k, 10); (* 2 *) 
    (* k := b[3]; TRAP *)
   END P2;
 
@@ -33,5 +33,5 @@ MODULE OpenArrays;
   END P1;
 BEGIN 
   P1(x, y);
-  Out.Int(y[0]); (* 2 *) 
+  Out.Int(y[0], 10); (* 2 *) 
 END OpenArrays.

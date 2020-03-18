@@ -30,21 +30,21 @@ MODULE Out4;
   BEGIN
     i := 1;
     j := 10;
-    Out.Int(j);
+    Out.Int(j, 10);
     a.x[1] := 11;
-    Out.Int(a.x[1]);
+    Out.Int(a.x[1], 10);
     r1.r0.x := 12;
-    Out.Int(r1.r0.x);
+    Out.Int(r1.r0.x, 10);
     b[2] := 13;
-    Out.Int(b[2]);
+    Out.Int(b[2], 10);
     s[i].v[3].x := 14;
-    Out.Int(s[i].v[3].x);
+    Out.Int(s[i].v[3].x, 10);
     P1(TRUE, j, a.x[1], r1.r0.x, b, s);
-    Out.Int(j);
-    Out.Int(a.x[1]);
-    Out.Int(r1.r0.x);
-    Out.Int(b[2]);
-    Out.Int(s[i].v[3].x)
+    Out.Int(j, 10);
+    Out.Int(a.x[1], 10);
+    Out.Int(r1.r0.x, 10);
+    Out.Int(b[2], 10);
+    Out.Int(s[i].v[3].x, 10)
   END P0;
 
   PROCEDURE P9(o : BOOLEAN ; VAR z0 : INTEGER);
@@ -64,13 +64,13 @@ MODULE Out4;
       s : ARR;
   BEGIN
     a := 1;
-    Out.Int(a);
+    Out.Int(a, 10);
     P9(TRUE, a);
-    Out.Int(a);
+    Out.Int(a, 10);
     i := 1; j := 1;
     s[i*1].v[j-1].x := 90;
     P10(s[i*1].v[j-1].x);
-    Out.Int(s[i*1].v[j-1].x)
+    Out.Int(s[i*1].v[j-1].x, 10)
   END P8;
 BEGIN
   P8(); P0()

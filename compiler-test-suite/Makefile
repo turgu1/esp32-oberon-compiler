@@ -38,7 +38,6 @@ SRC = \
   Pattern2a.Mod \
   Pattern2b.Mod \
   Pattern2c.Mod \
-  Permutations.Mod \
   Powers.Mod \
   PrimeNumbers.Mod \
   ProcComparisons.Mod \
