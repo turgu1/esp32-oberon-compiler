@@ -14,10 +14,16 @@ LD = $(TOOLCHAIN)ld
 OC = $(TOOLCHAIN)objcopy
 OS = $(TOOLCHAIN)size
 
+BLDDIR = ./build
+SRCDIR = ./src
+LIBDIR = ../lib
+
+ESP32LIB = esp32-oberon
 # Linker script location.
-LDSCRIPT = ./ld/esp32.ld
+LDSCRIPT = $(LIBDIR)/ld/esp32.ld
 LDFLAGS += -nostdlib -T$(LDSCRIPT) -Wl,-Map=$@.map -Wl,--cref -Wl,--gc-sections
 LDFLAGS += $(LDFLAGS_PLATFORM)
+LDFLAGS += -L$(LIBDIR) -l$(ESP32LIB)
 
 ASFLAGS += -c -O0 -Wall -fmessage-length=0
 ASFLAGS += $(ASFLAGS_PLATFORM)
@@ -25,9 +31,6 @@ ASFLAGS += -g
 
 PORT = /dev/tty.SLAB_USBtoUART
 #PORT = /dev/ttyUSB0
-
-BLDDIR = ./build/
-SRCDIR = ./src/
 
 INIT = init/init.S
 INITO = $(BLDDIR)/init.o
@@ -39,48 +42,32 @@ SRC =  \
 	SimpleReal.Mod \
 	SimpleMath.Mod \
 	Assignments.Mod \
-	Test.Mod \
-	Out.Mod \
-	Kernel.Mod
+	Test.Mod
 
+OBJS = $(addprefix $(BLDDIR)/, $(SRC:.Mod=.o))
 
-SYMS = $(addprefix $(SRCDIR), $(SRC:.Mod=.smb))
-ASSS = $(addprefix $(BLDDIR), $(SRC:.Mod=.S))
-OBJS = $(addprefix $(BLDDIR), $(SRC:.Mod=.o))
-
-TARGETELF = $(BLDDIR)tests.elf
-TARGETBIN = $(BLDDIR)tests.bin
+TARGETELF = $(BLDDIR)/tests.elf
+TARGETBIN = $(BLDDIR)/tests.bin
 
 .PHONY: all
 all: $(TARGETELF)
 
-.PHONY: test
-test:
-	@echo "OBJS = $(OBJS)"
-	@echo "ASSS = $(ASSS)"
-
 # Rules to build files.
 
-$(BLDDIR)Main.S $(SRCDIR)Main.smb: $(SRCDIR)Main.Mod $(SRCDIR)Test.smb $(SRCDIR)Out.smb $(SRCDIR)Kernel.smb
-$(BLDDIR)Test.S $(SRCDIR)Test.smb: $(SRCDIR)Test.Mod $(SRCDIR)Out.smb
-$(BLDDIR)Assignments.S $(SRCDIR)Assignments.smb: $(SRCDIR)Assignments.Mod $(SRCDIR)Out.smb $(SRCDIR)Test.smb
-$(BLDDIR)SimpleMath.S $(SRCDIR)SimpleMath.smb: $(SRCDIR)SimpleMath.Mod $(SRCDIR)Out.smb $(SRCDIR)Test.smb
-$(BLDDIR)SimpleReal.S $(SRCDIR)SimpleReal.smb: $(SRCDIR)SimpleReal.Mod $(SRCDIR)Out.smb $(SRCDIR)Test.smb
-$(BLDDIR)DefFunc.S $(SRCDIR)DefFunc.smb: $(SRCDIR)DefFunc.Mod $(SRCDIR)Out.smb $(SRCDIR)Test.smb
-$(BLDDIR)Kernel.S $(SRCDIR)Kernel.smb: $(SRCDIR)Kernel.Mod $(SRCDIR)Out.smb
-$(BLDDIR)Out.S $(SRCDIR)Out.smb: $(SRCDIR)Out.Mod
+$(BLDDIR)/Main.S $(SRCDIR)/Main.smb: $(SRCDIR)/Main.Mod $(SRCDIR)/Test.smb
+$(BLDDIR)/Test.S $(SRCDIR)/Test.smb: $(SRCDIR)/Test.Mod
+$(BLDDIR)/Assignments.S $(SRCDIR)/Assignments.smb: $(SRCDIR)/Assignments.Mod $(SRCDIR)/Test.smb
+$(BLDDIR)/SimpleMath.S $(SRCDIR)/SimpleMath.smb: $(SRCDIR)/SimpleMath.Mod $(SRCDIR)/Test.smb
+$(BLDDIR)/SimpleReal.S $(SRCDIR)/SimpleReal.smb: $(SRCDIR)/SimpleReal.Mod $(SRCDIR)/Test.smb
+$(BLDDIR)/DefFunc.S $(SRCDIR)/DefFunc.smb: $(SRCDIR)/DefFunc.Mod $(SRCDIR)/Test.smb
 
-$(BLDDIR)%.S $(SRCDIR)%.smb : $(SRCDIR)%.Mod
-	cd $(SRCDIR) ; ../$(OB) -s $(<F)
-	@mv $(SRCDIR)$(patsubst %.smb,%.S,$(@F)) $(BLDDIR)
-
-$(OBJS): %.o: %.S
+$(BLDDIR)/%.o : $(BLDDIR)/%.S
 	@$(CC) -x assembler-with-cpp $(ASFLAGS) $< -o $@
 
-$(INITO): $(INIT)
-	@$(CC) -x assembler-with-cpp $(ASFLAGS) $< -o $@
+$(BLDDIR)/%.S $(SRCDIR)/%.smb : $(SRCDIR)/%.Mod
+	$(OB) -o $(BLDDIR) -p $(LIBDIR) -s $<
 
-$(TARGETELF): $(INITO) $(OBJS)
+$(TARGETELF): $(OBJS)
 	$(CC) $^ $(LDFLAGS) -o $@
 
 .PHONY: flash
@@ -91,5 +78,5 @@ flash: $(TARGETELF)
 # Target to clean build artifacts.
 .PHONY: clean
 clean:
-	rm -f $(BLDDIR)*
-	rm -f $(SRCDIR)*.smb
+	rm -f $(BLDDIR)/*
+	rm -f $(SRCDIR)/*.smb

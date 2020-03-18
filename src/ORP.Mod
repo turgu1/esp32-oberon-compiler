@@ -29,7 +29,8 @@ MODULE ORP; (*N. Wirth 1.7.97 / 8.2.2020  Oberon compiler for ESP32 in Oberon-07
     dummy: ORB.Object;
     W: Texts.Writer;
 
-    sourceFolder, outputFolder, importPath: ARRAY 256 OF CHAR;
+    sourceFolder, outputFolder: ARRAY 256 OF CHAR;
+    importPath: ARRAY 1024 OF CHAR;
 
   PROCEDURE Check(s: INTEGER; msg: ARRAY OF CHAR);
   BEGIN
@@ -748,7 +749,7 @@ MODULE ORP; (*N. Wirth 1.7.97 / 8.2.2020  Oberon compiler for ESP32 in Oberon-07
           ORG.PutLabel(x.lf); x.lf := 0;
           StatSequence
         END ;
-        IF x.lf # 0 THEN ORG.PutLabel(x.lf) END; 
+        IF x.lf # 0 THEN ORG.PutLabel(x.lf); x.lf := 0 END; 
         IF   L0 # 0 THEN ORG.PutLabel(L0)   END;
         Check(ORS.end, "no END")
       ELSIF sym = ORS.while THEN (* ----- WHILE ----- *)
@@ -766,7 +767,7 @@ MODULE ORP; (*N. Wirth 1.7.97 / 8.2.2020  Oberon compiler for ESP32 in Oberon-07
           CheckBool(x); ORG.CFJump(x);
           Check(ORS.do, "no DO"); StatSequence; ORG.BJump(L0)
         END ;
-        ORG.PutLabel(x.lf); 
+        ORG.PutLabel(x.lf); x.lf := 0;
         Check(ORS.end, "no END")
       ELSIF sym = ORS.repeat THEN (* ----- REPEAT ----- *)
         ORS.Get(sym); L0 := ORG.Here(); 
@@ -1153,7 +1154,7 @@ MODULE ORP; (*N. Wirth 1.7.97 / 8.2.2020  Oberon compiler for ESP32 in Oberon-07
     IF sym = ORS.module THEN
       ORS.Get(sym);
       dc := 0; tdc := 0;
-      ORB.Init(importPath); ORB.OpenScope;
+      ORB.Init(importPath, sourceFolder); ORB.OpenScope;
       IF sym = ORS.ident THEN
         ORS.CopyId(modid); ORS.Get(sym);
         IF verbose THEN Texts.WriteString(W, modid); Texts.Append(Logger.Log, W.buf) END
@@ -1183,7 +1184,11 @@ MODULE ORP; (*N. Wirth 1.7.97 / 8.2.2020  Oberon compiler for ESP32 in Oberon-07
         IF newSF & verbose THEN Texts.WriteString(W, " new symbol file") END
       END;
       IF ORS.errcnt = 0 THEN
-        ORG.Close(modid, key, exno, outputFolder);
+        IF outputFolder[0] = 0X THEN
+          ORG.Close(modid, key, exno, sourceFolder);
+        ELSE
+          ORG.Close(modid, key, exno, outputFolder);
+        END;
         IF verbose THEN Texts.WriteInt(W, dc, 6); Texts.WriteHex(W, key) END
       ELSE 
         Texts.WriteLn(W); Texts.WriteString(W, "compilation FAILED");

@@ -9,7 +9,9 @@ VAR
   argCount : INTEGER;
   i        : INTEGER;
   res      : INTEGER;
-  outputFolder, filename, arg, importPath : ARRAY 256 OF CHAR;
+
+  outputFolder, filename, arg : ARRAY 256 OF CHAR;
+  importPath : ARRAY 1024 OF CHAR;
 
   overrideSymbolFile : BOOLEAN;
   generateCheckCode  : BOOLEAN; 

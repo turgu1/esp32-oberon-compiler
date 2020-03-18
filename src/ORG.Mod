@@ -140,8 +140,7 @@ MODULE ORG;
     BrOp: ARRAY 16 OF BrStr;  (* ESP32 branch instructions   *)
     BrReverse,                (* Parameters must be reversed *)
     BrOneParam,               (* One parameter instructions  *)
-    BrNoParam,                (* Unconditional branches      *)
-    BrNotValid: SET;          (* Not valid entries           *)
+    BrNoParam: SET;           (* Unconditional branches      *)
 
     UsedRegs: SET;
 
@@ -791,7 +790,7 @@ MODULE ORG;
     thisCond := cond;
     IF reverseArguments THEN thisCond := cond - 100 END;
     eStr(" revArgs:"); eInt(ORD(reverseArguments));
-    IF (thisCond < 0) OR (thisCond > 15) OR (thisCond IN BrNotValid) THEN
+    IF (thisCond < 0) OR (thisCond > 15) THEN
       ORS.Mark("Internal Error in PutCondBranch!! (cond off limits)");
       Out.Ln; Out.String("cond:"); Out.Int(thisCond, 0);
     ELSIF ((thisCond IN BrOneParam) & (RH < FirstRH + 1)) OR 
@@ -1531,13 +1530,13 @@ MODULE ORG;
     IF x.mode # Cond THEN loadCond(x) END ;
     IF x.lf = 0 THEN x.lf := label; INC(label) END;
     PutCondBranch(negated(x.r), x.lf);
-    IF x.lt # 0 THEN PutLabel(x.lt); x.lt := 0 END;
+    (* IF x.lt # 0 THEN PutLabel(x.lt); x.lt := 0 END; *)
   END And1;
 
   PROCEDURE And2*(VAR x, y: Item);
   BEGIN
     e("And2");
-    IF y.mode # Cond THEN loadCond(y) END ;
+    IF y.mode # Cond THEN loadCond(y) END;
     IF y.lt = 0 THEN y.lt := label; INC(label) END;
     x.lt := y.lt; x.r := y.r;
   END And2;
@@ -1548,7 +1547,7 @@ MODULE ORG;
     IF x.mode # Cond THEN loadCond(x) END ;
     IF x.lt = 0 THEN x.lt := label; INC(label) END;
     PutCondBranch(x.r, x.lt);
-    IF x.lf # 0 THEN PutLabel(x.lf); x.lf := 0 END;
+    (* IF x.lf # 0 THEN PutLabel(x.lf); x.lf := 0 END; *)
   END Or1;
 
   PROCEDURE Or2*(VAR x, y: Item);
@@ -2271,7 +2270,7 @@ MODULE ORG;
     IF x.mode # Cond THEN loadCond(x) END;
     IF x.lf = 0 THEN x.lf := label; INC(label) END;
     PutCondBranch(negated(x.r), x.lf); 
-    IF x.lt # 0 THEN PutLabel(x.lt) END
+    IF x.lt # 0 THEN PutLabel(x.lt); x.lt := 0 END
   END CFJump;
 
   PROCEDURE BJump*(L: INTEGER);
@@ -3253,7 +3252,6 @@ BEGIN
   BrReverse  := {6, 14};
   BrOneParam := {0, 1, 7, 8, 9, 15};
   BrNoParam  := {4, 12};
-  BrNotValid := {4, 12};
 
   UsedRegs := {};
 END ORG.

@@ -94,10 +94,11 @@ MODULE ORB;   (*NW 25.6.2014  / 1.3.2019  in Oberon-07*)
     typtab: ARRAY maxTypTab OF Type;
     importPaths: ARRAY 10, 256 OF CHAR;
 
-  PROCEDURE DecodePath(impPath: ARRAY OF CHAR);
+  PROCEDURE DecodePath(impPath, sourceFolder: ARRAY OF CHAR);
     VAR i, j, k: INTEGER;
   BEGIN
-    i := 0; j := 0; k := 0;
+    importPaths[0] := sourceFolder;
+    i := 1; j := 0; k := 0;
     WHILE (i < 10) & (j < LEN(impPath)) & (impPath[j] # 0X) DO
       IF impPath[j] = ":" THEN
         importPaths[i][k] := 0X; k := 0; INC(i)
@@ -179,14 +180,11 @@ MODULE ORB;   (*NW 25.6.2014  / 1.3.2019  in Oberon-07*)
   PROCEDURE FindFileName*(VAR FName: ARRAY OF CHAR; name, ext: ARRAY OF CHAR);
     VAR i: INTEGER;
   BEGIN
-    MakeFileName(FName, "", name, ext);
-    IF Files.Old(FName) = NIL THEN
-      i := -1;
-      REPEAT 
-        INC(i);
-        MakeFileName(FName, importPaths[i], name, ext)
-      UNTIL (i >= 10) OR (importPaths[i][0] = 0X) OR (Files.Old(FName) # NIL)
-    END
+    i := -1;
+    REPEAT 
+      INC(i);
+      MakeFileName(FName, importPaths[i], name, ext)
+    UNTIL (i >= 10) OR (importPaths[i][0] = 0X) OR (Files.Old(FName) # NIL)
   END FindFileName;
 
   PROCEDURE ThisModule(name, orgname: ORS.Ident; non: BOOLEAN; key: INTEGER): Object;
@@ -417,9 +415,9 @@ MODULE ORB;   (*NW 25.6.2014  / 1.3.2019  in Oberon-07*)
     END
   END Export;
 
-  PROCEDURE Init*(impPath: ARRAY OF CHAR);
+  PROCEDURE Init*(impPath, sourceFolder: ARRAY OF CHAR);
   BEGIN
-    DecodePath(impPath); 
+    DecodePath(impPath, sourceFolder); 
     topScope := universe; nofmod := 1
   END Init;
   

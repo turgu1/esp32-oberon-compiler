@@ -1,12 +1,14 @@
+#  ESP32 Oberon Compiler User's Guide
+
 ## Compiler parameters
 
-The ESP32 Oberon Compiler accepts the following parameters:
+The ESP32 Oberon Compiler is a single executable that can be launched as follows:
 
-```
-Oberon [-c][-o folder][-p path][-s][-v] filename
+```sh
+$ Oberon [-c][-o folder][-p path][-s][-v] filename
 ```
 
-Where:
+Where the parameters are:
 
 - **-c** : Add code to do the following additional checks at runtime:
 
@@ -17,16 +19,19 @@ Where:
   + Array copy overflow
   + Illegal procedure call
 
-- **-o folder** : Output folder for the generated assembly language code. 
-- **-p path** : Search path for imported modules, as a list of folder names separated with character ":".
+- **-o folder** : Output folder for the generated assembly language code. If not present, the module source code folder is being used.
+- **-p path** : Search path for imported modules, as a list of folder names separated with character “:”. An imported module is first seached in the folder of the module being compiled, then in sequence in the folders part of the path.
 - **-s** : Override Symbol file.
 - **-v** : Output compiler version number.
+- **filename** : Oberon source filename to be compiled
+
+The compiler will produce an ESP32 assembly language source code (extension “.S”) and a symbol file (extension “.smb”) if it does not exist or the **-s** option is present.
 
 ## Runtime support files
 
 An ESP32 Oberon program requires runtime support. The compiler is supplied with many files that you can find in the lib folder:
 
-- An application startup function that is called by the ESP32 bootstrap once the application has been loaded in memory. It is located in `lib/init/init.S`. This file contains many include instructions to add the other pieces of code present in the same folder. These files supply support for interupts management and floating point divide and square-toot functions.
+- An application startup function that is called by the ESP32 bootstrap once the application has been loaded in memory. It is located in `lib/init/init.S`. This file contains many include instructions to add the other pieces of code present in the same folder. These files supply support for interupts management and floating-point divide and square-toot functions.
 
 - A Linker Script file that supply memory mapping information to the linker. It is located in `lib/ld/esp32.ld`.
 
