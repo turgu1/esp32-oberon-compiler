@@ -105,9 +105,7 @@ $ ./install
 
 (Both INTEGER and REAL must be set to 32bits. The compiler is verifying this aspect on startup.)
 
-The OBNC Oberon-07 compiler is required with the extension libraries to parse command line arguments. It is available at the following location:
-
-    [https://miasap.se/obnc/]
+The OBNC Oberon-07 compiler is required with the extension libraries to parse command line arguments. Both are available from [this](https://miasap.se/obnc/) location.
 
 ### ESP-IDF
 
