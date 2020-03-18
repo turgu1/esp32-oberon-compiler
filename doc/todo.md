@@ -14,7 +14,7 @@
 - [ ] Cleanup internal compiler debugging support
 - [ ] Revisit Logging module
 - [ ] ORG.{load,store} procedures optimization
-- [ ] Revisit Procedure calls (function parameters) optimization
+- [x] Revisit Procedure calls (function parameters) optimization
  
 # Compiler Support
 
@@ -22,9 +22,10 @@
 - [x] Kernel Module (New, Garbage Collector, Timer)
 - [ ] Source code debug marking with GDB
 - [ ] PlatformIO integration
-- [ ] Makefile cleanup
+- [x] Makefile cleanup
 - [ ] Standard Modules
   + [ ] Out -> Needs a standard Real procedure.
   + [x] Strings
   + [x] Math
-- [ ] Library
+  + [x] Strings
+- [x] Library
