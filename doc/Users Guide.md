@@ -31,7 +31,7 @@ The compiler will produce an ESP32 assembly language source code (extension “.
 
 An ESP32 Oberon program requires runtime support. The compiler is supplied with many files that you can find in the lib folder:
 
-- An application startup function that is called by the ESP32 bootstrap once the application has been loaded in memory. It is located in `lib/init/init.S`. This file contains many include instructions to add the other pieces of code present in the same folder. These files supply support for interupts management and floating-point divide and square-toot functions.
+- An application startup function that is called by the ESP32 bootstrap once the application has been loaded in memory. It is located in `lib/init/init.S`. This file contains many include instructions to add the other pieces of code present in the same folder. These files supply support for interupts management and floating-point divide and square-root functions.
 
 - A Linker Script file that supply memory mapping information to the linker. It is located in `lib/ld/esp32.ld`.
 

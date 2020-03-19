@@ -111,7 +111,7 @@ PROCEDURE Real* (x: REAL; n: INTEGER);
   VAR e, i, k, m: INTEGER;
     d: ARRAY 16 OF CHAR;
 BEGIN
-  e := ASR(ORD(x), 23) MOD 100H;  (*binary exponent*)
+  e := ASR(ORD(x), 23) MOD 100H;  (* binary exponent *)
   IF e = 0 THEN
     String("  0 ");
     WHILE n >= 3 DO Char(" "); DEC(n) END
@@ -119,15 +119,15 @@ BEGIN
   ELSE 
     Char(" ");
     WHILE n >= 15 DO DEC(n); Char(" ") END ;
-    (* 2 < n < 9 digits to be written*)
+    (* 2 < n < 9 digits to be written *)
     IF x < 0.0 THEN Char("-"); x := -x ELSE Char(" ") END ;
-    e := (e - 127) * 77 DIV 256 - 6;  (*decimal exponent*)
+    e := (e - 127) * 77 DIV 256 - 6;  (* decimal exponent *)
     IF e >= 0 THEN x := x / Ten(e) ELSE x := Ten(-e) * x END ;
     m := FLOOR(x + 0.5);
     IF m >= 10000000 THEN INC(e); m := m DIV 10 END ;
     i := 0; k := 13-n;
     REPEAT
-      IF i = k THEN INC(m, 5) END ;    (*rounding*)
+      IF i = k THEN INC(m, 5) END ;    (* rounding *)
       d[i] := CHR(m MOD 10 + 30H); m := m DIV 10; INC(i)
     UNTIL m = 0;
     DEC(i); Char(d[i]); Char(".");

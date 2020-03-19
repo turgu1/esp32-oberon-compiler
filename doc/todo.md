@@ -15,6 +15,7 @@
 - [x] Revisit Logging module. No longer required.
 - [ ] ORG.{load,store} procedures optimization
 - [x] Revisit Procedure calls (function parameters) optimization
+- [ ] Implement other Extended Oberon features
  
 # Compiler Support
 

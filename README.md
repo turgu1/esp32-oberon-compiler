@@ -23,7 +23,7 @@ In a Nutshell, the steps I'm taking to get a working compiler are the following:
 11. Build the translation
 12. Creates main support code (program statup, Module Out, garbage collector, serial port output)
 13. Test the results. Build a test suite and make it run
-14. Add language functionalities (mainly SYSTEM procedures) required in support of the ESP32 architecture
+14. Add language functionalities required in support of the ESP32 architecture
 15. Create other Oakridge compliant Modules 
 16. Build a PlatformIO Custom Development Platform
 17. Develop modules for some ESP32 subsystems
