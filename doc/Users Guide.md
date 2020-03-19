@@ -81,7 +81,7 @@ This module implements the [Oakwood Guidelines](http://www.edm2.com/index.php/Th
 
 - `PROCEDURE RealFix*(x: REAL; n, k: INTEGER)` Write the real x in n field positions in fixed point notation with f fraction digits.
 
-```Oberon
+```Modula-2
 MODULE Out;
   CONST  (* INTEGER constants *)
     Baud115K*,
@@ -108,7 +108,7 @@ END Out.
 
 The module Strings provides a set of operations on strings, i.e., on string constants and character arrays, both of which contain the character 0X as a terminator.  All positions in strings start at 0. This module is implementing the [Oakwood Guidelines](http://www.edm2.com/index.php/The_Oakwood_Guidelines_for_Oberon-2_Compiler_Developers) Strings Module definition with some added procedures.
 
-```Oberon
+```Modula-2
 MODULE Strings;
   PROCEDURE Length* (s: ARRAY OF CHAR): INTEGER;
   PROCEDURE Write* (src: ARRAY OF CHAR; VAR dest: ARRAY OF CHAR;

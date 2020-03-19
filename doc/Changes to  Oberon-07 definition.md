@@ -47,7 +47,7 @@ The following standard functions can also be used in such an expression if param
 
 A REAL NaN value will be generated if a division by zero is done. The value will be equal to `SYSTEM.VAL(REAL, 07FFFFFFFH)`. You can define a constant that would get this value:
 
-```Oberon
+```Modula-2
 CONST NaN = 0.0 / 0.0;
 ```
 
@@ -57,7 +57,7 @@ TBC: System interrupts behavior and Trap mechanism on compiler check (**-c**) ge
 
 You can declare a procedure to be called when an interrupt occurs. To do so, you have to put into brackets the interrupt level number associated to the procedure like this:
 
-```Oberon
+```Modula-2
 PROCEDURE [12] P();
 BEGIN
 END P;
@@ -69,7 +69,7 @@ END P;
 
 The CASE statement is accepting INTEGER, BYTE or CHAR as CASE expression and constant case labels. This was not implemented in the Project Oberon version of the compiler but has been retrieved from the Extended Oberon project and modified to produce ESP32 assembly language instructions. When such statements are used, it is also possible to have an ELSE clause. For example:
 
-```Oberon
+```Modula-2
 CASE ch OF
   "a".."z" : i := 1
 ELSE
