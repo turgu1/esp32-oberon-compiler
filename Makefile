@@ -10,7 +10,6 @@ OUT=$(SRC)/$(ODIR)
 
 SIMS = \
 	$(OUT)/Texts.sym \
-	$(OUT)/Logger.sym \
 	$(OUT)/ORS.sym \
 	$(OUT)/ORB.sym \
 	$(OUT)/ORG.sym \
@@ -30,15 +29,13 @@ ORTool: $(SRC)/ORTool.Mod $(OUT)/ORB.sym $(OUT)/Texts.sym $(OUT)/Logger.sym
 
 $(OUT)/Texts.sym: $(SRC)/Texts.Mod
 
-$(OUT)/Logger.sym: $(SRC)/Logger.Mod $(OUT)/Texts.sym
-
-$(OUT)/ORS.sym: $(SRC)/ORS.Mod $(OUT)/Texts.sym $(OUT)/Logger.sym
+$(OUT)/ORS.sym: $(SRC)/ORS.Mod $(OUT)/Texts.sym
 
 $(OUT)/ORB.sym: $(SRC)/ORB.Mod $(OUT)/ORS.sym
 
 $(OUT)/ORG.sym: $(SRC)/ORG.Mod $(OUT)/ORS.sym $(OUT)/ORB.sym $(OUT)/Reals.sym
 
-$(OUT)/ORP.sym: $(SRC)/ORP.Mod $(OUT)/ORS.sym $(OUT)/ORB.sym $(OUT)/ORG.sym $(OUT)/Texts.sym $(OUT)/Logger.sym
+$(OUT)/ORP.sym: $(SRC)/ORP.Mod $(OUT)/ORS.sym $(OUT)/ORB.sym $(OUT)/ORG.sym $(OUT)/Texts.sym
 
 $(OUT)/Reals.sym: $(SRC)/Reals.c
 	cd $(SRC); cp Reals.sym Reals.h $(ODIR)

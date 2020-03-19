@@ -1738,22 +1738,36 @@ MODULE ORG;
   (* Code generation for REAL operators *)
 
   PROCEDURE RealOp*(op: INTEGER; VAR x, y: Item);   (* x := x op y *)
+  VAR xx, yy : REAL;
   BEGIN 
     e("RealOp");
-    load(x); load(y);
-    PutSR("wfr", 0, x.r);
-    PutSR("wfr", 1, y.r);
-    IF    op = ORS.plus  THEN PutSSS("add.s", 2, 0, 1)
-    ELSIF op = ORS.minus THEN PutSSS("sub.s", 2, 0, 1)
-    ELSIF op = ORS.times THEN PutSSS("mul.s", 2, 0, 1)
-    ELSIF op = ORS.rdiv  THEN
-      (* __fdiv32 is supplied in the startup code and compute f2 := f0 / f1 *) 
-      PutRR("mov", RH, 0);
-      PutA("call0", "__fdiv32");
-      PutRR("mov", 0, RH);
-    END;
-    decR; x.r := RH-1;
-    PutRS("rfr", x.r, 2);
+    IF  y.mode = ORB.Const THEN Reals.IntToReal(y.a, yy) END;
+    IF (y.mode = ORB.Const) & (yy = 0.0) THEN 
+      Reals.IntToReal(07FFFFFFFH, xx) (* NaN *)
+    ELSIF (x.mode = ORB.Const) & (y.mode = ORB.Const) THEN
+      Reals.IntToReal(x.a, xx);
+      IF    op = ORS.plus  THEN xx := xx + yy
+      ELSIF op = ORS.minus THEN xx := xx - yy
+      ELSIF op = ORS.times THEN xx := xx * yy
+      ELSIF op = ORS.rdiv  THEN xx := xx / yy
+      END;
+      Reals.RealToInt(xx, x.a)
+    ELSE
+      load(x); load(y);
+      PutSR("wfr", 0, x.r);
+      PutSR("wfr", 1, y.r);
+      IF    op = ORS.plus  THEN PutSSS("add.s", 2, 0, 1)
+      ELSIF op = ORS.minus THEN PutSSS("sub.s", 2, 0, 1)
+      ELSIF op = ORS.times THEN PutSSS("mul.s", 2, 0, 1)
+      ELSIF op = ORS.rdiv  THEN
+        (* __fdiv32 is supplied in the startup code and compute f2 := f0 / f1 *) 
+        PutRR("mov", RH, 0);
+        PutA("call0", "__fdiv32");
+        PutRR("mov", 0, RH);
+      END;
+      decR; x.r := RH-1;
+      PutRS("rfr", x.r, 2);
+    END
   END RealOp;
 
   (* Code generation for set operators *)
@@ -2760,25 +2774,42 @@ PROCEDURE Abs*(VAR x: Item);
   PROCEDURE Odd*(VAR x: Item);
   BEGIN 
     e("Odd");
-    load(x);
-    PutRI("movi", RH, 1);
-    PutRRR("and", x.r, x.r, RH); 
+    IF x.mode = ORB.Const THEN
+      x.a := ORD(ODD(x.a));
+      x.type := ORB.boolType;
+    ELSE
+      load(x);
+      PutRI("movi", RH, 1);
+      PutRRR("and", x.r, x.r, RH); 
+    END
   END Odd;
 
   PROCEDURE Floor*(VAR x: Item);
+  VAR
+    xx: REAL;
   BEGIN 
     e("Floor");
-    load(x); 
-    PutSR("wfr", 0, x.r);
-    PutRSI("floor.s", x.r, 0, 0);
+    IF x.mode = ORB.Const THEN
+      Reals.IntToReal(x.a, xx);
+      x.a := FLOOR(xx);
+      x.type := ORB.intType
+    ELSE
+      load(x); 
+      PutSR("wfr", 0, x.r);
+      PutRSI("floor.s", x.r, 0, 0);
+    END
   END Floor;
 
   PROCEDURE Float*(VAR x: Item);
   BEGIN 
     e("Float");
-    load(x); 
-    PutSRI("float.s", 0, x.r, 0);
-    PutRS("rfr", x.r, 0);
+    IF x.mode = ORB.Const THEN
+      Reals.RealToInt(FLT(x.a), x.a);
+    ELSE
+      load(x); 
+      PutSRI("float.s", 0, x.r, 0);
+      PutRS("rfr", x.r, 0);
+    END
   END Float;
 
   PROCEDURE Ord*(VAR x: Item);
@@ -2804,23 +2835,39 @@ PROCEDURE Abs*(VAR x: Item);
   END Len;
 
   PROCEDURE BitOp*(fct: INTEGER; VAR x, y: Item);
-  VAR op: ARRAY 5 OF CHAR;
+  VAR 
+    op: ARRAY 5 OF CHAR;
+    xx, yy: SET;
   BEGIN
-    IF fct = 0 THEN op := "and" 
-    ELSIF fct = 1 THEN op := "or" 
-    ELSIF fct = 2 THEN op := "xor"
-    END;
-
-    load(x); load(y);
-    PutRRR(op, x.r, x.r, y.r);
-    decR
+    e("BitOp");
+    IF (x.mode = ORB.Const) & (y.mode = ORB.Const) THEN
+      xx := SYSTEM.VAL(SET, x.a);
+      yy := SYSTEM.VAL(SET, y.a);
+      IF    fct = 0 THEN xx := xx * yy; (* AND *)
+      ELSIF fct = 1 THEN xx := xx + yy; (* BOR *)
+      ELSIF fct = 2 THEN xx := xx / yy; (* XOR *)
+      END;
+      x.a := ORD(xx)
+    ELSE
+      IF    fct = 0 THEN op := "and" 
+      ELSIF fct = 1 THEN op := "or" 
+      ELSIF fct = 2 THEN op := "xor"
+      END;
+      load(x); load(y);
+      PutRRR(op, x.r, x.r, y.r);
+      decR
+    END
   END BitOp;
 
   PROCEDURE BitNot*(VAR x: Item);
   BEGIN
-    load(x);
-    PutRI("movi", RH, -1);
-    PutRRR("xor", x.r, x.r, RH);
+    IF x.mode = ORB.Const THEN
+      x.a := ORD(SYSTEM.VAL(SET, x.a) / {0..31});
+    ELSE
+      load(x);
+      PutRI("movi", RH, -1);
+      PutRRR("xor", x.r, x.r, RH);
+    END
   END BitNot;
 
   PROCEDURE MinMax*(fct: INTEGER; VAR x, y: Item);
@@ -2847,35 +2894,41 @@ PROCEDURE Abs*(VAR x: Item);
   PROCEDURE Shift*(fct: INTEGER; VAR x, y: Item);
   BEGIN 
     e("Shift");
-    load(x);
-    IF fct = 0 THEN  (* LSL *)
-      IF y.mode = ORB.Const THEN
-        PutRRI("slli", x.r, x.r, y.a MOD 20H)
-      ELSE
-        load(y);
-        PutR("ssl", y.r);
-        PutRR("sll", x.r, x.r);
-        decR
+    IF (x.mode = ORB.Const) & (y.mode = ORB.Const) THEN
+      IF      fct = 0 THEN x.a := LSL(x.a, y.a)
+      ELSIF   fct = 1 THEN x.a := ASR(x.a, y.a)
+      ELSE (* fct = 2 *)   x.a := ROR(x.a, y.a) END
+    ELSE
+      load(x);
+      IF fct = 0 THEN  (* LSL *)
+        IF y.mode = ORB.Const THEN
+          PutRRI("slli", x.r, x.r, y.a MOD 20H)
+        ELSE
+          load(y);
+          PutR("ssl", y.r);
+          PutRR("sll", x.r, x.r);
+          decR
+        END
+      ELSIF fct = 1 THEN (* ASR *)
+        IF y.mode = ORB.Const THEN
+          PutRRI("srai", x.r, x.r, y.a MOD 20H)
+        ELSE
+          load(y);
+          PutR("ssr", y.r);
+          PutRR("sra", x.r, x.r);
+          decR
+        END
+      ELSE (* ROR *)
+        IF y.mode = ORB.Const THEN
+          PutI("ssai", y.a MOD 20H)
+        ELSE
+          load(y);
+          PutR("ssr", y.r);
+          decR
+        END;
+        PutRR("mov", RH, x.r);
+        PutRRR("src", x.r, x.r, RH)
       END
-    ELSIF fct = 1 THEN (* ASR *)
-      IF y.mode = ORB.Const THEN
-        PutRRI("srai", x.r, x.r, y.a MOD 20H)
-      ELSE
-        load(y);
-        PutR("ssr", y.r);
-        PutRR("sra", x.r, x.r);
-        decR
-      END
-    ELSE (* ROR *)
-      IF y.mode = ORB.Const THEN
-        PutI("ssai", y.a MOD 20H)
-      ELSE
-        load(y);
-        PutR("ssr", y.r);
-        decR
-      END;
-      PutRR("mov", RH, x.r);
-      PutRRR("src", x.r, x.r, RH)
     END
   END Shift;
 

@@ -1,5 +1,5 @@
 MODULE ORP; (*N. Wirth 1.7.97 / 8.2.2020  Oberon compiler for ESP32 in Oberon-07*)
-  IMPORT Texts, Logger, ORS, ORB, ORG;
+  IMPORT Texts, Out, ORS, ORB, ORG;
   (*Author: Niklaus Wirth, 2014. Modification from Guy Turcotte and Andreas Pirklbauer.
     Parser of Oberon-RISC compiler modified for the ESP32. 
     Uses Scanner ORS to obtain symbols (tokens),
@@ -28,7 +28,6 @@ MODULE ORP; (*N. Wirth 1.7.97 / 8.2.2020  Oberon compiler for ESP32 in Oberon-07
     modid: ORS.Ident;
     pbsList: PtrBase;   (*list of names of pointer base types*)
     dummy: ORB.Object;
-    W: Texts.Writer;
 
     sourceFolder, outputFolder: ARRAY 256 OF CHAR;
     importPath: ARRAY 1024 OF CHAR;
@@ -994,7 +993,7 @@ MODULE ORP; (*N. Wirth 1.7.97 / 8.2.2020  Oberon compiler for ESP32 in Oberon-07
         END ;
         ORS.Get(sym)
       ELSE Type(type.base);
-        IF ((type.base.form # ORB.Record) & (type.base.form # ORB.Proc)) OR (type.base.typobj = NIL) THEN ORS.Mark("must point to named record") END ;
+        IF (type.base.form # ORB.Record) OR (type.base.typobj = NIL) THEN ORS.Mark("must point to named record") END ;
         CheckRecLevel(level)
       END
     ELSIF sym = ORS.procedure THEN
@@ -1150,7 +1149,7 @@ MODULE ORP; (*N. Wirth 1.7.97 / 8.2.2020  Oberon compiler for ESP32 in Oberon-07
   PROCEDURE Module(generateCheckCode: BOOLEAN; verbose : BOOLEAN);
     VAR key: INTEGER;
   BEGIN 
-    IF verbose THEN Texts.WriteString(W, "  compiling ") END;
+    IF verbose THEN Out.String("  compiling ") END;
     ORS.Get(sym);
     IF sym = ORS.module THEN
       ORS.Get(sym);
@@ -1158,7 +1157,7 @@ MODULE ORP; (*N. Wirth 1.7.97 / 8.2.2020  Oberon compiler for ESP32 in Oberon-07
       ORB.Init(importPath, sourceFolder); ORB.OpenScope;
       IF sym = ORS.ident THEN
         ORS.CopyId(modid); ORS.Get(sym);
-        IF verbose THEN Texts.WriteString(W, modid); Texts.Append(Logger.Log, W.buf) END
+        IF verbose THEN Out.String(modid) END
       ELSE ORS.Mark("identifier expected")
       END;
       Check(ORS.semicolon, "no ;"); level := 0; exno := 1; key := 0;
@@ -1182,7 +1181,7 @@ MODULE ORP; (*N. Wirth 1.7.97 / 8.2.2020  Oberon compiler for ESP32 in Oberon-07
       END;
       IF ORS.errcnt = 0 THEN
         ORB.Export(modid, newSF, key, sourceFolder);
-        IF newSF & verbose THEN Texts.WriteString(W, " new symbol file") END
+        IF newSF & verbose THEN Out.String(" new symbol file") END
       END;
       IF DEBUG OR (ORS.errcnt = 0) THEN
         IF outputFolder[0] = 0X THEN
@@ -1190,12 +1189,11 @@ MODULE ORP; (*N. Wirth 1.7.97 / 8.2.2020  Oberon compiler for ESP32 in Oberon-07
         ELSE
           ORG.Close(modid, key, exno, outputFolder);
         END;
-        IF verbose THEN Texts.WriteInt(W, dc, 6); Texts.WriteHex(W, key) END
+        IF verbose THEN Out.Int(dc, 6); Out.Hex(key) END
       ELSE 
-        Texts.WriteLn(W); Texts.WriteString(W, "compilation FAILED");
-        Texts.WriteLn(W); Texts.Append(Logger.Log, W.buf)
+        Out.Ln; Out.String("compilation FAILED"); Out.Ln; 
       END;
-      IF verbose THEN Texts.WriteLn(W); Texts.Append(Logger.Log, W.buf) END;
+      IF verbose THEN Out.Ln END;
       ORB.CloseScope; pbsList := NIL
     ELSE ORS.Mark("must start with MODULE")
     END;
@@ -1221,11 +1219,9 @@ MODULE ORP; (*N. Wirth 1.7.97 / 8.2.2020  Oberon compiler for ESP32 in Oberon-07
       T: Texts.Text;
       (*S: Texts.Scanner; *)
   BEGIN 
-    Texts.OpenWriter(W); 
     IF verbose THEN
-      Texts.WriteString(W, "ESP32 Oberon-07 Compiler Version ");
-      Texts.WriteString(W, ORB.CompilerVersion);
-      Texts.WriteLn(W); Texts.Append(Logger.Log, W.buf);
+      Out.String("ESP32 Oberon-07 Compiler Version ");
+      Out.String(ORB.CompilerVersion); Out.Ln
     END;
     newSF := overrideSymbolFile;
 
@@ -1239,12 +1235,10 @@ MODULE ORP; (*N. Wirth 1.7.97 / 8.2.2020  Oberon compiler for ESP32 in Oberon-07
     IF T.len > 0 THEN 
       ORS.Init(T, 0);
       Module(generateCheckCode, verbose);
+      IF ORS.errcnt # 0 THEN Out.Ln END;
       ASSERT(ORS.errcnt = 0)
     ELSE
-      Texts.WriteString(W, filename); 
-      Texts.WriteString(W, " not found");
-      Texts.WriteLn(W); 
-      Texts.Append(Logger.Log, W.buf);
+      Out.String(filename); Out.String(" not found"); Out.Ln; 
       ASSERT(FALSE)
     END
   END Compile;

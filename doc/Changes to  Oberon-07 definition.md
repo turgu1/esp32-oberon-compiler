@@ -1,6 +1,6 @@
 # Changes to the Oberon-07 definition
 
-This document explains the changes made to the ESP32 Oberon-07 compiler in regard of the Niklaus Wirth language definition and implementation in Project Oberon. Note that using any of these changes will brake the portability of your code with the Project Oberon system.
+This document explains the changes made to the ESP32 Oberon-07 compiler in regard of the Niklaus Wirth language definition and implementation in Project Oberon. Note that using any of these changes will brake the portability of your code with the Project Oberon system or other Oberon-07 compilers.
 
 ## Identifiers
 
@@ -10,7 +10,7 @@ The underscore character is allowed inside an identifier. The first character mu
 ident = letter {letter | digit | "_" }.
 ```
 
-Identifiers are limited to 64 characters maximum in length, instead of 32.
+Identifiers are limited to 64 characters in length, instead of 32.
 
 ## Standard procedures
 
@@ -21,7 +21,7 @@ The following pre-defined functions have been added. They are using optimized ES
 - `SQRT(x)` for real argument. Uses an optimized assembly language function.
 
 The following standard procedure/function have been added
-in the SYSTEM module. They are using optimized ESP32 instructions and are useful in an IOT context:
+in the SYSTEM module. They are using specific ESP32 instructions:
 
 - `SYSTEM.WSR(x,y)` Procedure. Write INTEGER value y into (constant value) special register x (0 <= x <= 255).
 - `SYSTEM.RSR(x)` Function. Read INTEGER value from (constant value) special register x (0 <= x <= 255).
@@ -31,6 +31,27 @@ The following standard SYSTEM procedures are not implemented. They are not relev
 ```Oberon
 LED LDPSR ADC SBC UML REG H COND
 ```
+
+## CONST declaration expression
+
+Expressions with REAL operations are permitted in a CONST declaration expression. The Project Oberon CONST declaration permits only INTEGER/BYTE/SET constant expressions. 
+
+The following standard functions can also be used in such an expression if parameters x and y are constants:
+
+- Bit-wise `NOT(x)`, `AND(x,y)`, `BOR(x,y)` and `XOR(x,y)` functions
+- Shift functions `LSL(x,y)`, `ASR(x,y)` and `ROR(x,y)`
+- `FLOOR(x)`, `FLT(x)`, `ODD(x)` functions
+- `ABS(x)`, `ORD(x)` and `CHR(x)` were already useable in a CONST declaration
+
+## REAL NaN value
+
+A REAL NaN value will be generated if a division by zero is done. The value will be equal to `SYSTEM.VAL(REAL, 07FFFFFFFH)`. You can define a constant that would get this value:
+
+```Oberon
+CONST NaN = 0.0 / 0.0;
+```
+
+TBC: System interrupts behavior and Trap mechanism on compiler check (**-c**) generation
 
 ## Interrupt procedure
 
@@ -46,7 +67,7 @@ END P;
 
 ## CASE statement
 
-The CASE statement is accepting INTEGER, BYTE or CHAR as CASE expression and constant case labels. This was not implemented in the Project Oberon version of the compiler but has been retrieved from the Extended Oberon project. When such statements are used, it is also possible to have an ELSE clause. For example:
+The CASE statement is accepting INTEGER, BYTE or CHAR as CASE expression and constant case labels. This was not implemented in the Project Oberon version of the compiler but has been retrieved from the Extended Oberon project and modified to produce ESP32 assembly language instructions. When such statements are used, it is also possible to have an ELSE clause. For example:
 
 ```Oberon
 CASE ch OF
@@ -84,7 +105,7 @@ The ELSE clause has been re-introduced even though it is not part of the Oberon-
 
 The ESP32 Oberon compiler allows for direct entry of assembly language code inside the code generation stream. Here is an exemple:
 
-```Oberon
+```Modula-2
 MODULE Example;
 BEGIN
   i := 3;

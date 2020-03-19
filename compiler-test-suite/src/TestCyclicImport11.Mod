@@ -1,6 +1,5 @@
 MODULE TestCyclicImport11;
-  IMPORT Out;
-  IMPORT TestCyclicImport12;
+  IMPORT Out, TestCyclicImport12;
   VAR
      i*: INTEGER;
 BEGIN

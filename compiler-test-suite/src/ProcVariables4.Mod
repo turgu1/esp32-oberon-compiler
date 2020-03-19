@@ -30,13 +30,13 @@ BEGIN
   f := 8.5;
   v := Floor;
   (* Out.Int(Floor(8.0)); ERROR: read-only *) 
-  Out.Int(v(f)); (* 8 *) 
+  Out.Int(v(f), 10); (* 8 *) 
   f := 9.5;
   v1 := Floor1;
-  Out.Int(v1(f, v)); (* 9 *) 
+  Out.Int(v1(f, v), 10); (* 9 *) 
   f := 10.5;
   v2 := Floor2;
-  Out.Int(v2(f, v)); (* 10 *) 
+  Out.Int(v2(f, v), 10); (* 10 *) 
   v3 := Floor3;
   (* Out.Int(v3(f, v)); ERROR: incompatible parameters (see rule E)) *) 
 END ProcVariables4.

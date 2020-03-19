@@ -1,6 +1,5 @@
 MODULE TestConstFunc;
-  IMPORT Out;
-  IMPORT SYSTEM;
+  IMPORT Out, SYSTEM;
   CONST
     negReal = -2.5;
     posReal = 3.2;
@@ -30,7 +29,7 @@ MODULE TestConstFunc;
 
   PROCEDURE WriteBool(b: BOOLEAN);
   BEGIN
-    Out.Int(ORD(b))
+    Out.Int(ORD(b), 10)
   END WriteBool;
 
   PROCEDURE LenP(a0: ARRAY OF INTEGER; a1: arr5; VAR a2: ARRAY OF ARR);
@@ -43,9 +42,9 @@ MODULE TestConstFunc;
   BEGIN
     u := 1;
     a2[0][u] := 1;
-    Out.Int(len1); Out.Int(LEN(a1));
-    Out.Int(len2); Out.Int(LEN(a2[0]));
-    Out.Int(len3);  Out.Int(AND(LEN(a2[0]), a2[0][u]))
+    Out.Int(len1, 10); Out.Int(LEN(a1), 10);
+    Out.Int(len2, 10); Out.Int(LEN(a2[0]), 10);
+    Out.Int(len3, 10);  Out.Int(AND(LEN(a2[0]), a2[0][u]), 10)
   END LenP;
 
 
@@ -78,53 +77,53 @@ MODULE TestConstFunc;
       y: ARRAY 4 OF ARR;
     BEGIN
       r := negReal;
-      Out.Real(abs); Out.Real(ABS(r)); Out.Ln;
+      Out.Real(abs, 10); Out.Real(ABS(r), 10); Out.Ln;
       i := posInt;
       WriteBool(odd); WriteBool(ODD(i)); Out.Ln;
       r := posReal;
-      Out.Int(floor); Out.Int(FLOOR(r)); Out.Ln;
+      Out.Int(floor, 10); Out.Int(FLOOR(r), 10); Out.Ln;
       i := posInt;
-      Out.Real(flt); Out.Real(FLT(i)); Out.Ln;
+      Out.Real(flt, 10); Out.Real(FLT(i), 10); Out.Ln;
       c := a;
-      Out.Int(ord); Out.Int(ORD(c)); Out.Ln;
+      Out.Int(ord, 10); Out.Int(ORD(c), 10); Out.Ln;
       i := intA;
       Out.Char(chr); Out.Char(CHR(i)); Out.Ln;
       LenP(z, z, y); Out.Ln;
       i := intA;
       j := posInt;
-      Out.Int(lsl); Out.Int(LSL(i, j)); Out.Ln;
-      Out.Int(asr); Out.Int(ASR(i, j)); Out.Ln;
-      Out.Int(ror); Out.Int(ROR(i, j)); Out.Ln;
-      Out.Int(and); Out.Int(AND(i, j)); Out.Ln;
-      Out.Int(bor); Out.Int(BOR(i, j)); Out.Ln;
-      Out.Int(not); Out.Int(NOT(i)); Out.Ln;
+      Out.Int(lsl, 10); Out.Int(LSL(i, j), 10); Out.Ln;
+      Out.Int(asr, 10); Out.Int(ASR(i, j), 10); Out.Ln;
+      Out.Int(ror, 10); Out.Int(ROR(i, j), 10); Out.Ln;
+      Out.Int(and, 10); Out.Int(AND(i, j), 10); Out.Ln;
+      Out.Int(bor, 10); Out.Int(BOR(i, j), 10); Out.Ln;
+      Out.Int(not, 10); Out.Int(NOT(i), 10); Out.Ln;
       s := set;
-      Out.Int(int); Out.Int(SYSTEM.VAL(INTEGER, s)); Out.Ln;
+      Out.Int(int, 10); Out.Int(SYSTEM.VAL(INTEGER, s), 10); Out.Ln;
   END P;
 
 BEGIN
   r := negReal;
-  Out.Real(abs); Out.Real(ABS(r)); Out.Ln;
+  Out.Real(abs, 10); Out.Real(ABS(r), 10); Out.Ln;
   i := posInt;
   WriteBool(odd); WriteBool(ODD(i)); Out.Ln;
   r := posReal;
-  Out.Int(floor); Out.Int(FLOOR(r)); Out.Ln;
+  Out.Int(floor, 10); Out.Int(FLOOR(r), 10); Out.Ln;
   i := posInt;
-  Out.Real(flt); Out.Real(FLT(i)); Out.Ln;
+  Out.Real(flt, 10); Out.Real(FLT(i), 10); Out.Ln;
   c := a;
-  Out.Int(ord); Out.Int(ORD(c)); Out.Ln;
+  Out.Int(ord, 10); Out.Int(ORD(c), 10); Out.Ln;
   i := intA;
   Out.Char(chr); Out.Char(CHR(i)); Out.Ln;
   LenP(z, z, y); Out.Ln;
   i := intA;
   j := posInt;
-  Out.Int(lsl); Out.Int(LSL(i, j)); Out.Ln;
-  Out.Int(asr); Out.Int(ASR(i, j)); Out.Ln;
-  Out.Int(ror); Out.Int(ROR(i, j)); Out.Ln;
-  Out.Int(and); Out.Int(AND(i, j)); Out.Ln;
-  Out.Int(bor); Out.Int(BOR(i, j)); Out.Ln;
-  Out.Int(not); Out.Int(NOT(i)); Out.Ln;
+  Out.Int(lsl, 10); Out.Int(LSL(i, j), 10); Out.Ln;
+  Out.Int(asr, 10); Out.Int(ASR(i, j), 10); Out.Ln;
+  Out.Int(ror, 10); Out.Int(ROR(i, j), 10); Out.Ln;
+  Out.Int(and, 10); Out.Int(AND(i, j), 10); Out.Ln;
+  Out.Int(bor, 10); Out.Int(BOR(i, j), 10); Out.Ln;
+  Out.Int(not, 10); Out.Int(NOT(i), 10); Out.Ln;
   s := set;
-  Out.Int(int); Out.Int(SYSTEM.VAL(INTEGER, s)); Out.Ln;
+  Out.Int(int, 10); Out.Int(SYSTEM.VAL(INTEGER, s), 10); Out.Ln;
   P
 END TestConstFunc.

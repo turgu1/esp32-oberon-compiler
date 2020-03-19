@@ -9,13 +9,13 @@ BEGIN
   p := NIL;
   k1 := TestImport00.k;
   Out.Int(TestImport00.N);
-  Out.Int(k1);
+  Out.Int(k1, 10);
   a1 := TestImport00.a;
-  Out.Int(a1[2]);
+  Out.Int(a1[2], 10);
   k1 := TestImport00.P(TestImport00.k);
-  Out.Int(k1);
+  Out.Int(k1, 10);
   k1 := TestImport00.b0[1].t.o;
-  Out.Int(k1);
+  Out.Int(k1, 10);
   k1 := TestImport00.b1[1].n;
-  Out.Int(k1);
+  Out.Int(k1, 10);
 END TestImport01.

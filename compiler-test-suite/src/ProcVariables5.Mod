@@ -8,7 +8,7 @@ MODULE ProcVariables5;
 
   PROCEDURE P (x, y: INTEGER; z: BYTE);
   BEGIN
-    Out.Int(x+y+z)
+    Out.Int(x+y+z, 10)
   END P;
 
   PROCEDURE P1 (p: PROCEDURE (x, y: INTEGER; z: BYTE));

@@ -10,8 +10,8 @@ MODULE RecordParam;
 
   PROCEDURE Print(x: RP);
   BEGIN
-    Out.Int(x.i);
-    IF x.p = NIL THEN Out.Int(0) ELSE Out.Int(x.p.i) END;
+    Out.Int(x.i, 10);
+    IF x.p = NIL THEN Out.Int(0, 10) ELSE Out.Int(x.p.i, 10) END;
     Out.Ln
   END Print;
 

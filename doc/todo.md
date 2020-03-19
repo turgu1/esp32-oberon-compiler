@@ -12,7 +12,7 @@
 - [x] Implement Pointers management structure
 - [ ] Revisit Interrupt procedure definition
 - [ ] Cleanup internal compiler debugging support
-- [ ] Revisit Logging module
+- [x] Revisit Logging module. No longer required.
 - [ ] ORG.{load,store} procedures optimization
 - [x] Revisit Procedure calls (function parameters) optimization
  
@@ -20,6 +20,8 @@
 
 - [x] Trap mechanism to use Break instructions/Interrupts. Abandonned. Uses call4 instruction.
 - [x] Kernel Module (New, Garbage Collector, Timer)
+- [ ] Complete Kernel module (WatchDog, Flash disk access)
+- [ ] OTA capability, Flash memory-based code execution
 - [ ] Source code debug marking with GDB
 - [ ] PlatformIO integration
 - [x] Makefile cleanup
@@ -29,3 +31,11 @@
   + [x] Math
   + [x] Strings
 - [x] Library
+
+# Potential future activities
+
+- [ ] Add SHORTINT (16 bits) type 
+- [ ] Add DOUBLE type (and/or DoubleMath Module)
+- [ ] Add other transcendantal functions to Math.Mod
+
+ 

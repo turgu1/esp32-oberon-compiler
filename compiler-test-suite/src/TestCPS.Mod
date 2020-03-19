@@ -5,7 +5,7 @@ TYPE F = PROCEDURE(i: INTEGER);
 
 PROCEDURE log(i : INTEGER);
 BEGIN 
-  Out.Int(i)
+  Out.Int(i, 10)
 END log;
 
 PROCEDURE tailFact(n,a : INTEGER; ret : F);

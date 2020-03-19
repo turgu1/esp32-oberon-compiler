@@ -1,7 +1,8 @@
 MODULE ProcVariables3;
    IMPORT Out;
  TYPE PT = PROCEDURE (m, n: INTEGER);
-       Object = POINTER TO RECORD w: INTEGER; p: PT END ;
+      REC = RECORD w: INTEGER; p: PT END;
+      Object = POINTER TO REC;
   VAR obj: Object; a: ARRAY 4 OF PT;
 
   PROCEDURE P(m, n: INTEGER; q: PT; VAR obj: Object);

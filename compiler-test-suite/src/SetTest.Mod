@@ -1,6 +1,5 @@
 MODULE SetTest;
-  IMPORT Out;
-IMPORT SYSTEM;
+  IMPORT Out, SYSTEM;
   CONST
         eight = 8;
         c0 = {6..eight};
@@ -14,13 +13,13 @@ IMPORT SYSTEM;
   VAR i : INTEGER;
   BEGIN
     FOR i:= 0 TO 31 DO
-      IF i IN x THEN Out.Int(i) END
+      IF i IN x THEN Out.Int(i, 10) END
     END;
     Out.Ln
   END PrintSet;
   PROCEDURE PrintBool(x : BOOLEAN);
   BEGIN
-    IF x THEN Out.Int(1) ELSE Out.Int(0) END;
+    IF x THEN Out.Int(1, 10) ELSE Out.Int(0, 10) END;
   END PrintBool;
   PROCEDURE testRelation;
     VAR a : ARRAY 1 OF SET;
@@ -28,23 +27,23 @@ IMPORT SYSTEM;
   BEGIN
     a[0] := {4, 5, 3};
     b := {4, 5, 1, 8};
-    IF a[0] = b THEN Out.Int(3) END;
-    IF a[0] # b THEN Out.Int(4) END;
+    IF a[0] = b THEN Out.Int(3, 10) END;
+    IF a[0] # b THEN Out.Int(4, 10) END;
     Out.Ln;
     a[0] := {4, 5, 3};
     b := {1..8};
-    IF a[0] = b THEN Out.Int(3) END;
-    IF a[0] # b THEN Out.Int(4) END;
+    IF a[0] = b THEN Out.Int(3, 10) END;
+    IF a[0] # b THEN Out.Int(4, 10) END;
     Out.Ln;
     a[0] := {1..8};
     b := {3, 8, 1};
-    IF a[0] = b THEN Out.Int(3) END;
-    IF a[0] # b THEN Out.Int(4) END;
+    IF a[0] = b THEN Out.Int(3, 10) END;
+    IF a[0] # b THEN Out.Int(4, 10) END;
     Out.Ln;
     a[0] := {1..3};
     b := {3, 2, 1};
-    IF a[0] = b THEN Out.Int(3) END;
-    IF a[0] # b THEN Out.Int(4) END;
+    IF a[0] = b THEN Out.Int(3, 10) END;
+    IF a[0] # b THEN Out.Int(4, 10) END;
     Out.Ln;
   END testRelation;
   PROCEDURE testSetAndArrayAndField;
@@ -172,5 +171,5 @@ BEGIN
   testRelation;
   PrintSet({5, 6, 7} * six);
   PrintSet({5..7} / six);
-  Out.Int(SYSTEM.VAL(INTEGER, {9..1}))
+  Out.Int(SYSTEM.VAL(INTEGER, {9..1}), 10)
 END SetTest.

@@ -9,18 +9,18 @@ BEGIN
   b := r;
   y := i;
   a := ABS(r);
-  Out.Real(a);
+  Out.Real(a, 10);
   a := ABS(b);
-  Out.Real(a);
+  Out.Real(a, 10);
   x := ABS(i);
-  Out.Int(x);
+  Out.Int(x, 10);
   x := ABS(y);
-  Out.Int(x);
+  Out.Int(x, 10);
   Out.Ln;
   b := 7.3;
   y := 8;
-  Out.Real(ABS(b));
-  Out.Int(ABS(y));
+  Out.Real(ABS(b), 10);
+  Out.Int(ABS(y), 10);
   z := 10;
-  Out.Int(ABS(z))
+  Out.Int(ABS(z), 10)
 END TestABS.

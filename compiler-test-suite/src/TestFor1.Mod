@@ -7,7 +7,7 @@ MODULE TestFor1;
   BEGIN
     beg := 3;
     end := 10;
-    FOR v := beg TO end BY 2 DO Out.Int(v) END;
+    FOR v := beg TO end BY 2 DO Out.Int(v, 10) END;
     Out.Ln
   END For0;
   
@@ -15,24 +15,24 @@ MODULE TestFor1;
   BEGIN
     beg := 0;
     end := 3;
-    FOR v := beg TO end DO Out.Int(v) END;
+    FOR v := beg TO end DO Out.Int(v, 10) END;
     Out.Ln
   END For1;
   
   PROCEDURE For2(VAR v1, beg1, end1 : INTEGER; v0, beg0, end0 : INTEGER );
   BEGIN
-    FOR v1 := beg1 TO end1 BY 2 DO Out.Int(v1) END;
+    FOR v1 := beg1 TO end1 BY 2 DO Out.Int(v1, 10) END;
     Out.Ln;
-    FOR v0 := beg0 TO end0 DO Out.Int(v0) END;
+    FOR v0 := beg0 TO end0 DO Out.Int(v0, 10) END;
     Out.Ln;
-    FOR v1 := beg TO end0 DO Out.Int(v1) END;
+    FOR v1 := beg TO end0 DO Out.Int(v1, 10) END;
     Out.Ln
   END For2;
   PROCEDURE For4;
   BEGIN
     beg := 10;
     end := 3;
-    FOR v := beg TO end BY -1 DO Out.Int(v) END;
+    FOR v := beg TO end BY -1 DO Out.Int(v, 10) END;
     Out.Ln
   END For4;
 BEGIN

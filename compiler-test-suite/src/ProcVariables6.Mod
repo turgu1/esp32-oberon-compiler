@@ -5,12 +5,13 @@ MODULE ProcVariables6;
   VAR
     q: Q;
 
+  PROCEDURE P1(c: CHAR);
+  BEGIN
+    Out.Char(c);
+    Out.Ln
+  END P1;
+
   PROCEDURE P0(VAR j: Q);
-    PROCEDURE P1(c: CHAR);
-    BEGIN
-      Out.Char(c);
-      Out.Ln
-    END P1;
   BEGIN
     j := P1
   END P0;

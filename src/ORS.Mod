@@ -1,5 +1,5 @@
 MODULE ORS; (* NW 19.9.93 / 15.3.2017  Scanner in Oberon-07*)
-  IMPORT SYSTEM, Out, Texts, Logger;
+  IMPORT SYSTEM, Out, Texts;
 
 (* Oberon Scanner does lexical analysis. Input is Oberon-Text, output is
   sequence of symbols, i.e identifiers, numbers, strings, and special symbols.
@@ -93,16 +93,15 @@ MODULE ORS; (* NW 19.9.93 / 15.3.2017  Scanner in Oberon-07*)
     VAR p: INTEGER;
   BEGIN p := Pos();
     IF (p > errpos) & (errcnt < 25) THEN
-      Texts.WriteLn(W); 
-      Texts.WriteString(W, "  pos "); 
-      Texts.WriteInt(W, p, 1); 
-      Texts.WriteString(W, " [line ");
-      Texts.WriteInt(W, lineNbr, 1);
-      Texts.Write(W, ":");
-      Texts.WriteInt(W, columnNbr, 1);
-      Texts.WriteString(W, "] ");
-      Texts.WriteString(W, msg); 
-      Texts.Append(Logger.Log, W.buf)
+      Out.Ln; 
+      Out.String("  pos "); 
+      Out.Int(p, 1); 
+      Out.String(" [line ");
+      Out.Int(lineNbr, 1);
+      Out.Char(":");
+      Out.Int(columnNbr, 1);
+      Out.String("] ");
+      Out.String(msg)
     END ;
     INC(errcnt); errpos := p + 4
   END Mark;

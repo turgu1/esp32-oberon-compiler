@@ -103,13 +103,12 @@ BEGIN
   RETURN at
 END WriteChar;
 
-DBGON
 PROCEDURE AppendChar* (c: CHAR; VAR dest: ARRAY OF CHAR);
   VAR i: INTEGER;
 BEGIN
   i := WriteChar(c, dest, Length(dest))
 END AppendChar;
-DBGOFF
+
 PROCEDURE WriteInt* (x, n: INTEGER; VAR dest: ARRAY OF CHAR;
                     at: INTEGER): INTEGER;
   VAR i, size, tot, neg: INTEGER;

@@ -1,4 +1,4 @@
-MODULE TestCyclicImport00;
+MODULE TestCyclicImport00A;
   IMPORT Out;
   TYPE R0* = RECORD k*: INTEGER END;
-END TestCyclicImport00.
+END TestCyclicImport00A.

@@ -69,7 +69,6 @@ SRC = \
   TestAssignmentMix.Mod \
   TestByteType.Mod \
   TestCPS.Mod \
-  TestCmdLineArgs.Mod \
   TestConstFunc.Mod \
   TestCyclicImport00A.Mod \
   TestCyclicImport00B.Mod \

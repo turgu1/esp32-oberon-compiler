@@ -20,9 +20,9 @@ MODULE RecordAssignment2;
 
   PROCEDURE Print(x: R);
   BEGIN
-    Out.Int(x.i);
-    Out.Int(x.a[2].i);
-    Out.Int(x.p.i);
+    Out.Int(x.i, 10);
+    Out.Int(x.a[2].i, 10);
+    Out.Int(x.p.i, 10);
     Out.Ln
   END Print;
 
