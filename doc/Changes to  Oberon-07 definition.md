@@ -65,6 +65,45 @@ END P;
 
 (Not working. Still, a work in progress)
 
+## BYTE vs INTEGER
+
+The ESP32 Compiler allow for BYTE value to be the return answer to an INTEGER value function:
+
+```Modula-2
+MODULE Example;
+
+VAR b : BYTE;
+
+PROCEDURE F() : INTEGER;
+BEGIN
+  RETURN b
+END F;
+
+END Example.
+```
+
+## CHAR vs ARRAY OF CHAR
+
+The ESP32 Compiler allow char constants to be assignement compatible with strings as follow:
+
+```Modula-2
+MODULE Example;
+
+  CONST c = "a";
+  VAR 
+    a : ARRAY 32 OF CHAR;
+
+  PROCEDURE P(VAR aa: ARRAY OF CHAR);
+  BEGIN
+    aa := c;
+  END P;
+
+BEGIN
+  a := c;
+END Example.
+
+```
+
 ## CASE statement
 
 The CASE statement is accepting INTEGER, BYTE or CHAR as CASE expression and constant case labels. This was not implemented in the Project Oberon version of the compiler but has been retrieved from the Extended Oberon project and modified to produce ESP32 assembly language instructions. When such statements are used, it is also possible to have an ELSE clause. For example:

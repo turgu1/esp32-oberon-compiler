@@ -42,7 +42,7 @@ An ESP32 Oberon program requires runtime support. The compiler is supplied with 
 
 The application startup code is a piece of assembly language program that is called by the ESP32 bootstrap ROM. Once started, it is calling initialization code of each Oberon module in sequence. The order of these calls is important to understand as some module may rely on other modules to be initialized prior to their own initialization code can be initiated.
 
-At link time, modules must be presented to the linker in the reverse order of initialization, with the application startup object code as the first file. 
+At link time, modules must be presented to the linker in the reverse order of initialization, with the application startup object code as the first file.
 
 For example, imagine an application that uses 3 Oberon modules: Main.Mod, Module1.Mod and Module2.Mod. Main.Mod represents your principal portion of the program. As such, it is needed to be the last Oberon module to get its module initialization code to be launched. If the module named Module1.Mod rely on Module2.Mod to be initialized before itself, Module2.Mod will then need to be put after Module1.Mod in the list. Here is the order of object files to be supplied to the linker:
 
@@ -71,7 +71,7 @@ This module implements the [Oakwood Guidelines](http://www.edm2.com/index.php/Th
 
 - `PROCEDURE SetBaudRate*(baudRate: INTEGER);` Change baud rate according to the value passed as a parameter. The following usual baud rate are supplied as constants:
 
-  + Baud9600 
+  + Baud9600
   + Baud19200
   + Baud38400
   + Baud76800

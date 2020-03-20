@@ -1,7 +1,5 @@
 MODULE TestSystemVal;
-  IMPORT Out;
-
-IMPORT SYSTEM;
+  IMPORT Out, SYSTEM;
 
   TYPE
 

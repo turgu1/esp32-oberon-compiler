@@ -35,7 +35,7 @@
     .title Oberon ESP32 Startup code
     .sbttl Oberon ESP32 Compiler Version 0.1.0
 
-    .global _call_start_cpu0
+    .global _call_start_cpu0, _init_end
     .extern _sbss, _ebss, _sdata, _edata, _sidata, _sitable, _eitable
 
 /* ---- stack ---- */

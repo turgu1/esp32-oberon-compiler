@@ -133,8 +133,8 @@ SRC = \
   TestTypeGuardExt.Mod \
   TestTypeTest.Mod \
   UniqueTypeAndProcNames.Mod \
-  VarInit.Mod \
-  VarParGuard.Mod
+  VarInit.Mod
+  # VarParGuard.Mod
 
 #	Pattern13.Mod
 

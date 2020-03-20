@@ -1,7 +1,5 @@
 MODULE TestTypeGuardExt;
-  IMPORT Out;
-
-IMPORT ExtTypes;
+  IMPORT Out, ExtTypes;
   VAR
     p0: ExtTypes.pR0;
     p1, p: ExtTypes.pR1;

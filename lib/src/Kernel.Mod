@@ -545,7 +545,7 @@ MODULE Kernel;
       Out.Ln; Out.Flush;
 
       ASM
-        j _call_start_cpu0
+        j _init_end # Loop at nauseam
       END
     END;
   END OberonSyscallHandler;
