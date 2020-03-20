@@ -7,7 +7,7 @@ MODULE TestINC1;
       x: BYTE;
   PROCEDURE Effect(VAR x : BYTE) : INTEGER;
   BEGIN 
-    Out.Int(x); (* 7 *)
+    Out.Int(x, 10); (* 7 *)
     INC(k); 
     RETURN 0
   END Effect;
@@ -27,14 +27,14 @@ MODULE TestINC1;
     k := 0;
     j[x+5] := 7;
     INC(i[Effect(j[x+5])].b, 2);
-    Out.Int(k); (* 1 *)
-    Out.Int(i[0].b); (* 8 *)
+    Out.Int(k, 10); (* 1 *)
+    Out.Int(i[0].b, 10); (* 8 *)
     INC(i[0].b, j[x+5]);
-    Out.Int(i[0].b); (* 15 *)
+    Out.Int(i[0].b, 10); (* 15 *)
     INC(j[x+5], i[0].b);
-    Out.Int(j[x+5]); (* 22 *)
+    Out.Int(j[x+5], 10); (* 22 *)
     INC(x, CallMe(i[0].b));
-    Out.Int(x); (* 25 *)
+    Out.Int(x, 10); (* 25 *)
   END P; 
   
 BEGIN
@@ -45,12 +45,12 @@ BEGIN
   k := 0;
   j[x+5] := 7;
   INC(i[Effect(j[x+5])].b, 2);
-  Out.Int(k); (* 1 *)
-  Out.Int(i[0].b); (* 8 *)
+  Out.Int(k, 10); (* 1 *)
+  Out.Int(i[0].b, 10); (* 8 *)
   INC(i[0].b, j[x+5]);
-  Out.Int(i[0].b); (* 15 *)
+  Out.Int(i[0].b, 10); (* 15 *)
   INC(j[x+5], i[0].b);
-  Out.Int(j[x+5]); (* 22 *)
+  Out.Int(j[x+5], 10); (* 22 *)
   INC(x, CallMe(i[0].b));
-  Out.Int(x) (* 25 *)
+  Out.Int(x, 10) (* 25 *)
 END TestINC1.

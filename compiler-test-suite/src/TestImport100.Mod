@@ -4,5 +4,5 @@ MODULE TestImport100;
     s: SET;
 BEGIN
   s := {1};
-  Out.Int(S.VAL(INTEGER, s));
+  Out.Int(S.VAL(INTEGER, s), 10);
 END TestImport100.

@@ -11,7 +11,7 @@ MODULE TestINCLAndEXCL;
   VAR i : INTEGER;
   BEGIN
     FOR i:= 0 TO 31 DO
-      IF i IN x THEN Out.Int(i) END
+      IF i IN x THEN Out.Int(i, 10) END
     END;
     Out.Ln
   END PrintSet;
@@ -48,7 +48,7 @@ MODULE TestINCLAndEXCL;
   
   PROCEDURE Effect(VAR x : BYTE) : INTEGER;
   BEGIN 
-    Out.Int(x); (* 7 *)
+    Out.Int(x, 10); (* 7 *)
     INC(f); 
     RETURN 0
   END Effect;
@@ -64,15 +64,15 @@ MODULE TestINCLAndEXCL;
     f := 0;
     j[x+5] := 7;
     EXCL(i[Effect(j[x+5])].b, 2);
-    Out.Int(f); (* 1 *)
+    Out.Int(f, 10); (* 1 *)
     PrintSet(i[0].b); (* {1 3} *)
     z[x+1] := 8;
     INCL(i[Effect(j[x+5])].b, z[x+1]);
-    Out.Int(f); (* 2 *)
+    Out.Int(f, 10); (* 2 *)
     PrintSet(i[0].b); (* {1 3 8} *)
     z[2+x] := 10;
     INCL(i[Effect(j[x+5])].b, z[x+1] + z[2+x]);
-    Out.Int(f); (* 3 *)
+    Out.Int(f, 10); (* 3 *)
     PrintSet(i[0].b); (* {1 3 8 18} *)
   END P1; 
 

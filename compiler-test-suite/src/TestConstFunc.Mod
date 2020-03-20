@@ -88,7 +88,7 @@ MODULE TestConstFunc;
       Out.Int(ord, 10); Out.Int(ORD(c), 10); Out.Ln;
       i := intA;
       Out.Char(chr); Out.Char(CHR(i)); Out.Ln;
-      LenP(z, z, y); Out.Ln;
+      (* LenP(z, z, y); Out.Ln; *)
       i := intA;
       j := posInt;
       Out.Int(lsl, 10); Out.Int(LSL(i, j), 10); Out.Ln;

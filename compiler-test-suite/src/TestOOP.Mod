@@ -50,7 +50,7 @@ MODULE TestOOP;
     shape := newRect();
     Out.Char(shape.name);
     Out.Char(" ");
-    Out.Real(shape.area(shape));
+    Out.Real(shape.area(shape), 10);
     Out.Ln;
     shape := newCircle();
     Out.Char(shape.name);
@@ -120,7 +120,7 @@ MODULE TestOOP;
     Out.Char(shape.name);
     Out.Char(" ");
     shape.handle(shape, area);
-    Out.Real(area.area)
+    Out.Real(area.area, 10)
   END oopType1;
 
   PROCEDURE oopType2;
@@ -192,7 +192,7 @@ MODULE TestOOP;
     shape := newCircle2();
     Out.Char(shape.name);
     Out.Char(" ");
-    Out.Real(shape.do.area(shape));
+    Out.Real(shape.do.area(shape), 10);
   END oopType2;
   
 BEGIN

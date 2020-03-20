@@ -40,12 +40,14 @@ _Pattern2_init:
     movi a4, 1065353216
     wfr f0, a3
     wfr f1, a4
-    sub.s f0, f0, f1
+    sub.s f2, f0, f1
     rfr a3, f2
     l32i a4, a2, 20
     wfr f0, a4
     wfr f1, a3
-    call __fdiv32
+    mov a5, a0
+    call0 __fdiv32
+    mov a0, a5
     rfr a3, f2
     wfr f0, a3
     neg.s f0, f0

@@ -17,7 +17,7 @@ MODULE RealExpressions;
     Out.Real(r, 10); Out.Ln;
     r := x / y;
     Out.Real(r, 10); Out.Ln;
-    Out.Real(3.5 + 10.0 * 2.0); Out.Ln
+    Out.Real(3.5 + 10.0 * 2.0, 10); Out.Ln
   END Arithmetic;
   PROCEDURE Relations;
     VAR  x, y : REAL;

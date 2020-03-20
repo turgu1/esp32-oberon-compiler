@@ -17,7 +17,7 @@ MODULE TestReturn0;
   END P3;
 BEGIN
   x := 1;
-  Out.Int(P1());
-  Out.Int(P2());
-  Out.Int(P3());
+  Out.Int(P1(), 10);
+  Out.Int(P2(), 10);
+  Out.Int(P3(), 10);
 END TestReturn0.

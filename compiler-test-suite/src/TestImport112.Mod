@@ -7,5 +7,5 @@ MODULE TestImport112;
 BEGIN
   y := TestImport111.TWELVE;
   x.i := y;
-  Out.Int(x.i)
+  Out.Int(x.i, 10)
 END TestImport112.

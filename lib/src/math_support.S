@@ -1,6 +1,19 @@
     .title Floating Point Support
     .sbttl Oberon ESP32 Compiler Version 0.1.0
 
+.macro function name
+      .type _\name, @function
+      .align 4
+      .literal_position
+      .align 4
+  _\name\():
+.endm
+
+.macro iram_function name
+      .section .iram1, "ax"
+      function \name
+.endm
+
     .global __fdiv32, __fsqrt32
 
 iram_function _fdiv32
@@ -31,6 +44,7 @@ iram_function _fdiv32
     addexp.s  f6, f7
     divn.s    f2, f9, f6
     ret
+    .size __fdiv32, .-__fdiv32
 
 iram_function _fsqrt32   # f1 := sqrt(f0)
 
@@ -64,4 +78,4 @@ iram_function _fsqrt32   # f1 := sqrt(f0)
     addexp.s  f3, f2
     divn.s    f1, f5, f3
     ret
-
+    .size __fsqrt32, .-__fsqrt32

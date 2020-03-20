@@ -31,6 +31,9 @@ BLDDIR = build
 INIT = init/init.S
 INITO = $(BLDDIR)/init.o
 
+MATH = $(SRCDIR)/math_support.S
+MATHO = $(BLDDIR)/math_support.o
+
 SRC = \
   Out.Mod \
   Kernel.Mod \
@@ -43,10 +46,14 @@ ARCHIVE = libesp32-oberon.a
 
 OBJS  = $(addprefix $(BLDDIR)/, $(SRC:.Mod=.o))
 
-$(ARCHIVE) : $(OBJS) $(INITO)
+$(ARCHIVE) : $(OBJS) $(INITO) $(MATHO)
 	$(RL) $(ARCHIVE)
 
 $(INITO): $(INIT)
+	$(CC) -x assembler-with-cpp $(ASFLAGS) $< -o $@
+	@$(AR) r $(ARCHIVE) $@ 
+
+$(MATHO): $(MATH)
 	$(CC) -x assembler-with-cpp $(ASFLAGS) $< -o $@
 	@$(AR) r $(ARCHIVE) $@ 
 

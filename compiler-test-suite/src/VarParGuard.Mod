@@ -38,7 +38,7 @@ MODULE VarParGuard;
     p0.x := 1;
     p0(P1).z := 4;
     Proc(p0(P1));
-    Out.Int(p0.x)
+    Out.Int(p0.x, 10)
   END Proc2;
 
   PROCEDURE Proc3;
@@ -52,7 +52,7 @@ MODULE VarParGuard;
     p0 := p1;
     p0(P1).y[1+i].x := 1;
     ProcInt(p0(P1).y[1+i].x);
-    Out.Int(p0(P1).y[1+i].x);
+    Out.Int(p0(P1).y[1+i].x, 10);
   END Proc3;
 
   PROCEDURE Proc4;
@@ -67,7 +67,7 @@ MODULE VarParGuard;
     p0[1+i].x := 1;
     p0[1+i](P1).z := 6;
     Proc(p0[1+i](P1));
-    Out.Int(p0[1+i].x)
+    Out.Int(p0[1+i].x, 10)
   END Proc4;
 
   PROCEDURE Proc5;
@@ -80,7 +80,7 @@ MODULE VarParGuard;
     r.a.x := 1;
     r.a(P1).z := 7;
     Proc(r.a(P1));
-    Out.Int(r.a.x)
+    Out.Int(r.a.x, 10)
   END Proc5;
 
   PROCEDURE Proc6;
@@ -95,7 +95,7 @@ MODULE VarParGuard;
     r.a[1+i].x := 1;
     r.a[1+i](P1).z := 8;
     Proc(r.a[1+i](P1));
-    Out.Int(r.a[1+i].x)
+    Out.Int(r.a[1+i].x, 10)
   END Proc6;
 
 BEGIN
@@ -105,12 +105,12 @@ BEGIN
   p0.x := 1;
   p0(P1).z := 2;
   Proc(p0(P1));
-  Out.Int(p0.x);
+  Out.Int(p0.x, 10);
 
   p0.x := 1;
   p0(P1).z := 3;
   Proc1(p0);
-  Out.Int(p0.x);
+  Out.Int(p0.x, 10);
 
   Proc2;
   Proc3;

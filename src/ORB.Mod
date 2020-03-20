@@ -97,7 +97,11 @@ MODULE ORB;   (*NW 25.6.2014  / 1.3.2019  in Oberon-07*)
   PROCEDURE DecodePath(impPath, sourceFolder: ARRAY OF CHAR);
     VAR i, j, k: INTEGER;
   BEGIN
-    importPaths[0] := sourceFolder;
+    IF sourceFolder[0] # 0X THEN
+      importPaths[0] := sourceFolder;
+    ELSE
+      importPaths[0] := ".";
+    END;
     i := 1; j := 0; k := 0;
     WHILE (i < 10) & (j < LEN(impPath)) & (impPath[j] # 0X) DO
       IF impPath[j] = ":" THEN

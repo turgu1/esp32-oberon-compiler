@@ -19,42 +19,42 @@ MODULE TestTypeTest;
   BEGIN
     i := 0;
     b := g IS G1;
-    Out.Int(ORD(b));
+    Out.Int(ORD(b), 10);
     b := g IS G2;
-    Out.Int(ORD(b));
+    Out.Int(ORD(b), 10);
     b := g.next IS G1;
-    Out.Int(ORD(b));
+    Out.Int(ORD(b), 10);
     b := g.next IS G2;
-    Out.Int(ORD(b));
+    Out.Int(ORD(b), 10);
     b := g.next.next.next IS G1;
-    Out.Int(ORD(b));
+    Out.Int(ORD(b), 10);
     b := g.next.next.next IS G2;
-    Out.Int(ORD(b));
+    Out.Int(ORD(b), 10);
     b := g.next2[i*3].next.next.next IS G1;
-    Out.Int(ORD(b));
+    Out.Int(ORD(b), 10);
     b := g.next2[i*3].next.next.next IS G2;
-    Out.Int(ORD(b));
+    Out.Int(ORD(b), 10);
     b := g.next.next.next2[i*3].next IS G1;
-    Out.Int(ORD(b));
+    Out.Int(ORD(b), 10);
     b := g.next.next.next2[i*3].next IS G2;
-    Out.Int(ORD(b));
+    Out.Int(ORD(b), 10);
     b := g.next.next.next.next2[i*3] IS G1;
-    Out.Int(ORD(b));
+    Out.Int(ORD(b), 10);
     b := g.next.next.next.next2[i*3] IS G2;
-    Out.Int(ORD(b));
+    Out.Int(ORD(b), 10);
     b := L(g) IS G1;
-    Out.Int(ORD(b));
+    Out.Int(ORD(b), 10);
     b := L(g) IS G2;
-    Out.Int(ORD(b))
+    Out.Int(ORD(b), 10)
   END P1;
 
   PROCEDURE P2(VAR g: G1Desc);
     VAR b: BOOLEAN;
   BEGIN
     b := g IS G1Desc;
-    Out.Int(ORD(b));
+    Out.Int(ORD(b), 10);
     b := g IS G2Desc;
-    Out.Int(ORD(b))
+    Out.Int(ORD(b), 10)
   END P2;
 
 BEGIN

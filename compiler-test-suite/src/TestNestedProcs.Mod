@@ -8,7 +8,7 @@ MODULE TestNestedProcs;
     END Inner;
   BEGIN
     IF n > 0 THEN Inner(CHR(n)) END;
-    Out.Int(n)
+    Out.Int(n, 10)
   END Outer;
 BEGIN
   Outer(3)

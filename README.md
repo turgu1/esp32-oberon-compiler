@@ -2,7 +2,7 @@
 
 This is an ongoing effort to build an ESP32 Oberon Compiler, using the Oberon-07 Compiler from [Project Oberon](http://www.projectoberon.com) by Niklaus Wirth and Jürg Gutknecht and some code from project [Oberon Extended](https://github.com/andreaspirklbauer/Oberon-extended) by Mr. Andreas Pirklbauer. Test cases are being designed in part using the [OberonC](https://github.com/lboasso) effort by Luca Boasso.
 
-The code is being ported to [OBNC](https://miasap.se/obnc/) and will generate ELF object code through ESP32 assembly language generation. I'm currently targeting a 'bear metal' version, supplying everything necessary for building applications, relying only on the assembler linker and loader provided with [ESP-IDF](https://docs.espressif.com/projects/esp-idf/en/latest/). GDB and OpenOCD are also used to allow remote debugging through JTAG. 
+The code is being ported to [OBNC](https://miasap.se/obnc/) and produces ELF object code through ESP32 assembly language generation. I'm currently targeting a 'bear metal' version, supplying everything necessary for building applications, relying only on the assembler linker and loader provided with [ESP-IDF](https://docs.espressif.com/projects/esp-idf/en/latest/). GDB and OpenOCD are also used to allow remote debugging through JTAG. 
 
 This is the intent. A large portion of the compiler is in a workable condition at this point in time.
 
@@ -62,7 +62,7 @@ This module is expected to parse command line parameters and call the ORP.Compil
 
 - Folder location path for standard modules and other project related folders
 
-The Oberon.Log has been replaced with a new Logger Module. Very basic for now.
+The Oberon.Log output has been replaced with the Out module procedures.
 
 ### Texts.Mod
 
@@ -96,7 +96,7 @@ Some potential bugs corrected:
 
 ### OBNC
 
-The OBNC Oberon-07 version 0.16.1 is used to build this compiler. The author is using it on both Linux and MacOs platforms without any major issue. It must be built using the following commands and option (after having changed current folder to OBNC):
+The OBNC Oberon-07 version 0.16.1 is used to build this compiler. The author is using it on both Linux and MacOs platforms without any major issue (Except for the SYSTEM.VAL() that needed to be replaced). It must be built using the following commands and option (after having changed current folder to OBNC):
 
 ```
 $ ./build --c-real-type=float

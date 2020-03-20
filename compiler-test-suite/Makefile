@@ -71,13 +71,13 @@ SRC = \
   TestCPS.Mod \
   TestConstFunc.Mod \
   TestCyclicImport00A.Mod \
-  TestCyclicImport00B.Mod \
   TestCyclicImport01A.Mod \
+  TestCyclicImport00B.Mod \
   TestCyclicImport01B.Mod \
   TestCyclicImport10A.Mod \
-  TestCyclicImport10B.Mod \
-  TestCyclicImport11.Mod \
   TestCyclicImport12.Mod \
+  TestCyclicImport11.Mod \
+  TestCyclicImport10B.Mod \
   TestEqualSignature00.Mod \
   TestExprVarPar.Mod \
   TestFor.Mod \

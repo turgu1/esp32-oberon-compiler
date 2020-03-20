@@ -3,6 +3,8 @@
 
     .align 4
     .section .data_types_Pattern4_A8E2D4B5
+    .global _Pattern4_A8E2D4B5_s_data_types
+_Pattern4_A8E2D4B5_s_data_types:
 _Pattern4_s_types:
     .int 32,-1,-1,-1,12,-1
 
@@ -12,6 +14,12 @@ _Pattern4_s_types:
 _Pattern4_A8E2D4B5_s_bss:
 _Pattern4_s_bss:
     .space 24
+
+    .align 4
+    .section .pointers_table_Pattern4_A8E2D4B5
+    .int _Pattern4_s_bss + 0
+    .int _Pattern4_s_bss + 4
+    .int _Pattern4_s_bss + 20
 
 
 

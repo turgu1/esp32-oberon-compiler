@@ -203,13 +203,13 @@ BEGIN
   l := Strings.Out.Int(2, 2, buf, l);
   l := Strings.Out.Char("$", buf, l);
   Print(buf); (* 'Hello... World! 2$'*)
-  Out.Int(l);
+  Out.Int(l, 10);
   Out.Ln;
 
   l := Strings.Out.Int(2, 2, buf2, 0);
-  Out.Int(l); (* -1 *)
+  Out.Int(l, 10); (* -1 *)
   l := Strings.Out.Char("$", buf2, 1);
-  Out.Int(l); (* -1 *)
+  Out.Int(l, 10); (* -1 *)
 
   Out.Ln;
   l := Strings.Write("Hello", buf2, 0);
@@ -218,5 +218,5 @@ BEGIN
   Out.Ln;
   l := Strings.Write("World", buf2, 2);
   Print(buf2);
-  Out.Int(l)
+  Out.Int(l, 10)
 END TestStringsMod.

@@ -89,7 +89,7 @@ MODULE ORS; (* NW 19.9.93 / 15.3.2017  Scanner in Oberon-07*)
     END
   END GetCh;
 
-  PROCEDURE Mark*(msg: ARRAY OF CHAR);
+  PROCEDURE Mark2*(msg1, msg2: ARRAY OF CHAR);
     VAR p: INTEGER;
   BEGIN p := Pos();
     IF (p > errpos) & (errcnt < 25) THEN
@@ -101,9 +101,16 @@ MODULE ORS; (* NW 19.9.93 / 15.3.2017  Scanner in Oberon-07*)
       Out.Char(":");
       Out.Int(columnNbr, 1);
       Out.String("] ");
-      Out.String(msg)
+      Out.String(msg1);
+      Out.String(msg2)
     END ;
     INC(errcnt); errpos := p + 4
+  END Mark2;
+
+  PROCEDURE Mark*(msg: ARRAY OF CHAR);
+    VAR p: INTEGER;
+  BEGIN
+    Mark2(msg, "")
   END Mark;
 
   PROCEDURE Identifier(VAR sym: INTEGER);

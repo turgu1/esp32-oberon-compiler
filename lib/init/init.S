@@ -158,8 +158,6 @@ _set_160mhz:
 
     retw 
 
-#include "math_support.S"
-
 #if 0
 #include "interrupt_vectors.S"
 #include "syscall.S"

@@ -1,7 +1,6 @@
 MODULE TestImport41;
-  IMPORT Out;
-IMPORT TestImport40;
+  IMPORT Out, TestImport40;
   PROCEDURE P*(VAR t: TestImport40.T);
-  BEGIN Out.Int(t.x)
+  BEGIN Out.Int(t.x, 10)
   END P;
 END TestImport41.

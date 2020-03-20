@@ -25,7 +25,7 @@ BEGIN
   c := SYSTEM.VAL(INTEGER, {1..4});
   a := SYSTEM.VAL(INTEGER, SYSTEM.VAL(SET, b) + SYSTEM.VAL(SET, c));
   IF 2 IN SYSTEM.VAL(SET, a) THEN
-    Out.Int(a); (* 63 *)
+    Out.Int(a, 10); (* 63 *)
     Out.Char(CHR(a)); (* ? *)
   END;
 
@@ -33,9 +33,9 @@ BEGIN
 
   i := 8;
   r := SYSTEM.VAL(REAL, i);
-  Out.Real(r);
+  Out.Real(r, 10);
   i := SYSTEM.VAL(INTEGER, r);
-  Out.Int(i); Out.Ln;
+  Out.Int(i, 10); Out.Ln;
 
   (* converting extension types *)
 
@@ -43,11 +43,11 @@ BEGIN
   p1.y := 25;
   p0 := p1;
   p := SYSTEM.VAL(pR1, p0);
-  Out.Int(p.y); (* 25 *)
+  Out.Int(p.y, 10); (* 25 *)
 
   NEW(p1);
   p1.y := 26;
   p := SYSTEM.VAL(pR1, p1);
-  Out.Int(p.y) (* 26 *)
+  Out.Int(p.y, 10) (* 26 *)
 
 END TestSystemVal.

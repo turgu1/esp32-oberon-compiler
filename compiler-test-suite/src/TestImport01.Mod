@@ -1,6 +1,5 @@
 MODULE TestImport01;
-  IMPORT Out;
-IMPORT TestImport00;
+  IMPORT Out, TestImport00;
 VAR
    k1: INTEGER;
    a1: ARRAY TestImport00.N OF INTEGER;

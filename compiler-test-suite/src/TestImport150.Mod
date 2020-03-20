@@ -8,6 +8,6 @@ MODULE TestImport150;
 
   PROCEDURE Two*;
   BEGIN
-    Out.Int(2); Out.Ln
+    Out.Int(2, 10); Out.Ln
   END Two;
 END TestImport150.
