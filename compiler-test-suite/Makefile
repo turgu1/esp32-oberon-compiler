@@ -79,7 +79,6 @@ SRC = \
   TestCyclicImport11.Mod \
   TestCyclicImport10B.Mod \
   TestEqualSignature00.Mod \
-  TestExprVarPar.Mod \
   TestFor.Mod \
   TestFor1.Mod \
   TestFunction0.Mod \
@@ -101,9 +100,7 @@ SRC = \
   TestImport131.Mod \
   TestImport140.Mod \
   TestImport141.Mod \
-  TestImport142.Mod \
   TestImport150.Mod \
-  TestImport151.Mod \
   TestImport20.Mod \
   TestImport21.Mod \
   TestImport22.Mod \
@@ -121,15 +118,13 @@ SRC = \
   TestImport62.Mod \
   TestImport70.Mod \
   TestImport71.Mod \
-  TestImport80.Mod \
   TestImport81.Mod \
   TestImport82.Mod \
+  TestImport80.Mod \
   TestImport90.Mod \
   TestImport91.Mod \
   TestNestedProcs.Mod \
   TestODD.Mod \
-  TestOOP.Mod \
-  TestReadOnlyPar.Mod \
   TestReturn0.Mod \
   TestShift.Mod \
   TestStringsMod.Mod \

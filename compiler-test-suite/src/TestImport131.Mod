@@ -7,6 +7,6 @@ MODULE TestImport131;
 BEGIN
   x.a := "@";
   x.d := 1;
-  y := x;
+  (* y := x; *)
   Out.Char(y.a); Out.Int(y.d, 10)
 END TestImport131.

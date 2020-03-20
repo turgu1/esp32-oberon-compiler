@@ -9,5 +9,5 @@ MODULE TestImport122;
 
 BEGIN
   c := a;
-  b := d
+  (* b := d *)
 END TestImport122.

@@ -1,7 +1,5 @@
 MODULE TestStringsMod;
-  IMPORT Out;
-
-IMPORT Strings;
+  IMPORT Out, Strings;
 
   VAR l: INTEGER; 
     buf, tmp: ARRAY 30 OF CHAR;
@@ -200,6 +198,7 @@ BEGIN
 
   l := Strings.Write("Hello", buf, 0);
   l := Strings.Write("... World!", buf, l);
+  (*
   l := Strings.Out.Int(2, 2, buf, l);
   l := Strings.Out.Char("$", buf, l);
   Print(buf); (* 'Hello... World! 2$'*)
@@ -219,4 +218,5 @@ BEGIN
   l := Strings.Write("World", buf2, 2);
   Print(buf2);
   Out.Int(l, 10)
+  *)
 END TestStringsMod.

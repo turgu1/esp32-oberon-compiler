@@ -419,7 +419,7 @@ MODULE ORG;
 
   PROCEDURE incR;
   BEGIN
-    IF RH < LastRH-1 THEN
+    IF RH < LastRH THEN
       INCL(UsedRegs, RH);
       INC(RH) 
     ELSE 
@@ -2471,6 +2471,11 @@ MODULE ORG;
       Texts.WriteString(CodeW, procid);
       Texts.WriteLn(    CodeW);
     END;
+    Texts.WriteString(CodeW, "    .type _");
+    Texts.WriteString(CodeW, procid);
+    Texts.WriteString(CodeW, ", @function");
+    Texts.WriteLn(    CodeW);
+
     Texts.WriteString(CodeW, "_");
     Texts.WriteString(CodeW, procid);
     Texts.WriteString(CodeW, ":");

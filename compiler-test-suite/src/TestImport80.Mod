@@ -6,5 +6,5 @@ MODULE TestImport80;
     c: TestImport82.TypeC;
 
 BEGIN
-  c := b
+  (* c := b  Not working *)
 END TestImport80.

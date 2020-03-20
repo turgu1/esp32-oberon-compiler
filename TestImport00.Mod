@@ -1,4 +1,5 @@
 MODULE TestImport00;
+  IMPORT Out;
 CONST N* = 100;
 TYPE
   Ptr* = POINTER TO Rec;

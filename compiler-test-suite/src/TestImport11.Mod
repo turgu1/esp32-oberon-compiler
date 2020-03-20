@@ -1,6 +1,5 @@
 MODULE TestImport11;
-  IMPORT Out;
-IMPORT I := TestImport10;
+  IMPORT Out, I := TestImport10;
   VAR
     r : I.R;
     s : I.S;

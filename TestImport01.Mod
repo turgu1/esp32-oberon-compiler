@@ -7,7 +7,7 @@ VAR
 BEGIN
   p := NIL;
   k1 := TestImport00.k;
-  Out.Int(TestImport00.N, 10);
+  Out.Int(TestImport00.N);
   Out.Int(k1, 10);
   a1 := TestImport00.a;
   Out.Int(a1[2], 10);
