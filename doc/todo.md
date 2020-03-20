@@ -22,7 +22,8 @@
 - [x] Trap mechanism to use Break instructions/Interrupts. Abandonned. Uses call4 instruction.
 - [x] Kernel Module (New, Garbage Collector, Timer)
 - [ ] Complete Kernel module (WatchDog, Flash disk access)
-- [ ] OTA capability, Flash memory-based code execution
+- [ ] OTA capability
+- [ ] Flash memory-based code execution
 - [ ] Source code debug marking with GDB
 - [ ] PlatformIO integration
 - [x] Makefile cleanup
@@ -31,7 +32,9 @@
   + [x] Strings
   + [x] Math
   + [x] Strings
-- [x] Library
+- [x] Library folder
+- [ ] Interrupts management
+- [ ] ESP32 hardware interfaces
 
 # Potential future activities
 
