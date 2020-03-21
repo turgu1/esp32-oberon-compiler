@@ -42,6 +42,7 @@ INITO = $(BLDDIR)/init.o
 # The first module in the list is the main program
 SRC =  \
 	Main.Mod \
+	Byte.Mod \
 	DefFunc.Mod \
 	SimpleReal.Mod \
 	SimpleMath.Mod \
@@ -64,6 +65,7 @@ $(BLDDIR)/Assignments.S $(SRCDIR)/Assignments.smb: $(SRCDIR)/Assignments.Mod $(S
 $(BLDDIR)/SimpleMath.S $(SRCDIR)/SimpleMath.smb: $(SRCDIR)/SimpleMath.Mod $(SRCDIR)/Test.smb
 $(BLDDIR)/SimpleReal.S $(SRCDIR)/SimpleReal.smb: $(SRCDIR)/SimpleReal.Mod $(SRCDIR)/Test.smb
 $(BLDDIR)/DefFunc.S $(SRCDIR)/DefFunc.smb: $(SRCDIR)/DefFunc.Mod $(SRCDIR)/Test.smb
+$(BLDDIR)/Byte.S $(SRCDIR)/Byte.smb: $(SRCDIR)/Byte.Mod $(SRCDIR)/Test.smb
 
 $(BLDDIR)/%.o : $(BLDDIR)/%.S
 	@$(CC) -x assembler-with-cpp $(ASFLAGS) $< -o $@
