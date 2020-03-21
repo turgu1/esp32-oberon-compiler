@@ -29,8 +29,12 @@ ASFLAGS += -c -O0 -Wall -fmessage-length=0
 ASFLAGS += $(ASFLAGS_PLATFORM)
 ASFLAGS += -g
 
-PORT = /dev/tty.SLAB_USBtoUART
-#PORT = /dev/ttyUSB0
+OS = $(shell uname -s)
+ifeq ($(OS), Darwin)
+  PORT = /dev/tty.SLAB_USBtoUART
+else
+  PORT = /dev/ttyUSB0
+endif
 
 INIT = init/init.S
 INITO = $(BLDDIR)/init.o
