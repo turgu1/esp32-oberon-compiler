@@ -1,5 +1,5 @@
 MODULE ORP; (*N. Wirth 1.7.97 / 8.2.2020  Oberon compiler for ESP32 in Oberon-07*)
-  IMPORT Texts, Out, ORS, ORB, ORG;
+  IMPORT Texts, Out, ORS, ORB, ORG, SYS;
   (*Author: Niklaus Wirth, 2014. Modification from Guy Turcotte and Andreas Pirklbauer.
     Parser of Oberon-RISC compiler modified for the ESP32. 
     Uses Scanner ORS to obtain symbols (tokens),
@@ -69,27 +69,27 @@ MODULE ORP; (*N. Wirth 1.7.97 / 8.2.2020  Oberon compiler for ESP32 in Oberon-07
 
   PROCEDURE CheckBool(VAR x: ORG.Item);
   BEGIN
-    IF x.type.form # ORB.Bool THEN ORS.Mark("not Boolean"); x.type := ORB.boolType END
+    IF x.type.form # ORB.Bool THEN ORS.Mark("Boolean expected"); x.type := ORB.boolType END
   END CheckBool;
 
   PROCEDURE CheckInt(VAR x: ORG.Item);
   BEGIN
-    IF x.type.form # ORB.Int THEN ORS.Mark("not Integer"); x.type := ORB.intType END
+    IF x.type.form # ORB.Int THEN ORS.Mark("Integer expected"); x.type := ORB.intType END
   END CheckInt;
 
   PROCEDURE CheckReal(VAR x: ORG.Item);
   BEGIN
-    IF x.type.form # ORB.Real THEN ORS.Mark("not Real"); x.type := ORB.realType END
+    IF x.type.form # ORB.Real THEN ORS.Mark("Real expected"); x.type := ORB.realType END
   END CheckReal;
 
   PROCEDURE CheckSet(VAR x: ORG.Item);
   BEGIN
-    IF x.type.form # ORB.Set THEN ORS.Mark("not Set"); x.type := ORB.setType END 
+    IF x.type.form # ORB.Set THEN ORS.Mark("Set expected"); x.type := ORB.setType END 
   END CheckSet;
 
   PROCEDURE CheckSetVal(VAR x: ORG.Item);
   BEGIN
-    IF x.type.form # ORB.Int THEN ORS.Mark("not Int"); x.type := ORB.setType
+    IF x.type.form # ORB.Int THEN ORS.Mark("Int expected"); x.type := ORB.setType
     ELSIF x.mode = ORB.Const THEN
       IF (x.a < 0) OR (x.a >= 32) THEN ORS.Mark("invalid set") END
     END 
@@ -175,7 +175,7 @@ MODULE ORP; (*N. Wirth 1.7.97 / 8.2.2020  Oberon compiler for ESP32 in Oberon-07
           ELSE ORS.Mark("not an array")
           END
         UNTIL sym # ORS.comma;
-        Check(ORS.rbrak, "no ]")
+        Check(ORS.rbrak, "] expected")
       ELSIF sym = ORS.period THEN ORS.Get(sym);
         IF sym = ORS.ident THEN
           IF x.type.form = ORB.Pointer THEN ORG.DeRef(x); x.type := x.type.base END ;
@@ -186,7 +186,7 @@ MODULE ORP; (*N. Wirth 1.7.97 / 8.2.2020  Oberon compiler for ESP32 in Oberon-07
             END
           ELSE ORS.Mark("not a record")
           END
-        ELSE ORS.Mark("ident?")
+        ELSE ORS.Mark("ident  expected")
         END
       ELSIF sym = ORS.arrow THEN
         ORS.Get(sym);
@@ -202,7 +202,7 @@ MODULE ORP; (*N. Wirth 1.7.97 / 8.2.2020  Oberon compiler for ESP32 in Oberon-07
           END
         ELSE ORS.Mark("not an identifier")
         END ;
-        Check(ORS.rparen, " ) missing")
+        Check(ORS.rparen, " )  expected")
       END
     END
   END selector;
@@ -263,7 +263,7 @@ MODULE ORP; (*N. Wirth 1.7.97 / 8.2.2020  Oberon compiler for ESP32 in Oberon-07
             (par.type.len < 0) THEN ORG.StringParam(x)
       ELSIF ~varpar & 
             (par.type.form = ORB.Int) & 
-            (x.type.form = ORB.Int) THEN ORG.ValueParam(x)  (*BYTE*)
+            (x.type.form = ORB.Int) THEN ORG.ValueParam(x)  (* BYTE *)
       ELSIF (x.type.form = ORB.String) & 
             (x.b = 2) & 
             (par.class = ORB.Var) & 
@@ -280,10 +280,10 @@ MODULE ORP; (*N. Wirth 1.7.97 / 8.2.2020  Oberon compiler for ESP32 in Oberon-07
             (par.type.size = x.type.size) THEN
         ORG.VarParam(x, par.type)
       ELSE ORS.Mark("incompatible parameters");
-        Out.Ln;Out.String("x.type.form: "); Out.Int(x.type.form, 0); Out.Ln;
-        Out.String("par.type.form: "); Out.Int(par.type.form, 0); Out.Ln;
-        Out.String("par.type.base.form: "); Out.Int(par.type.base.form, 0); Out.Ln;
-        Out.String("par.type.len: "); Out.Int(par.type.len, 0); Out.Ln;
+        Out.Ln;Out.String("  x.type.form: "); Out.Int(x.type.form, 0);        Out.Ln;
+        Out.String("  par.type.form: ");      Out.Int(par.type.form, 0);      Out.Ln;
+        Out.String("  par.type.base.form: "); Out.Int(par.type.base.form, 0); Out.Ln;
+        Out.String("  par.type.len: ");       Out.Int(par.type.len, 0);       Out.Ln;
       END
     END
   END Parameter;
@@ -294,11 +294,11 @@ MODULE ORP; (*N. Wirth 1.7.97 / 8.2.2020  Oberon compiler for ESP32 in Oberon-07
     IF sym # ORS.rparen THEN
       Parameter(par); n := 1;
       WHILE sym <= ORS.comma DO
-        Check(sym, "comma?");
+        Check(sym, "comma expected");
         IF par # NIL THEN par := par.next END ;
         INC(n); Parameter(par)
       END ;
-      Check(ORS.rparen, ") missing")
+      Check(ORS.rparen, ") expected")
     ELSE ORS.Get(sym);
     END ;
     IF n < x.type.nofpar THEN ORS.Mark("too few params")
@@ -308,10 +308,10 @@ MODULE ORP; (*N. Wirth 1.7.97 / 8.2.2020  Oberon compiler for ESP32 in Oberon-07
 
   PROCEDURE StandFunc(VAR x: ORG.Item; fct: INTEGER; restyp: ORB.Type);
     VAR y: ORG.Item; n, npar: INTEGER;
-  BEGIN Check(ORS.lparen, "no (");
+  BEGIN Check(ORS.lparen, "( expected");
     npar := fct MOD 10; fct := fct DIV 10; expression(x); n := 1;
     WHILE sym = ORS.comma DO ORS.Get(sym); expression(y); INC(n) END ;
-    Check(ORS.rparen, "no )");
+    Check(ORS.rparen, ") expected");
     IF n = npar THEN
       IF fct = 0 THEN (*ABS*)
         IF x.type.form IN {ORB.Int, ORB.Real} THEN
@@ -382,12 +382,12 @@ MODULE ORP; (*N. Wirth 1.7.97 / 8.2.2020  Oberon compiler for ESP32 in Oberon-07
     VAR y: ORG.Item;
   BEGIN
     IF sym >= ORS.if THEN
-      IF sym # ORS.rbrace THEN ORS.Mark(" } missing") END ;
+      IF sym # ORS.rbrace THEN ORS.Mark(" }  expected") END ;
       ORG.MakeConstItem(x, ORB.setType, 0) (*empty set*)
     ELSE element(x);
       WHILE (sym < ORS.rparen) OR (sym > ORS.rbrace) DO
         IF sym = ORS.comma THEN ORS.Get(sym)
-        ELSIF sym # ORS.rbrace THEN ORS.Mark("missing comma")
+        ELSIF sym # ORS.rbrace THEN ORS.Mark("comma expected")
         END ;
         element(y); ORG.SetOp(ORS.plus, x, y)
       END
@@ -509,7 +509,7 @@ MODULE ORP; (*N. Wirth 1.7.97 / 8.2.2020  Oberon compiler for ESP32 in Oberon-07
         ORG.StrToChar(y); ORG.IntRelation(rel, x, y)
       ELSIF (yf = ORB.Char) & (xf = ORB.String) & (x.b = 2) THEN
         ORG.StrToChar(x); ORG.IntRelation(rel, x, y)
-      ELSIF (xf = ORB.Int) & (yf = ORB.Int) THEN ORG.IntRelation(rel,  x, y)  (*BYTE*)
+      ELSIF (xf = ORB.Int) & (yf = ORB.Int) THEN ORG.IntRelation(rel,  x, y)  (* BYTE *)
       ELSE ORS.Mark("illegal comparison")
       END ;
       x.type := ORB.boolType
@@ -525,7 +525,7 @@ MODULE ORP; (*N. Wirth 1.7.97 / 8.2.2020  Oberon compiler for ESP32 in Oberon-07
   (* statements *)
 
   PROCEDURE StandProc(pno: INTEGER);
-    VAR nap, npar: INTEGER; (*nof actual/formal parameters*)
+    VAR nap, npar: INTEGER; (* nof actual/formal parameters *)
       x, y, z: ORG.Item;
   BEGIN Check(ORS.lparen, "no (");
     npar := pno MOD 10; pno := pno DIV 10; expression(x); nap := 1;
@@ -536,14 +536,14 @@ MODULE ORP; (*N. Wirth 1.7.97 / 8.2.2020  Oberon compiler for ESP32 in Oberon-07
     END ;
     Check(ORS.rparen, "no )");
     IF (npar = nap) OR (pno IN {0, 1}) THEN 
-      IF pno IN {0, 1} THEN (*INC, DEC*)
+      IF pno IN {0, 1} THEN (* INC, DEC *)
         CheckInt(x); CheckReadOnly(x);
         IF y.type # ORB.noType THEN CheckInt(y) END ;
         ORG.Increment(pno, x, y)
-      ELSIF pno IN {2, 3} THEN (*INCL, EXCL*)
+      ELSIF pno IN {2, 3} THEN (* INCL, EXCL *)
         CheckSet(x); CheckReadOnly(x); CheckInt(y); ORG.Include(pno-2, x, y)
       ELSIF pno = 4 THEN CheckBool(x); ORG.Assert(x)
-      ELSIF pno = 5 THEN(*NEW*) CheckReadOnly(x);
+      ELSIF pno = 5 THEN(* NEW *) CheckReadOnly(x);
          IF (x.type.form = ORB.Pointer) & (x.type.base.form = ORB.Record) THEN ORG.New(x)
          ELSE ORS.Mark("not a pointer to record")
          END
@@ -564,7 +564,7 @@ MODULE ORP; (*N. Wirth 1.7.97 / 8.2.2020  Oberon compiler for ESP32 in Oberon-07
 
   PROCEDURE StatSequence;
     VAR obj: ORB.Object;
-      (*orgtype: ORB.Type; original type of case var*)
+      (* orgtype: ORB.Type; original type of case var *)
       x, y, z, w: ORG.Item;
       L0, L1, rx, callType: INTEGER;
 
@@ -587,7 +587,7 @@ MODULE ORP; (*N. Wirth 1.7.97 / 8.2.2020  Oberon compiler for ESP32 in Oberon-07
 
       PROCEDURE TypeCase(obj: ORB.Object; VAR x: ORG.Item);
         VAR typobj: ORB.Object; 
-          orgtype: ORB.Type;  (*original type of case var*)
+          orgtype: ORB.Type;  (* original type of case var *)
       BEGIN
         IF sym = ORS.ident THEN
           qualident(typobj); ORG.MakeItem(x, obj, level); orgtype := obj.type;
@@ -639,7 +639,7 @@ MODULE ORP; (*N. Wirth 1.7.97 / 8.2.2020  Oberon compiler for ESP32 in Oberon-07
   *)
     PROCEDURE NumericCasePart;
       VAR x: ORG.Item; L0, L1, L2, n, labelform: INTEGER;
-        tab: ARRAY NofCases OF ORG.LabelRange;  (*ordered table of label ranges*)
+        tab: ARRAY NofCases OF ORG.LabelRange;  (* ordered table of label ranges *)
       PROCEDURE NumericCase(LabelForm: INTEGER; VAR n: INTEGER; VAR tab: ARRAY OF ORG.LabelRange);
         VAR x, y: ORG.Item; i: INTEGER; continue: BOOLEAN;
 
@@ -658,7 +658,7 @@ MODULE ORP; (*N. Wirth 1.7.97 / 8.2.2020  Oberon compiler for ESP32 in Oberon-07
             IF (x.type.form # y.type.form) OR (x.a >= y.a) THEN ORS.Mark("invalid label range"); y := x END
           ELSE y := x
           END ;
-          IF n < NofCases THEN  (*enter label range into ordered table*)
+          IF n < NofCases THEN  (* enter label range into ordered table *)
             i := n; continue := TRUE;
             WHILE continue & (i > 0) DO
               IF tab[i - 1].low > y.a THEN tab[i] := tab[i - 1]; DEC(i)
@@ -694,7 +694,7 @@ MODULE ORP; (*N. Wirth 1.7.97 / 8.2.2020  Oberon compiler for ESP32 in Oberon-07
     END SkipCase;
  *)
   BEGIN (* StatSequence *)
-    REPEAT (*sync*) obj := NIL;
+    REPEAT (* sync *) obj := NIL;
       IF ~((sym >= ORS.ident) & (sym <= ORS.asm) OR (sym >= ORS.semicolon)) THEN
         ORS.Mark("statement expected");
         REPEAT ORS.Get(sym) UNTIL (sym >= ORS.ident)
@@ -735,7 +735,7 @@ MODULE ORP; (*N. Wirth 1.7.97 / 8.2.2020  Oberon compiler for ESP32 in Oberon-07
             ELSE 
               ORS.Mark("not a procedure"); ParamList(x)
             END
-          ELSIF x.type.form = ORB.Proc THEN (*procedure call without parameters*)
+          ELSIF x.type.form = ORB.Proc THEN (* procedure call without parameters *)
             IF x.type.nofpar > 0 THEN ORS.Mark("missing parameters") END ;
             IF x.type.base.form = ORB.NoTyp THEN 
               callType := ORG.PrepCall(x, rx); 
@@ -756,7 +756,7 @@ MODULE ORP; (*N. Wirth 1.7.97 / 8.2.2020  Oberon compiler for ESP32 in Oberon-07
         L0 := 0; ORG.ClearLabels(x);
         expression(x); 
         CheckBool(x); ORG.CFJump(x);
-        Check(ORS.then, "no THEN");
+        Check(ORS.then, "THEN expected");
         StatSequence;
         WHILE sym = ORS.elsif DO
           ORS.Get(sym);
@@ -764,7 +764,7 @@ MODULE ORP; (*N. Wirth 1.7.97 / 8.2.2020  Oberon compiler for ESP32 in Oberon-07
           ORG.PutLabel(x.lf); ORG.ClearLabels(x); 
           expression(x); 
           CheckBool(x); ORG.CFJump(x); 
-          Check(ORS.then, "no THEN"); 
+          Check(ORS.then, "THEN expected"); 
           StatSequence
         END;
         IF sym = ORS.else THEN 
@@ -775,13 +775,13 @@ MODULE ORP; (*N. Wirth 1.7.97 / 8.2.2020  Oberon compiler for ESP32 in Oberon-07
         END ;
         IF x.lf # 0 THEN ORG.PutLabel(x.lf); x.lf := 0 END; 
         IF   L0 # 0 THEN ORG.PutLabel(L0)   END;
-        Check(ORS.end, "no END")
+        Check(ORS.end, "END expected")
       ELSIF sym = ORS.while THEN (* ----- WHILE ----- *)
         ORS.Get(sym); 
         L0 := ORG.Here(); ORG.ClearLabels(x);   
         expression(x); 
         CheckBool(x); ORG.CFJump(x);
-        Check(ORS.do, "no DO"); 
+        Check(ORS.do, "DO expected"); 
         StatSequence; 
         ORG.BJump(L0);
         WHILE sym = ORS.elsif DO
@@ -789,10 +789,10 @@ MODULE ORP; (*N. Wirth 1.7.97 / 8.2.2020  Oberon compiler for ESP32 in Oberon-07
           ORG.PutLabel(x.lf); ORG.ClearLabels(x); 
           expression(x); 
           CheckBool(x); ORG.CFJump(x);
-          Check(ORS.do, "no DO"); StatSequence; ORG.BJump(L0)
+          Check(ORS.do, "DO expected"); StatSequence; ORG.BJump(L0)
         END ;
         ORG.PutLabel(x.lf); x.lf := 0;
-        Check(ORS.end, "no END")
+        Check(ORS.end, "END expected")
       ELSIF sym = ORS.repeat THEN (* ----- REPEAT ----- *)
         ORS.Get(sym); L0 := ORG.Here(); 
         StatSequence;
@@ -809,12 +809,12 @@ MODULE ORP; (*N. Wirth 1.7.97 / 8.2.2020  Oberon compiler for ESP32 in Oberon-07
           qualident(obj); ORG.MakeItem(x, obj, level); CheckInt(x); CheckReadOnly(x);
           IF sym = ORS.becomes THEN
             ORS.Get(sym); expression(y); CheckInt(y); ORG.For0(x, y); L0 := ORG.Here();
-            Check(ORS.to, "no TO"); expression(z); CheckInt(z); obj.rdo := TRUE;
+            Check(ORS.to, "TO expected"); expression(z); CheckInt(z); obj.rdo := TRUE;
             IF sym = ORS.by THEN ORS.Get(sym); expression(w); CheckConst(w); CheckInt(w)
             ELSE ORG.MakeConstItem(w, ORB.intType, 1)
             END;
-            Check(ORS.do, "no DO"); ORG.For1(x, y, z, w, L1);
-            StatSequence; Check(ORS.end, "no END");
+            Check(ORS.do, "DO expected"); ORG.For1(x, y, z, w, L1);
+            StatSequence; Check(ORS.end, "END expected");
             ORG.For2(x, y, w); ORG.BJump(L0); ORG.PutLabel(L1); obj.rdo := FALSE
           ELSE ORS.Mark(":= expected")
           END
@@ -829,7 +829,7 @@ MODULE ORP; (*N. Wirth 1.7.97 / 8.2.2020  Oberon compiler for ESP32 in Oberon-07
             (obj.class = ORB.Par)) THEN TypeCasePart
         ELSE NumericCasePart
         END;
-        Check(ORS.end, "no END")
+        Check(ORS.end, "END expected")
       ELSIF sym = ORS.asm THEN 
         ORG.assembler; ORS.Get(sym)
       END ;
@@ -853,7 +853,7 @@ MODULE ORP; (*N. Wirth 1.7.97 / 8.2.2020  Oberon compiler for ESP32 in Oberon-07
         ELSE ORS.Mark("ident?")
         END
       END;
-      IF sym = ORS.colon THEN ORS.Get(sym) ELSE ORS.Mark(":?") END
+      IF sym = ORS.colon THEN ORS.Get(sym) ELSE ORS.Mark(": expected") END
     ELSE first := NIL
     END
   END IdentList;
@@ -877,7 +877,7 @@ MODULE ORP; (*N. Wirth 1.7.97 / 8.2.2020  Oberon compiler for ESP32 in Oberon-07
           ORS.Mark("dyn array not allowed") 
         END
       ELSIF sym = ORS.comma THEN ORS.Get(sym); ArrayType(typ.base)
-      ELSE ORS.Mark("missing OF"); typ.base := ORB.intType
+      ELSE ORS.Mark("OF expected"); typ.base := ORB.intType
       END ;
       typ.size := (len * typ.base.size + 3) DIV 4 * 4; typ.len := len
     END;
@@ -893,7 +893,7 @@ MODULE ORP; (*N. Wirth 1.7.97 / 8.2.2020  Oberon compiler for ESP32 in Oberon-07
     typ.form := ORB.NoTyp; typ.base := NIL; typ.mno := -level; typ.nofpar := 0; typ.len := 0; 
     offset := 0; bot := NIL;
     IF sym = ORS.lparen THEN
-      ORS.Get(sym); (*record extension*)
+      ORS.Get(sym); (* record extension *)
       IF level # 0 THEN ORS.Mark("extension of local types not implemented") END ;
       IF sym = ORS.ident THEN
         qualident(base);
@@ -901,15 +901,15 @@ MODULE ORP; (*N. Wirth 1.7.97 / 8.2.2020  Oberon compiler for ESP32 in Oberon-07
           IF base.type.form = ORB.Record THEN typ.base := base.type
           ELSE typ.base := ORB.intType; ORS.Mark("invalid extension")
           END ;
-          typ.nofpar := typ.base.nofpar + 1; (*"nofpar" here abused for extension level*)
+          typ.nofpar := typ.base.nofpar + 1; (* "nofpar" here abused for extension level *)
           bot := typ.base.dsc; offset := typ.base.size
         ELSE ORS.Mark("type expected")
         END
       ELSE ORS.Mark("ident expected")
       END ;
-      Check(ORS.rparen, ") missing")
+      Check(ORS.rparen, ")  expected")
     END ;
-    WHILE sym = ORS.ident DO  (*fields*)
+    WHILE sym = ORS.ident DO  (* fields *)
       n := 0; obj := bot;
       WHILE sym = ORS.ident DO
         obj0 := obj;
@@ -940,7 +940,7 @@ MODULE ORP; (*N. Wirth 1.7.97 / 8.2.2020  Oberon compiler for ESP32 in Oberon-07
     IdentList(cl, first); FormalType(tp, 0); rdo := FALSE;
     IF (cl = ORB.Var) & (tp.form >= ORB.Array) THEN cl := ORB.Par; rdo := TRUE END ;
     IF (tp.form = ORB.Array) & (tp.len < 0) OR (tp.form = ORB.Record) THEN
-      parsize := 2*ORG.WordSize  (*open array or record, needs second word for length or type tag*)
+      parsize := 2*ORG.WordSize  (* open array or record, needs second word for length or type tag *)
     ELSE parsize := ORG.WordSize
     END ;
     obj := first;
@@ -959,9 +959,9 @@ MODULE ORP; (*N. Wirth 1.7.97 / 8.2.2020  Oberon compiler for ESP32 in Oberon-07
       IF sym = ORS.rparen THEN ORS.Get(sym)
       ELSE FPSection(size, nofpar);
         WHILE sym = ORS.semicolon DO ORS.Get(sym); FPSection(size, nofpar) END ;
-        Check(ORS.rparen, " ) missing")
+        Check(ORS.rparen, ") expected")
       END ;
-      IF sym = ORS.colon THEN  (*function*)
+      IF sym = ORS.colon THEN  (* function *)
         ORS.Get(sym);
         IF sym = ORS.ident THEN
           qualident(obj); ptype.base := obj.type;
@@ -1006,7 +1006,7 @@ MODULE ORP; (*N. Wirth 1.7.97 / 8.2.2020  Oberon compiler for ESP32 in Oberon-07
 
   PROCEDURE Type0(VAR type: ORB.Type);
     VAR dmy: INTEGER; obj: ORB.Object; ptbase: PtrBase;
-  BEGIN type := ORB.intType; (*sync*)
+  BEGIN type := ORB.intType; (* sync *)
     IF (sym # ORS.ident) & (sym < ORS.array) THEN ORS.Mark("not a type");
       REPEAT ORS.Get(sym) UNTIL (sym = ORS.ident) OR (sym >= ORS.array)
     END ;
@@ -1058,7 +1058,7 @@ MODULE ORP; (*N. Wirth 1.7.97 / 8.2.2020  Oberon compiler for ESP32 in Oberon-07
       ORS.Get(sym);
       WHILE sym = ORS.ident DO
         ORS.CopyId(id); ORS.Get(sym); CheckExport(expo);
-        IF sym = ORS.eql THEN ORS.Get(sym) ELSE ORS.Mark("= missing") END;
+        IF sym = ORS.eql THEN ORS.Get(sym) ELSE ORS.Mark("=  expected") END;
         expression(x);
         IF (x.type.form = ORB.String) & (x.b = 2) THEN ORG.StrToChar(x) END;
         ORB.NewObj(obj, id, ORB.Const); obj.expo := expo;
@@ -1066,14 +1066,14 @@ MODULE ORP; (*N. Wirth 1.7.97 / 8.2.2020  Oberon compiler for ESP32 in Oberon-07
           obj.val := x.a; obj.lev := level; obj.type := x.type;
         ELSE ORS.Mark("expression not constant"); obj.type := ORB.intType
         END;
-        Check(ORS.semicolon, "; missing")
+        Check(ORS.semicolon, ";  expected")
       END
     END ;
     IF sym = ORS.type THEN
       ORS.Get(sym);
       WHILE sym = ORS.ident DO
         ORS.CopyId(id); ORS.Get(sym); CheckExport(expo);
-        IF sym = ORS.eql THEN ORS.Get(sym) ELSE ORS.Mark("= missing") END ;
+        IF sym = ORS.eql THEN ORS.Get(sym) ELSE ORS.Mark("=  expected") END ;
         Type(tp);
         ORB.NewObj(obj, id, ORB.Typ); obj.type := tp; obj.expo := expo; obj.lev := level;
         IF tp.typobj = NIL THEN tp.typobj := obj END ;
@@ -1086,7 +1086,7 @@ MODULE ORP; (*N. Wirth 1.7.97 / 8.2.2020  Oberon compiler for ESP32 in Oberon-07
           END ;
           IF level = 0 THEN ORG.BuildTD(tp, tdc) END    (*type descriptor; len used as its address*)
         END ;
-        Check(ORS.semicolon, "; missing")
+        Check(ORS.semicolon, ";  expected")
       END
     END ;
     IF sym = ORS.var THEN
@@ -1101,7 +1101,7 @@ MODULE ORP; (*N. Wirth 1.7.97 / 8.2.2020  Oberon compiler for ESP32 in Oberon-07
           IF obj.expo THEN obj.exno := exno; INC(exno) END ;
           obj := obj.next
         END ;
-        Check(ORS.semicolon, "; missing")
+        Check(ORS.semicolon, ";  expected")
       END
     END ;
     varsize := (varsize + 3) DIV 4 * 4;
@@ -1132,7 +1132,7 @@ MODULE ORP; (*N. Wirth 1.7.97 / 8.2.2020  Oberon compiler for ESP32 in Oberon-07
         ORS.Mark("Interrupt Level expected");
         intLevel := 0;
       END;
-      Check(ORS.rbrak, "] missing");
+      Check(ORS.rbrak, "]  expected");
     END;
     IF sym = ORS.ident THEN
       ORS.CopyId(procid); ORS.Get(sym);
@@ -1144,11 +1144,11 @@ MODULE ORP; (*N. Wirth 1.7.97 / 8.2.2020  Oberon compiler for ESP32 in Oberon-07
       IF proc.expo THEN proc.exno := exno; INC(exno) END ;
       ORB.OpenScope; INC(level); type.base := ORB.noType;
       ProcedureType(type, parblksize);  (* formal parameter list *)
-      Check(ORS.semicolon, "; missing"); locblksize := parblksize; 
+      Check(ORS.semicolon, ";  expected"); locblksize := parblksize; 
       Declarations(locblksize);
       proc.type.dsc := ORB.topScope.next;
       IF sym = ORS.procedure THEN
-        REPEAT ProcedureDecl; Check(ORS.semicolon, "; missing") UNTIL sym # ORS.procedure;
+        REPEAT ProcedureDecl; Check(ORS.semicolon, ";  expected") UNTIL sym # ORS.procedure;
         proc.type.dsc := ORB.topScope.next
       END ;
       ORG.Enter(procid, proc.expo, parblksize, locblksize, int);
@@ -1214,10 +1214,10 @@ MODULE ORP; (*N. Wirth 1.7.97 / 8.2.2020  Oberon compiler for ESP32 in Oberon-07
         IF verbose THEN Out.String(modid) END
       ELSE ORS.Mark("identifier expected")
       END;
-      Check(ORS.semicolon, "; missing"); level := 0; exno := 1; key := 0;
-      IF sym = ORS.import THEN ImportList; Check(ORS.semicolon, "; missing") END;
+      Check(ORS.semicolon, ";  expected"); level := 0; exno := 1; key := 0;
+      IF sym = ORS.import THEN ImportList; Check(ORS.semicolon, ";  expected") END;
       ORG.Open(modid, generateCheckCode); Declarations(dc); ORG.SetDataSize((dc + 3) DIV 4 * 4);
-      WHILE sym = ORS.procedure DO ProcedureDecl; Check(ORS.semicolon, "; missing") END ;
+      WHILE sym = ORS.procedure DO ProcedureDecl; Check(ORS.semicolon, ";  expected") END ;
       ORG.Header;
       IF sym = ORS.begin THEN ORS.Get(sym); StatSequence END ;
       Check(ORS.end, "END expected");
@@ -1285,11 +1285,10 @@ MODULE ORP; (*N. Wirth 1.7.97 / 8.2.2020  Oberon compiler for ESP32 in Oberon-07
     IF T.len > 0 THEN 
       ORS.Init(T, 0);
       Module(generateCheckCode, verbose);
-      IF ORS.errcnt # 0 THEN Out.Ln END;
-      ASSERT(ORS.errcnt = 0)
+      IF ORS.errcnt # 0 THEN Out.Ln; SYS.Exit(1) END;
     ELSE
       Out.String(filename); Out.String(" not found"); Out.Ln; 
-      ASSERT(FALSE)
+      SYS.Exit(1)
     END
   END Compile;
 

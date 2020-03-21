@@ -220,7 +220,7 @@ MODULE ORS; (* NW 19.9.93 / 15.3.2017  Scanner in Oberon-07*)
             REPEAT s := s*10 + ORD(ch)-30H; GetCh()
             UNTIL (ch < "0") OR (ch >"9");
             IF negE THEN e := e-s ELSE e := e+s END
-          ELSE Mark("digit?")
+          ELSE Mark("digit expected")
           END
         END ;
         IF e < 0 THEN

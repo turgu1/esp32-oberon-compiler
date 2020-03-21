@@ -14,7 +14,7 @@ SIMS = \
 	$(OUT)/ORB.sym \
 	$(OUT)/ORG.sym \
 	$(OUT)/ORP.sym \
-    $(OUT)/Reals.sym
+    $(OUT)/SYS.sym
 
 $(OUT)/%.sym: $(SRC)/%.Mod
 	cd $(SRC); $(OC) $(<F)
@@ -33,14 +33,14 @@ $(OUT)/ORS.sym: $(SRC)/ORS.Mod $(OUT)/Texts.sym
 
 $(OUT)/ORB.sym: $(SRC)/ORB.Mod $(OUT)/ORS.sym
 
-$(OUT)/ORG.sym: $(SRC)/ORG.Mod $(OUT)/ORS.sym $(OUT)/ORB.sym $(OUT)/Reals.sym
+$(OUT)/ORG.sym: $(SRC)/ORG.Mod $(OUT)/ORS.sym $(OUT)/ORB.sym $(OUT)/SYS.sym
 
 $(OUT)/ORP.sym: $(SRC)/ORP.Mod $(OUT)/ORS.sym $(OUT)/ORB.sym $(OUT)/ORG.sym $(OUT)/Texts.sym
 
-$(OUT)/Reals.sym: $(SRC)/Reals.c
-	cd $(SRC); cp Reals.sym Reals.h $(ODIR)
-	cd $(SRC); gcc -c Reals.c -o $(ODIR)/Reals.o
-	cd $(SRC); touch $(ODIR)/Reals.sym
+$(OUT)/SYS.sym: $(SRC)/SYS.c
+	cd $(SRC); cp SYS.sym SYS.h $(ODIR)
+	cd $(SRC); gcc -c SYS.c -o $(ODIR)/SYS.o
+	cd $(SRC); touch $(ODIR)/SYS.sym
 
 .PHONY: clean
 clean:

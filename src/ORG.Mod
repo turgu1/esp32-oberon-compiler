@@ -2,7 +2,7 @@ MODULE ORG;
   (* N.Wirth, 16.4.2016 / 4.4.2017 / 31.5.2019  Oberon compiler; code generator for RISC*)
   (* G.Turcotte XX.X.2020 Version for the ESP32 processor chip *)
 
-  IMPORT SYSTEM, Files, Texts, ORS, ORB, Out, Reals;
+  IMPORT SYSTEM, Files, Texts, ORS, ORB, Out, SYS;
   
   (* Code generator for Oberon compiler for ESP32 processor.
      Procedural interface to Parser ORP; result in stream "CodeW".
@@ -1248,7 +1248,7 @@ MODULE ORG;
     x.mode := ORB.Const; 
     x.type := ORB.realType; 
     (* x.a := SYSTEM.VAL(INTEGER, val); *)
-    Reals.RealToInt(val, x.a)
+    SYS.RealToInt(val, x.a)
   END MakeRealItem;
 
   PROCEDURE MakeStringItem*(VAR x: Item; len: INTEGER); (*copies string from ORS-buffer to ORG-string array*)
@@ -1741,17 +1741,17 @@ MODULE ORG;
   VAR xx, yy : REAL;
   BEGIN 
     e("RealOp");
-    IF  y.mode = ORB.Const THEN Reals.IntToReal(y.a, yy) END;
+    IF  y.mode = ORB.Const THEN SYS.IntToReal(y.a, yy) END;
     IF (y.mode = ORB.Const) & (yy = 0.0) THEN 
-      Reals.IntToReal(07FFFFFFFH, xx) (* NaN *)
+      SYS.IntToReal(07FFFFFFFH, xx) (* NaN *)
     ELSIF (x.mode = ORB.Const) & (y.mode = ORB.Const) THEN
-      Reals.IntToReal(x.a, xx);
+      SYS.IntToReal(x.a, xx);
       IF    op = ORS.plus  THEN xx := xx + yy
       ELSIF op = ORS.minus THEN xx := xx - yy
       ELSIF op = ORS.times THEN xx := xx * yy
       ELSIF op = ORS.rdiv  THEN xx := xx / yy
       END;
-      Reals.RealToInt(xx, x.a)
+      SYS.RealToInt(xx, x.a)
     ELSE
       load(x); load(y);
       PutSR("wfr", 0, x.r);
@@ -2795,7 +2795,7 @@ PROCEDURE Abs*(VAR x: Item);
   BEGIN 
     e("Floor");
     IF x.mode = ORB.Const THEN
-      Reals.IntToReal(x.a, xx);
+      SYS.IntToReal(x.a, xx);
       x.a := FLOOR(xx);
       x.type := ORB.intType
     ELSE
@@ -2809,7 +2809,7 @@ PROCEDURE Abs*(VAR x: Item);
   BEGIN 
     e("Float");
     IF x.mode = ORB.Const THEN
-      Reals.RealToInt(FLT(x.a), x.a);
+      SYS.RealToInt(FLT(x.a), x.a);
     ELSE
       load(x); 
       PutSRI("float.s", 0, x.r, 0);
