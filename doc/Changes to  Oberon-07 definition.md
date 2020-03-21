@@ -84,7 +84,7 @@ END Example.
 
 ## CHAR vs ARRAY OF CHAR
 
-The ESP32 Compiler allow char constants to be assignement compatible with strings as follow:
+The ESP32 Compiler allow char constants to be assignement compatible with strings. The example below shows 1) assignment of a CHAR constant to an ARRAY OF CHAR variable, parameter inside a procedure and when calling a procedure:
 
 ```Modula-2
 MODULE Example;
@@ -93,16 +93,21 @@ MODULE Example;
   VAR 
     a : ARRAY 32 OF CHAR;
 
-  PROCEDURE P(VAR aa: ARRAY OF CHAR);
+  PROCEDURE P(VAR aa: ARRAY OF CHAR; bb: ARRAY OF CHAR);
+  VAR aaa: ARRAY 32 OF CHAR;
   BEGIN
     aa := c;
+    aaa := 22X;
   END P;
 
 BEGIN
   a := c;
+  P(a, c);
 END Example.
 
 ```
+
+When assigning a CHAR constant to a variable or a parameter (ARRAY OF CHAR), it is then promoted to a constant null terminated ARRAY OF CHAR and then assigned to the variable or parameter. Note that when calling a procedure you cannot assign to a variable parameter.
 
 ## CASE statement
 

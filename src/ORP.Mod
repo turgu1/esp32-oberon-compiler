@@ -267,7 +267,7 @@ MODULE ORP; (*N. Wirth 1.7.97 / 8.2.2020  Oberon compiler for ESP32 in Oberon-07
             (par.class = ORB.Var) & 
             (par.type.form = ORB.Char) THEN
         ORG.StrToChar(x); ORG.ValueParam(x)
-      ELSIF (x.type.form = ORB.Char) & 
+      ELSIF (x.type.form = ORB.Char) & (x.mode = ORB.Const) &
             (par.type.form = ORB.Array) & par.rdo &
             (par.type.base.form = ORB.Char) &
             ((par.type.len < 0) OR (par.type.len > 2)) THEN
@@ -712,7 +712,7 @@ MODULE ORP; (*N. Wirth 1.7.97 / 8.2.2020  Oberon compiler for ESP32 in Oberon-07
               ORG.StoreStruct(x, y)
             ELSIF (x.type.form = ORB.Array) & (x.type.base.form = ORB.Char) & (y.type.form = ORB.String) THEN
               ORG.CopyString(x, y)
-            ELSIF (x.type.form = ORB.Array) & (x.type.base.form = ORB.Char) & (y.type.form = ORB.Char) THEN
+            ELSIF (x.type.form = ORB.Array) & (x.type.base.form = ORB.Char) & (y.mode = ORB.Const) & (y.type.form = ORB.Char) THEN
               ORG.CharToStr(y); ORG.CopyString(x, y);
             ELSIF (x.type.form = ORB.Int) & (y.type.form = ORB.Int) THEN ORG.Store(x, y)  (* BYTE *)
             ELSIF (x.type.form = ORB.Char) & (y.type.form = ORB.String) & (y.b = 2) THEN
