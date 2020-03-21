@@ -58,10 +58,12 @@ MODULE ORP; (*N. Wirth 1.7.97 / 8.2.2020  Oberon compiler for ESP32 in Oberon-07
         ORS.Mark("identifier expected"); 
         obj := dummy
       END
+    (* Was added, but removed. 
+       Report interpretation remains to be validated.
     ELSIF (obj.lev > 0) & (obj.lev # level) &
           ((obj.class # ORB.Const) OR (obj.type.form # ORB.Proc)) THEN 
       ORS.Mark2("not accessible: ", obj.name);
-      Out.Ln; Out.Int(obj.lev, 0); Out.Ln;
+      Out.Ln; Out.Int(obj.lev, 0); Out.Ln; *)
     END
   END qualident;
 
