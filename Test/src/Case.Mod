@@ -135,6 +135,11 @@ MODULE Case;
       | P2: p.b := {0, 2}; ii := 2
     END;
     T.Assert(ii = 1, "CaseNum15");
+    IF ii # 1 THEN 
+      Out.String("Expected: "); Out.Int(1,  0); 
+      Out.String(" Got: "    ); Out.Int(ii, 0); 
+      Out.Ln 
+    END;
 
     T.End; Out.String(" End"); Out.Ln
   END Run;

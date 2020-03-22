@@ -40,23 +40,23 @@ INIT = init/init.S
 INITO = $(BLDDIR)/init.o
 
 # The first module in the list is the main program
-SRC =  \
-	Main.Mod \
-	Pointer.Mod \
-	Test.Mod
-
 # SRC =  \
 # 	Main.Mod \
-# 	Case.Mod \
 # 	Pointer.Mod \
-# 	BitFunc.Mod \
-# 	ArrayAssignments.Mod \
-# 	Byte.Mod \
-# 	DefFunc.Mod \
-# 	SimpleReal.Mod \
-# 	SimpleMath.Mod \
-# 	Assignments.Mod \
 # 	Test.Mod
+
+SRC =  \
+	Main.Mod \
+	Case.Mod \
+	Pointer.Mod \
+	BitFunc.Mod \
+	ArrayAssignments.Mod \
+	Byte.Mod \
+	DefFunc.Mod \
+	SimpleReal.Mod \
+	SimpleMath.Mod \
+	Assignments.Mod \
+	Test.Mod
 
 OBJS = $(addprefix $(BLDDIR)/, $(SRC:.Mod=.o))
 
@@ -93,6 +93,7 @@ $(TARGETELF): $(OBJS)
 flash: $(TARGETELF)
 	esptool.py --chip=esp32 elf2image $(TARGETELF)
 	esptool.py --chip=esp32 --port $(PORT) write_flash 0x1000 $(TARGETBIN) -ff 80m -fm dout
+	minicom
 
 # Target to clean build artifacts.
 .PHONY: clean

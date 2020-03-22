@@ -18,6 +18,9 @@ CONST
   CR        = 0DX;
   LF        = 0AX;
 
+VAR
+  Opened: BOOLEAN;
+
 PROCEDURE FifoCount(): INTEGER;
 VAR 
   c, r : INTEGER;
@@ -183,7 +186,10 @@ END SetBaudRate;
 
 PROCEDURE Open*;
 BEGIN
-  SetBaudRate(Baud115K);
+  IF ~Opened THEN
+    SetBaudRate(Baud115K);
+    Opened := TRUE
+  END
 END Open;
 
 BEGIN

@@ -8,7 +8,7 @@ MODULE Pointer;
   PROCEDURE Run*;
     VAR i: INTEGER;
   BEGIN
-    Out.String("Template: "); Out.Flush;
+    Out.String("Pointer: "); Out.Flush;
 
     (* Operations *)
 
@@ -23,7 +23,7 @@ MODULE Pointer;
 
     T.First("a"); 
     
-    T.Assert(p # NIL, "NEW(p)");
+    T.Assert(p # NIL, "NEW(p) # NIL");
 
     (* The End *)
     

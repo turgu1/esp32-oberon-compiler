@@ -2658,9 +2658,12 @@ MODULE ORG;
     loadAdr(x);                 (* a7, a8 := pointer address *)
     loadTypTagAdr(x.type.base); 
     PutRI("movi", 6, 1);        (* a6 := 1 for NEW *)
+    
     (* PutA("syscall", "# New");  <-- Not used. Interrupts is a pain *)
+    
     PutCallLocal(4, "OberonSyscallHandler");
-    GetLocalSB;
+
+    (* GetLocalSB; Not needed with call4 *)
     RH := FirstRH; UsedRegs := {}
   END New;
 

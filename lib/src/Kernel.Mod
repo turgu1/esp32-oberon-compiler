@@ -129,19 +129,23 @@ MODULE Kernel;
     END
   END GetBlock32;
 
-   PROCEDURE New*(VAR ptr: INTEGER; tag: INTEGER);
+   PROCEDURE New*(ptr: INTEGER; tag: INTEGER);
     (* called by NEW; ptr and tag are pointers *)
     VAR p, size, lim: INTEGER;
   BEGIN 
-    SYSTEM.GET(tag, size);
+    SYSTEM.GET(tag, size); 
+    (* Out.Ln; Out.String("New: Size to give: "); Out.Int(size,0);  *)
     IF size = 32 THEN GetBlock32(p)
     ELSIF size = 64 THEN GetBlock64(p)
     ELSIF size = 128 THEN GetBlock128(p)
     ELSE GetBlock(p, (size + 255) DIV 256 * 256)
     END;
-    IF p = 0 THEN ptr := 0
+    IF p = 0 THEN 
+      SYSTEM.PUT(ptr, 0); 
+      (* Out.Ln;Out.String("Nothing to give..."); *)
     ELSE 
-      ptr := p + 8; 
+      SYSTEM.PUT(ptr, p + 8); 
+      (* Out.Ln; Out.String("Data address: "); Out.Hex(ptr,0); *)
       SYSTEM.PUT(p, tag); 
       lim := p + size; 
       INC(p, 4); 
@@ -528,12 +532,12 @@ MODULE Kernel;
      instruction *)
   PROCEDURE [1] OberonSyscallHandler(tag: INTEGER; p1, p2: INTEGER);
   BEGIN
-(* 
-    Out.Ln; 
+ 
+    (* Out.Ln; 
     Out.String("Tag: "); Out.Int(tag, 0);
     Out.String(", p1: "); Out.Hex(p1, 0);
-    Out.String(", p2: "); Out.Hex(p2, 0); 
- *)
+    Out.String(", p2: "); Out.Hex(p2, 0);  *)
+ 
 
     IF tag = 1 THEN
       New(p1, p2);
@@ -571,7 +575,7 @@ MODULE Kernel;
     SYSTEM.PUT(list0 + 8, 0);
     allocated := 0;
 
-    Out.String("Heap Top: "); Out.Hex(heapTop, 0); Out.Ln;
+    (* Out.String("Heap Top: "); Out.Hex(heapTop, 0); Out.Ln; *)
   END Init;
 
 END Kernel.

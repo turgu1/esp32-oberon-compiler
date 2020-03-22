@@ -29,6 +29,7 @@ MODULE Test;
   PROCEDURE First*(ch: CHAR);
   BEGIN
     firstCh := ch;
+    nextCh := firstCh;
     maxCh := CHR(ORD(ch) + 26)
   END First;
 
@@ -66,7 +67,7 @@ MODULE Test;
     Next;
     IF  ~cond THEN
       Out.Ln;
-      Out.String(" =====> Assert Failed: ");
+      Out.String("=====> Assert Failed: ");
       Out.String(msg);
       Out.String(" <=====");
       Out.Ln;
