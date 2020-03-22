@@ -1491,7 +1491,7 @@ MODULE ORG;
       ELSE 
         load(x);                        (* Load pointer content (address)    *)
         PutRI("movi", RH,    0);
-        PutRI("mov",  RH+1, RH);
+        PutRR("mov",  RH+1, RH);
         PutBranchR("beqz", x.r, label);  (* NIL belongs to every pointer type *)
         PutRRI("addi", RH, x.r, -8);
         PutRRI("l32i", RH, RH,  0);
@@ -1772,9 +1772,9 @@ MODULE ORG;
       ELSIF op = ORS.times THEN PutSSS("mul.s", 2, 0, 1)
       ELSIF op = ORS.rdiv  THEN
         (* __fdiv32 is supplied in the startup code and compute f2 := f0 / f1 *) 
-        PutRR("mov", RH, 0);
+        PutRR("mov", RH, 0); (* Save return address *)
         PutA("call0", "__fdiv32");
-        PutRR("mov", 0, RH);
+        PutRR("mov", 0, RH); (* Restore return address *)
       END;
       decR; x.r := RH-1;
       PutRS("rfr", x.r, 2);
@@ -1899,19 +1899,20 @@ MODULE ORG;
   BEGIN 
     e("CaseHead");
     CheckFreeRegs(4);
-    load(x);  (*value of case expression*)
-    PutRL("movi", RH, L0);       (* Get address of case table *)
+    load(x);                              (* value of case expression *)
+    PutRL("movi", RH, L0);                (* Get address of case table *)
     PutRRI("l32i", RH+1, RH, 0);          (* Low bound *)
     PutRR("mov", RH+2, RH+1);             (* Save it for later *)
     PutBranchRR("bge", x.r, RH+1, label);
-    PutJump("j", L1);            (* Else clause if lower *)
+    PutJump("j", L1);                     (* Else clause if lower *)
     PutLabel(label); INC(label);
     PutRRI("l32i", RH+1, RH, 4);
     PutBranchRR("blt", x.r, RH+1, label);
-    PutJump("j", L1);            (* Else clause if higher *)
+    PutJump("j", L1);                     (* Else clause if higher *)
     PutLabel(label); INC(label);
     PutRRI("addi", RH, RH, 8);            (* Compute index in table *)
     PutRRR("sub", x.r, x.r, RH+2);
+    PutRRI("slli", x.r, x.r, 2);
     PutRRR("add", RH, RH, x.r);
     PutRRI("l32i", RH, RH, 0);            (* Get address *)
     PutR("jx", RH);
@@ -1923,9 +1924,8 @@ MODULE ORG;
 
     PROCEDURE PutEntry(label: INTEGER);
     BEGIN 
-      Texts.WriteString(CodeW, "    .int ");
+      Texts.WriteString(CodeW, "    .int L");
       Texts.WriteInt(CodeW, label, 0);
-      Texts.Write(CodeW, "b");
       Texts.WriteLn(CodeW);
     END PutEntry;
 

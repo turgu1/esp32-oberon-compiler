@@ -17,7 +17,7 @@ MODULE BitFunc;
         0..7: (* 1 bytes format: 0xxxxxxx *)
           ch := CHR(b1); INC(i)
         | 12,13: (* 2 bytes format: 110xxxxx 10xxxxxx *)
-          IF i+1 < size THEN
+          IF i + 1 < size THEN
             INC(i);
             b2 := in[i];
             IF AND(b2, 0C0H) = 80H THEN
@@ -26,7 +26,7 @@ MODULE BitFunc;
             INC(i)
           END
         | 14:  (* 3 bytes format: 1110xxxx 10xxxxxx 10xxxxxx *)
-          IF i+2 < size THEN
+          IF i + 2 < size THEN
             INC(i);
             b2 := in[i];
             INC(i);

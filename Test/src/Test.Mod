@@ -29,8 +29,6 @@ MODULE Test;
   PROCEDURE First*(ch: CHAR);
   BEGIN
     firstCh := ch;
-    Put(ch);
-    nextCh := CHR(ORD(ch) + 1);
     maxCh := CHR(ORD(ch) + 26)
   END First;
 

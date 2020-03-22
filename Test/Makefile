@@ -42,13 +42,21 @@ INITO = $(BLDDIR)/init.o
 # The first module in the list is the main program
 SRC =  \
 	Main.Mod \
-	ArrayAssignments.Mod \
-	Byte.Mod \
-	DefFunc.Mod \
-	SimpleReal.Mod \
-	SimpleMath.Mod \
-	Assignments.Mod \
+	Pointer.Mod \
 	Test.Mod
+
+# SRC =  \
+# 	Main.Mod \
+# 	Case.Mod \
+# 	Pointer.Mod \
+# 	BitFunc.Mod \
+# 	ArrayAssignments.Mod \
+# 	Byte.Mod \
+# 	DefFunc.Mod \
+# 	SimpleReal.Mod \
+# 	SimpleMath.Mod \
+# 	Assignments.Mod \
+# 	Test.Mod
 
 OBJS = $(addprefix $(BLDDIR)/, $(SRC:.Mod=.o))
 
@@ -68,6 +76,9 @@ $(BLDDIR)/SimpleReal.S $(SRCDIR)/SimpleReal.smb: $(SRCDIR)/SimpleReal.Mod $(SRCD
 $(BLDDIR)/DefFunc.S $(SRCDIR)/DefFunc.smb: $(SRCDIR)/DefFunc.Mod $(SRCDIR)/Test.smb
 $(BLDDIR)/Byte.S $(SRCDIR)/Byte.smb: $(SRCDIR)/Byte.Mod $(SRCDIR)/Test.smb
 $(BLDDIR)/ArrayAssignments.S $(SRCDIR)/ArrayAssignments.smb: $(SRCDIR)/ArrayAssignments.Mod $(SRCDIR)/Test.smb
+$(BLDDIR)/BitFunc.S $(SRCDIR)/BitFunc.smb: $(SRCDIR)/BitFunc.Mod $(SRCDIR)/Test.smb
+$(BLDDIR)/Pointer.S $(SRCDIR)/Pointer.smb: $(SRCDIR)/Pointer.Mod $(SRCDIR)/Test.smb
+$(BLDDIR)/Case.S $(SRCDIR)/Case.smb: $(SRCDIR)/Case.Mod $(SRCDIR)/Test.smb
 
 $(BLDDIR)/%.o : $(BLDDIR)/%.S
 	@$(CC) -x assembler-with-cpp $(ASFLAGS) $< -o $@

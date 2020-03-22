@@ -1,14 +1,12 @@
-MODULE Sample;
+MODULE Pointer;
   IMPORT T := Test, Out;
-
-  PROCEDURE Put(ch: CHAR);
-  BEGIN
-    Out.Char(ch); Out.Flush
-  END Put;
+  TYPE
+    REC = RECORD i, j: INTEGER END;
+  VAR 
+    p : POINTER TO REC;
 
   PROCEDURE Run*;
     VAR i: INTEGER;
-
   BEGIN
     Out.String("Template: "); Out.Flush;
 
@@ -16,15 +14,16 @@ MODULE Sample;
 
     T.First("A"); 
     
-    i := 25;
-
+    T.Assert(p = NIL, "p = NIL");
+    NEW(p); 
+ 
     T.End;
 
     (* Verifications *)
 
     T.First("a"); 
     
-    T.Assert(i = 25, "Integer Assignment");
+    T.Assert(p # NIL, "NEW(p)");
 
     (* The End *)
     
@@ -33,4 +32,4 @@ MODULE Sample;
 
 BEGIN
   T.Register(Run)
-END Sample.
+END Pointer.
