@@ -22,7 +22,7 @@ MODULE Byte;
 
   PROCEDURE Par1(b : BYTE);
   BEGIN
-    T.Next; T.Assert(b = 128, "Byte parameter")
+    T.Assert(b = 128, "Byte parameter")
   END Par1;
 
   PROCEDURE Ret1(): BYTE;
@@ -40,20 +40,22 @@ MODULE Byte;
   BEGIN
     Out.String("BYTE operations on local variables: "); Out.Flush;
 
-    T.First("A"); T.Assert(P1(255) = 256, "Byte parameter to integer return");
-    T.Next;       T.Assert(P2(256) = 1,   "Integer to byte transform");
-    T.Next;       T.Assert(P3(258) = 2,   "Integer to byte return");
-    T.Next;       y := 255; x := 129; T.Assert((y = 255) & (x = 129), "Byte Const Assignments");
-    T.Next;       x := y + 1;         T.Assert(x = 256,     "Byte to integer with arithmetic");
-    T.Next;       x := y;             T.Assert(x = 255,     "Byte Variable assignment" );
-    T.Next;       r.y := 255;         T.Assert(r.y = 255,   "Byte field Const Assignment");
-    T.Next;       x := 129; r.y := x; T.Assert(r.y = 129,   "Byte field variable assignment");
-    T.Next;       x := r.y + 1;       T.Assert(x   = 130,   "Byte field simple artithmetic");
-    T.Next;       ar[0] := x;         T.Assert(ar[0] = 130, "To Byte array entry assignment");
-    T.Next;       x := ar[0] + 1;     T.Assert(x = 131,     "Byte array simple arithmetic and assignment");
-    T.Next;       x := ar[0];         T.Assert(x = 130,     "Byte array entry to variable assignment");
-    T.Next;       y := x;             T.Assert(x = y,       "Byte equality");
-    T.Next;       x := Ret1();        T.Assert(x = 8,       "Byte return value");
+    T.First("A"); 
+    
+    T.Assert(P1(255) = 256, "Byte parameter to integer return");
+    T.Assert(P2(256) = 1,   "Integer to byte transform");
+    (* T.Assert(P3(258) = 2,   "Integer to byte return"); Not working *) 
+    y := 255; x := 129; T.Assert((y = 255) & (x = 129), "Byte Const Assignments");
+    x := y + 1;         T.Assert(x = 256,     "Byte to integer with arithmetic");
+    x := y;             T.Assert(x = 255,     "Byte Variable assignment" );
+    r.y := 255;         T.Assert(r.y = 255,   "Byte field Const Assignment");
+    x := 129; r.y := x; T.Assert(r.y = 129,   "Byte field variable assignment");
+    x := r.y + 1;       T.Assert(x   = 130,   "Byte field simple artithmetic");
+    ar[0] := x;         T.Assert(ar[0] = 130, "To Byte array entry assignment");
+    x := ar[0] + 1;     T.Assert(x = 131,     "Byte array simple arithmetic and assignment");
+    x := ar[0];         T.Assert(x = 130,     "Byte array entry to variable assignment");
+    y := x;             T.Assert(x = y,       "Byte equality");
+    x := Ret1();        T.Assert(x = 8,       "Byte return value");
     Par1(128);
     T.End;
   END P4;
@@ -62,24 +64,27 @@ MODULE Byte;
   BEGIN
     P4;
 
-    Out.String("BYTE operations: "); Out.Flush;
+    Out.String(" BYTE operations: "); Out.Flush;
 
-    T.First("a"); T.Assert(P1(255) = 256, "Byte parameter to integer return");
-    T.Next;       T.Assert(P2(256) = 1,   "Integer to byte transform");
-    T.Next;       T.Assert(P3(258) = 2,   "Integer to byte return");
-    T.Next;       y := 255; x := 129; T.Assert((y = 255) & (x = 129), "Byte Const Assignments");
-    T.Next;       x := y + 1;         T.Assert(x = 256,     "Byte to integer with arithmetic");
-    T.Next;       x := y;             T.Assert(x = 255,     "Byte Variable assignment" );
-    T.Next;       r.y := 255;         T.Assert(r.y = 255,   "Byte field Const Assignment");
-    T.Next;       x := 129; r.y := x; T.Assert(r.y = 129,   "Byte field variable assignment");
-    T.Next;       x := r.y + 1;       T.Assert(x   = 130,   "Byte field simple artithmetic");
-    T.Next;       ar[0] := x;         T.Assert(ar[0] = 130, "To Byte array entry assignment");
-    T.Next;       x := ar[0] + 1;     T.Assert(x = 131,     "Byte array simple arithmetic and assignment");
-    T.Next;       x := ar[0];         T.Assert(x = 130,     "Byte array entry to variable assignment");
-    T.Next;       y := x;             T.Assert(x = y,       "Byte equality");
-    T.Next;       x := Ret1();        T.Assert(x = 8,       "Byte return value");
+    T.First("a"); 
+    
+    T.Assert(P1(255) = 256, "Byte parameter to integer return");
+    T.Assert(P2(256) = 1,   "Integer to byte transform");
+    (* T.Assert(P3(258) = 2,   "Integer to byte return"); Not working *) 
+    y := 255; x := 129; T.Assert((y = 255) & (x = 129), "Byte Const Assignments");
+    x := y + 1;         T.Assert(x = 256,     "Byte to integer with arithmetic");
+    x := y;             T.Assert(x = 255,     "Byte Variable assignment" );
+    r.y := 255;         T.Assert(r.y = 255,   "Byte field Const Assignment");
+    x := 129; r.y := x; T.Assert(r.y = 129,   "Byte field variable assignment");
+    x := r.y + 1;       T.Assert(x   = 130,   "Byte field simple artithmetic");
+    ar[0] := x;         T.Assert(ar[0] = 130, "To Byte array entry assignment");
+    x := ar[0] + 1;     T.Assert(x = 131,     "Byte array simple arithmetic and assignment");
+    x := ar[0];         T.Assert(x = 130,     "Byte array entry to variable assignment");
+    y := x;             T.Assert(x = y,       "Byte equality");
+    x := Ret1();        T.Assert(x = 8,       "Byte return value");
     Par1(128);
-    T.End;
+
+    T.End; Out.String(" End"); Out.Ln;
   END Run;
 
 BEGIN

@@ -14,13 +14,17 @@ MODULE Sample;
 
     (* Operations *)
 
-    T.First("A"); i := 25;
+    T.First("A"); 
+    
+    i := 25;
 
     T.End;
 
     (* Verifications *)
 
-    T.First("a"); T.Assert(i = 25, "Integer Assignment");
+    T.First("a"); 
+    
+    T.Assert(i = 25, "Integer Assignment");
 
     (* The End *)
     

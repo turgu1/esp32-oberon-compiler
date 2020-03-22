@@ -65,6 +65,7 @@ MODULE Test;
   PROCEDURE Assert*(cond: BOOLEAN; msg: ARRAY OF CHAR);
   BEGIN 
     INC(assertCallCount);
+    Next;
     IF  ~cond THEN
       Out.Ln;
       Out.String(" =====> Assert Failed: ");
