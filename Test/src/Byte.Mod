@@ -15,6 +15,11 @@ MODULE Byte;
     RETURN SYSTEM.VAL(BYTE, i + 1)
   END P2;
 
+  PROCEDURE P3(i: INTEGER): BYTE;
+  BEGIN
+    RETURN i
+  END P3;
+
   PROCEDURE Par1(b : BYTE);
   BEGIN
     T.Next; T.Assert(b = 128, "Byte parameter")
@@ -27,7 +32,7 @@ MODULE Byte;
     RETURN b
   END Ret1;
 
-  PROCEDURE P3;
+  PROCEDURE P4;
     VAR x : INTEGER;
       y : BYTE;
       r : RECORD y : BYTE END;
@@ -37,8 +42,9 @@ MODULE Byte;
 
     T.First("A"); T.Assert(P1(255) = 256, "Byte parameter to integer return");
     T.Next;       T.Assert(P2(256) = 1,   "Integer to byte transform");
+    T.Next;       T.Assert(P3(258) = 2,   "Integer to byte return");
     T.Next;       y := 255; x := 129; T.Assert((y = 255) & (x = 129), "Byte Const Assignments");
-    T.Next;       x := y + 1;         T.Assert(x = 0,       "Byte overflow");
+    T.Next;       x := y + 1;         T.Assert(x = 256,     "Byte to integer with arithmetic");
     T.Next;       x := y;             T.Assert(x = 255,     "Byte Variable assignment" );
     T.Next;       r.y := 255;         T.Assert(r.y = 255,   "Byte field Const Assignment");
     T.Next;       x := 129; r.y := x; T.Assert(r.y = 129,   "Byte field variable assignment");
@@ -50,18 +56,19 @@ MODULE Byte;
     T.Next;       x := Ret1();        T.Assert(x = 8,       "Byte return value");
     Par1(128);
     T.End;
-  END P3;
+  END P4;
 
   PROCEDURE Run*;
   BEGIN
-    P3;
+    P4;
 
     Out.String("BYTE operations: "); Out.Flush;
 
     T.First("a"); T.Assert(P1(255) = 256, "Byte parameter to integer return");
     T.Next;       T.Assert(P2(256) = 1,   "Integer to byte transform");
+    T.Next;       T.Assert(P3(258) = 2,   "Integer to byte return");
     T.Next;       y := 255; x := 129; T.Assert((y = 255) & (x = 129), "Byte Const Assignments");
-    T.Next;       x := y + 1;         T.Assert(x = 0,       "Byte overflow");
+    T.Next;       x := y + 1;         T.Assert(x = 256,     "Byte to integer with arithmetic");
     T.Next;       x := y;             T.Assert(x = 255,     "Byte Variable assignment" );
     T.Next;       r.y := 255;         T.Assert(r.y = 255,   "Byte field Const Assignment");
     T.Next;       x := 129; r.y := x; T.Assert(r.y = 129,   "Byte field variable assignment");

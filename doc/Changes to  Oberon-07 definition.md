@@ -147,7 +147,7 @@ The ELSE clause has been re-introduced even though it is not part of the Oberon-
 
 ## User's Assembly language 
 
-The ESP32 Oberon compiler allows for direct entry of assembly language code inside the code generation stream. Here is an exemple:
+The ESP32 Oberon compiler allows for direct entry of assembly language code inside the code generation stream. Here is an example:
 
 ```Modula-2
 MODULE Example;

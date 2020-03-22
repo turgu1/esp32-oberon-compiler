@@ -1735,6 +1735,17 @@ MODULE ORG;
     END
   END DivOp;
 
+  PROCEDURE AdjustVal*(VAR x: Item; targetType: ORB.Type);
+  BEGIN
+    IF x.type.size > targetType.size THEN
+      load(x);
+      IF targetType.size = 1 THEN
+        PutRI("movi", RH, 255);
+        PutRRR("and", x.r, x.r, RH)
+      END
+    END
+  END AdjustVal;
+
   (* Code generation for REAL operators *)
 
   PROCEDURE RealOp*(op: INTEGER; VAR x, y: Item);   (* x := x op y *)
@@ -2498,10 +2509,16 @@ MODULE ORG;
     GetLocalSB
   END Enter;
 
-  PROCEDURE Return*(procid: ORS.Ident; form: INTEGER; VAR x: Item; size: INTEGER; int: BOOLEAN; intLevel: INTEGER);
+  PROCEDURE Return*(procid: ORS.Ident; type: ORB.Type; VAR x: Item; size: INTEGER; int: BOOLEAN; intLevel: INTEGER);
   BEGIN
     e("Return");
-    IF form # ORB.NoTyp THEN load(x) END;
+    IF type.base.form # ORB.NoTyp THEN 
+      load(x);
+      IF type.size = 1 THEN
+        PutRI("movi", RH, 255);
+        PutRRR("and", x.r, x.r, RH)
+      END
+    END;
     PutSingle("retw");
     (*
     IF ~int THEN (*procedure epilog*)

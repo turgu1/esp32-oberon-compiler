@@ -317,55 +317,56 @@ MODULE ORP; (*N. Wirth 1.7.97 / 8.2.2020  Oberon compiler for ESP32 in Oberon-07
         IF x.type.form IN {ORB.Int, ORB.Real} THEN
           ORG.Abs(x); restyp := x.type 
         ELSE ORS.Mark("bad type") END
-      ELSIF fct = 1 THEN (*ODD*)   CheckInt(x);  ORG.Odd(x)
-      ELSIF fct = 2 THEN (*FLOOR*) CheckReal(x); ORG.Floor(x)
-      ELSIF fct = 3 THEN (*FLT*)   CheckInt(x);  ORG.Float(x)
-      ELSIF fct = 4 THEN (*ORD*)
+      ELSIF fct = 1 THEN (* ODD *)   CheckInt(x);  ORG.Odd(x)
+      ELSIF fct = 2 THEN (* FLOOR *) CheckReal(x); ORG.Floor(x)
+      ELSIF fct = 3 THEN (* FLT *)   CheckInt(x);  ORG.Float(x)
+      ELSIF fct = 4 THEN (* ORD *)
         IF x.type.form <= ORB.Proc THEN ORG.Ord(x)
         ELSIF (x.type.form = ORB.String) & (x.b = 2) THEN ORG.StrToChar(x)
         ELSE ORS.Mark("bad type")
         END
-      ELSIF fct = 5 THEN (*CHR*) CheckInt(x); ORG.Ord(x)
-      ELSIF fct = 6 THEN (*LEN*)
+      ELSIF fct = 5 THEN (* CHR *) CheckInt(x); ORG.Ord(x)
+      ELSIF fct = 6 THEN (* LEN *)
           IF x.type.form = ORB.Array THEN ORG.Len(x) ELSE 
             ORS.Mark("not an array") 
           END
-      ELSIF fct IN {7, 8, 9} THEN (*LSL, ASR, ROR*) CheckInt(y);
+      ELSIF fct IN {7, 8, 9} THEN (* LSL, ASR, ROR *) CheckInt(y);
         IF x.type.form IN {ORB.Int, ORB.Set} THEN 
           ORG.Shift(fct-7, x, y); restyp := x.type 
         ELSE ORS.Mark("bad type") END
-      ELSIF fct = 11 THEN (*ADC*) ORG.ADC(x, y)
-      ELSIF fct = 12 THEN (*SBC*) ORG.SBC(x, y)
-      ELSIF fct = 13 THEN (*UML*) ORG.UML(x, y)
-      ELSIF fct = 14 THEN (*BIT*) CheckInt(x);   CheckInt(y); ORG.Bit(x, y)
-      ELSIF fct = 15 THEN (*REG*) CheckConst(x); CheckInt(x); ORG.Register(x)
-      ELSIF fct = 16 THEN (*VAL*)
-        IF (x.mode= ORB.Typ) & (x.type.size <= y.type.size) THEN restyp := x.type; x := y
+      ELSIF fct = 11 THEN (* ADC *) ORG.ADC(x, y)
+      ELSIF fct = 12 THEN (* SBC *) ORG.SBC(x, y)
+      ELSIF fct = 13 THEN (* UML *) ORG.UML(x, y)
+      ELSIF fct = 14 THEN (* BIT *) CheckInt(x);   CheckInt(y); ORG.Bit(x, y)
+      ELSIF fct = 15 THEN (* REG *) CheckConst(x); CheckInt(x); ORG.Register(x)
+      ELSIF fct = 16 THEN (* VAL *)
+        IF (x.mode= ORB.Typ) & (x.type.size <= y.type.size) THEN 
+          restyp := x.type; x := y; ORG.AdjustVal(x, restyp);
         ELSE ORS.Mark("casting not allowed")
         END
-      ELSIF fct = 17 THEN (*ADR*) ORG.Adr(x)
-      ELSIF fct = 18 THEN (*SIZE*)
+      ELSIF fct = 17 THEN (* ADR *) ORG.Adr(x)
+      ELSIF fct = 18 THEN (* SIZE *)
         IF x.mode = ORB.Typ THEN ORG.MakeConstItem(x, ORB.intType, x.type.size)
         ELSE ORS.Mark("must be a type")
         END
-      ELSIF fct = 19 THEN (*COND*) CheckConst(x); CheckInt(x); ORG.Condition(x)
-      ELSIF fct = 20 THEN (*H*) CheckConst(x); CheckInt(x); ORG.H(x)
-      ELSIF fct = 21 THEN (*NOT*) CheckInt(x); ORG.BitNot(x)
-      ELSIF fct IN {22, 23, 24} THEN (*AND, BOR, XOR*) 
+      ELSIF fct = 19 THEN (* COND *) CheckConst(x); CheckInt(x); ORG.Condition(x)
+      ELSIF fct = 20 THEN (* H *) CheckConst(x); CheckInt(x); ORG.H(x)
+      ELSIF fct = 21 THEN (* NOT *) CheckInt(x); ORG.BitNot(x)
+      ELSIF fct IN {22, 23, 24} THEN (* AND, BOR, XOR *) 
         CheckInt(x); CheckInt(y);
-        ORG.BitOp(fct-22, x, y);
-      ELSIF fct IN {25, 26} THEN (*MIN, MAX*) 
+        ORG.BitOp(fct - 22, x, y);
+      ELSIF fct IN {25, 26} THEN (* MIN, MAX *) 
         IF ((x.type.form = ORB.Real) & (y.type.form = ORB.Real)) OR
            ((x.type.form IN {ORB.Int, ORB.Byte}) & (y.type.form IN {ORB.Int, ORB.Byte})) THEN
-          ORG.MinMax(fct-25, x, y);
+          ORG.MinMax(fct - 25, x, y);
           restyp := x.type 
         ELSE ORS.Mark("bad type") END
-      ELSIF fct = 27 THEN (*SQRT*) CheckReal(x); ORG.Sqrt(x)
-      ELSIF fct = 28 THEN (*RSR*) CheckInt(x); CheckConst(x); ORG.RSR(x)
+      ELSIF fct = 27 THEN (* SQRT *) CheckReal(x); ORG.Sqrt(x)
+      ELSIF fct = 28 THEN (* RSR *) CheckInt(x); CheckConst(x); ORG.RSR(x)
       ELSE ORS.Mark("bad type")
       END;
       x.type := restyp
-    ELSE ORS.Mark("wrong nof params")
+    ELSE ORS.Mark("wrong nbr of params")
     END
   END StandFunc;
 
@@ -383,7 +384,7 @@ MODULE ORP; (*N. Wirth 1.7.97 / 8.2.2020  Oberon compiler for ESP32 in Oberon-07
   BEGIN
     IF sym >= ORS.if THEN
       IF sym # ORS.rbrace THEN ORS.Mark("} expected") END ;
-      ORG.MakeConstItem(x, ORB.setType, 0) (*empty set*)
+      ORG.MakeConstItem(x, ORB.setType, 0) (* empty set *)
     ELSE element(x);
       WHILE (sym < ORS.rparen) OR (sym > ORS.rbrace) DO
         IF sym = ORS.comma THEN ORS.Get(sym)
@@ -396,7 +397,7 @@ MODULE ORP; (*N. Wirth 1.7.97 / 8.2.2020  Oberon compiler for ESP32 in Oberon-07
 
   PROCEDURE factor(VAR x: ORG.Item);
     VAR obj: ORB.Object; rx, callType: INTEGER;
-  BEGIN (*sync*)
+  BEGIN (* sync *)
     IF (sym < ORS.char) OR (sym > ORS.ident) THEN ORS.Mark("expression expected");
       REPEAT 
         ORS.Get(sym)
@@ -453,7 +454,7 @@ MODULE ORP; (*N. Wirth 1.7.97 / 8.2.2020  Oberon compiler for ESP32 in Oberon-07
         ELSIF f = ORB.Set THEN factor(y); CheckSet(y); ORG.SetOp(op, x, y)
         ELSE ORS.Mark("bad type")
         END
-      ELSE (*op = and*) 
+      ELSE (* op = and *) 
         CheckBool(x); ORG.And1(x); factor(y); CheckBool(y); ORG.And2(x, y)
       END
     END
@@ -964,7 +965,7 @@ MODULE ORP; (*N. Wirth 1.7.97 / 8.2.2020  Oberon compiler for ESP32 in Oberon-07
       IF sym = ORS.colon THEN  (* function *)
         ORS.Get(sym);
         IF sym = ORS.ident THEN
-          qualident(obj); ptype.base := obj.type;
+          qualident(obj); ptype.base := obj.type; 
           IF ~((obj.class = ORB.Typ) & (obj.type.form IN {ORB.Byte .. ORB.Pointer, ORB.Proc})) THEN
             ORS.Mark2("illegal function type: ", obj.name)
           END
@@ -1155,21 +1156,24 @@ MODULE ORP; (*N. Wirth 1.7.97 / 8.2.2020  Oberon compiler for ESP32 in Oberon-07
       IF sym = ORS.begin THEN ORS.Get(sym); StatSequence END ;
       IF sym = ORS.return THEN
         ORS.Get(sym); expression(x);
+            Out.Ln; 
+            Out.String("--> type.base.form: "); Out.Int(type.base.form, 0); Out.Ln;
+            Out.String("--> x.type.form: "); Out.Int(x.type.form, 0);
         IF type.base = ORB.noType THEN ORS.Mark("this is not a function")
         ELSIF ~CompTypes(type.base, x.type, FALSE) THEN 
           IF (type.base.form = ORB.Char) & (x.type.form = ORB.String) & (x.b = 2) THEN
             ORG.StrToChar(x);
           ELSIF (type.base.form # x.type.form) THEN
             ORS.Mark("wrong result type");
-            Out.Ln; 
+            (* Out.Ln; 
             Out.String("--> type.base.form: "); Out.Int(type.base.form, 0); Out.Ln;
-            Out.String("--> x.type.form: "); Out.Int(x.type.form, 0);
+            Out.String("--> x.type.form: "); Out.Int(x.type.form, 0); *)
           END
         END
       ELSIF type.base.form # ORB.NoTyp THEN
         ORS.Mark("function without result"); type.base := ORB.noType
       END ;
-      ORG.Return(procid, type.base.form, x, locblksize, int, intLevel);
+      ORG.Return(procid, type, x, locblksize, int, intLevel);
       ORB.CloseScope; DEC(level); Check(ORS.end, "END expected");
       IF sym = ORS.ident THEN
         IF ORS.id # procid THEN ORS.Mark("no match") END ;

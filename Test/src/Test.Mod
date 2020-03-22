@@ -67,8 +67,9 @@ MODULE Test;
     INC(assertCallCount);
     IF  ~cond THEN
       Out.Ln;
-      Out.String("Assert Failed: ");
+      Out.String(" =====> Assert Failed: ");
       Out.String(msg);
+      Out.String(" <=====");
       Out.Ln;
       Out.Flush;
       INC(errorCount)
