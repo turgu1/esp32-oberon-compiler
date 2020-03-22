@@ -1509,7 +1509,7 @@ MODULE ORG;
         END
       ELSE
         SetCC(x, EQU);
-        IF ~varpar THEN decR END
+        (* IF ~varpar THEN decR END *)
       END
     END;
     e("End of TypeTest RH:"); eInt(RH)
