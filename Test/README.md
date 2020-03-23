@@ -1,6 +1,6 @@
 # Test folder
 
-This forlder contains a suite of basic tests to be used on a ESP32 module to verify basic compiler generation capabilities. 
+This folder contains a suite of basic tests to be used on a ESP32 module to verify basic compiler generation capabilities. 
 
 To build everything and upload to the ESP32 development board, do the following commands:
 

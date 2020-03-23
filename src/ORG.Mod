@@ -821,7 +821,8 @@ MODULE ORG;
         END;
         decR; decR
       END
-    END      
+    END;
+    e("End of PutCondBranch RH:"); eInt(RH);
   END PutCondBranch;
 
     (* Produce a unique section name of the following form:
@@ -1474,6 +1475,30 @@ MODULE ORG;
     END
   END BuildTD;
 
+  (* PROCEDURE TypeTest*(VAR x: Item; T: ORB.Type; varpar, isguard: BOOLEAN);
+    VAR pc0: LONGINT;
+  BEGIN
+    IF T = NIL THEN
+      IF x.mode >= Reg THEN DEC(RH) END ;
+      SetCC(x, 7)
+    ELSE (*fetch tag into RH*)
+      IF varpar THEN Put2(Ldr, RH, SP, x.a+4+frame)
+      ELSE load(x);
+        pc0 := pc; Put3(BC, EQ, 0);  (*NIL belongs to every pointer type*)
+        Put2(Ldr, RH, x.r, -8)
+      END ;
+      Put2(Ldr, RH, RH, T.nofpar*4); incR;
+      loadTypTagAdr(T);  (*tag of T*)
+      Put0(Cmp, RH-1, RH-1, RH-2); DEC(RH, 2);
+      IF ~varpar THEN fix(pc0, pc - pc0 - 1) END ;
+      IF isguard THEN
+        IF check THEN Trap(NE, 2) END
+      ELSE SetCC(x, EQ);
+        IF ~varpar THEN DEC(RH) END
+      END
+    END
+  END TypeTest; *)
+  
   PROCEDURE TypeTest*(VAR x: Item; T: ORB.Type; varpar, isguard: BOOLEAN);
   BEGIN
     e("TypeTest RH:"); eInt(RH); eStr(" varpar:"); eInt(ORD(varpar)); eStr(" isguard:"); eInt(ORD(isguard));
@@ -1488,28 +1513,26 @@ MODULE ORG;
         PutMoveRRI("l32i", 1020, RH, RH, T.nofpar * 4); incR;
         (* tag of T *)
         loadTypTagAdr(T);
-      ELSE 
-        load(x);                        (* Load pointer content (address)    *)
-        PutRI("movi", RH,    0);
-        PutRR("mov",  RH+1, RH);
-        PutBranchR("beqz", x.r, label);  (* NIL belongs to every pointer type *)
-        PutRRI("addi", RH, x.r, -8);
-        PutRRI("l32i", RH, RH,  0);
-        PutMoveRRI("l32i", 1020, RH, RH, T.nofpar * 4); incR;
-        (* tag of T *)
-        loadTypTagAdr(T);
-        PutLabel(label); INC(label)
-      END;
-      (* Here, we need three register: maybe x + two types to compare *)
-      IF isguard THEN
-        IF check THEN 
-          Trap(NEQ, TrGuard)
-        ELSE
-          decR; decR
+        IF isguard THEN
+          IF check THEN Trap(NEQ, TrGuard);
+          ELSE decR; decR END
+        ELSE SetCC(x, EQU);
         END
       ELSE
-        SetCC(x, EQU);
-        (* IF ~varpar THEN decR END *)
+        load(x);                         (* Load pointer content (address)    *)
+        PutRI("movi", RH, 0);
+        PutBranchR("beqz", x.r, label);  (* NIL belongs to every pointer type *)
+        PutRRI("addi", x.r, x.r, -8);
+        PutRRI("l32i", x.r, x.r,  0);
+        PutMoveRRI("l32i", 1020, x.r, x.r, T.nofpar * 4);
+        (* tag of T *)
+        loadTypTagAdr(T);
+        PutLabel(label); INC(label);
+        IF isguard THEN
+          IF check THEN Trap(NEQ, TrGuard); incR
+          ELSE decR END
+        ELSE SetCC(x, EQU); incR
+        END
       END
     END;
     e("End of TypeTest RH:"); eInt(RH)

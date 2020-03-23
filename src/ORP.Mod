@@ -9,7 +9,7 @@ MODULE ORP; (*N. Wirth 1.7.97 / 8.2.2020  Oberon compiler for ESP32 in Oberon-07
   
   CONST 
     NofCases = 256; (* Max number of case labels in a CASE statement *)
-    DEBUG = TRUE;
+    DEBUG = FALSE;
   TYPE 
     PtrBase = POINTER TO PtrBaseDesc;
     PtrBaseDesc = RECORD  (*list of names of pointer base types*)
