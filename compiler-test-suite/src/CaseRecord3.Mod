@@ -19,7 +19,6 @@ BEGIN
   p2.a := 1;
   p2.z[3].c := 8;
   p2.y := p2.z[3];
-  DBGON
   p := p2;
   CASE p OF
     P0: p.b := 1.5 + p(P2).d + p(P2).z[2].b + FLT(p.a) +
@@ -28,6 +27,5 @@ BEGIN
         i:= p.a |
     P2: p.b := 1.8; i:= 2
   END;
-  DBGOFF
   Out.Int(i, 0) (* 1 *)
 END CaseRecord3.

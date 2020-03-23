@@ -129,6 +129,7 @@ MODULE Case;
     T.Assert(Proc5(b) =  1,  "CaseNum 14");
 
     NEW(p1); p := p1; p.a := 1;
+    ii := -1;
     CASE p OF
         P0: p.b := 2.5; ii := 0
       | P1: p.b := p.a + p.b + p.b DIV 3; ii := p.a

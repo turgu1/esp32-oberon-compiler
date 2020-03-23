@@ -108,10 +108,7 @@ MODULE ORG;
     varsize,                 (* data index *)
     tdx, strx,               (* type description and string indexes *)
     RH,                      (* available registers R[FirstRH] ... R[LastRH] *)
-    frame,                   (* frame offset changed in SaveRegs and RestoreRegs *)
-    fixorgP, 
-    fixorgD, 
-    fixorgT: INTEGER;        (* origins of lists of locations to be fixed up by loader *)
+    frame:   INTEGER;        (* frame offset changed in SaveRegs and RestoreRegs *)
     check:   BOOLEAN;        (* emit run-time checks *)
     
     relmap: ARRAY 6       OF INTEGER;  (* condition codes for relations *)
@@ -1200,7 +1197,7 @@ MODULE ORG;
     VAR 
       offset : INTEGER;
   BEGIN 
-    e("loadTypTagAdr");
+    e("loadTypTagAdr mno:"); eInt(T.mno); eStr(" offset:"); eInt(T.len);
     offset := T.len;
     CheckFreeRegs(1);
     GetTypesDescrSB(-T.mno);
@@ -1407,12 +1404,29 @@ MODULE ORG;
   END DeRef;
 
   PROCEDURE Q(T: ORB.Type; VAR dcw: INTEGER);
-  BEGIN (* one entry of type descriptor extension table *)
+  BEGIN 
+    (* one entry of type descriptor extension table *)
+    (* T.len is the descriptor address offset *)
+    (* T.mno is level (0 is this module, Not 0 is import) *)
     IF T.base # NIL THEN
-      Q(T.base, dcw); data[dcw] := (T.mno*1000H + T.len) * 1000H + dcw - fixorgT;
-      fixorgT := dcw; INC(dcw)
+      Q(T.base, dcw); 
+      data[dcw] := (T.mno * 1000H + T.len);
+      INC(dcw)
     END
   END Q;
+
+  (* PROCEDURE Q(T: ORB.Type; VAR dcw: INTEGER);
+  BEGIN 
+    (* one entry of type descriptor extension table *)
+    (* T.len is the descriptor address offset *)
+    (* T.mno is level (0 is this module, Not 0 is import) *)
+    IF T.base # NIL THEN
+      Q(T.base, dcw); 
+      data[dcw] := (T.mno * 1000H + T.len) * 1000H + dcw - fixorgT;
+      fixorgT := dcw; 
+      INC(dcw)
+    END
+  END Q; *)
 
   PROCEDURE FindPtrFlds(typ: ORB.Type; off: INTEGER; VAR dcw: INTEGER);
     VAR fld: ORB.Object; i, s: INTEGER;
@@ -1455,7 +1469,7 @@ MODULE ORG;
     INC(dcw);  
     k := T.nofpar;   (* extension level! *)
     IF k > 3 THEN 
-      ORS.Mark("ext level too large")
+      ORS.Mark("record type extention level too large")
     ELSE 
       Q(T, dcw);
       WHILE k < 3 DO 
@@ -1463,7 +1477,7 @@ MODULE ORG;
         INC(dcw); 
         INC(k) 
       END
-    END ;
+    END;
     FindPtrFlds(T, 0, dcw); 
     data[dcw] := -1; 
     INC(dcw); 
@@ -1531,7 +1545,7 @@ MODULE ORG;
         IF isguard THEN
           IF check THEN Trap(NEQ, TrGuard); incR
           ELSE decR END
-        ELSE SetCC(x, EQU); incR
+        ELSE SetCC(x, EQU);
         END
       END
     END;
@@ -3171,6 +3185,29 @@ PROCEDURE Abs*(VAR x: Item);
     RETURN initPresent
   END WriteCode;
 
+  PROCEDURE TypePointer(a: INTEGER);
+  VAR 
+    base: INTEGER;
+    offset: INTEGER;
+    moduleId: ORS.Ident;
+    moduleKey: INTEGER;
+    name: ARRAY 256 OF CHAR;
+  BEGIN
+    base := a DIV 1000H;
+    offset := a MOD 1000H;
+    IF base = 0 THEN
+      name := "_"; AppendStr(name, thisModuleId); AppendStr(name, "_s_types");
+    ELSE
+      ModuleInfo(base, moduleId, moduleKey);
+      name := "_"; AppendStr(name, moduleId); AppendStr(name, "_");
+      AppendHex(name, moduleKey);
+      AppendStr(name, "_s_data_types");
+    END;
+    Texts.WriteString(AsW, name);
+    Texts.WriteString(AsW, "+");
+    Texts.WriteInt(AsW, offset, 0)
+  END TypePointer;
+
   PROCEDURE Close*(VAR moduleId: ORS.Ident; moduleKey, nofent: INTEGER; outputFolder: ARRAY OF CHAR);
     VAR 
       obj: ORB.Object;
@@ -3208,15 +3245,19 @@ PROCEDURE Abs*(VAR x: Item);
       Texts.WriteString(AsW, "_");
       Texts.WriteString(AsW, moduleId);
       Texts.WriteString(AsW, "_s_types:");
-      FOR i := 0 TO tdx-1 DO 
-        IF (i MOD 8) = 0 THEN
-          Texts.WriteLn(AsW);
-          Texts.WriteString(AsW, "    .int ");
-        END;
-        Texts.WriteInt(AsW, data[i], 0);
-        IF (i < tdx-1) & (((i+1) MOD 8) # 0) THEN Texts.Write(AsW, ",") END
-      END;    
       Texts.WriteLn(AsW);
+      FOR i := 0 TO tdx-1 DO 
+        Texts.WriteString(AsW, "    .int ");
+        (* Type size for allocation *)
+        IF (i MOD 5) = 0 THEN
+          Texts.WriteInt(AsW, data[i], 0);
+        ELSIF data[i] = -1 THEN
+          Texts.WriteString(AsW, "-1");
+        ELSE
+          TypePointer(data[i])
+        END;
+        Texts.WriteLn(AsW);
+      END;    
     END;
 
     (* Strings section *)
@@ -3306,9 +3347,6 @@ PROCEDURE Abs*(VAR x: Item);
     strx    := 0;
     varsize := 0; 
     RH      := FirstRH; 
-    fixorgP := 0; 
-    fixorgD := 0; 
-    fixorgT := 0; 
     label   := 1;
 
     CodeF := Files.New("");

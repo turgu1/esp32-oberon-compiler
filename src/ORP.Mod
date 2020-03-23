@@ -1245,7 +1245,8 @@ MODULE ORP; (*N. Wirth 1.7.97 / 8.2.2020  Oberon compiler for ESP32 in Oberon-07
         END;
         IF verbose THEN Out.Int(dc, 6); Out.Hex(key) END
       ELSE 
-        Out.Ln; Out.String("compilation FAILED"); Out.Ln; 
+        Out.Ln; Out.String("compilation FAILED; "); 
+        Out.Int(ORS.errcnt,0); Out.String(" error(s) detected."); Out.Ln; 
       END;
       IF verbose THEN Out.Ln END;
       ORB.CloseScope; pbsList := NIL
