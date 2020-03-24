@@ -1255,7 +1255,7 @@ MODULE ORP; (*N. Wirth 1.7.97 / 8.2.2020  Oberon compiler for ESP32 in Oberon-07
   END Module;
 
   PROCEDURE ExtractFolder(VAR folder: ARRAY OF CHAR; filename: ARRAY OF CHAR);
-  VAR i, j: INTEGER;
+    VAR i, j: INTEGER;
   BEGIN 
     i := 0;
     WHILE (i < LEN(filename)) & (filename[i] # 0X) DO INC(i) END;
