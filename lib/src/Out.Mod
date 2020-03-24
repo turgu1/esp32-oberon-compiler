@@ -5,9 +5,10 @@ MODULE Out;
 
   CONST
     (* UART0 Registers *)
-    Fifo      = 3FF40000H; (* UART0 fifo address *)
-    ClkDiv    = 3FF40014H; (* UART0 clock divisor *)
-    status    = 3FF4001CH; (* UART0 status register *)
+    UART_FIFO      = 3FF40000H; (* UART0 fifo address *)
+    UART_CLKDIV    = 3FF40014H; (* UART0 clock divisor *)
+    UART_STATUS    = 3FF4001CH; (* UART0 status register *)
+    UART_MEM_CNT   = 3FF40064H; (* UART0 mem count register *)
 
     Baud115K*  = 80000000 DIV 115200;
     Baud76800* = 80000000 DIV 76800;
@@ -23,10 +24,11 @@ MODULE Out;
 
   PROCEDURE FifoCount(): INTEGER;
   VAR 
-    c, r : INTEGER;
+    c, r1, r2 : INTEGER;
   BEGIN
-    SYSTEM.GET(status, r);
-    c := ASR(r, 16) MOD 256;
+    SYSTEM.GET(UART_STATUS, r1);
+    SYSTEM.GET(UART_MEM_CNT, r2);
+    c := AND(ASR(r1, 16), 0FFH) + LSL(AND(ASR(r2, 3), 07H), 8);
     RETURN c
   END FifoCount;
 
@@ -38,7 +40,7 @@ MODULE Out;
   PROCEDURE Char*(ch: CHAR);
   BEGIN
     WHILE FifoCount() > 120 DO END; (* Wait for some space in UART xmit FIFO *)
-    SYSTEM.PUT(Fifo, ORD(ch))
+    SYSTEM.PUT(UART_FIFO, ORD(ch))
   END Char;
 
   PROCEDURE String*(s: ARRAY OF CHAR);
@@ -181,7 +183,7 @@ MODULE Out;
 
   PROCEDURE SetBaudRate*(baudRate: INTEGER);
   BEGIN
-    SYSTEM.PUT(ClkDiv, baudRate)
+    SYSTEM.PUT(UART_CLKDIV, baudRate)
   END SetBaudRate;
 
   PROCEDURE Open*;

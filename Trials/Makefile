@@ -69,6 +69,7 @@ $(TARGETELF): $(OBJS)
 flash: $(TARGETELF)
 	esptool.py --chip=esp32 elf2image $(TARGETELF)
 	esptool.py --chip=esp32 --port $(PORT) write_flash 0x1000 $(TARGETBIN) -ff 80m -fm dout
+	minicom
 
 # Target to clean build artifacts.
 .PHONY: clean

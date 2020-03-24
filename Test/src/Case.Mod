@@ -33,11 +33,11 @@ MODULE Case;
   PROCEDURE Proc2() : INTEGER;
    VAR i, j: INTEGER;
   BEGIN
-      i := 1;
-      CASE i OF
-         0: j := 0
-       | 1: j := 1
-       | 2: j := 2
+    i := 1;
+    CASE i OF
+        0: j := 0
+      | 1: j := 1
+      | 2: j := 2
     END;
     RETURN j
   END Proc2;
@@ -109,7 +109,7 @@ MODULE Case;
       | 5..6:             aa := 3 
     END;
  
-    T.Assert(aa = 2,      "CaseNum  1");
+    T.Assert(aa = 2,         "CaseNum  1");
     T.Assert(Proc1(9)  =  1, "CaseNum  2");
     T.Assert(Proc1(4)  =  2, "CaseNum  3");
     T.Assert(Proc1(6)  =  3, "CaseNum  4");
@@ -122,7 +122,7 @@ MODULE Case;
     T.Assert(Proc3(25) =  3, "CaseNum 10");
     T.Assert(Proc3( 6) =  4, "CaseNum 11");
     NoLocals(5); 
-    T.Assert(aa = 5,      "CaseNum 12");
+    T.Assert(aa = 5,         "CaseNum 12");
 
     b[2].c := "P";
     T.Assert(Proc4(b) = 80,  "CaseNum 13");
