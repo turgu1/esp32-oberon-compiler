@@ -19,16 +19,40 @@
 
 ## Sections
 
-The generated code and data are put in different sections that will be placed at appropriate locations in memory by the linker:
+The generated code and data are put in different sections that will be placed at appropriate locations in memory by the linker (see file lib/ld/esp32.ld). Each section name contains the module name and symbol file checksum. This is to insure a minimal validation of proper module linkage. For example, assume that de module name is ModuleName and symbol file checksum is 1234ABCD in hex, you will then get, as a suffix, `_ModuleName_1234ABCD`. Here is the list of sections with their name prefix:
 
-- Module variables
-- String constants
-- Record Types descriptors
-- Pointers table
-- Module initialisation code
-- Procedure code
-- Interrupt procedures
-- Module initialisation code entry point
+- Module variables: `.bss`
+- String constants: `.data_strs`
+- Record Types descriptors: `.data_types`
+- Module initialisation code: `.init`
+- Procedure code: `.text`
+
+The following sections define also an external entry point (a `.global` name) using the previously defined suffix as a prefix and with the following suffixes:
+
+- Module variables: `_s_bss`
+- Record Types descriptors: `_s_data_types`
+- Procedure code: `_s_text`
+
+For example, with the example above, the module varable section would be named `.bss_ModuleName_1234ABCD` and the globally defined name would be `_ModuleName_1234ABCD_s_bss`.
+
+The other sections receive a locally defined name with the module name as a prefix and with the following suffixes:
+
+- String constants: `_data_strs`
+- Module initialisation code: `_init`
+
+- Interrupt procedures: (To Be Defined)
+
+### Procedures
+
+Procedure names are locally defined using the procedure name prefixed with `_`. For Example, a procedure named ProcName would then get the following local name: `_ProcName`. Exported procedures receives an external entry point as, for, example, `_ModuleName_1234ABCD_p_ProcName`.
+
+### Module Initialisation and pointers table
+
+The Module Initialisation code is not publicly available. It registers an entry to be put in the Module Initialization Table with a section with the following name prefix: `.init_table`. For example: `.init_table_ModuleName_1234ABCD`.
+
+The pointers table section is using `.pointers_table` as prefix. For example: `.pointers_table_ModuleName_1234ABCD`. 
+
+Both Initialization and Pointer table sections are merged with other modules by the linker.
 
 ## Memory usage
 

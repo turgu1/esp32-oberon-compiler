@@ -1,4 +1,8 @@
 (* ESP32 Definition *)
+
+(* Please note that this file is *not* used by the compiler. It was a first cut on the
+   ESP32 instruction set definition and is a kind of NutShell view of this architecture... *)
+
 (* Xtensa Little Endian Architecture (Big Endian not available) *)
 
 (* The following Xtensa LX6 instruction options are available on the ESP32: 

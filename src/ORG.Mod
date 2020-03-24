@@ -1219,7 +1219,7 @@ MODULE ORG;
     Texts.WriteInt(CodeW, RH, 0);
     Texts.WriteString(CodeW, ", _");
     Texts.WriteString(CodeW, thisModuleId);
-    Texts.WriteString(CodeW, "_s_str");
+    Texts.WriteString(CodeW, "_data_strs");
     Texts.WriteLn(CodeW);
 
     IF x.a <= 127 THEN
@@ -3265,7 +3265,7 @@ PROCEDURE Abs*(VAR x: Item);
       SectionHeader("data_strs", moduleId, moduleKey, FALSE);
       Texts.WriteString(AsW, "_");
       Texts.WriteString(AsW, moduleId);
-      Texts.WriteString(AsW, "_s_str:");
+      Texts.WriteString(AsW, "_data_strs:");
       FOR i := 0 TO strx-1 DO 
         IF (i MOD 16) = 0 THEN
           Texts.WriteLn(AsW);
