@@ -33,7 +33,7 @@ The following sections define also an external entry point (a `.global` name) us
 - Record Types descriptors: `_s_data_types`
 - Procedure code: `_s_text`
 
-For example, with the example above, the module varable section would be named `.bss_ModuleName_1234ABCD` and the globally defined name would be `_ModuleName_1234ABCD_s_bss`.
+For example, with the example above, the module variable section would be named `.bss_ModuleName_1234ABCD` and the globally defined name would be `_ModuleName_1234ABCD_s_bss`.
 
 The other sections receive a locally defined name with the module name as a prefix and with the following suffixes:
 
