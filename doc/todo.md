@@ -1,5 +1,7 @@
 # Compiler changes
 
+Here is the list of ongoing tasks to complete the effort of building the ESP32 Oberon Compiler.
+
 - [x] Add INTEGER/BYTE/CHAR in CASE statements
 - [x] User's assembly language
 - [x] Add bit-wise AND/BOR/XOR/NOT for INTEGER/BYTE functions

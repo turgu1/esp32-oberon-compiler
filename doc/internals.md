@@ -1,5 +1,7 @@
 # ESP32 Oberon Compiler - Internals description
 
+This document describes the internal structure of the ESP32 Oberon Compiler generated code.
+
 ## General information
 
 - Assembly language instead of direct code generation
@@ -56,7 +58,7 @@ Both Initialization and Pointer table sections are merged with other modules by 
 
 ## Memory usage
 
-Memory mapping is done by the linker, using a descriptor located in file `lib/ld/esp32.ld`. This file defines the location of each section as described above, but also identify the location of the stack and the heap.
+Memory mapping is done by the linker, using a descriptor located in file `lib/ld/esp32.ld`. This file defines the location of each section as described above, but also identify the location of the stack and the heap. It is still a temporary solution as the complete code is currently put in RAM. The target is to have the code pushed in flash memory, using automated swapping mechanism to retrieve code into a RAM cache for execution.
 
 (TBC)
 

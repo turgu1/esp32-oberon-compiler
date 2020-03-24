@@ -1,5 +1,7 @@
 # Documentation and Source Code References
 
+These are the document references and source code location that have helped the author to conduct this effort.
+
 - [Prof. Niklaus Wirth Site](https://inf.ethz.ch/personal/wirth/)
 - [Project Oberon](http://www.projectoberon.com)
 - [The Extended Oberon operating system and the Revised Oberon-2 programming language by Mr. Andreas Pirklbauer](https://github.com/andreaspirklbauer/Oberon-extended)
