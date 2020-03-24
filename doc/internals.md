@@ -5,7 +5,7 @@ This document describes the internal structure of the ESP32 Oberon Compiler gene
 ## General information
 
 - Assembly language instead of direct code generation
-- Bear metal. For now, no code from ESP-IDF is being used
+- Bare metal. For now, no code from ESP-IDF is being used
 - ESP32 Windowing calls 
   + Only call4 and call8 are used. Registers beyond A4 or A8 will be pushed on stack prior to the call4 or call8, if required
 

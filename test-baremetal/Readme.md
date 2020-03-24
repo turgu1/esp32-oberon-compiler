@@ -1,4 +1,4 @@
-# Bearmetal assembly language trial
+# Bare metal assembly language trial
 
 This code has been used to verify the comprehension of the author on the working conditions required to get an independant development framework useable on an ESP32.
 
