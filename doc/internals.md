@@ -19,7 +19,7 @@
 
 ## Sections
 
-The generated code and data are put in different sections that will be placed at appropriate locations in memory by the linker (see file lib/ld/esp32.ld). Each section name contains the module name and symbol file checksum. This is to insure a minimal validation of proper module linkage. For example, assume that de module name is ModuleName and symbol file checksum is 1234ABCD in hex, you will then get, as a suffix, `_ModuleName_1234ABCD`. Here is the list of sections with their name prefix:
+The generated code and data are put in different sections that will be placed at appropriate locations in memory by the linker (see file lib/ld/esp32.ld). Each section name contains the module name and symbol file checksum. This is to insure a minimal validation of proper module linkage. For example, assume that de module name is ModuleName and the symbol file checksum is 1234ABCD in hex, you will then get, as a suffix, `_ModuleName_1234ABCD`. Here is the list of sections with their name prefix:
 
 - Module variables: `.bss`
 - String constants: `.data_strs`
@@ -40,7 +40,7 @@ The other sections receive a locally defined name with the module name as a pref
 - String constants: `_data_strs`
 - Module initialisation code: `_init`
 
-- Interrupt procedures: (To Be Defined)
+Interrupt procedures remains to be defined.
 
 ### Procedures
 
@@ -56,14 +56,11 @@ Both Initialization and Pointer table sections are merged with other modules by 
 
 ## Memory usage
 
-TBD
+Memory mapping is done by the linker, using a descriptor located in file `lib/ld/esp32.ld`. This file defines the location of each section as described above, but also identify the location of the stack and heap.
 
-## Name mangling
-
-- Section names
-- Procedure entry points
+(TBC)
 
 ## Interrupt mechanism
 
-TBD
+(TBC)
 
