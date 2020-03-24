@@ -56,7 +56,7 @@ Both Initialization and Pointer table sections are merged with other modules by 
 
 ## Memory usage
 
-Memory mapping is done by the linker, using a descriptor located in file `lib/ld/esp32.ld`. This file defines the location of each section as described above, but also identify the location of the stack and heap.
+Memory mapping is done by the linker, using a descriptor located in file `lib/ld/esp32.ld`. This file defines the location of each section as described above, but also identify the location of the stack and the heap.
 
 (TBC)
 
