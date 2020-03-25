@@ -603,11 +603,11 @@ MODULE ORP; (*N. Wirth 1.7.97 / 8.2.2020  Oberon compiler for ESP32 in Oberon-07
     BEGIN qualident(obj); Check(ORS.of, "OF expected"); ORG.GetLabel(L0); x.lf := 0;
       WHILE (sym < ORS.end) OR (sym = ORS.bar) DO
         IF sym = ORS.bar THEN ORS.Get(sym) ELSE 
-          IF x.lf # 0 THEN ORG.PutLabel(x.lf); ORG.ClearLabels(x) END;
+          IF x.lf # 0 THEN ORG.PutLabel(x.lf); x.lf := 0 END;
           TypeCase(obj, x); ORG.FJump(L0) 
         END
       END;
-      IF x.lf # 0 THEN ORG.PutLabel(x.lf) END;
+      IF x.lf # 0 THEN ORG.PutLabel(x.lf); x.lf := 0 END;
       IF sym = ORS.else THEN ORS.Get(sym); StatSequence END ;
       ORG.PutLabel(L0)
     END TypeCasePart;
@@ -762,7 +762,7 @@ MODULE ORP; (*N. Wirth 1.7.97 / 8.2.2020  Oberon compiler for ESP32 in Oberon-07
         WHILE sym = ORS.elsif DO
           ORS.Get(sym);
           IF L0 = 0 THEN ORG.GetLabel(L0) END; ORG.FJump(L0); 
-          ORG.PutLabel(x.lf); ORG.ClearLabels(x); 
+          ORG.PutLabel(x.lf); x.lf := 0; 
           expression(x); 
           CheckBool(x); ORG.CFJump(x); 
           Check(ORS.then, "THEN expected"); 
@@ -803,7 +803,7 @@ MODULE ORP; (*N. Wirth 1.7.97 / 8.2.2020  Oberon compiler for ESP32 in Oberon-07
         ELSE 
           ORS.Mark("missing UNTIL")
         END;
-        IF x.lt # 0 THEN ORG.PutLabel(x.lt) END 
+        IF x.lt # 0 THEN ORG.PutLabel(x.lt); x.lt := 0 END 
       ELSIF sym = ORS.for THEN (* ----- FOR ----- *)
         ORS.Get(sym);
         IF sym = ORS.ident THEN

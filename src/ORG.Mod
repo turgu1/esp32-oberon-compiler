@@ -13,6 +13,8 @@ MODULE ORG;
     SP = 1; SB = 2;   (* dedicated registers *)
     maxStrx = 5000; maxTD = 250;
 
+    MaxLabel = 300;   (* Maximum number of local labels in a procedure *)
+
     Reg = 10; RegI = 11; Cond = 12;  (* internal item modes *)
 
     FirstRH = 3;   (* First available register for arguments *)
@@ -132,7 +134,7 @@ MODULE ORG;
 
     thisModuleId: ORS.Ident; (* Module Id being compiled *)
 
-    label: INTEGER; (* local label number *)
+    theNextLabel: INTEGER; (* local label number *)
 
     BrOp: ARRAY 16 OF BrStr;  (* ESP32 branch instructions   *)
     BrReverse,                (* Parameters must be reversed *)
@@ -493,8 +495,8 @@ MODULE ORG;
     Texts.WriteString(CodeW, " a");
     Texts.WriteInt(   CodeW, r, 0);
     Texts.WriteString(CodeW, ", ");
-    Texts.Write(      CodeW, "L");
-    Texts.WriteInt(   CodeW, label, 0);
+    Texts.WriteInt(   CodeW, label MOD MaxLabel, 0);
+    Texts.Write(      CodeW, "$");
     Texts.WriteLn(    CodeW);
   END PutRL;
 
@@ -713,13 +715,30 @@ MODULE ORG;
     Texts.WriteLn(CodeW)
   END PutCALLExternal;
 
+  PROCEDURE NextLabel*(): INTEGER;
+  VAR l: INTEGER;
+  BEGIN
+    l := theNextLabel;
+    INC(theNextLabel);
+    IF theNextLabel >= MaxLabel THEN
+      ORS.Mark("Max number of labels reached in a procedure.")
+    END;
+    RETURN l
+  END NextLabel;
+
   PROCEDURE PutLabel*(label: INTEGER);
+  VAR l: INTEGER;
   BEGIN
     e("PutLabel");
-    Texts.Write(   CodeW, "L");
-    Texts.WriteInt(CodeW, label, 0);
-    Texts.Write(   CodeW, ":");
-    Texts.WriteLn( CodeW);
+    WHILE label > 0 DO
+      l := label MOD MaxLabel;
+      label := label DIV MaxLabel;
+
+      Texts.WriteInt(CodeW, l, 0);
+      Texts.Write(   CodeW, "$");
+      Texts.Write(   CodeW, ":");
+      Texts.WriteLn( CodeW);
+    END;
     InitRc;
   END PutLabel;
 
@@ -733,8 +752,8 @@ MODULE ORG;
     Texts.WriteString(CodeW, ", a");
     Texts.WriteInt(   CodeW, r2, 0);
     Texts.WriteString(CodeW, ", ");
-    Texts.Write(      CodeW, "L");
-    Texts.WriteInt(   CodeW, label, 0);
+    Texts.WriteInt(   CodeW, label MOD MaxLabel, 0);
+    Texts.Write(      CodeW, "$");
     Texts.WriteLn(CodeW);
   END PutBranchRR;
 
@@ -748,8 +767,8 @@ MODULE ORG;
     Texts.WriteString(CodeW, ", ");
     Texts.WriteInt(   CodeW, imm, 0);
     Texts.WriteString(CodeW, ", ");
-    Texts.Write(      CodeW, "L");
-    Texts.WriteInt(   CodeW, label, 0);
+    Texts.WriteInt(   CodeW, label MOD MaxLabel, 0);
+    Texts.Write(      CodeW, "$");
     Texts.WriteLn(CodeW);
   END PutBranchRI;
 
@@ -761,8 +780,8 @@ MODULE ORG;
     Texts.WriteString(CodeW, " a");
     Texts.WriteInt(   CodeW, r, 0);
     Texts.WriteString(CodeW, ", ");
-    Texts.Write    (  CodeW, "L");
-    Texts.WriteInt(   CodeW, label, 0);
+    Texts.WriteInt(   CodeW, label MOD MaxLabel, 0);
+    Texts.Write    (  CodeW, "$");
     Texts.WriteLn(CodeW);
   END PutBranchR;
 
@@ -772,8 +791,8 @@ MODULE ORG;
     Texts.WriteString(CodeW, "    ");
     Texts.WriteString(CodeW, op);
     Texts.Write(      CodeW, " ");
-    Texts.Write(      CodeW, "L");
-    Texts.WriteInt(   CodeW, label, 0);
+    Texts.WriteInt(   CodeW, label MOD MaxLabel, 0);
+    Texts.Write(      CodeW, "$");
     Texts.WriteLn(CodeW);
   END PutJump;
 
@@ -798,22 +817,22 @@ MODULE ORG;
     ELSE
       e(BrOp[thisCond]);
       IF thisCond IN BrOneParam THEN
-        PutBranchR(BrOp[thisCond], RH-1, label);
+        PutBranchR(BrOp[thisCond], RH-1, label MOD MaxLabel);
         decR
       ELSIF thisCond IN BrNoParam THEN
-        PutJump("j", label)
+        PutJump("j", label MOD MaxLabel)
       ELSE
         IF thisCond IN BrReverse THEN
           IF reverseArguments THEN
-            PutBranchRR(BrOp[thisCond], RH-2, RH-1, label)
+            PutBranchRR(BrOp[thisCond], RH-2, RH-1, label MOD MaxLabel)
           ELSE
-            PutBranchRR(BrOp[thisCond], RH-1, RH-2, label)
+            PutBranchRR(BrOp[thisCond], RH-1, RH-2, label MOD MaxLabel)
           END
         ELSE
           IF reverseArguments THEN
-            PutBranchRR(BrOp[thisCond], RH-1, RH-2, label)
+            PutBranchRR(BrOp[thisCond], RH-1, RH-2, label MOD MaxLabel)
           ELSE
-            PutBranchRR(BrOp[thisCond], RH-2, RH-1, label)
+            PutBranchRR(BrOp[thisCond], RH-2, RH-1, label MOD MaxLabel)
           END
         END;
         decR; decR
@@ -887,15 +906,16 @@ MODULE ORG;
     *)
 
   PROCEDURE Trap(cond, num: INTEGER);
+  VAR l: INTEGER;
   BEGIN 
     e("Trap");
-    PutCondBranch(negated(cond), label);
+    l := NextLabel();
+    PutCondBranch(negated(cond), l);
     PutRI("movi", 6, 2);       (* a6 := 2 is TRAP EXCEPTION      *)
     PutRI("movi", 7, num);     (* a7 := num is TRAP Reason       *)
     (* PutA("syscall", "# Trap"); Not supposed to come back here *)
     PutCallLocal(4, "OberonSyscallHandler");
-    PutLabel(label); 
-    INC(label)
+    PutLabel(l); 
   END Trap;
 
   (* RH-1 must contains the pointer to check for NIL value.
@@ -1025,7 +1045,7 @@ MODULE ORG;
   PROCEDURE load(VAR x: Item);
     VAR 
       op: ARRAY 5 OF CHAR;
-      max, moduleKey: INTEGER;
+      max, moduleKey, lbl: INTEGER;
       moduleId: ORS.Ident;
   BEGIN
     e("load "); 
@@ -1088,15 +1108,15 @@ MODULE ORG;
         ClearRc(x.r);
       ELSIF x.mode = Cond THEN
         eStr("(cond");
-        IF x.lf = 0 THEN x.lf := label; INC(label) END;
+        IF x.lf = 0 THEN x.lf := NextLabel(); END;
         PutCondBranch(negated(x.r), x.lf);
         (* IF x.lt # 0 THEN PutLabel(x.lt) END; *)
         PutRI("movi", RH, 1); 
-        PutJump("j", label);
+        lbl := NextLabel();
+        PutJump("j", lbl);
         PutLabel(x.lf); x.lf := 0;
         PutRI("movi", RH, 0); 
-        PutLabel(label);
-        INC(label);
+        PutLabel(lbl);
         x.r := RH; incR
       END;
       x.mode := Reg
@@ -1514,6 +1534,7 @@ MODULE ORG;
   END TypeTest; *)
   
   PROCEDURE TypeTest*(VAR x: Item; T: ORB.Type; varpar, isguard: BOOLEAN);
+  VAR lbl: INTEGER;
   BEGIN
     e("TypeTest RH:"); eInt(RH); eStr(" varpar:"); eInt(ORD(varpar)); eStr(" isguard:"); eInt(ORD(isguard));
     IF T = NIL THEN
@@ -1535,13 +1556,14 @@ MODULE ORG;
       ELSE
         load(x);                         (* Load pointer content (address)    *)
         PutRI("movi", RH, 0);
-        PutBranchR("beqz", x.r, label);  (* NIL belongs to every pointer type *)
+        lbl := NextLabel();
+        PutBranchR("beqz", x.r, lbl);  (* NIL belongs to every pointer type *)
         PutRRI("addi", x.r, x.r, -8);
         PutRRI("l32i", x.r, x.r,  0);
         PutMoveRRI("l32i", 1020, x.r, x.r, T.nofpar * 4);
         (* tag of T *)
         loadTypTagAdr(T);
-        PutLabel(label); INC(label);
+        PutLabel(lbl);
         IF isguard THEN
           IF check THEN Trap(NEQ, TrGuard); incR
           ELSE decR END
@@ -1564,38 +1586,59 @@ MODULE ORG;
 
   PROCEDURE And1*(VAR x: Item);   (* x := x & *)
   BEGIN
-    e("And1");
-    IF x.mode # Cond THEN loadCond(x) END ;
-    IF x.lf = 0 THEN x.lf := label; INC(label) END;
+    e("And1 x.lf:"); eInt(x.lf); eStr(" x.lt:"); eInt(x.lt);
+
+    IF x.mode # Cond THEN loadCond(x) END;
+    IF x.lf = 0 THEN x.lf := NextLabel() END;
     PutCondBranch(negated(x.r), x.lf);
-    (* IF x.lt # 0 THEN PutLabel(x.lt); x.lt := 0 END; *)
+    IF x.lt # 0 THEN PutLabel(x.lt); x.lt := 0 END;
+    e("End of And1 x.lf:"); eInt(x.lf); eStr(" x.lt:"); eInt(x.lt);
   END And1;
 
   PROCEDURE And2*(VAR x, y: Item);
   BEGIN
-    e("And2");
+    e("And2 x.lf:"); eInt(x.lf); eStr(" x.lt:"); eInt(x.lt);
+    eStr(" y.lf:"); eInt(y.lf); eStr(" y.lt:"); eInt(y.lt);
+
     IF y.mode # Cond THEN loadCond(y) END;
-    IF y.lt = 0 THEN y.lt := label; INC(label) END;
+    IF y.lt = 0 THEN y.lt := NextLabel() END;
     x.lt := y.lt; x.r := y.r;
+    IF x.lf = 0 THEN 
+      x.lf := y.lf 
+    ELSIF y.lf # 0 THEN
+      x.lf := x.lf * MaxLabel + y.lf
+    END;
+
+    e("End of And2 x.lt:"); eInt(x.lf); eStr(" x.lt:"); eInt(x.lt);
+    eStr(" y.lf:"); eInt(y.lf); eStr(" y.lt:"); eInt(y.lt);
   END And2;
 
   PROCEDURE Or1*(VAR x: Item);   (* x := x OR *)
   BEGIN
-    e("Or1");
+    e("Or1 x.lf:"); eInt(x.lf); eStr(" x.lt:"); eInt(x.lt);
     IF x.mode # Cond THEN loadCond(x) END ;
-    IF x.lt = 0 THEN x.lt := label; INC(label) END;
+    IF x.lt = 0 THEN x.lt := NextLabel() END;
     PutCondBranch(x.r, x.lt);
-    (* IF x.lf # 0 THEN PutLabel(x.lf); x.lf := 0 END; *)
+    IF x.lf # 0 THEN PutLabel(x.lf); x.lf := 0 END;
+    e("End of Or1 x.lf:"); eInt(x.lf); eStr(" x.lt:"); eInt(x.lt);
   END Or1;
 
   PROCEDURE Or2*(VAR x, y: Item);
   BEGIN
-    e("Or2");
+    e("Or2 x.lf:"); eInt(x.lf); eStr(" x.lt:"); eInt(x.lt);
+    eStr(" y.lf:"); eInt(y.lf); eStr(" y.lt:"); eInt(y.lt);
+
     IF y.mode # Cond THEN loadCond(y) END ;
-    IF y.lf = 0 THEN y.lf := label; INC(label) END;
+    IF y.lf = 0 THEN y.lf := NextLabel() END;
     x.lf := y.lf; x.r := y.r;
-    IF x.lt = 0 THEN x.lt := y.lt END;
+    IF x.lt = 0 THEN
+      x.lt := y.lt
+    ELSIF y.lt # 0 THEN
+      x.lt := x.lt * MaxLabel + y.lt 
+    END;
     (*x.a := y.a; x.b := merged(y.b, x.b); x.r := y.r *)
+    e("End of Or2 x.lt:"); eInt(x.lf); eStr(" x.lt:"); eInt(x.lt);
+    eStr(" y.lf:"); eInt(y.lf); eStr(" y.lt:"); eInt(y.lt);
   END Or2;
 
   PROCEDURE ClearLabels*(VAR x: Item);
@@ -1833,6 +1876,7 @@ MODULE ORG;
   END Singleton;
 
   PROCEDURE Set*(VAR x, y: Item);   (* x := {x .. y} *)
+  VAR lbl: INTEGER;
   BEGIN
     e("Set");
     IF (x.mode = ORB.Const) & (y.mode = ORB.Const) THEN
@@ -1860,14 +1904,15 @@ MODULE ORG;
           y.r := RH; incR
         ELSE 
           load(y); 
-          PutBranchRI("bgei", y.r, 31, label);
+          lbl := NextLabel();
+          PutBranchRI("bgei", y.r, 31, lbl);
           PutRI("movi", RH, -1);
           PutRRI("addi", y.r, y.r, 1);
           PutR("ssl", y.r);
           PutRR("sll", y.r, RH);
         END;
         PutRRR("xor", x.r, x.r, y.r);
-        IF y.mode # ORB.Const THEN PutLabel(label); INC(label) END;
+        IF y.mode # ORB.Const THEN PutLabel(lbl) END;
         decR
       END
     END
@@ -1933,6 +1978,7 @@ MODULE ORG;
     (* Case Statements *)
 
   PROCEDURE CaseHead*(VAR x: Item; VAR L0, L1: INTEGER); (* L0 = Jump Table High bound addr, L1 = ELSE clause *)
+  VAR lbl: INTEGER;
   BEGIN 
     e("CaseHead");
     CheckFreeRegs(4);
@@ -1940,13 +1986,15 @@ MODULE ORG;
     PutRL("movi", RH, L0);                (* Get address of case table *)
     PutRRI("l32i", RH+1, RH, 0);          (* Low bound *)
     PutRR("mov", RH+2, RH+1);             (* Save it for later *)
-    PutBranchRR("bge", x.r, RH+1, label);
+    lbl := NextLabel();
+    PutBranchRR("bge", x.r, RH+1, lbl);
     PutJump("j", L1);                     (* Else clause if lower *)
-    PutLabel(label); INC(label);
+    PutLabel(lbl);
     PutRRI("l32i", RH+1, RH, 4);
-    PutBranchRR("blt", x.r, RH+1, label);
+    lbl := NextLabel();
+    PutBranchRR("blt", x.r, RH+1, lbl);
     PutJump("j", L1);                     (* Else clause if higher *)
-    PutLabel(label); INC(label);
+    PutLabel(lbl);
     PutRRI("addi", RH, RH, 8);            (* Compute index in table *)
     PutRRR("sub", x.r, x.r, RH+2);
     PutRRI("slli", x.r, x.r, 2);
@@ -1959,10 +2007,11 @@ MODULE ORG;
   PROCEDURE CaseTail*(L0, L1, n: INTEGER; VAR tab: ARRAY OF LabelRange);  (* L0: Jump Table label, L1 = label for else *)
     VAR i, j, l1: INTEGER;
 
-    PROCEDURE PutEntry(label: INTEGER);
+    PROCEDURE PutEntry(lbl: INTEGER);
     BEGIN 
-      Texts.WriteString(CodeW, "    .int L");
-      Texts.WriteInt(CodeW, label, 0);
+      Texts.WriteString(CodeW, "    .int ");
+      Texts.WriteInt(CodeW, lbl, 0);
+      Texts.WriteString(CodeW, "$");
       Texts.WriteLn(CodeW);
     END PutEntry;
 
@@ -2044,6 +2093,7 @@ MODULE ORG;
 
   PROCEDURE StringRelation*(op: INTEGER; VAR x, y: Item);   (* x := x < y *)
     (* x, y are char arrays or strings *)
+  VAR lbl1, lbl2: INTEGER;
   BEGIN
     e("string relation");
     CheckFreeRegs(4);
@@ -2051,15 +2101,16 @@ MODULE ORG;
     IF x.type.form = ORB.String THEN loadStringAdr(x) ELSE loadAdr(x) END ;
     IF y.type.form = ORB.String THEN loadStringAdr(y) ELSE loadAdr(y) END ;
     decR; decR; decR; decR;
-    PutLabel(label);
+    lbl1 := NextLabel();
+    PutLabel(lbl1);
     PutRRI("l8ui", RH, x.r, 0);
     PutRRI("addi", x.r, x.r, 1);
     PutRRI("l8ui", RH+1, y.r, 0);
     PutRRI("addi", y.r, y.r, 1);
-    PutBranchRR("bne", RH, RH+1, label + 1);
-    PutBranchR("bnez", RH, label);
-    PutLabel(label + 1);
-    INC(label, 2);
+    lbl2 := NextLabel();
+    PutBranchRR("bne", RH, RH+1, lbl2);
+    PutBranchR("bnez", RH, lbl1);
+    PutLabel(lbl2);
     incR; incR;
     SetCC(x, relmap[op - ORS.eql])
   END StringRelation;
@@ -2117,7 +2168,7 @@ MODULE ORG;
   END Store;
 
   PROCEDURE StoreStruct*(VAR x, y: Item); (* x := y, frame = 0 *)
-  VAR size: INTEGER;
+  VAR size, lbl: INTEGER;
   BEGIN
     e("StoreStruct");
     IF y.type.size # 0 THEN
@@ -2132,7 +2183,8 @@ MODULE ORG;
         ELSE (*y  open array*) 
           PutMoveRRI("l32i", 1020, RH, SP, x.a + 4);
           size := y.type.base.size;  (* element size *)
-          PutBranchR("beqz", RH, label);
+          lbl := NextLabel();
+          PutBranchR("beqz", RH, lbl);
           IF size = 1 THEN 
             PutRRI("addi", RH, RH, 3); 
             PutRRI("srai", RH, RH, 2)
@@ -2145,27 +2197,26 @@ MODULE ORG;
             incR; incR; 
             Trap(GT, TrCopy)
           END;
-          PutLabel(label);
-          INC(label)
+          PutLabel(lbl)
         END
       ELSIF x.type.form = ORB.Record THEN 
         PutRI("movi", RH, x.type.size DIV 4)
       ELSE 
         ORS.Mark("inadmissible assignment")
       END;
-      PutBranchR("loop", RH, label);
+      lbl := NextLabel();
+      PutBranchR("loop", RH, lbl);
         PutRRI("l32i", RH+1, y.r, 0); 
         PutRRI("addi", y.r, y.r, 4);
         PutRRI("s32i", RH+1, x.r, 0); 
         PutRRI("addi", x.r, x.r, 4);
-      PutLabel(label);
-      INC(label);
+      PutLabel(lbl)
     END ;
     RH := FirstRH; UsedRegs := {}
   END StoreStruct;
 
   PROCEDURE CopyString*(VAR x, y: Item);  (* x := y *) 
-  VAR len: INTEGER;
+  VAR len, lbl: INTEGER;
   BEGIN 
     e("CopyString");
     CheckFreeRegs(4);
@@ -2181,14 +2232,14 @@ MODULE ORG;
     END ;
     loadStringAdr(y);
     PutRI("movi", RH, (y.b + 3) DIV 4);
-    PutBranchR("loop", RH, label);
+    lbl := NextLabel();
+    PutBranchR("loop", RH, lbl);
       PutRRI("l32i", RH+1,  y.r, 0); 
       PutRRI("addi", y.r, y.r, 4);
       PutRRI("s32i", RH+1,  x.r, 0); 
       PutRRI("addi", x.r, x.r, 4);
-    PutLabel(label);
-    RH := FirstRH; UsedRegs := {};
-    INC(label)
+    PutLabel(lbl);
+    RH := FirstRH; UsedRegs := {}
    END CopyString;
   
   (* Code generation for parameters *)
@@ -2258,7 +2309,7 @@ MODULE ORG;
       load(z); 
     END ;
     
-    L := label; INC(label);
+    L := NextLabel();
 
     IF w.a > 0 THEN PutCondBranch(GT, L)
     ELSIF w.a < 0 THEN PutCondBranch(LT, L)
@@ -2286,39 +2337,40 @@ MODULE ORG;
   (* Branches, procedure calls, procedure prolog and epilog *)
 
   PROCEDURE Here*(): INTEGER;
+  VAR lbl: INTEGER;
   BEGIN
     e("Here");
-    PutLabel(label);
-    INC(label); 
-    RETURN label-1
+    lbl := NextLabel();
+    PutLabel(lbl);
+    RETURN lbl
   END Here;
 
   PROCEDURE GetLabelTF*(VAR x: Item);
   BEGIN 
-    x.lt := label; INC(label);
-    x.lf := label; INC(label)
+    IF x.lt = 0 THEN x.lt := NextLabel() END;
+    IF x.lf = 0 THEN x.lf := NextLabel() END
   END GetLabelTF;
 
   PROCEDURE GetSetLabelTF*(VAR x: Item; VAR L: INTEGER);
   BEGIN 
-    x.lt := label; INC(label);
-    x.lf := label; L := label; 
-    INC(label)
+    IF x.lt = 0 THEN x.lt := NextLabel() END;
+    IF x.lf = 0 THEN x.lf := NextLabel() END;
+    L := x.lf;
   END GetSetLabelTF;
 
   PROCEDURE GetLabelT*(VAR x: Item);
   BEGIN 
-    x.lt := label; INC(label)
+    IF x.lt = 0 THEN x.lt := NextLabel() END
   END GetLabelT;
 
   PROCEDURE GetLabelF*(VAR x: Item);
   BEGIN 
-    x.lf := label; INC(label)
+    IF x.lf = 0 THEN x.lf := NextLabel() END
   END GetLabelF;
 
   PROCEDURE GetLabel*(VAR L: INTEGER);
   BEGIN
-    L := label; INC(label)
+    L := NextLabel()
   END GetLabel;
 
   PROCEDURE FJump*(L: INTEGER);
@@ -2331,7 +2383,7 @@ MODULE ORG;
   BEGIN
     e("CFJump");
     IF x.mode # Cond THEN loadCond(x) END;
-    IF x.lf = 0 THEN x.lf := label; INC(label) END;
+    IF x.lf = 0 THEN x.lf := NextLabel() END;
     PutCondBranch(negated(x.r), x.lf); 
     IF x.lt # 0 THEN PutLabel(x.lt); x.lt := 0 END
   END CFJump;
@@ -2500,6 +2552,7 @@ MODULE ORG;
     (* interrupt procedures requires to be put in iram to be fast.  To be implemented *)
     e("Enter");
     frame := 0;
+    theNextLabel := 1;
     IF ~ProcPresent THEN
       ProcPresent := TRUE;
       (* Put a .text... section head *)
@@ -2749,6 +2802,7 @@ MODULE ORG;
   END Put;
 
   PROCEDURE Copy*(VAR x, y, z: Item);
+  VAR lbl1, lbl2: INTEGER;
   BEGIN 
     e("Copy");
     load(x); load(y);
@@ -2762,18 +2816,18 @@ MODULE ORG;
         Trap(MI, TrCopy); (* array or string copy overflow *)
         incR
       END; 
-      PutBranchR("beqz", z.r, label);
-      INC(label)
+      lbl1 := NextLabel();
+      PutBranchR("beqz", z.r, lbl1);
     END ;
-    PutBranchR("loop", z.r, label);
+    lbl2 := NextLabel();
+    PutBranchR("loop", z.r, lbl2);
       PutRRI("l32i", RH, x.r, 0); 
       PutRRI("addi", x.r, x.r, 4);
       PutRRI("s32i", RH, y.r, 0); 
       PutRRI("addi", y.r, y.r, 4);
-    PutLabel(label);
+    PutLabel(lbl2);
     decR; decR; decR;
-    INC(label);
-    PutLabel(label - 2);
+    PutLabel(lbl1);
   END Copy;
 
   PROCEDURE LDPSR*(VAR x: Item);
@@ -3347,7 +3401,7 @@ PROCEDURE Abs*(VAR x: Item);
     strx    := 0;
     varsize := 0; 
     RH      := FirstRH; 
-    label   := 1;
+    theNextLabel := 1;
 
     CodeF := Files.New("");
     Texts.OpenWriterToFile(CodeW, CodeF);

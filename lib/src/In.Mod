@@ -132,9 +132,11 @@ MODULE In;
       END;
       Char(ch);
     END;
+    DBGON
     i := 0; j := 0;
     WHILE Done & ((ch = BS) OR (ch = "-") OR ((ch >= "0") & (ch <= "9"))) & (j < LEN(str)) DO
-      IF (ch = BS) & (j > 0) THEN
+    DBGOFF
+    IF (ch = BS) & (j > 0) THEN
         IF Echo THEN Out.Char(BS); Out.Char(SPACE); Out.Char(BS) END;
         DEC(j);
       ELSIF ch > SPACE THEN
