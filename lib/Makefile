@@ -35,6 +35,7 @@ MATH = $(SRCDIR)/math_support.S
 MATHO = $(BLDDIR)/math_support.o
 
 SRC = \
+  In.Mod \
   Out.Mod \
   Kernel.Mod \
   Math.Mod \

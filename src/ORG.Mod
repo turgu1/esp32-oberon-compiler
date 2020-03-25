@@ -1576,6 +1576,19 @@ MODULE ORG;
 
   (* Code generation for Boolean operators *)
 
+  PROCEDURE merged(L0, L1: INTEGER): INTEGER;
+    VAR L2: INTEGER;
+  BEGIN (* merge labels from operand of x and y *)
+    IF L0 = 0 THEN 
+      L2 := L1
+    ELSIF L1 # 0 THEN
+      L2 := L0 * MaxLabel + L1;
+    ELSE
+      L2 := L0
+    END;
+    RETURN L2
+  END merged;
+
   PROCEDURE Not*(VAR x: Item);   (* x := ~x *)
     VAR t: INTEGER;
   BEGIN
@@ -1589,9 +1602,12 @@ MODULE ORG;
     e("And1 x.lf:"); eInt(x.lf); eStr(" x.lt:"); eInt(x.lt);
 
     IF x.mode # Cond THEN loadCond(x) END;
-    IF x.lf = 0 THEN x.lf := NextLabel() END;
+    IF x.lf = 0 THEN 
+      x.lf := NextLabel()
+    END;
     PutCondBranch(negated(x.r), x.lf);
     IF x.lt # 0 THEN PutLabel(x.lt); x.lt := 0 END;
+
     e("End of And1 x.lf:"); eInt(x.lf); eStr(" x.lt:"); eInt(x.lt);
   END And1;
 
@@ -1601,13 +1617,8 @@ MODULE ORG;
     eStr(" y.lf:"); eInt(y.lf); eStr(" y.lt:"); eInt(y.lt);
 
     IF y.mode # Cond THEN loadCond(y) END;
-    IF y.lt = 0 THEN y.lt := NextLabel() END;
-    x.lt := y.lt; x.r := y.r;
-    IF x.lf = 0 THEN 
-      x.lf := y.lf 
-    ELSIF y.lf # 0 THEN
-      x.lf := x.lf * MaxLabel + y.lf
-    END;
+    x.lt := y.lt; x.r := y.r; y.lt := 0;
+    x.lf := merged(x.lf, y.lf); y.lf := 0;
 
     e("End of And2 x.lt:"); eInt(x.lf); eStr(" x.lt:"); eInt(x.lt);
     eStr(" y.lf:"); eInt(y.lf); eStr(" y.lt:"); eInt(y.lt);
@@ -1616,10 +1627,12 @@ MODULE ORG;
   PROCEDURE Or1*(VAR x: Item);   (* x := x OR *)
   BEGIN
     e("Or1 x.lf:"); eInt(x.lf); eStr(" x.lt:"); eInt(x.lt);
+
     IF x.mode # Cond THEN loadCond(x) END ;
     IF x.lt = 0 THEN x.lt := NextLabel() END;
     PutCondBranch(x.r, x.lt);
-    IF x.lf # 0 THEN PutLabel(x.lf); x.lf := 0 END;
+    IF (x.lf # 0) THEN PutLabel(x.lf); x.lf := 0 END;
+
     e("End of Or1 x.lf:"); eInt(x.lf); eStr(" x.lt:"); eInt(x.lt);
   END Or1;
 
@@ -1629,14 +1642,9 @@ MODULE ORG;
     eStr(" y.lf:"); eInt(y.lf); eStr(" y.lt:"); eInt(y.lt);
 
     IF y.mode # Cond THEN loadCond(y) END ;
-    IF y.lf = 0 THEN y.lf := NextLabel() END;
-    x.lf := y.lf; x.r := y.r;
-    IF x.lt = 0 THEN
-      x.lt := y.lt
-    ELSIF y.lt # 0 THEN
-      x.lt := x.lt * MaxLabel + y.lt 
-    END;
-    (*x.a := y.a; x.b := merged(y.b, x.b); x.r := y.r *)
+    x.lf := y.lf; x.r := y.r; y.lf := 0;
+    x.lt := merged(x.lt, y.lt); y.lt := 0;
+
     e("End of Or2 x.lt:"); eInt(x.lf); eStr(" x.lt:"); eInt(x.lt);
     eStr(" y.lf:"); eInt(y.lf); eStr(" y.lt:"); eInt(y.lt);
   END Or2;
