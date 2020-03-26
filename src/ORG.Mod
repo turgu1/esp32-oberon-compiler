@@ -2429,14 +2429,12 @@ MODULE ORG;
     VAR lbl: INTEGER;
   BEGIN
     e("CBJump");
-    IF x.mode # Cond THEN loadCond(x) END ;
-    PutCondBranch(negated(x.r), L); 
-    (* This is uggly, but I can't find a better solution for complex conditions. There
-       are cases for which a false label has been generated that is not pointing at
-       the beginning of the REPEAT statement... For example: (i & j & (k & (l OR m)) & n) *)
-    IF x.lf # 0 THEN
+    IF x.mode # Cond THEN loadCond(x) END;
+    IF x.lf = 0 THEN
+      PutCondBranch(negated(x.r), L); 
+    ELSE
       lbl := NextLabel();
-      PutJump("j", lbl);
+      PutCondBranch(x.r, lbl); 
       PutLabel(x.lf); x.lf := 0;
       PutJump("j", L);
       PutLabel(lbl)
