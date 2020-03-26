@@ -6,9 +6,26 @@
     .global _Pattern21_A6E3D3E6_s_data_types
 _Pattern21_A6E3D3E6_s_data_types:
 _Pattern21_s_types:
-    .int 32,-1,-1,-1,-1,32,81926,-1
-    .int -1,-1,32,163845,-1,-1,-1,32
-    .int 245765,-1,-1,-1
+    .int 32
+    .int -1
+    .int -1
+    .int -1
+    .int -1
+    .int 32
+    .int _Pattern21_s_types+20
+    .int -1
+    .int -1
+    .int -1
+    .int 32
+    .int _Pattern21_s_types+40
+    .int -1
+    .int -1
+    .int -1
+    .int 32
+    .int _Pattern21_s_types+60
+    .int -1
+    .int -1
+    .int -1
 
     .align 4
     .section .bss_Pattern21_A6E3D3E6
@@ -31,53 +48,50 @@ _Pattern21_init:
     movi a2, _Pattern21_s_bss
     l32i a3, a2, 0
     movi a4, 0
-    mov a5, 4
-    beqz a3, L2
-    addi a4, a3, -8
-    l32i a4, a4, 0
-    l32i a4, a4, 4
-    movi a5, _Pattern21_s_types
-    addi a5, a5, 20
-L2:
-    bne a3, a4, L3
+    beqz a3, 2$
+    addi a3, a3, -8
+    l32i a3, a3, 0
+    l32i a3, a3, 4
+    movi a4, _Pattern21_s_types
+    addi a4, a4, 20
+2$:
+    bne a3, a4, 3$
     l32i a3, a2, 0
     movi a4, 10
     s32i a4, a3, 4
-    j L1
-L3:
+    j 1$
+3$:
     l32i a3, a2, 0
     movi a4, 0
-    mov a5, 4
-    beqz a3, L4
-    addi a4, a3, -8
-    l32i a4, a4, 0
-    l32i a4, a4, 4
-    movi a5, _Pattern21_s_types
-    addi a5, a5, 40
-L4:
-    bne a3, a4, L5
+    beqz a3, 4$
+    addi a3, a3, -8
+    l32i a3, a3, 0
+    l32i a3, a3, 4
+    movi a4, _Pattern21_s_types
+    addi a4, a4, 40
+4$:
+    bne a3, a4, 5$
     l32i a3, a2, 0
     movi a4, 1075838976
     s32i a4, a3, 4
-    j L1
-L5:
+    j 1$
+5$:
     l32i a3, a2, 0
     movi a4, 0
-    mov a5, 4
-    beqz a3, L6
-    addi a4, a3, -8
-    l32i a4, a4, 0
-    l32i a4, a4, 4
-    movi a5, _Pattern21_s_types
-    addi a5, a5, 60
-L6:
-    bne a3, a4, L7
+    beqz a3, 6$
+    addi a3, a3, -8
+    l32i a3, a3, 0
+    l32i a3, a3, 4
+    movi a4, _Pattern21_s_types
+    addi a4, a4, 60
+6$:
+    bne a3, a4, 7$
     l32i a3, a2, 0
     movi a4, 5
     s32i a4, a3, 4
-    j L1
-L7:
-L1:
+    j 1$
+7$:
+1$:
     retw
     .size _Pattern21_init, .-_Pattern21_init
 

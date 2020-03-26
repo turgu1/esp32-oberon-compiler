@@ -14,6 +14,7 @@ _Pattern10_s_bss:
     .global _Pattern10_A5E3D3E5_s_text
 _Pattern10_A5E3D3E5_s_text:
 
+    .type _P, @function
 _P:
     entry a1, 32
     s32i a2, a1, 0

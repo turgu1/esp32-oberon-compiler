@@ -23,13 +23,13 @@ _Pattern11_init:
     s32i a3, a2, 0
     movi a3, -1
     l32i a4, a2, 8
-    bgei a4, 31, L1
-    movi a5, -1
     addi a4, a4, 1
+    bgei a4, 32, 1$
+    movi a5, -1
     ssl a4
     sll a4, a5
     xor a3, a3, a4
-L1:
+1$:
     s32i a3, a2, 0
     l32i a3, a2, 4
     movi a4, -1
@@ -41,20 +41,20 @@ L1:
     ssl a3
     sll a3, a4
     l32i a4, a2, 8
-    bgei a4, 31, L2
-    movi a5, -1
     addi a4, a4, 1
+    bgei a4, 32, 2$
+    movi a5, -1
     ssl a4
     sll a4, a5
     xor a3, a3, a4
-L2:
+2$:
     s32i a3, a2, 0
     movi a3, 10412
     l32i a4, a2, 8
-    bbc a3, a4, L3
+    bbc a3, a4, 3$
     movi a3, 1
     s32i a3, a2, 4
-L3:
+3$:
     retw
     .size _Pattern11_init, .-_Pattern11_init
 

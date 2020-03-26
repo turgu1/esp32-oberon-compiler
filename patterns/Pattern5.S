@@ -18,59 +18,58 @@ _Pattern5_init:
     movi a2, _Pattern5_s_bss
     l32i a3, a2, 0
     movi a4, 0
-    bne a3, a4, L1
+    bne a3, a4, 1$
     mov a3, a2
     l32i a4, a3, 0
     addi a4, a4, 1
     s32i a4, a3, 0
-L1:
+1$:
     l32i a3, a2, 0
     movi a4, 0
-    blt a3, a4, L2
+    blt a3, a4, 2$
     l32i a3, a2, 0
     movi a4, 100
-    bge a3, a4, L2
-L3:
+    bge a3, a4, 2$
     mov a3, a2
     l32i a4, a3, 0
     addi a4, a4, -1
     s32i a4, a3, 0
-L2:
+2$:
     l32i a3, a2, 0
     movi a4, 1
     and a3, a3, a4
-    bnez a3, L4
+    bnez a3, 3$
     l32i a3, a2, 4
     l32i a4, a2, 0
-    bbc a3, a4, L5
-L4:
+    bbc a3, a4, 4$
+3$:
     movi a3, -1000
     s32i a3, a2, 0
-L5:
+4$:
     l32i a3, a2, 0
     movi a4, 0
-    bge a3, a4, L6
+    bge a3, a4, 5$
     movi a3, 0
     s32i a3, a2, 4
-    j L7
-L6:
+    j 6$
+5$:
     l32i a3, a2, 0
     movi a4, 10
-    bge a3, a4, L8
+    bge a3, a4, 7$
     movi a3, 1
     s32i a3, a2, 4
-    j L7
-L8:
+    j 6$
+7$:
     l32i a3, a2, 0
     movi a4, 100
-    bge a3, a4, L9
+    bge a3, a4, 8$
     movi a3, 2
     s32i a3, a2, 4
-    j L7
-L9:
+    j 6$
+8$:
     movi a3, 4
     s32i a3, a2, 4
-L7:
+6$:
     retw
     .size _Pattern5_init, .-_Pattern5_init
 

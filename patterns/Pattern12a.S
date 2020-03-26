@@ -17,6 +17,7 @@ _Pattern12a_A42AACE9_s_text:
     .global _Pattern12a_A42AACE9_p_P
     .type _Pattern12a_A42AACE9_p_P, @function
 _Pattern12a_A42AACE9_p_P:
+    .type _P, @function
 _P:
     entry a1, 16
     movi a2, _Pattern12a_s_bss

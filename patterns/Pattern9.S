@@ -14,20 +14,21 @@ _Pattern9_s_bss:
     .global _Pattern9_ADE2D4B5_s_text
 _Pattern9_ADE2D4B5_s_text:
 
+    .type _F, @function
 _F:
     entry a1, 32
     s32i a2, a1, 0
     movi a2, _Pattern9_s_bss
     l32i a3, a1, 0
     movi a4, 1065353216
-    blt a3, a4, L1
+    blt a3, a4, 1$
     l32i a10, a1, 0
     call8 _F
     mov a6, a11
     call4 _F
     mov a3, a7
     s32i a3, a1, 0
-L1:
+1$:
     l32i a3, a1, 0
     retw
     .size _F, .-_F

@@ -17,6 +17,7 @@ _Pattern12b_A32BBAE9_s_text:
     .global _Pattern12b_A32BBAE9_p_Q
     .type _Pattern12b_A32BBAE9_p_Q, @function
 _Pattern12b_A32BBAE9_p_Q:
+    .type _Q, @function
 _Q:
     entry a1, 16
     movi a2, _Pattern12b_s_bss

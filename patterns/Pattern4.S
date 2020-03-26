@@ -6,7 +6,12 @@
     .global _Pattern4_A8E2D4B5_s_data_types
 _Pattern4_A8E2D4B5_s_data_types:
 _Pattern4_s_types:
-    .int 32,-1,-1,-1,12,-1
+    .int 32
+    .int -1
+    .int -1
+    .int -1
+    .int _Pattern4_s_types+12
+    .int -1
 
     .align 4
     .section .bss_Pattern4_A8E2D4B5

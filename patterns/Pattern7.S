@@ -17,18 +17,18 @@ _Pattern7_init:
     entry a1, 16
     movi a2, _Pattern7_s_bss
     movi a3, 0
-L1:
+1$:
     l32i a4, a2, 8
     addi a4, a4, -1
-    blt a4, a3, L2
+    blt a4, a3, 2$
     s32i a3, a2, 0
     l32i a3, a2, 4
     slli a3, a3, 1
     s32i a3, a2, 4
     l32i a3, a2, 0
     addi a3, a3, 1
-    j L1
-L2:
+    j 1$
+2$:
     retw
     .size _Pattern7_init, .-_Pattern7_init
 

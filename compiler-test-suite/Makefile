@@ -1,7 +1,31 @@
-OB = ../Oberon
+TOOLCHAIN = xtensa-esp32-elf-
 
-SRCDIR = src
-BLDDIR = build
+ASFLAGS_PLATFORM  = -mlongcalls -mauto-litpools -mtext-section-literals -fstrict-volatile-bitfields
+LDFLAGS_PLATFORM = $(AFLAGS_PLATFORM)
+
+###
+# General project build
+###
+OB = ../Oberon
+CC = $(TOOLCHAIN)gcc
+LD = $(TOOLCHAIN)ld
+OC = $(TOOLCHAIN)objcopy
+OS = $(TOOLCHAIN)size
+
+BLDDIR = ./build
+SRCDIR = ./src
+LIBDIR = ../lib
+
+ESP32LIB = esp32-oberon
+# Linker script location.
+LDSCRIPT = $(LIBDIR)/ld/esp32.ld
+LDFLAGS += -nostdlib -T$(LDSCRIPT) -Wl,-Map=$@.map -Wl,--cref -Wl,--gc-sections
+LDFLAGS += $(LDFLAGS_PLATFORM)
+LDFLAGS += -L$(LIBDIR) -l$(ESP32LIB)
+
+ASFLAGS += -c -O0 -Wall -fmessage-length=0
+ASFLAGS += $(ASFLAGS_PLATFORM)
+ASFLAGS += -g
 
 SRC = \
   ArrayAssignment.Mod \
@@ -70,14 +94,6 @@ SRC = \
   TestByteType.Mod \
   TestCPS.Mod \
   TestConstFunc.Mod \
-  TestCyclicImport00A.Mod \
-  TestCyclicImport01A.Mod \
-  TestCyclicImport00B.Mod \
-  TestCyclicImport01B.Mod \
-  TestCyclicImport10A.Mod \
-  TestCyclicImport12.Mod \
-  TestCyclicImport11.Mod \
-  TestCyclicImport10B.Mod \
   TestEqualSignature00.Mod \
   TestFor.Mod \
   TestFor1.Mod \
@@ -86,10 +102,8 @@ SRC = \
   TestINC1.Mod \
   TestINCLAndEXCL.Mod \
   TestImport00.Mod \
-  TestImport01.Mod \
   TestImport10.Mod \
   TestImport100.Mod \
-  TestImport11.Mod \
   TestImport110.Mod \
   TestImport111.Mod \
   TestImport112.Mod \
@@ -108,21 +122,18 @@ SRC = \
   TestImport31.Mod \
   TestImport40.Mod \
   TestImport41.Mod \
-  TestImport42.Mod \
   TestImport50.Mod \
   TestImport51.Mod \
   TestImport52.Mod \
   TestImport53.Mod \
   TestImport60.Mod \
   TestImport61.Mod \
-  TestImport62.Mod \
   TestImport70.Mod \
   TestImport71.Mod \
   TestImport81.Mod \
   TestImport82.Mod \
   TestImport80.Mod \
   TestImport90.Mod \
-  TestImport91.Mod \
   TestNestedProcs.Mod \
   TestODD.Mod \
   TestReturn0.Mod \
@@ -130,23 +141,59 @@ SRC = \
   TestStringsMod.Mod \
   TestSystemVal.Mod \
   TestTypeConvFun.Mod \
-  TestTypeGuardExt.Mod \
   TestTypeTest.Mod \
-  UniqueTypeAndProcNames.Mod \
   VarInit.Mod
   # VarParGuard.Mod
 
+Others = \
+	TestCyclicImport00.S \
+	TestCyclicImport01.S \
+	TestCyclicImport10.S
+
+Others2 = \
+	TestCyclicImport00B.Mod \
+	TestCyclicImport12.Mod \
+	TestCyclicImport11.Mod \
+  TestImport01.Mod \
+  TestImport11.Mod \
+  TestImport42.Mod \
+  TestImport62.Mod \
+  TestImport91.Mod \
+  TestTypeGuardExt.Mod \
+  UniqueTypeAndProcNames.Mod \
+  
 #	Pattern13.Mod
 
 SRCS = $(addprefix $(SRCDIR)/, $(SRC))
 SYMS = $(addprefix $(SRCDIR)/, $(SRC:.Mod=.smb))
 ASSS = $(addprefix $(BLDDIR)/, $(SRC:.Mod=.S))
+OBJS = $(ASSS:.S=.o)
+EXECS = $(ASSS:.S=.elf)
+OTHERS = $(addprefix $(BLDDIR)/, $(Others))
 
 $(BLDDIR)/%.S : $(SRCDIR)/%.Mod
 	$(OB) -o $(BLDDIR) -p ../lib -s $<
 
+$(BLDDIR)/%.o : $(BLDDIR)/%.S
+	@$(CC) -x assembler-with-cpp $(ASFLAGS) $< -o $@
+
+$(BLDDIR)/%.elf : $(BLDDIR)/%.o
+	$(CC) $^ $(LDFLAGS) -o $@
+
 .PHONY: all
-all: $(ASSS)
+all: oth $(EXECS) 
+
+$(BLDDIR)/TestCyclicImport00.S : $(SRCDIR)/TestCyclicImport00A.Mod
+	$(OB) -o $(BLDDIR) -p ../lib -s $<
+
+$(BLDDIR)/TestCyclicImport01.S : $(SRCDIR)/TestCyclicImport01B.Mod
+	$(OB) -o $(BLDDIR) -p ../lib -s $<
+
+$(BLDDIR)/TestCyclicImport10.S : $(SRCDIR)/TestCyclicImport10A.Mod
+	$(OB) -o $(BLDDIR) -p ../lib -s $<
+
+.PHONY: oth
+oth: $(OTHERS)
 
 clean:
 	rm build/*

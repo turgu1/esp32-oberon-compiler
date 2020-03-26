@@ -18,22 +18,22 @@ _Pattern6_init:
     movi a2, _Pattern6_s_bss
     movi a3, 0
     s32i a3, a2, 0
-L1:
+1$:
     l32i a3, a2, 0
     movi a4, 10
-    bge a3, a4, L2
+    bge a3, a4, 2$
     l32i a3, a2, 0
     addi a3, a3, 2
     s32i a3, a2, 0
-    j L1
-L2:
-L3:
+    j 1$
+2$:
+3$:
     l32i a3, a2, 0
     addi a3, a3, -1
     s32i a3, a2, 0
     l32i a3, a2, 0
     movi a4, 0
-    bne a3, a4, L3
+    bne a3, a4, 3$
     retw
     .size _Pattern6_init, .-_Pattern6_init
 

@@ -14,6 +14,7 @@ _Pattern8_s_bss:
     .global _Pattern8_ACE2D4B5_s_text
 _Pattern8_ACE2D4B5_s_text:
 
+    .type _P, @function
 _P:
     entry a1, 32
     s32i a2, a1, 0

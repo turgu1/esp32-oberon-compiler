@@ -14,42 +14,46 @@ _Pattern20_s_bss:
     .global _Pattern20_A6E3D3E5_s_text
 _Pattern20_A6E3D3E5_s_text:
 
+    .type _qa, @function
 _qa:
     entry a1, 32
     s32i a2, a1, 0
     s32i a3, a1, 4
     movi a2, _Pattern20_s_bss
     l8ui a3, a1, 0
-    beqz a3, L1
+    beqz a3, 1$
     l8ui a3, a1, 4
-    beqz a3, L1
+    beqz a3, 1$
     movi a3, 1
-    j L3
-L1:
+    j 2$
+1$:
     movi a3, 0
-L3:
+2$:
     retw
     .size _qa, .-_qa
 
     .align 4
+    .type _qb, @function
 _qb:
     entry a1, 32
     s32i a2, a1, 0
     s32i a3, a1, 4
     movi a2, _Pattern20_s_bss
     l8ui a3, a1, 0
-    bnez a3, L4
+    bnez a3, 1$
     l8ui a3, a1, 4
-    beqz a3, L5
+    beqz a3, 2$
+1$:
     movi a3, 1
-    j L6
-L5:
+    j 3$
+2$:
     movi a3, 0
-L6:
+3$:
     retw
     .size _qb, .-_qb
 
     .align 4
+    .type _q, @function
 _q:
     entry a1, 32
     s32i a2, a1, 0
@@ -111,12 +115,12 @@ _Pattern20_init:
     s32i a4, a3, 0
     l32i a3, a2, 4
     l32i a4, a2, 8
-    bge a3, a4, L7
+    bge a3, a4, 1$
     movi a3, 1
-    j L8
-L7:
+    j 2$
+1$:
     movi a3, 0
-L8:
+2$:
     s8i a3, a2, 0
     movi a3, 1
     s8i a3, a2, 0

@@ -18,41 +18,41 @@ _Pattern19_init:
     movi a2, _Pattern19_s_bss
     movi a3, 3
     movi a4, 5
-    blt a3, a4, L1
+    blt a3, a4, 1$
     movi a6, 2
     movi a7, 7
     call4 _OberonSyscallHandler
-L1:
+1$:
     movi a3, 3
     movi a4, 5
-    bge a3, a4, L2
+    bge a3, a4, 2$
     l8ui a3, a2, 8
-    bnez a3, L3
+    bnez a3, 3$
     movi a6, 2
     movi a7, 7
     call4 _OberonSyscallHandler
-L3:
-L2:
+3$:
+2$:
     l32i a3, a2, 0
     l32i a4, a2, 4
-    beq a3, a4, L4
+    beq a3, a4, 4$
     movi a6, 2
     movi a7, 7
     call4 _OberonSyscallHandler
-L4:
+4$:
     l32i a3, a2, 0
     movi a4, 0
-    beq a3, a4, L5
+    beq a3, a4, 5$
     movi a6, 2
     movi a7, 7
     call4 _OberonSyscallHandler
-L5:
+5$:
     l8ui a3, a2, 8
-    bnez a3, L6
+    bnez a3, 6$
     movi a6, 2
     movi a7, 7
     call4 _OberonSyscallHandler
-L6:
+6$:
     retw
     .size _Pattern19_init, .-_Pattern19_init
 

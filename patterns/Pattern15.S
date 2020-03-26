@@ -3,7 +3,7 @@
 
     .align 4
     .section .data_strs_Pattern15_A5E3D3EA
-_Pattern15_s_str:
+_Pattern15_data_strs:
     .byte 65,66,67,68,69,70,0,0,48,49,50,51,52,53,0,0
     .byte 37,0,0,0
 
@@ -20,6 +20,7 @@ _Pattern15_s_bss:
     .global _Pattern15_A5E3D3EA_s_text
 _Pattern15_A5E3D3EA_s_text:
 
+    .type _P, @function
 _P:
     entry a1, 32
     s32i a2, a1, 0
@@ -36,31 +37,31 @@ _Pattern15_init:
     entry a1, 16
     movi a2, _Pattern15_s_bss
     mov a3, a2
-    movi a4, _Pattern15_s_str
+    movi a4, _Pattern15_data_strs
     movi a5, 2
-    loop a5, L1
+    loop a5, 1$
     l32i a6, a4, 0
     addi a4, a4, 4
     s32i a6, a3, 0
     addi a3, a3, 4
-L1:
+1$:
     mov a3, a2
     addi a4, a2, 32
     movi a5, 8
-    loop a5, L2
+    loop a5, 2$
     l32i a6, a4, 0
     addi a4, a4, 4
     s32i a6, a3, 0
     addi a3, a3, 4
-L2:
+2$:
     addi a6, a2, 32
     movi a7, 32
     call4 _P
-    movi a6, _Pattern15_s_str
+    movi a6, _Pattern15_data_strs
     addi a6, a6, 8
     movi a7, 7
     call4 _P
-    movi a6, _Pattern15_s_str
+    movi a6, _Pattern15_data_strs
     addi a6, a6, 16
     movi a7, 2
     call4 _P

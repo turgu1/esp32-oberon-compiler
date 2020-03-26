@@ -6,8 +6,16 @@
     .global _Pattern14_A5E3D3E9_s_data_types
 _Pattern14_A5E3D3E9_s_data_types:
 _Pattern14_s_types:
-    .int 32,-1,-1,-1,-1,32,81926,-1
-    .int -1,-1
+    .int 32
+    .int -1
+    .int -1
+    .int -1
+    .int -1
+    .int 32
+    .int _Pattern14_s_types+20
+    .int -1
+    .int -1
+    .int -1
 
     .align 4
     .section .bss_Pattern14_A5E3D3E9
@@ -22,6 +30,7 @@ _Pattern14_s_bss:
     .global _Pattern14_A5E3D3E9_s_text
 _Pattern14_A5E3D3E9_s_text:
 
+    .type _P, @function
 _P:
     entry a1, 32
     s32i a2, a1, 0

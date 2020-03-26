@@ -925,16 +925,16 @@ MODULE ORG;
     *)
 
   PROCEDURE Trap(cond, num: INTEGER);
-  VAR l: INTEGER;
+  VAR lbl: INTEGER;
   BEGIN 
     e("Trap");
-    l := NextLabel();
-    PutCondBranch(negated(cond), l);
+    lbl := NextLabel();
+    PutCondBranch(negated(cond), lbl);
     PutRI("movi", 6, 2);       (* a6 := 2 is TRAP EXCEPTION      *)
     PutRI("movi", 7, num);     (* a7 := num is TRAP Reason       *)
     (* PutA("syscall", "# Trap"); Not supposed to come back here *)
     PutCallLocal(4, "OberonSyscallHandler");
-    PutLabel(l); 
+    PutLabel(lbl); 
   END Trap;
 
   (* RH-1 must contains the pointer to check for NIL value.
@@ -1129,7 +1129,7 @@ MODULE ORG;
         eStr("(cond");
         IF x.lf = 0 THEN x.lf := NextLabel(); END;
         PutCondBranch(negated(x.r), x.lf);
-        (* IF x.lt # 0 THEN PutLabel(x.lt) END; *)
+        IF x.lt # 0 THEN PutLabel(x.lt); x.lt := 0 END;
         PutRI("movi", RH, 1); 
         lbl := NextLabel();
         PutJump("j", lbl);
@@ -1645,7 +1645,12 @@ MODULE ORG;
   BEGIN
     e("Or1 x.lf:"); eInt(x.lf); eStr(" x.lt:"); eInt(x.lt);
 
+    (* 
     IF x.mode # Cond THEN loadCond(x) END ;
+    Put3(BC, x.r, x.b);  x.b := pc-1; FixLink(x.a); x.a := 0 
+    *)
+
+    IF x.mode # Cond THEN loadCond(x) END;
     IF x.lt = 0 THEN x.lt := NextLabel() END;
     PutCondBranch(x.r, x.lt);
     IF (x.lf # 0) THEN PutLabel(x.lf); x.lf := 0 END;
@@ -1657,8 +1662,13 @@ MODULE ORG;
   BEGIN
     e("Or2 x.lf:"); eInt(x.lf); eStr(" x.lt:"); eInt(x.lt);
     eStr(" y.lf:"); eInt(y.lf); eStr(" y.lt:"); eInt(y.lt);
-
+    
+    (* 
     IF y.mode # Cond THEN loadCond(y) END ;
+    x.a := y.a; x.b := merged(y.b, x.b); x.r := y.r
+    *)
+
+    IF y.mode # Cond THEN loadCond(y) END;
     x.lf := y.lf; x.r := y.r; y.lf := 0;
     x.lt := merged(x.lt, y.lt); y.lt := 0;
 
@@ -1691,10 +1701,10 @@ MODULE ORG;
         PutRS("rfr",   x.r, 0  );
       END
     ELSE (*form = Set*)
-      IF x.mode = ORB.Const THEN x.a := -x.a-1 
+      IF x.mode = ORB.Const THEN x.a := -x.a - 1 
       ELSE
         load(x); 
-        PutRI("mov", RH, -1);
+        PutRI("movi", RH, -1);
         PutRRR("xor", x.r, x.r, RH)
       END
     END
@@ -1877,9 +1887,9 @@ MODULE ORG;
       ELSIF op = ORS.times THEN PutSSS("mul.s", 2, 0, 1)
       ELSIF op = ORS.rdiv  THEN
         (* __fdiv32 is supplied in the startup code and compute f2 := f0 / f1 *) 
-        PutRR("mov", RH, 0); (* Save return address *)
+        PutRR("mov", RH, 0); (* Save return address (a0) *)
         PutA("call0", "__fdiv32");
-        PutRR("mov", 0, RH); (* Restore return address *)
+        PutRR("mov", 0, RH); (* Restore return address (a0) *)
       END;
       decR; x.r := RH-1;
       PutRS("rfr", x.r, 2);
@@ -1905,22 +1915,17 @@ MODULE ORG;
   BEGIN
     e("Set");
     IF (x.mode = ORB.Const) & (y.mode = ORB.Const) THEN
-      IF x.a <= y.a THEN 
-        x.a := LSL(2, y.a) - LSL(1, x.a) 
-      ELSE 
-        x.a := 0 
-      END
+      IF x.a <= y.a THEN x.a := LSL(2, y.a) - LSL(1, x.a) ELSE x.a := 0 END
     ELSE
       IF x.mode = ORB.Const THEN
         x.a := LSL(-1, x.a);
         PutRI("movi", RH, x.a);
-        x.r := RH; incR;
-        x.mode := Reg
+        x.r := RH; x.mode := Reg; incR
       ELSE 
         load(x); 
-        PutRI("movi", RH, -1);
-        PutR("ssl", x.r);
-        PutRR("sll", x.r, RH);
+        PutRI("movi", RH,  -1);
+        PutR( "ssl",  x.r    );
+        PutRR("sll",  x.r, RH);
       END ;
       IF (y.mode # ORB.Const) OR (y.a < 31) THEN 
         IF y.mode = ORB.Const THEN 
@@ -1930,11 +1935,11 @@ MODULE ORG;
         ELSE 
           load(y); 
           lbl := NextLabel();
-          PutBranchRI("bgei", y.r, 31, lbl);
-          PutRI("movi", RH, -1);
-          PutRRI("addi", y.r, y.r, 1);
-          PutR("ssl", y.r);
-          PutRR("sll", y.r, RH);
+          PutRRI(     "addi", y.r, y.r,   1);
+          PutBranchRI("bgei", y.r,  32, lbl);
+          PutRI(      "movi", RH,   -1     );
+          PutR(       "ssl",  y.r          );
+          PutRR(      "sll",  y.r,  RH     );
         END;
         PutRRR("xor", x.r, x.r, y.r);
         IF y.mode # ORB.Const THEN PutLabel(lbl) END;
@@ -1975,9 +1980,9 @@ MODULE ORG;
       IF op = ORS.plus THEN 
         PutRRR("or", x.r, x.r, RH)
       ELSIF op = ORS.minus THEN 
-        PutRI("movi", RH+1, -1); 
-        PutRRR("xor", RH, RH, RH+1);
-        PutRRR("and", x.r, x.r, RH)
+        PutRI( "movi", RH + 1, -1         ); 
+        PutRRR("xor",  RH,     RH,  RH + 1);
+        PutRRR("and",  x.r,    x.r, RH    )
       ELSIF op = ORS.times THEN 
         PutRRR("and", x.r, x.r, RH)
       ELSIF op = ORS.rdiv THEN
@@ -1987,13 +1992,13 @@ MODULE ORG;
       load(x); load(y);
       IF op = ORS.plus THEN PutRRR("or", RH-2, x.r, y.r)
       ELSIF op = ORS.minus THEN 
-        PutRI("movi", RH, -1); 
-        PutRRR("xor", y.r, y.r, RH);
-        PutRRR("and", x.r, x.r, y.r)
+        PutRI( "movi",  RH,  -1     ); 
+        PutRRR("xor",  y.r, y.r,  RH);
+        PutRRR("and",  x.r, x.r, y.r)
       ELSIF op = ORS.times THEN 
-        PutRRR("and", RH-2, x.r, y.r)
+        PutRRR("and", RH - 2, x.r, y.r)
       ELSIF op = ORS.rdiv THEN 
-        PutRRR("xor", RH-2, x.r, y.r)
+        PutRRR("xor", RH - 2, x.r, y.r)
       END;
       decR; 
       x.r := RH-1
@@ -2429,10 +2434,10 @@ MODULE ORG;
     (* This is uggly, but I can't find a better solution for complex conditions. There
        are cases for which a false label has been generated that is not pointing at
        the beginning of the REPEAT statement... For example: (i & j & (k & (l OR m)) & n) *)
-    IF (x.lf # 0) & (x.lf # L) THEN
+    IF x.lf # 0 THEN
       lbl := NextLabel();
       PutJump("j", lbl);
-      PutLabel2(x.lf, L);
+      PutLabel(x.lf); x.lf := 0;
       PutJump("j", L);
       PutLabel(lbl)
     END
@@ -2760,22 +2765,28 @@ MODULE ORG;
     decR; decR
   END Include;
 
+  (* 
+  IF x.mode # Cond THEN loadCond(x) END;
+  IF x.a = 0 THEN cond := negated(x.r)
+  ELSE Put3(BC, x.r, x.b); FixLink(x.a); x.b := pc-1; cond := 7
+  END;
+  Trap(cond, 7); FixLink(x.b) 
+  *)
+
   PROCEDURE Assert*(VAR x: Item);
     VAR cond: INTEGER;
   BEGIN
     e("Assert");
     IF x.mode # Cond THEN loadCond(x) END;
-    cond := negated(x.r);
-    (* ??
-    IF x.a = 0 THEN 
+    IF x.lf = 0 THEN
       cond := negated(x.r)
     ELSE
-      Put3(BC, x.r, x.b); 
-      FixLink(x.a); 
-      x.b := pc-1; 
-      cond := 7 
-    END; *)
+      PutCondBranch(x.r, x.lt);
+      PutLabel(x.lf); x.lf := 0;
+      cond := BR
+    END;
     Trap(cond, TrAssert);
+    PutLabel(x.lt); x.lt := 0
   END Assert; 
 
   PROCEDURE New*(VAR x: Item);
@@ -3038,9 +3049,9 @@ PROCEDURE Abs*(VAR x: Item);
   BEGIN 
     load(x);
     PutSR("wfr", 0, x.r);
-    PutRR("mov", RH, 0);
+    PutRR("mov", RH, 0); (* Save return address (a0) *)
     PutA("call0", "__fsqrt32");
-    PutRR("mov", 0, RH);
+    PutRR("mov", 0, RH); (* Restore return address (a0) *)
     PutRS("rfr", x.r, 1);
   END Sqrt;
 

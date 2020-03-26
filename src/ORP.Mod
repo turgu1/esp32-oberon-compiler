@@ -787,7 +787,7 @@ MODULE ORP; (*N. Wirth 1.7.97 / 8.2.2020  Oberon compiler for ESP32 in Oberon-07
         ORG.BJump(L0);
         WHILE sym = ORS.elsif DO
           ORS.Get(sym); 
-          ORG.PutLabel(x.lf); ORG.ClearLabels(x); 
+          ORG.PutLabel(x.lf); x.lf := 0; 
           expression(x); 
           CheckBool(x); ORG.CFJump(x);
           Check(ORS.do, "DO expected"); StatSequence; ORG.BJump(L0)
@@ -798,7 +798,7 @@ MODULE ORP; (*N. Wirth 1.7.97 / 8.2.2020  Oberon compiler for ESP32 in Oberon-07
         ORS.Get(sym); L0 := ORG.Here(); 
         StatSequence;
         IF sym = ORS.until THEN
-          ORS.Get(sym); x.lf := L0; x.lt := 0; expression(x); CheckBool(x); 
+          ORS.Get(sym); expression(x); CheckBool(x); 
           ORG.CBJump(x, L0)
         ELSE 
           ORS.Mark("missing UNTIL")
