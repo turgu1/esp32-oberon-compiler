@@ -726,13 +726,15 @@ MODULE ORG;
     RETURN l
   END NextLabel;
 
-  PROCEDURE PutLabel*(label: INTEGER);
+  (* Labels contains many label like a stack. Each one is 
+     extracted and put on the assembly output. See the merged proc. *)
+  PROCEDURE PutLabel*(labels: INTEGER);
   VAR l: INTEGER;
   BEGIN
     e("PutLabel");
-    WHILE label > 0 DO
-      l := label MOD MaxLabel;
-      label := label DIV MaxLabel;
+    WHILE labels > 0 DO
+      l := labels MOD MaxLabel;
+      labels := labels DIV MaxLabel;
 
       Texts.WriteInt(CodeW, l, 0);
       Texts.Write(   CodeW, "$");
@@ -741,6 +743,23 @@ MODULE ORG;
     END;
     InitRc;
   END PutLabel;
+
+  (* Put labels that are not equal to L *)
+  PROCEDURE PutLabel2(labels, L: INTEGER);
+  VAR l: INTEGER;
+  BEGIN
+    WHILE labels > 0 DO
+      l := labels MOD MaxLabel;
+      labels := labels DIV MaxLabel;
+      IF l # L THEN
+        Texts.WriteInt(CodeW, l, 0);
+        Texts.Write(   CodeW, "$");
+        Texts.Write(   CodeW, ":");
+        Texts.WriteLn( CodeW);
+      END
+    END;
+    InitRc;
+  END PutLabel2;
 
   PROCEDURE PutBranchRR(op: ARRAY OF CHAR; r1, r2, label: INTEGER);
   BEGIN 
@@ -1602,9 +1621,7 @@ MODULE ORG;
     e("And1 x.lf:"); eInt(x.lf); eStr(" x.lt:"); eInt(x.lt);
 
     IF x.mode # Cond THEN loadCond(x) END;
-    IF x.lf = 0 THEN 
-      x.lf := NextLabel()
-    END;
+    IF x.lf = 0 THEN x.lf := NextLabel() END;
     PutCondBranch(negated(x.r), x.lf);
     IF x.lt # 0 THEN PutLabel(x.lt); x.lt := 0 END;
 
@@ -2402,14 +2419,26 @@ MODULE ORG;
     PutJump("j", L)
   END BJump;
 
+  (* This is available ONLY for the end of the ORS.until end of treatment *)
   PROCEDURE CBJump*(VAR x: Item; L: INTEGER);
+    VAR lbl: INTEGER;
   BEGIN
     e("CBJump");
     IF x.mode # Cond THEN loadCond(x) END ;
     PutCondBranch(negated(x.r), L); 
-  END CBJump;
+    (* This is uggly, but I can't find a better solution for complex conditions. There
+       are cases for which a false label has been generated that is not pointing at
+       the beginning of the REPEAT statement... For example: (i & j & (k & (l OR m)) & n) *)
+    IF (x.lf # 0) & (x.lf # L) THEN
+      lbl := NextLabel();
+      PutJump("j", lbl);
+      PutLabel2(x.lf, L);
+      PutJump("j", L);
+      PutLabel(lbl)
+    END
+  END CBJump;      
 
-  PROCEDURE SaveRegs(low, high: INTEGER);  (* R[low .. high]*)
+  PROCEDURE SaveRegs(low, high: INTEGER);  (* R[low .. high] *)
     VAR 
       cnt, i: INTEGER;
   BEGIN 
@@ -2419,13 +2448,13 @@ MODULE ORG;
     ELSE
       cnt := (high - low + 1) * 4;
       cnt := ((cnt + 15) DIV 16) * 16; (* Must be a multiple of 16 *)
-      PutRI("movi", high+1, cnt);
-      PutRRR("add", high+1, high+1, SP);
-      PutRR("movsp", SP, high+1); 
+      PutRI("movi", high + 1, cnt);
+      PutRRR("add", high + 1, high + 1, SP);
+      PutRR("movsp", SP, high + 1); 
       INC(frame, cnt);
       i := 0;
       REPEAT
-        PutRRI("s32i", low, SP, i*4);
+        PutRRI("s32i", low, SP, i * 4);
         INC(i); INC(low);
       UNTIL low > high
     END
@@ -2445,9 +2474,9 @@ MODULE ORG;
       UNTIL low > high;
       cnt := cnt * 4;
       cnt := ((cnt + 15) DIV 16) * 16; (* Must be a multiple of 16 *)
-      PutRI("movi", high+1, cnt);
-      PutRRR("sub", high+1, SP, high+1);
-      PutRR("movsp", SP, high+1); 
+      PutRI("movi", high + 1, cnt);
+      PutRRR("sub", high + 1, SP, high + 1);
+      PutRR("movsp", SP, high + 1); 
       DEC(frame, cnt)
     END
   END RestoreRegs;
