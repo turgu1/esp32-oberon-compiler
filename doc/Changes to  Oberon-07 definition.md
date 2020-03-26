@@ -107,7 +107,7 @@ END Example.
 
 ```
 
-When assigning a CHAR constant to a variable or a parameter (ARRAY OF CHAR), it is then promoted to a constant null terminated ARRAY OF CHAR and then assigned to the variable or parameter. Note that when calling a procedure you cannot assign to a variable parameter.
+When assigning a CHAR constant to a variable or a parameter (ARRAY OF CHAR), it is then promoted to a constant null terminated ARRAY OF CHAR and then assigned to the variable or parameter. Note that when calling a procedure you cannot assign to a variable parameter, as it must remains constant.
 
 ## CASE statement
 
@@ -120,6 +120,8 @@ ELSE
   i := 2
 END
 ```
+
+Note that small CASE statements are better recoded as IF THEN ELSE. The example showned would require (26 * 4 + 8 = 112) bytes of memory to implement the jump table.
 
 Here is a documentation extract from [Extended Oberon](https://github.com/andreaspirklbauer/Oberon-extended/blob/master/Documentation/The-Revised-Oberon2-Programming-Language.pdf):
 
@@ -164,8 +166,8 @@ END Example;
 
 This introduce a new ASM keyword. Everyting up to a line that start with the keyword END will be added to the generated assembly language stream. No interpretation is done by the compiler. 
 
-## Compiler debugging trace
+## Compiler debugging pragmas
 
-### DBGON DBGOFF
+### $D+ (Debug On) and $D- (Debug OFF)
 
-The words DBGON and DBGOFF can be put anywhere in the application source code. This will allow to get a trace of the compiler code generator module (ORG) procedure calls during the compilation phase. This trace is to help resolve issues with the compiler.
+The pragmas `$D+` and `$D-`  can be put anywhere in the application source code inside a comment. This will allow to get a trace of the compiler code generator module (ORG) procedure calls during the compilation phase. This trace is to help resolve issues with the compiler.

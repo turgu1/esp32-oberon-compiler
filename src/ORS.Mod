@@ -35,15 +35,15 @@ MODULE ORS; (* NW 19.9.93 / 15.3.2017  Scanner in Oberon-07*)
     in*     = 15; is*        = 16; arrow*     = 17; period* = 18;
     char*   = 20; int*       = 21; real*      = 22; false*  = 23; true*   = 24;
     nil*    = 25; string*    = 26; not*       = 27; lparen* = 28; lbrak*  = 29;
-    lbrace* = 30; ident*     = 31; if*        = 32; while*  = 34; repeat* = 35;
-    case*   = 36; for*       = 37; asm*       = 38;
+    lbrace* = 30; ident*     = 31; if*        = 32;               while*  = 34;
+    repeat* = 35; case*      = 36; for*       = 37; asm*    = 38;
     comma*  = 40; colon*     = 41; becomes*   = 42; upto*   = 43; rparen* = 44;
     rbrak*  = 45; rbrace*    = 46; then*      = 47; of*     = 48; do*     = 49;
     to*     = 50; by*        = 51; semicolon* = 52; end*    = 53; bar*    = 54;
     else*   = 55; elsif*     = 56; until*     = 57; return* = 58;
     array*  = 60; record*    = 61; pointer*   = 62; const*  = 63; type*   = 64;
     var*    = 65; procedure* = 66; begin*     = 67; import* = 68; module* = 69; 
-    eot     = 70; debugon    = 71; debugoff   = 72; 
+    eot     = 70;
 
   TYPE 
     Ident* = ARRAY IdLen OF CHAR;
@@ -55,8 +55,11 @@ MODULE ORS; (* NW 19.9.93 / 15.3.2017  Scanner in Oberon-07*)
     str*: ARRAY stringBufSize OF CHAR;
     errcnt*: INTEGER;
 
-    ch: CHAR;  (*last character read*)
+    line: ARRAY 1024 OF CHAR;
+    eof: BOOLEAN; (* End Of File *) 
+    ch: CHAR;     (*last character read*)
     lineNbr, columnNbr: INTEGER;
+
     errpos: INTEGER;
     R: Texts.Reader;
     W: Texts.Writer;
@@ -74,6 +77,29 @@ MODULE ORS; (* NW 19.9.93 / 15.3.2017  Scanner in Oberon-07*)
   PROCEDURE Pos*(): INTEGER;
   BEGIN RETURN Texts.Pos(R) - 1
   END Pos;
+
+  PROCEDURE GetLine;
+  VAR 
+    i: INTEGER;
+    ch: CHAR;
+  BEGIN
+    IF ~eof THEN
+      IF R.eot THEN eof = TRUE
+      ELSE
+        i := 0;
+        REPEAT
+          Texts.Read(R, ch);
+        UNTIL ((ch >= " ") OR (ch = TAB)) AND ~R.eot;
+        WHILE ((ch >= " ") OR (ch = TAB)) AND (i < 1023) AND ~R.eot DO
+          line[i] := ch;
+          INC(i);
+          Texts.Read(R, ch);
+        END;
+        line[i] := 0X;
+        INC(lineNbr);
+      END
+    END
+  END GetLine;
 
   PROCEDURE GetCh();
   BEGIN
@@ -243,14 +269,28 @@ MODULE ORS; (* NW 19.9.93 / 15.3.2017  Scanner in Oberon-07*)
   END Number;
 
   PROCEDURE comment;
-  BEGIN GetCh();
+  BEGIN 
+    GetCh();
     REPEAT
       WHILE ~R.eot & (ch # "*") DO
-        IF ch = "(" THEN GetCh();
+        IF ch = "(" THEN 
+          GetCh();
           IF ch = "*" THEN comment END
+        ELSIF ch = "$" THEN 
+          GetCh();
+          IF (ch = "D") THEN 
+            GetCh();
+            IF ch = "+" THEN 
+              debugging := TRUE; GetCh();
+              Out.Ln; Out.String("Debugging is ON");
+            ELSIF ch = "-" THEN
+              debugging := FALSE; GetCh();
+              Out.Ln; Out.String("Debugging is OFF"); Out.Ln;
+            END
+          END
         ELSE GetCh()
         END
-      END ;
+      END;
       WHILE ch = "*" DO GetCh() END
     UNTIL (ch = ")") OR R.eot;
     IF ~R.eot THEN GetCh() ELSE Mark("unterminated comment") END
@@ -339,15 +379,6 @@ MODULE ORS; (* NW 19.9.93 / 15.3.2017  Scanner in Oberon-07*)
         ELSE sym := null
         END ;
         GetCh()
-      END;
-      IF sym = debugon THEN 
-        debugging := TRUE; 
-        Out.Ln; Out.String("Debugging is ON");
-        sym := null
-      ELSIF sym = debugoff THEN 
-        debugging := FALSE; 
-        Out.Ln; Out.String("Debugging is OFF"); Out.Ln;
-        sym := null
       END
     UNTIL sym # null
   END Get;
@@ -397,14 +428,12 @@ BEGIN Texts.OpenWriter(W); k := 0; KWX[0] := 0; KWX[1] := 0;
   EnterKW(const, "CONST");
   EnterKW(until, "UNTIL");
   EnterKW(while, "WHILE");
-  EnterKW(debugon, "DBGON"); (* DBGON *)
   KWX[5] := k;
   EnterKW(record, "RECORD");
   EnterKW(repeat, "REPEAT");
   EnterKW(return, "RETURN");
   EnterKW(import, "IMPORT");
   EnterKW(module, "MODULE");
-  EnterKW(debugoff, "DBGOFF"); (* DBGOFF *)
   KWX[6] := k;
   EnterKW(pointer, "POINTER");
   KWX[7] := k; KWX[8] := k;

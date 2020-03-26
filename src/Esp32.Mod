@@ -9,16 +9,18 @@
 
     - Core Architecture
     - Windowed Registers (64 registers)
-    - 16-bits instructions
-    - Boolean registers (16) and instructions
     - Zero-overhead Loops with buffer size of 256
-    - NSA/NSAU Instructions
     - MIN/MAX Instructions
-    - SEXT Instruction
-    - MUL16S / MUL16U / MULL / MULUH / MULSH Instructions
-    - QUOS / QUOU / REMS / REMU Instructions
+    - QUOS / REMS Instructions
+    - Single precision floating point (ADD.S / SUB.S / MUL.S)
 
     Not used options / Instructions
+    - QUOU / REMU Instructions
+    - MUL16S / MUL16U / MULL / MULUH / MULSH Instructions
+    - SEXT Instruction
+    - NSA/NSAU Instructions
+    - Boolean registers (16) and instructions
+    - 16-bits instructions (maybe used in a future version)
     - MAC16 DSP Instructions
     - CLAMPS Instruction
     - L32AI / S32RI / S32C1I Instructions

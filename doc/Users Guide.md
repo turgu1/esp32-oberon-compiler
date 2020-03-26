@@ -37,7 +37,6 @@ An ESP32 Oberon program requires runtime support. The compiler is supplied with 
 
 - Several Oberon modules that are located in the `lib/modules` folder. They are described in the following sections
 
-
 ## Modules Initialization Sequence
 
 The application startup code is a piece of assembly language program that is called by the ESP32 bootstrap ROM. Once started, it is calling initialization code of each Oberon module in sequence. The order of these calls is important to understand as some module may rely on other modules to be initialized prior to their own initialization code can be initiated.
@@ -58,12 +57,12 @@ The ESP32 Oberon Compiler is supplied with a variaty of modules for use by appli
 
 Support for:
 
-- Heap allocation through the New function.
+- Heap allocation through the `New` function.
 - Garbage collection
 - General timing functions
 - Error trap support
 
-This module is currently being developped.
+This module is currently being developped. The application program that requires this module must initialize it through the `Kernel.Init` procedure.
 
 ### Module Out
 
@@ -121,7 +120,9 @@ This module implements the [Oakwood Guidelines](http://www.edm2.com/index.php/Th
 
 - `PROCEDURE Flush;` Empty the input Fifo buffer.
 
-When Echo is enabled, the backspace key on the keyboard can be used to erase characters at the end of line. A sequence of backspace-space-backspace will then be sent to the terminal through the Out.Char procedure.
+When Echo is enabled, the backspace key on the keyboard can be used to erase characters at the end of line. A sequence of backspace-space-backspace will then be sent to the terminal through the `Out.Char` procedure.
+
+This module requires the Out and Kernel modules. The Kernel module must have been properly initialized through the use of the `Kernel.Init` procedure through user's application.
 
 ```Modula-2
 MODULE In;
@@ -163,6 +164,7 @@ MODULE Strings;
   PROCEDURE Replace* (source: ARRAY OF CHAR; pos: INTEGER;
                       VAR dest: ARRAY OF CHAR);
   PROCEDURE Extract* (source: ARRAY OF CHAR; pos, n: INTEGER;
+                      VAR dest: ARRAY OF CHAR);
   PROCEDURE Pos* (pattern, s: ARRAY OF CHAR; pos: INTEGER): INTEGER;
   PROCEDURE Cap* (VAR s: ARRAY OF CHAR);
   PROCEDURE Match* (string, pattern: ARRAY OF CHAR): BOOLEAN;

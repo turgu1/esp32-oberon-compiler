@@ -569,19 +569,6 @@ MODULE ORP; (*N. Wirth 1.7.97 / 8.2.2020  Oberon compiler for ESP32 in Oberon-07
       x, y, z, w: ORG.Item;
       L0, L1, rx, callType: INTEGER;
 
-(*
-    PROCEDURE TypeCase(obj: ORB.Object; VAR x: ORG.Item);
-      VAR typobj: ORB.Object;
-    BEGIN
-      IF sym = ORS.ident THEN
-        qualident(typobj); ORG.MakeItem(x, obj, level);
-        IF typobj.class # ORB.Typ THEN ORS.Mark("not a type") END ;
-        TypeTest(x, typobj.type, FALSE); obj.type := typobj.type;
-        ORG.CFJump(x); Check(ORS.colon, ": expected"); StatSequence
-      ELSE ORG.CFJump(x); ORS.Mark("type id expected")
-      END
-     END TypeCase;
-*)
     PROCEDURE TypeCasePart;
       VAR obj: ORB.Object; L0: INTEGER;
         x: ORG.Item;
@@ -612,32 +599,6 @@ MODULE ORP; (*N. Wirth 1.7.97 / 8.2.2020  Oberon compiler for ESP32 in Oberon-07
       ORG.PutLabel(L0)
     END TypeCasePart;
 
-(*
-        IF sym = ORS.ident THEN
-          qualident(obj); orgtype := obj.type;
-          IF (orgtype.form = ORB.Pointer) OR 
-             (orgtype.form = ORB.Record) & 
-             (obj.class = ORB.Par) THEN
-            Check(ORS.of, "OF expected"); 
-            ORG.ClearLabels(x);
-            TypeCase(obj, x); 
-            ORG.GetLabel(L0);
-            WHILE sym = ORS.bar DO
-              ORS.Get(sym); ORG.FJump(L0); 
-              ORG.PutLabel(x.lf); ORG.ClearLabels(x);
-              obj.type := orgtype; TypeCase(obj, x)
-            END ;
-            ORG.PutLabel(x.lf);
-            ORG.PutLabel(L0); obj.type := orgtype
-
-            -----
-
-          ELSE ORS.Mark("numeric case not implemented");
-            Check(ORS.of, "OF expected"); SkipCase;
-            WHILE sym = ORS.bar DO SkipCase END
-          END
-        ELSE ORS.Mark("ident expected")
-  *)
     PROCEDURE NumericCasePart;
       VAR x: ORG.Item; L0, L1, L2, n, labelform: INTEGER;
         tab: ARRAY NofCases OF ORG.LabelRange;  (* ordered table of label ranges *)
@@ -687,13 +648,7 @@ MODULE ORP; (*N. Wirth 1.7.97 / 8.2.2020  Oberon compiler for ESP32 in Oberon-07
       IF L1 < 0 THEN ORG.PutLabel(-L1) END;
       ORG.PutLabel(L2)
     END NumericCasePart;
-(*
-     PROCEDURE SkipCase;
-    BEGIN 
-      WHILE sym # ORS.colon DO ORS.Get(sym) END ;
-      ORS.Get(sym); StatSequence
-    END SkipCase;
- *)
+
   BEGIN (* StatSequence *)
     REPEAT (* sync *) obj := NIL;
       IF ~((sym >= ORS.ident) & (sym <= ORS.asm) OR (sym >= ORS.semicolon)) THEN

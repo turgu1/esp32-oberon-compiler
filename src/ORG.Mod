@@ -46,10 +46,10 @@ MODULE ORG;
     TrAssert  = 7; (* assertionviolated             *)
 
     (* kind of register content *)
+    UNK = 0;  (* Unknown *)
     IMM = 1;  (* Immediate value *)
     LOC = 2;  (* Memory address  *)
     MEM = 3;  (* Memory content, value + displacement is the address  *)
-    UNK = 0;  (* Unknown *)
 
   TYPE 
     (*
@@ -305,6 +305,7 @@ MODULE ORG;
     END*)
   END ShowItem;
 *)
+
   (* Register optimization management *)
   PROCEDURE InitRc;
   VAR
@@ -438,16 +439,6 @@ MODULE ORG;
     END
   END decR;
 
-(*
-  PROCEDURE FirstFreeReg() : INTEGER;
-  VAR
-    i: INTEGER;
-  BEGIN 
-    i := LastRH;
-    WHILE (i > FirstRH) & ~(i IN UsedRegs) DO DEC(i) END;
-    RETURN i
-  END FirstFreeReg;
-*)
   PROCEDURE CheckRegs*;
   BEGIN
     IF RH # FirstRH THEN 
@@ -457,7 +448,7 @@ MODULE ORG;
       RH := FirstRH;
       UsedRegs := {}
     END ;
-    (* IF pc >= maxCode - 40 THEN ORS.Mark("program too long") END ; *)
+
     IF frame # 0 THEN 
       ORS.Mark("frame error"); 
       Out.String("Frame size error: "); Out.Int(frame, 0); Out.Ln;
@@ -1454,19 +1445,6 @@ MODULE ORG;
     END
   END Q;
 
-  (* PROCEDURE Q(T: ORB.Type; VAR dcw: INTEGER);
-  BEGIN 
-    (* one entry of type descriptor extension table *)
-    (* T.len is the descriptor address offset *)
-    (* T.mno is level (0 is this module, Not 0 is import) *)
-    IF T.base # NIL THEN
-      Q(T.base, dcw); 
-      data[dcw] := (T.mno * 1000H + T.len) * 1000H + dcw - fixorgT;
-      fixorgT := dcw; 
-      INC(dcw)
-    END
-  END Q; *)
-
   PROCEDURE FindPtrFlds(typ: ORB.Type; off: INTEGER; VAR dcw: INTEGER);
     VAR fld: ORB.Object; i, s: INTEGER;
   BEGIN
@@ -1528,30 +1506,6 @@ MODULE ORG;
     END
   END BuildTD;
 
-  (* PROCEDURE TypeTest*(VAR x: Item; T: ORB.Type; varpar, isguard: BOOLEAN);
-    VAR pc0: LONGINT;
-  BEGIN
-    IF T = NIL THEN
-      IF x.mode >= Reg THEN DEC(RH) END ;
-      SetCC(x, 7)
-    ELSE (*fetch tag into RH*)
-      IF varpar THEN Put2(Ldr, RH, SP, x.a+4+frame)
-      ELSE load(x);
-        pc0 := pc; Put3(BC, EQ, 0);  (*NIL belongs to every pointer type*)
-        Put2(Ldr, RH, x.r, -8)
-      END ;
-      Put2(Ldr, RH, RH, T.nofpar*4); incR;
-      loadTypTagAdr(T);  (*tag of T*)
-      Put0(Cmp, RH-1, RH-1, RH-2); DEC(RH, 2);
-      IF ~varpar THEN fix(pc0, pc - pc0 - 1) END ;
-      IF isguard THEN
-        IF check THEN Trap(NE, 2) END
-      ELSE SetCC(x, EQ);
-        IF ~varpar THEN DEC(RH) END
-      END
-    END
-  END TypeTest; *)
-  
   PROCEDURE TypeTest*(VAR x: Item; T: ORB.Type; varpar, isguard: BOOLEAN);
   VAR lbl: INTEGER;
   BEGIN
@@ -1645,11 +1599,6 @@ MODULE ORG;
   BEGIN
     e("Or1 x.lf:"); eInt(x.lf); eStr(" x.lt:"); eInt(x.lt);
 
-    (* 
-    IF x.mode # Cond THEN loadCond(x) END ;
-    Put3(BC, x.r, x.b);  x.b := pc-1; FixLink(x.a); x.a := 0 
-    *)
-
     IF x.mode # Cond THEN loadCond(x) END;
     IF x.lt = 0 THEN x.lt := NextLabel() END;
     PutCondBranch(x.r, x.lt);
@@ -1663,11 +1612,6 @@ MODULE ORG;
     e("Or2 x.lf:"); eInt(x.lf); eStr(" x.lt:"); eInt(x.lt);
     eStr(" y.lf:"); eInt(y.lf); eStr(" y.lt:"); eInt(y.lt);
     
-    (* 
-    IF y.mode # Cond THEN loadCond(y) END ;
-    x.a := y.a; x.b := merged(y.b, x.b); x.r := y.r
-    *)
-
     IF y.mode # Cond THEN loadCond(y) END;
     x.lf := y.lf; x.r := y.r; y.lf := 0;
     x.lt := merged(x.lt, y.lt); y.lt := 0;

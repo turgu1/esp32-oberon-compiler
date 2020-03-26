@@ -34,14 +34,19 @@ Here is the list of ongoing tasks to complete the effort of building the ESP32 O
   + [x] Strings
   + [x] Math
   + [x] Strings
+  + [ ] In
+  + [ ] File
+  + [ ] Texts (ASCII only version)
 - [x] Library folder
 - [ ] Interrupts management
 - [ ] ESP32 hardware interfaces
 
 # Potential future activities
 
+- [ ] Optimize CASE statements when ranges are supplied as selectors
 - [ ] Add SHORTINT (16 bits) type 
 - [ ] Add DOUBLE type (and/or DoubleMath Module)
 - [ ] Add other transcendantal functions to Math.Mod
+- [ ] In and Out modules to be compliant with Texts module
 
  

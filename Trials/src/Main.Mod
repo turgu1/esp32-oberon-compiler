@@ -5,7 +5,6 @@ MODULE Main;
     i: INTEGER;
 BEGIN
   Kernel.Init;
-
   WHILE TRUE DO
     Out.Ln;
     Out.String("> ");
