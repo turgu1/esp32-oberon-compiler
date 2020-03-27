@@ -19,7 +19,7 @@ Where the parameters are:
   + Array copy overflow
   + Illegal procedure call
 
-- **-l** : Source code will be output as comments in assembly language generated code.
+- **-l** : [lowercase L] Source code will be output as comments in assembly language generated code.
 - **-o folder** : Output folder for the generated assembly language code. If not present, the module source code folder is being used.
 - **-p path** : Search path for imported modules, as a list of folder names separated with character “:”. An imported module is first seached in the folder of the module being compiled, then in sequence in the folders part of the path.
 - **-s** : Override Symbol file. The symbol file will be generated in the same folder as the module source code.
