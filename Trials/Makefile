@@ -1,5 +1,8 @@
 # 'Bare metal' ESP32 application Makefile
 # Use the xtensa-esp32-elf toolchain.
+
+.SECONDARY:  # Keep intermediary files
+
 TOOLCHAIN = xtensa-esp32-elf-
 
 ASFLAGS_PLATFORM  = -mlongcalls -mauto-litpools -mtext-section-literals -fstrict-volatile-bitfields
@@ -29,6 +32,8 @@ LDFLAGS += -L$(LIBDIR) -l$(ESP32LIB)
 ASFLAGS += -c -O0 -Wall -fmessage-length=0
 ASFLAGS += $(ASFLAGS_PLATFORM)
 ASFLAGS += -g
+
+OBFLAGS = -o $(BLDDIR) -p $(LIBDIR) -l -c
 
 OS = $(shell uname -s)
 ifeq ($(OS), Darwin)
@@ -60,7 +65,7 @@ $(BLDDIR)/%.o : $(BLDDIR)/%.S
 	@$(CC) -x assembler-with-cpp $(ASFLAGS) $< -o $@
 
 $(BLDDIR)/%.S $(SRCDIR)/%.smb : $(SRCDIR)/%.Mod
-	$(OB) -o $(BLDDIR) -p $(LIBDIR) -s $<
+	$(OB) $(OBFLAGS) -s $<
 
 $(TARGETELF): $(OBJS)
 	$(CC) $^ $(LDFLAGS) -o $@
@@ -74,5 +79,5 @@ flash: $(TARGETELF)
 # Target to clean build artifacts.
 .PHONY: clean
 clean:
-	rm -f $(BLDDIR)/*
-	rm -f $(SRCDIR)/*.smb
+	-rm -f $(BLDDIR)/*
+	-rm -f $(SRCDIR)/*.smb

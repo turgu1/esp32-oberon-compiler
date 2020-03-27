@@ -1,5 +1,7 @@
 OB = ../Oberon
 
+OBFLAGS = -c -l -s 
+
 SRCS = \
 	Pattern1.Mod \
 	Pattern2.Mod \
@@ -30,7 +32,7 @@ SRCS = \
 ASS = $(SRCS:.Mod=.S)
 
 %.S : %.Mod
-	$(OB)  -s $(<F)
+	$(OB) $(OBFLAGS) $(<F)
 
 .PHONY: all
 all: $(ASS)

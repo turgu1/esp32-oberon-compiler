@@ -1,5 +1,8 @@
 # 'Bare metal' ESP32 application Makefile
 # Use the xtensa-esp32-elf toolchain.
+
+.SECONDARY:  # Keep intermediary files
+
 TOOLCHAIN = xtensa-esp32-elf-
 
 ASFLAGS_PLATFORM  = -mlongcalls -mauto-litpools -mtext-section-literals -fstrict-volatile-bitfields
@@ -27,6 +30,9 @@ ASFLAGS += -g
 
 SRCDIR = src
 BLDDIR = build
+LIBDIR = ../lib
+
+OBFLAGS = -o $(BLDDIR) -p $(LIBDIR) -s -c -l
 
 INIT = init/init.S
 INITO = $(BLDDIR)/init.o
@@ -35,9 +41,9 @@ MATH = $(SRCDIR)/math_support.S
 MATHO = $(BLDDIR)/math_support.o
 
 SRC = \
-  In.Mod \
   Out.Mod \
   Kernel.Mod \
+  In.Mod \
   Math.Mod \
   Strings.Mod
 
@@ -59,7 +65,7 @@ $(MATHO): $(MATH)
 	@$(AR) r $(ARCHIVE) $@ 
 
 $(BLDDIR)/%.S %.smb : $(SRCDIR)/%.Mod
-	$(OB) -o $(BLDDIR) -p ../lib -s $<
+	$(OB) $(OBFLAGS) $<
 	@mv $(SRCDIR)/$(patsubst %.Mod,%.smb,$(<F)) .
 
 $(BLDDIR)/%.o : $(BLDDIR)/%.S
@@ -67,5 +73,7 @@ $(BLDDIR)/%.o : $(BLDDIR)/%.S
 	@$(AR) r $(ARCHIVE) $@ 
 
 clean:
-	rm build/*
-	rm src/*.smb
+	-rm build/*
+	-rm src/*.smb
+	-rm *.smb
+	-rm libesp32-oberon.a

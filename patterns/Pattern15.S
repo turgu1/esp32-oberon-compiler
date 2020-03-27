@@ -14,6 +14,12 @@ _Pattern15_A5E3D3EA_s_bss:
 _Pattern15_s_bss:
     .space 64
 
+# -->    1: MODULE Pattern15;
+# -->    2: VAR
+# -->    3:   s0, s1: ARRAY 32 OF CHAR;
+# -->    4:   
+# -->    5:   PROCEDURE P(x: ARRAY OF CHAR);
+# -->    6:   END P;
 
     .align 4
     .section .text_Pattern15_A5E3D3EA
@@ -28,6 +34,8 @@ _P:
     movi a2, _Pattern15_s_bss
     retw
     .size _P, .-_P
+# -->    7:   
+# -->    8: BEGIN 
 
 
     .align 4
@@ -36,6 +44,7 @@ _P:
 _Pattern15_init:
     entry a1, 16
     movi a2, _Pattern15_s_bss
+# -->    9:   s0 := "ABCDEF";
     mov a3, a2
     movi a4, _Pattern15_data_strs
     movi a5, 2
@@ -45,6 +54,7 @@ _Pattern15_init:
     s32i a6, a3, 0
     addi a3, a3, 4
 1$:
+# -->   10:   s0 := s1;
     mov a3, a2
     addi a4, a2, 32
     movi a5, 8
@@ -54,16 +64,20 @@ _Pattern15_init:
     s32i a6, a3, 0
     addi a3, a3, 4
 2$:
+# -->   11:   P(s1);
     addi a6, a2, 32
     movi a7, 32
     call4 _P
+# -->   12:   P("012345");
     movi a6, _Pattern15_data_strs
     addi a6, a6, 8
     movi a7, 7
     call4 _P
+# -->   13:   P("%")
     movi a6, _Pattern15_data_strs
     addi a6, a6, 16
     movi a7, 2
+# -->   14: END Pattern15.
     call4 _P
     retw
     .size _Pattern15_init, .-_Pattern15_init

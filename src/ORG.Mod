@@ -918,11 +918,10 @@ MODULE ORG;
   PROCEDURE Trap(cond, num: INTEGER);
   VAR lbl: INTEGER;
   BEGIN 
-    e("Trap");
+    e("Trap cond:"); eInt(cond); eStr(" num:"); eInt(num);
     lbl := NextLabel();
     PutCondBranch(negated(cond), lbl);
-    PutRI("movi", 6, 2);       (* a6 := 2 is TRAP EXCEPTION      *)
-    PutRI("movi", 7, num);     (* a7 := num is TRAP Reason       *)
+    PutRI("movi", 6, (num * 256) + 2);       (* 2 is TRAP EXCEPTION, num is REASON *)
     (* PutA("syscall", "# Trap"); Not supposed to come back here *)
     PutCallLocal(4, "OberonSyscallHandler");
     PutLabel(lbl); 
@@ -1358,7 +1357,7 @@ MODULE ORG;
           END
         END;
         incR;
-        Trap(GT, TrIndex); incR
+        Trap(GE, TrIndex); incR
       END;
       IF size = 4 THEN 
         PutRRI("slli", y.r, y.r, 2)
@@ -1414,14 +1413,14 @@ MODULE ORG;
           PutMoveRRI("l32i", 1020, RH, RH, x.a)
         END
       END;
+      x.r := RH; incR;
       NilCheck; 
-      x.r := RH; incR
     ELSIF x.mode = ORB.Par THEN
       CheckFreeRegs(1);
       PutMoveRRI("l32i", 1020, RH, SP, x.a + frame);
       PutMoveRRI("l32i", 1020, RH, RH, x.b);
+      x.r := RH; incR;
       NilCheck; 
-      x.r := RH; incR
     ELSIF x.mode = RegI THEN 
       PutMoveRRI("l32i", 1020, x.r, x.r, x.a);
       NilCheck
@@ -2510,7 +2509,8 @@ MODULE ORG;
         DEC(r); 
         (* DEC(frame, 4) *)
       END ;
-      IF check THEN 
+      IF check THEN
+        incR;
         Trap(EQ, TrCall); (* Trap if zero *)
         incR 
       END;
@@ -3073,11 +3073,12 @@ PROCEDURE Abs*(VAR x: Item);
     e("Register");
     (*x.mode = Const*)
     (* Put0(Mov, RH, 0, x.a MOD 10H); x.mode := Reg; x.r := RH; incR *)
-    ORS.Mark("REG not implemented")
+    PutRR("mov", RH, x.a MOD 10H);
+    x.mode := Reg; x.r := RH; incR
   END Register;
 
   PROCEDURE H*(VAR x: Item);
-  BEGIN 
+  BEGIN
     e("H");
     (*x.mode = Const*)
     (* Put0(Mov + U + x.a MOD 2 * V, RH, 0, 0); x.mode := Reg; x.r := RH; incR *)

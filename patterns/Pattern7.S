@@ -8,6 +8,11 @@ _Pattern7_ABE2D4B5_s_bss:
 _Pattern7_s_bss:
     .space 12
 
+# -->    1: MODULE Pattern7;
+# -->    2: VAR 
+# -->    3:   i, m, n: INTEGER;
+# -->    4:   
+# -->    5: BEGIN
 
 
     .align 4
@@ -16,15 +21,19 @@ _Pattern7_s_bss:
 _Pattern7_init:
     entry a1, 16
     movi a2, _Pattern7_s_bss
+# -->    6:   FOR i := 0 TO n - 1 DO
     movi a3, 0
 1$:
     l32i a4, a2, 8
     addi a4, a4, -1
+# -->    7:     m := 2 * m
     blt a4, a3, 2$
     s32i a3, a2, 0
+# -->    8:   END
     l32i a3, a2, 4
     slli a3, a3, 1
     s32i a3, a2, 4
+# -->    9: END Pattern7.
     l32i a3, a2, 0
     addi a3, a3, 1
     j 1$

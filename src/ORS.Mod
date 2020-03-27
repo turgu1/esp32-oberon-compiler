@@ -25,6 +25,8 @@ MODULE ORS; (* NW 19.9.93 / 15.3.2017  Scanner in Oberon-07*)
     maxExp        =  38; 
     stringBufSize = 256;
   
+    LF    = 0AX;
+    CR    = 0DX;
     TAB   = 07X;
     SPACE = 20X;
 
@@ -96,6 +98,7 @@ MODULE ORS; (* NW 19.9.93 / 15.3.2017  Scanner in Oberon-07*)
         i := 0;
         REPEAT
           Texts.Read(R, ch);
+          IF ch = LF THEN INC(lineNbr) END
         UNTIL (ch >= SPACE) OR (ch = TAB) OR R.eot;
         IF ~R.eot THEN
           line[i] := ch; INC(i);

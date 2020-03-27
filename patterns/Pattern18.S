@@ -13,6 +13,11 @@ _Pattern18_A5E3D3ED_s_bss:
 _Pattern18_s_bss:
     .space 516
 
+# -->    1: MODULE Pattern18;
+# -->    2: VAR
+# -->    3:   str: ARRAY 510 OF CHAR;
+# -->    4:   i: INTEGER;
+# -->    5: BEGIN
 
 
     .align 4
@@ -21,6 +26,7 @@ _Pattern18_s_bss:
 _Pattern18_init:
     entry a1, 16
     movi a2, _Pattern18_s_bss
+# -->    6:   str := "Hello";
     mov a3, a2
     movi a4, _Pattern18_data_strs
     movi a5, 2
@@ -30,6 +36,7 @@ _Pattern18_init:
     s32i a6, a3, 0
     addi a3, a3, 4
 1$:
+# -->    7:   IF str < "Allo" THEN
     mov a5, a2
     movi a6, _Pattern18_data_strs
     addi a6, a6, 8
@@ -42,9 +49,12 @@ _Pattern18_init:
     bnez a3, 2$
 3$:
     bge a3, a4, 4$
+# -->    8:     i := 3;
     movi a3, 3
     s32i a3, a2, 512
+# -->    9:   END
 4$:
+# -->   10: END Pattern18.
     retw
     .size _Pattern18_init, .-_Pattern18_init
 

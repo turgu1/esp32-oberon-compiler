@@ -531,27 +531,37 @@ MODULE Kernel;
   (* Still not an interrupt handler. It is called through a call4
      instruction *)
   PROCEDURE [1] OberonSyscallHandler(tag: INTEGER; p1, p2: INTEGER);
+    VAR adr, tg, num: INTEGER;
   BEGIN
- 
-    (* Out.Ln; 
-    Out.String("Tag: "); Out.Int(tag, 0);
-    Out.String(", p1: "); Out.Hex(p1, 0);
-    Out.String(", p2: "); Out.Hex(p2, 0);  *)
- 
+    tg  := AND(tag, 255);
+    num := ASR(tag,   8);
 
-    IF tag = 1 THEN
+    IF tg = 1 THEN
       New(p1, p2);
-      (* Out.Ln; Out.String("Allocated: "); Out.Int(allocated, 0); *)
-    ELSIF tag = 2 THEN
+    ELSIF tg = 2 THEN
+      adr := SYSTEM.REG(0);
       Out.Ln; 
       Out.String("TRAP EXCEPTION: ");
-      Out.Int(p1, 0);
+      CASE num OF
+        1: Out.String("Array index out of range."     ) |
+        2: Out.String("Type guard failure."           ) |
+        3: Out.String("Array or string copy overflow.") |
+        4: Out.String("Access via NIL pointer."       ) |
+        5: Out.String("Illegal procedure call."       ) |
+        6: Out.String("Integer division by zero."     ) |
+        7: Out.String("Assertion violated."           ) |
+        8: Out.String("Heap exausted."                )
+      ELSE
+        Out.String("Unknown raison.")
+      END;
+      Out.String(" PC: ");
+      Out.Hex(adr, 0);
       Out.Ln; Out.Flush;
 
       ASM
         j _init_end # Loop at nauseam
       END
-    END;
+    END
   END OberonSyscallHandler;
 
   PROCEDURE Init*;
@@ -574,8 +584,6 @@ MODULE Kernel;
     SYSTEM.PUT(list0 + 4, -1); 
     SYSTEM.PUT(list0 + 8, 0);
     allocated := 0;
-
-    (* Out.String("Heap Top: "); Out.Hex(heapTop, 0); Out.Ln; *)
   END Init;
 
 END Kernel.

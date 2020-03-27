@@ -1,3 +1,5 @@
+.SECONDARY:  # Keep intermediary files
+
 TOOLCHAIN = xtensa-esp32-elf-
 
 ASFLAGS_PLATFORM  = -mlongcalls -mauto-litpools -mtext-section-literals -fstrict-volatile-bitfields
@@ -26,6 +28,8 @@ LDFLAGS += -L$(LIBDIR) -l$(ESP32LIB)
 ASFLAGS += -c -O0 -Wall -fmessage-length=0
 ASFLAGS += $(ASFLAGS_PLATFORM)
 ASFLAGS += -g
+
+OBFLAGS = -o $(BLDDIR) -p $(LIBDIR) -s -c -l
 
 SRC = \
   ArrayAssignment.Mod \
@@ -172,7 +176,7 @@ EXECS = $(ASSS:.S=.elf)
 OTHERS = $(addprefix $(BLDDIR)/, $(Others))
 
 $(BLDDIR)/%.S : $(SRCDIR)/%.Mod
-	$(OB) -o $(BLDDIR) -p ../lib -s $<
+	$(OB) $(OBFLAGS) $<
 
 $(BLDDIR)/%.o : $(BLDDIR)/%.S
 	@$(CC) -x assembler-with-cpp $(ASFLAGS) $< -o $@
@@ -184,13 +188,13 @@ $(BLDDIR)/%.elf : $(BLDDIR)/%.o
 all: oth $(EXECS) 
 
 $(BLDDIR)/TestCyclicImport00.S : $(SRCDIR)/TestCyclicImport00A.Mod
-	$(OB) -o $(BLDDIR) -p ../lib -s $<
+	$(OB) $(OBFLAGS) $<
 
 $(BLDDIR)/TestCyclicImport01.S : $(SRCDIR)/TestCyclicImport01B.Mod
-	$(OB) -o $(BLDDIR) -p ../lib -s $<
+	$(OB) $(OBFLAGS) $<
 
 $(BLDDIR)/TestCyclicImport10.S : $(SRCDIR)/TestCyclicImport10A.Mod
-	$(OB) -o $(BLDDIR) -p ../lib -s $<
+	$(OB) $(OBFLAGS) $<
 
 .PHONY: oth
 oth: $(OTHERS)

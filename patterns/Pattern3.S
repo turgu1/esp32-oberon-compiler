@@ -8,6 +8,13 @@ _Pattern3_A7E2D4B5_s_bss:
 _Pattern3_s_bss:
     .space 4456
 
+# -->    1: MODULE Pattern3;
+# -->    2: VAR
+# -->    3:   i, j, k, n: INTEGER; 
+# -->    4:   a: ARRAY 10 OF INTEGER;
+# -->    5:   x: ARRAY 10, 10 OF INTEGER;
+# -->    6:   y: ARRAY 10, 10, 10 OF INTEGER;
+# -->    7: BEGIN 
 
 
     .align 4
@@ -16,35 +23,71 @@ _Pattern3_s_bss:
 _Pattern3_init:
     entry a1, 16
     movi a2, _Pattern3_s_bss
+# -->    8:   k := a[i]; 
     l32i a3, a2, 0
+    movi a4, 10
+    blt a3, a4, 1$
+    movi a6, 258
+    call4 _OberonSyscallHandler
+1$:
     slli a3, a3, 2
     add a3, a2, a3
     l32i a3, a3, 16
     s32i a3, a2, 8
+# -->    9:   n := a[5]; 
     l32i a3, a2, 36
     s32i a3, a2, 12
+# -->   10:   x[i, j] := 2;
     l32i a3, a2, 0
+    movi a4, 10
+    blt a3, a4, 2$
+    movi a6, 258
+    call4 _OberonSyscallHandler
+2$:
     movi a4, 40
     mull a3, a3, a4
     add a3, a2, a3
     l32i a4, a2, 4
+    movi a5, 10
+    blt a4, a5, 3$
+    movi a6, 258
+    call4 _OberonSyscallHandler
+3$:
     slli a4, a4, 2
     add a3, a3, a4
     movi a4, 2
     s32i a4, a3, 56
+# -->   11:   y[i, j, k] := 3;
     l32i a3, a2, 0
+    movi a4, 10
+    blt a3, a4, 4$
+    movi a6, 258
+    call4 _OberonSyscallHandler
+4$:
     movi a4, 400
     mull a3, a3, a4
     add a3, a2, a3
     l32i a4, a2, 4
+    movi a5, 10
+    blt a4, a5, 5$
+    movi a6, 258
+    call4 _OberonSyscallHandler
+5$:
     movi a5, 40
     mull a4, a4, a5
     add a3, a3, a4
     l32i a4, a2, 8
+    movi a5, 10
+    blt a4, a5, 6$
+    movi a6, 258
+    call4 _OberonSyscallHandler
+6$:
     slli a4, a4, 2
     add a3, a3, a4
     movi a4, 3
     s32i a4, a3, 456
+# -->   12:   y[3, 4, 5] := 6
+# -->   13: END Pattern3.
     movi a3, 6
     addmi a4, a2, 1792
     s32i a3, a4, 44

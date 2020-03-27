@@ -29,6 +29,8 @@ ASFLAGS += -c -O0 -Wall -fmessage-length=0
 ASFLAGS += $(ASFLAGS_PLATFORM)
 ASFLAGS += -g
 
+OBFLAGS = -o $(BLDDIR) -p $(LIBDIR) -l -c
+
 OS = $(shell uname -s)
 ifeq ($(OS), Darwin)
   PORT = /dev/tty.SLAB_USBtoUART
@@ -84,7 +86,7 @@ $(BLDDIR)/%.o : $(BLDDIR)/%.S
 	@$(CC) -x assembler-with-cpp $(ASFLAGS) $< -o $@
 
 $(BLDDIR)/%.S $(SRCDIR)/%.smb : $(SRCDIR)/%.Mod
-	$(OB) -o $(BLDDIR) -p $(LIBDIR) -s $<
+	$(OB) $(OBFLAGS) -s $<
 
 $(TARGETELF): $(OBJS)
 	$(CC) $^ $(LDFLAGS) -o $@
@@ -98,5 +100,5 @@ flash: $(TARGETELF)
 # Target to clean build artifacts.
 .PHONY: clean
 clean:
-	rm -f $(BLDDIR)/*
-	rm -f $(SRCDIR)/*.smb
+	-rm -f $(BLDDIR)/*
+	-rm -f $(SRCDIR)/*.smb
