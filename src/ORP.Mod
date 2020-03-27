@@ -1159,7 +1159,7 @@ MODULE ORP; (*N. Wirth 1.7.97 / 8.2.2020  Oberon compiler for ESP32 in Oberon-07
     UNTIL sym # ORS.comma
   END ImportList;
 
-  PROCEDURE Module(generateCheckCode: BOOLEAN; verbose : BOOLEAN);
+  PROCEDURE Module(verbose : BOOLEAN);
     VAR key: INTEGER;
   BEGIN 
     IF verbose THEN Out.String("  compiling ") END;
@@ -1175,7 +1175,7 @@ MODULE ORP; (*N. Wirth 1.7.97 / 8.2.2020  Oberon compiler for ESP32 in Oberon-07
       END;
       Check(ORS.semicolon, "; expected"); level := 0; exno := 1; key := 0;
       IF sym = ORS.import THEN ImportList; Check(ORS.semicolon, "; expected") END;
-      ORG.Open(modid, generateCheckCode); Declarations(dc); ORG.SetDataSize((dc + 3) DIV 4 * 4);
+      ORG.Open(modid); Declarations(dc); ORG.SetDataSize((dc + 3) DIV 4 * 4);
       WHILE sym = ORS.procedure DO ProcedureDecl; Check(ORS.semicolon, "; expected") END ;
       ORG.Header;
       IF sym = ORS.begin THEN ORS.Get(sym); StatSequence END ;
@@ -1223,7 +1223,8 @@ MODULE ORP; (*N. Wirth 1.7.97 / 8.2.2020  Oberon compiler for ESP32 in Oberon-07
   PROCEDURE Compile*(filename : ARRAY OF CHAR; 
                      overrideSymbolFile,
                      generateCheckCode,
-                     verbose : BOOLEAN;
+                     verbose,
+                     sourceToAssembly : BOOLEAN;
                      outFolder, impPath : ARRAY OF CHAR);
     VAR (* beg, end, time: INTEGER; *)
       T: Texts.Text;
@@ -1243,8 +1244,9 @@ MODULE ORP; (*N. Wirth 1.7.97 / 8.2.2020  Oberon compiler for ESP32 in Oberon-07
     NEW(T);
     Texts.Open(T, filename);
     IF T.len > 0 THEN 
+      ORG.Init(generateCheckCode, sourceToAssembly);
       ORS.Init(T, 0);
-      Module(generateCheckCode, verbose);
+      Module(verbose);
       IF ORS.errcnt # 0 THEN Out.Ln; SYS.Exit(1) END;
     ELSE
       Out.String(filename); Out.String(" not found"); Out.Ln; 

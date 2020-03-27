@@ -17,12 +17,14 @@ VAR
   generateCheckCode  : BOOLEAN; 
   filePresent        : BOOLEAN;
   verbose            : BOOLEAN;
+  sourceToAssembly   : BOOLEAN;
 
 PROCEDURE Usage;
 BEGIN
   Out.Ln;
-  Out.String("Usage: Oberon [-c][-o folder][-p path][-s][-v] filename"); Out.Ln;
+  Out.String("Usage: Oberon [-c][-l][-o folder][-p path][-s][-v] filename"); Out.Ln;
   Out.String("-c : Generate Verification Code"                        ); Out.Ln;
+  Out.String("-l : Add source code to the assembler output"           ); Out.Ln;
   Out.String("-o : Output folder of generated code"                   ); Out.Ln;
   Out.String("-p : Folder Path for imported modules (e.g. f1:f2:f3)"  ); Out.Ln;
   Out.String("-s : Update Symbols File"                               ); Out.Ln;
@@ -42,6 +44,7 @@ BEGIN
     generateCheckCode  := FALSE;
     filePresent        := FALSE;
     verbose            := FALSE;
+    sourceToAssembly   := FALSE;
     argCount           := extArgs.count;
 
     IF (argCount > 0) THEN
@@ -61,6 +64,12 @@ BEGIN
           generateCheckCode := TRUE;
           IF DEBUG THEN
             Out.String("Generating Check Code");
+            Out.Ln;
+          END
+        ELSIF (arg = "-l") THEN
+          sourceToAssembly := TRUE;
+          IF DEBUG THEN
+            Out.String("Add Source code to assembler output");
             Out.Ln;
           END
         ELSIF (arg = "-o") THEN
@@ -113,9 +122,10 @@ BEGIN
         
         ORP.Compile(
           filename, 
-          overrideSymbolFile, 
+          overrideSymbolFile,
           generateCheckCode, 
           verbose,
+          sourceToAssembly,
           outputFolder,
           importPath);
       ELSE

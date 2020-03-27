@@ -25,8 +25,8 @@ MODULE ORS; (* NW 19.9.93 / 15.3.2017  Scanner in Oberon-07*)
     maxExp        =  38; 
     stringBufSize = 256;
   
-    EOL = 0AX;
-    TAB = 07X;
+    TAB   = 07X;
+    SPACE = 20X;
 
     (*lexical symbols*)
     null    =  0; times*     =  1; rdiv*      =  2; div*    =  3; mod*    =  4;
@@ -47,20 +47,20 @@ MODULE ORS; (* NW 19.9.93 / 15.3.2017  Scanner in Oberon-07*)
 
   TYPE 
     Ident* = ARRAY IdLen OF CHAR;
+    LineConsumer = PROCEDURE (lineNbr: INTEGER; line: ARRAY OF CHAR);
 
   VAR 
     ival*, slen*: INTEGER;  (*results of Get*)
     rval*: REAL;
-    id*: Ident;  (*for identifiers*)
-    str*: ARRAY stringBufSize OF CHAR;
+    id*:   Ident;  (*for identifiers*)
+    str*:  ARRAY stringBufSize OF CHAR;
     errcnt*: INTEGER;
 
     line: ARRAY 1024 OF CHAR;
-    eof: BOOLEAN; (* End Of File *) 
-    ch: CHAR;     (*last character read*)
+    eof:  BOOLEAN; (* End Of File *) 
+    ch:   CHAR;    (*last character read*)
     lineNbr, columnNbr: INTEGER;
 
-    errpos: INTEGER;
     R: Texts.Reader;
     W: Texts.Writer;
     k: INTEGER;
@@ -69,72 +69,76 @@ MODULE ORS; (* NW 19.9.93 / 15.3.2017  Scanner in Oberon-07*)
         RECORD sym: INTEGER; id: ARRAY 12 OF CHAR END;
 
     debugging*: BOOLEAN;
+
+    (* Allow another module to connect a consumer of lines to ORS without 
+       requesting an import statement *)
+    lineConsumer: LineConsumer;
     
+  PROCEDURE SetLineConsumer*(consumer: LineConsumer);
+  BEGIN
+    lineConsumer := consumer;
+  END SetLineConsumer;
+
   PROCEDURE CopyId*(VAR ident: Ident);
   BEGIN ident := id
   END CopyId;
 
-  PROCEDURE Pos*(): INTEGER;
-  BEGIN RETURN Texts.Pos(R) - 1
-  END Pos;
-
   PROCEDURE GetLine;
-  VAR 
-    i: INTEGER;
-    ch: CHAR;
+    VAR 
+      i: INTEGER;
+      ch: CHAR;
   BEGIN
+    line[0] := 0X;
     IF ~eof THEN
-      IF R.eot THEN eof = TRUE
+      IF R.eot THEN 
+        eof := TRUE
       ELSE
         i := 0;
         REPEAT
           Texts.Read(R, ch);
-        UNTIL ((ch >= " ") OR (ch = TAB)) AND ~R.eot;
-        WHILE ((ch >= " ") OR (ch = TAB)) AND (i < 1023) AND ~R.eot DO
-          line[i] := ch;
-          INC(i);
-          Texts.Read(R, ch);
+        UNTIL (ch >= SPACE) OR (ch = TAB) OR R.eot;
+        IF ~R.eot THEN
+          line[i] := ch; INC(i);
+          WHILE ((ch >= SPACE) OR (ch = TAB)) & (i < 1023) & ~R.eot DO
+            Texts.Read(R, ch);
+            line[i] := ch; INC(i) (* First character after the end of line will be kept *)
+          END
         END;
         line[i] := 0X;
         INC(lineNbr);
+        columnNbr := 0;
+        IF lineConsumer # NIL THEN lineConsumer(lineNbr, line) END;
       END
     END
   END GetLine;
 
-  PROCEDURE GetCh();
+  PROCEDURE GetCh;
   BEGIN
-    IF R.eot THEN
-      ch := 0FFX;
+    WHILE (line[columnNbr] = 0X) & ~eof DO GetLine END;
+    IF eof THEN
+      ch := 0FFX
     ELSE
-      Texts.Read(R, ch);
-      IF ch = EOL THEN
-        INC(lineNbr); columnNbr := 1 
-      ELSIF (ch >= " ") OR (ch = TAB) THEN
-        INC(columnNbr)
-      END
+      ch := line[columnNbr];
+      INC(columnNbr)
     END
   END GetCh;
 
   PROCEDURE Mark2*(msg1, msg2: ARRAY OF CHAR);
-    VAR p: INTEGER;
-  BEGIN p := Pos();
-    IF (p > errpos) & (errcnt < 25) THEN
+  BEGIN
+    IF (errcnt < 25) THEN
       Out.Ln; 
-      Out.String("  pos "); 
-      Out.Int(p, 1); 
-      Out.String(" [line ");
+      Out.String("[line ");
       Out.Int(lineNbr, 1);
       Out.Char(":");
       Out.Int(columnNbr, 1);
       Out.String("] ");
       Out.String(msg1);
       Out.String(msg2)
-    END ;
-    INC(errcnt); errpos := p + 4
+    END;
+    INC(errcnt)
   END Mark2;
 
   PROCEDURE Mark*(msg: ARRAY OF CHAR);
-    VAR p: INTEGER;
   BEGIN
     Mark2(msg, "")
   END Mark;
@@ -143,14 +147,14 @@ MODULE ORS; (* NW 19.9.93 / 15.3.2017  Scanner in Oberon-07*)
     VAR i, k: INTEGER;
   BEGIN i := 0;
     REPEAT
-      IF i < IdLen-1 THEN id[i] := ch; INC(i) END ;
+      IF i < IdLen - 1 THEN id[i] := ch; INC(i) END ;
       GetCh()
     UNTIL (ch < "0") OR 
           (ch > "9") & (ch < "A") OR 
           (ch > "Z") & (ch < "a") & (ch # "_") OR 
           (ch > "z");
     id[i] := 0X; 
-    IF i < 10 THEN k := KWX[i-1];  (*search for keyword*)
+    IF i < 10 THEN k := KWX[i - 1];  (* search for keyword *)
       WHILE (id # keyTab[k].id) & (k < KWX[i]) DO INC(k) END ;
       IF k < KWX[i] THEN sym := keyTab[k].sym ELSE sym := ident END
     ELSE sym := ident
@@ -160,33 +164,35 @@ MODULE ORS; (* NW 19.9.93 / 15.3.2017  Scanner in Oberon-07*)
   PROCEDURE String;
     VAR i: INTEGER;
   BEGIN i := 0; GetCh();
-    WHILE ~R.eot & (ch # 22X) DO (* 22X = " *)
-      IF ch >= " " THEN
-        IF i < stringBufSize-1 THEN str[i] := ch; INC(i) ELSE Mark("string too long") END ;
+    WHILE ~eof & (ch # 22X) DO (* 22X = " *)
+      IF (ch >= SPACE) OR (ch = TAB) THEN
+        IF i < stringBufSize - 1 THEN str[i] := ch; INC(i) ELSE Mark("string too long") END ;
       END ;
       GetCh()
-    END ;
+    END;
     str[i] := 0X; INC(i); GetCh(); slen := i
   END String;
 
   PROCEDURE HexString;
     VAR i, m, n: INTEGER;
   BEGIN i := 0; GetCh();
-    WHILE ~R.eot & (ch # "$") DO
-      WHILE ~R.eot  & (ch <= " ") DO GetCh() END ;  (*skip*)
-      IF ("0" <= ch) & (ch <= "9") THEN m := ORD(ch) - 30H
+    WHILE ~eof & (ch # "$") DO
+      WHILE ~eof & (ch <= SPACE) DO GetCh() END;  (* skip *)
+      IF    ("0" <= ch) & (ch <= "9") THEN m := ORD(ch) - 30H
       ELSIF ("A" <= ch) & (ch <= "F") THEN m := ORD(ch) - 37H
       ELSE m := 0; Mark("hexdig expected")
-      END ;
+      END;
       GetCh();
-      IF ("0" <= ch) & (ch <= "9") THEN n := ORD(ch) - 30H
+      IF    ("0" <= ch) & (ch <= "9") THEN n := ORD(ch) - 30H
       ELSIF ("A" <= ch) & (ch <= "F") THEN n := ORD(ch) - 37H
       ELSE n := 0; Mark("hexdig expected")
-      END ;
-      IF i < stringBufSize THEN str[i] := CHR(m*10H + n); INC(i) ELSE Mark("string too long") END ;
+      END;
+      IF i < stringBufSize THEN str[i] := CHR(m * 10H + n); INC(i) 
+      ELSE Mark("string too long") 
+      END;
       GetCh()
-    END ;
-    GetCh(); slen := i  (*no 0X appended!*)
+    END;
+    GetCh(); slen := i  (* no 0X appended! *)
   END HexString;
 
   PROCEDURE Ten(e: INTEGER): REAL;
@@ -200,19 +206,20 @@ MODULE ORS; (* NW 19.9.93 / 15.3.2017  Scanner in Oberon-07*)
   END Ten;
 
   PROCEDURE Number(VAR sym: INTEGER);
-    CONST max = 2147483647 (*2^31 - 1*);
-    VAR i, k, e, n, s, h: INTEGER; x: REAL;
+    CONST max = 2147483647 (* 2^31 - 1 *);
+    VAR 
+      i, k, e, n, s, h: INTEGER; x: REAL;
       d: ARRAY 16 OF INTEGER;
       negE: BOOLEAN;
   BEGIN ival := 0; i := 0; n := 0; k := 0;
     REPEAT
-      IF n < 16 THEN d[n] := ORD(ch)-30H; INC(n) ELSE Mark("too many digits"); n := 0 END ;
+      IF n < 16 THEN d[n] := ORD(ch) - 30H; INC(n) ELSE Mark("too many digits"); n := 0 END ;
       GetCh()
     UNTIL (ch < "0") OR (ch > "9") & (ch < "A") OR (ch > "F");
-    IF (ch = "H") OR (ch = "R") OR (ch = "X") THEN  (*hex*)
+    IF (ch = "H") OR (ch = "R") OR (ch = "X") THEN  (* hex *)
       REPEAT h := d[i];
-        IF h >= 10 THEN h := h-7 END ;
-        k := k*10H + h; INC(i) (*no overflow check*)
+        IF h >= 10 THEN h := h - 7 END ;
+        k := k * 10H + h; INC(i) (* no overflow check *)
       UNTIL i = n;
       IF ch = "X" THEN sym := char;
         IF k < 100H THEN ival := k ELSE Mark("illegal value"); ival := 0 END
@@ -222,30 +229,30 @@ MODULE ORS; (* NW 19.9.93 / 15.3.2017  Scanner in Oberon-07*)
       GetCh()
     ELSIF ch = "." THEN
       GetCh();
-      IF ch = "." THEN (*double dot*) ch := 7FX;  (*decimal integer*)
+      IF ch = "." THEN (* double dot *) ch := 7FX;  (* decimal integer *)
         REPEAT
           IF d[i] < 10 THEN
-            IF k <= (max-d[i]) DIV 10 THEN k := k *10 + d[i] ELSE Mark("too large"); k := 0 END
+            IF k <= (max - d[i]) DIV 10 THEN k := k * 10 + d[i] ELSE Mark("too large"); k := 0 END
           ELSE Mark("bad integer")
           END ;
           INC(i)
         UNTIL i = n;
         sym := int; ival := k
-      ELSE (*real number*) x := 0.0; e := 0;
-        REPEAT  (*integer part*) x := x * 10.0 + FLT(d[i]); INC(i) UNTIL i = n;
-        WHILE (ch >= "0") & (ch <= "9") DO  (*fraction*)
+      ELSE (* real number *) x := 0.0; e := 0;
+        REPEAT  (* integer part *) x := x * 10.0 + FLT(d[i]); INC(i) UNTIL i = n;
+        WHILE (ch >= "0") & (ch <= "9") DO  (* fraction *)
           x := x * 10.0 + FLT(ORD(ch) - 30H); DEC(e); GetCh()
         END ;
-        IF (ch = "E") OR (ch = "D") THEN  (*scale factor*)
+        IF (ch = "E") OR (ch = "D") THEN  (* scale factor *)
           GetCh(); s := 0; 
           IF ch = "-" THEN negE := TRUE; GetCh()
           ELSE negE := FALSE;
             IF ch = "+" THEN GetCh() END
           END ;
           IF (ch >= "0") & (ch <= "9") THEN
-            REPEAT s := s*10 + ORD(ch)-30H; GetCh()
+            REPEAT s := s * 10 + ORD(ch) - 30H; GetCh()
             UNTIL (ch < "0") OR (ch >"9");
-            IF negE THEN e := e-s ELSE e := e+s END
+            IF negE THEN e := e - s ELSE e := e + s END
           ELSE Mark("digit expected")
           END
         END ;
@@ -256,12 +263,12 @@ MODULE ORS; (* NW 19.9.93 / 15.3.2017  Scanner in Oberon-07*)
         END ;
         sym := real; rval := x
       END
-    ELSE  (*decimal integer*)
+    ELSE  (* decimal integer *)
       REPEAT
         IF d[i] < 10 THEN
-          IF k <= (max-d[i]) DIV 10 THEN k := k*10 + d[i] ELSE Mark("too large"); k := 0 END
+          IF k <= (max - d[i]) DIV 10 THEN k := k * 10 + d[i] ELSE Mark("too large"); k := 0 END
         ELSE Mark("bad integer")
-        END ;
+        END;
         INC(i)
       UNTIL i = n;
       sym := int; ival := k
@@ -272,7 +279,7 @@ MODULE ORS; (* NW 19.9.93 / 15.3.2017  Scanner in Oberon-07*)
   BEGIN 
     GetCh();
     REPEAT
-      WHILE ~R.eot & (ch # "*") DO
+      WHILE ~eof & (ch # "*") DO
         IF ch = "(" THEN 
           GetCh();
           IF ch = "*" THEN comment END
@@ -284,53 +291,51 @@ MODULE ORS; (* NW 19.9.93 / 15.3.2017  Scanner in Oberon-07*)
               debugging := TRUE; GetCh();
               Out.Ln; Out.String("Debugging is ON");
             ELSIF ch = "-" THEN
+              IF debugging THEN Out.Ln; Out.String("Debugging is OFF"); Out.Ln END;
               debugging := FALSE; GetCh();
-              Out.Ln; Out.String("Debugging is OFF"); Out.Ln;
             END
           END
         ELSE GetCh()
         END
       END;
       WHILE ch = "*" DO GetCh() END
-    UNTIL (ch = ")") OR R.eot;
-    IF ~R.eot THEN GetCh() ELSE Mark("unterminated comment") END
+    UNTIL (ch = ")") OR eof;
+    IF ~eof THEN GetCh() ELSE Mark("unterminated comment") END
   END comment;
 
-  PROCEDURE GetAssemblerLine*(VAR line: ARRAY OF CHAR): BOOLEAN;
+  PROCEDURE GetAssemblerLine*(VAR theLine: ARRAY OF CHAR): BOOLEAN;
   VAR
-    i, size : INTEGER;
+    i, j : INTEGER;
     theEnd : BOOLEAN;
   BEGIN 
-    GetCh(); 
-    theEnd := FALSE;
-    i := 0; size := LEN(line);
-    WHILE ~R.eot & (ch < " ") DO GetCh() END;
-    WHILE (i < (size - 7)) & ((ch = " ") OR (ch = TAB)) DO 
-      line[i] := ch; INC(i); GetCh() 
-    END;
-    IF ch = "E" THEN
-      line[i] := ch; INC(i); GetCh();
-      IF ch = "N" THEN
-        line[i] := ch; INC(i); GetCh();
-        IF ch = "D" THEN
-          GetCh();
-          theEnd := TRUE
-        END
-      END
-    END;
-    IF ~theEnd THEN
-      WHILE ~ (R.eot OR (ch < " ") OR (i > (size - 2)))  DO line[i] := ch; INC(i); GetCh() END;
-      line[i] := 0X;
-    END;
+    IF eof THEN
+      theEnd := TRUE
+    ELSE
+      GetLine();
+      i := 0;
+      WHILE (line[i] # 0X) & ((line[i] = SPACE) OR (line[i] = TAB)) DO INC(i) END;
+      IF (line[i] = "E") & (line[i + 1] = "N") & (line[i + 2] = "D") THEN
+        columnNbr := i + 3;
+        theEnd := TRUE;
+      ELSE
+        i := 0; j := 0;
+        WHILE (line[i] # 0X) & (j < (LEN(theLine) - 1)) DO
+          IF (line[i] >= SPACE) OR (line[i] = TAB) THEN
+            theLine[j] := line[i]; INC(j);
+          END;
+          INC(i) 
+        END;
+        IF j < (LEN(theLine) - 1) THEN theLine[j] := 0X END;
+        theEnd := FALSE;
+      END;
+    END
     RETURN ~theEnd
   END GetAssemblerLine;
 
   PROCEDURE Get*(VAR sym: INTEGER);
   BEGIN
     REPEAT
-      WHILE ~R.eot & (ch <= " ") DO GetCh() END;
-      (*IF R.eot THEN sym := eot
-      ELS *)
+      WHILE ~eof & (ch <= SPACE) DO GetCh() END;
       IF ch < "A" THEN
         IF ch < "0" THEN
           IF ch = 22X THEN String; sym := string
@@ -385,19 +390,24 @@ MODULE ORS; (* NW 19.9.93 / 15.3.2017  Scanner in Oberon-07*)
 
   PROCEDURE Init*(T: Texts.Text; pos: INTEGER);
   BEGIN 
-    errpos := pos; 
-    errcnt := 0; 
     Texts.OpenReader(R, T, pos); 
-    lineNbr := 1;
-    columnNbr := 1;
-    GetCh()
+    errcnt    := 0; 
+    lineNbr   := 0;
+    columnNbr := 0;
+    eof       := FALSE;
+    GetLine();
+    GetCh();
   END Init;
 
   PROCEDURE EnterKW(sym: INTEGER; name: ARRAY OF CHAR);
   BEGIN keyTab[k].id := name; keyTab[k].sym := sym; INC(k)
   END EnterKW;
 
-BEGIN Texts.OpenWriter(W); k := 0; KWX[0] := 0; KWX[1] := 0;
+BEGIN 
+  Texts.OpenWriter(W); 
+  
+  k := 0; KWX[0] := 0; KWX[1] := 0;
+
   EnterKW(if, "IF");
   EnterKW(do, "DO");
   EnterKW(of, "OF");
@@ -441,4 +451,5 @@ BEGIN Texts.OpenWriter(W); k := 0; KWX[0] := 0; KWX[1] := 0;
   KWX[9] := k;
 
   debugging := FALSE;
+  lineConsumer := NIL;
 END ORS.

@@ -3252,6 +3252,21 @@ PROCEDURE Abs*(VAR x: Item);
     Texts.WriteInt(AsW, offset, 0)
   END TypePointer;
 
+  PROCEDURE LineConsumer(lineNbr: INTEGER; line: ARRAY OF CHAR);
+  (* VAR i : INTEGER; *)
+  BEGIN
+    (* i := 0;
+    WHILE line[i] # 0X DO INC(i) END;
+    IF i > 0 THEN DEC(i) END;
+    line[i] := 0X; *)
+
+    Texts.WriteString(CodeW, "# --> ");
+    Texts.WriteInt(CodeW, lineNbr, 4);
+    Texts.WriteString(CodeW, ": ");
+    Texts.WriteString(CodeW, line);
+    Texts.WriteLn(CodeW)
+  END LineConsumer;
+
   PROCEDURE Close*(VAR moduleId: ORS.Ident; moduleKey, nofent: INTEGER; outputFolder: ARRAY OF CHAR);
     VAR 
       obj: ORB.Object;
@@ -3381,10 +3396,17 @@ PROCEDURE Abs*(VAR x: Item);
     Files.Register(AsF) 
   END Close;
 
-  PROCEDURE Open*(modid: ORS.Ident; generateCheckCode: BOOLEAN);
+  PROCEDURE Open*(modid: ORS.Ident);
   BEGIN 
     thisModuleId := modid;
+  END Open;
 
+  PROCEDURE SetDataSize*(dc: INTEGER);
+  BEGIN varsize := dc
+  END SetDataSize;
+
+  PROCEDURE Init*(generateCheckCode, sourceToAssembly: BOOLEAN);
+  BEGIN
     check   := generateCheckCode;
 
     tdx     := 0; 
@@ -3399,11 +3421,8 @@ PROCEDURE Abs*(VAR x: Item);
 
     ProcPresent := FALSE;
 
-  END Open;
-
-  PROCEDURE SetDataSize*(dc: INTEGER);
-  BEGIN varsize := dc
-  END SetDataSize;
+    IF sourceToAssembly THEN ORS.SetLineConsumer(LineConsumer) END
+  END Init;
 
 BEGIN 
   relmap[0] := EQU; (* = *)

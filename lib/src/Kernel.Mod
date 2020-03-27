@@ -434,13 +434,13 @@ MODULE Kernel;
         l32i a5, a1, 8         # a5 := time.low
         l32i a6, a3, 0         # a6 := fromTime.low
         sub  a7, a5, a6        # a7 := time.low - fromTime.low 
-        bgeu a5, a7, 96f       # branch if no borrow
+        bgeu a5, a7, 996$      # branch if no borrow
         addi a4, a4, -1
-    96:
+    996$:
         l32i a5, a3, 4         # a5 := fromTime.high
-        beq a4, a5, 97f        # if time.high # fromTime.high then
+        beq a4, a5, 997$        # if time.high # fromTime.high then
         movi a7, -1            #    overflow
-    97:
+    997$:
         s32i a7, a1, 16        # Save value in result
     END;
   RETURN result
@@ -458,9 +458,9 @@ MODULE Kernel;
         l32i a4, a1, 16        # a4 := high
         l32i a5, a1, 0         # a5 := duration
         add  a6, a3, a5        # a6 := low + wait_time
-        bgeu a6, a3, 98f       # branch if no overflow on high part
+        bgeu a6, a3, 998$      # branch if no overflow on high part
         addi a4, a4, 1
-    98:
+    998$:
         s32i a6, a1, 12        # Save low
         s32i a4, a1, 16        # Save high
     END;
@@ -469,13 +469,13 @@ MODULE Kernel;
       ASM
           l32i a3, a1, 8       # a3 := high just read
           l32i a4, a1, 16      # a4 := high target
-          bltu a3, a4, 99f     # Branch if High portion of the timer is still too small
+          bltu a3, a4, 999$    # Branch if High portion of the timer is still too small
           l32i a3, a1, 4       # a3 := low just read
           l32i a4, a1, 12      # a4 := low target
-          bltu a3, a4, 99f     # Branch if Low portion of the timer is still too small
+          bltu a3, a4, 999$    # Branch if Low portion of the timer is still too small
           movi a3, 1           # done := TRUE
           s8i  a3, a1, 20
-      99:
+      999$:
       END
     UNTIL done
   END Wait;
