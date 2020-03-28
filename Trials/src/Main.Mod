@@ -1,5 +1,5 @@
 MODULE Main;
-  IMPORT SYSTEM, Kernel, Out, In;
+  IMPORT SYSTEM, Kernel, Out, In, Watchdog;
   TYPE
     Rec1 = RECORD x: INTEGER END;
     Rec2 = RECORD y: INTEGER END;
@@ -80,6 +80,10 @@ MODULE Main;
 
   PROCEDURE Check8;
   BEGIN
+    Watchdog.ShowRegs;
+    Watchdog.Init;
+    Watchdog.ShowRegs;
+    Kernel.EnableWatchdog
   END Check8;
 
 BEGIN

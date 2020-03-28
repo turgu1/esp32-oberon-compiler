@@ -42,6 +42,7 @@ MATHO = $(BLDDIR)/math_support.o
 
 SRC = \
   Out.Mod \
+  Watchdog.Mod \
   Kernel.Mod \
   In.Mod \
   Math.Mod \

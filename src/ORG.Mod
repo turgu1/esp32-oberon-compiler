@@ -1392,7 +1392,8 @@ MODULE ORG;
         x.r := y.r; 
         x.a := x.b
       ELSIF x.mode = RegI THEN 
-        PutRRR("add", x.r, x.r, y.r); 
+        PutRRR("add", RH - 2, x.r, y.r); 
+        x.r := RH - 2;
         decR
       END
     END
@@ -1884,7 +1885,8 @@ MODULE ORG;
           PutR(       "ssl",  y.r          );
           PutRR(      "sll",  y.r,  RH     );
         END;
-        PutRRR("xor", x.r, x.r, y.r);
+        PutRRR("xor", RH - 2, x.r, y.r);
+        x.r := RH - 2;
         IF y.mode # ORB.Const THEN PutLabel(lbl) END;
         decR
       END
@@ -1937,14 +1939,14 @@ MODULE ORG;
       ELSIF op = ORS.minus THEN 
         PutRI( "movi",  RH,  -1     ); 
         PutRRR("xor",  y.r, y.r,  RH);
-        PutRRR("and",  x.r, x.r, y.r)
+        PutRRR("and",  RH - 2, x.r, y.r)
       ELSIF op = ORS.times THEN 
         PutRRR("and", RH - 2, x.r, y.r)
       ELSIF op = ORS.rdiv THEN 
         PutRRR("xor", RH - 2, x.r, y.r)
       END;
       decR; 
-      x.r := RH-1
+      x.r := RH - 1
     END 
   END SetOp;
 
@@ -2960,7 +2962,8 @@ PROCEDURE Abs*(VAR x: Item);
       ELSIF fct = 2 THEN op := "xor"
       END;
       load(x); load(y);
-      PutRRR(op, x.r, x.r, y.r);
+      PutRRR(op, RH - 2, x.r, y.r);
+      x.r := RH - 2;
       decR
     END
   END BitOp;
@@ -2983,7 +2986,8 @@ PROCEDURE Abs*(VAR x: Item);
     ELSIF fct = 1 THEN op := "max" 
     END;
     load(x); load(y);
-    PutRRR(op, x.r, x.r, y.r);
+    PutRRR(op, RH - 2, x.r, y.r);
+    x.r := RH - 2;
     decR
   END MinMax;
 

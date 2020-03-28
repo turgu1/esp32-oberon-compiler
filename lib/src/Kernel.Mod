@@ -1,31 +1,32 @@
 (* ESP32 Kernel Functions *)
 
 MODULE Kernel;
-  IMPORT SYSTEM, Out;
+  IMPORT SYSTEM, Out, Watchdog;
 
   CONST
-    RTC_CNTL_CLK_CONF_REG  = 3FF48070H;
-    DPORT_CPU_PER_CONF_REG = 3FF0003CH;
+    (* CPU Speed Control Registers *)
+    RTC_CNTL_CLK_CONF_REG    = 3FF48070H;
+    DPORT_CPU_PER_CONF_REG   = 3FF0003CH;
 
-    CLK_SEL_MASK          = 0E7FFFFFFH;
+    CLK_SEL_MASK             = 0E7FFFFFFH;
     
-    CLK_XTAL               = 00000000H;
-    CLK_PLL                = 08000000H;
-    CLK_CK8M               = 10000000H;
-    CLK_APLL               = 18000000H;
+    CLK_XTAL                 = 00000000H;
+    CLK_PLL                  = 08000000H;
+    CLK_CK8M                 = 10000000H;
+    CLK_APLL                 = 18000000H;
 
-    TIMG0_T0CONFIG_REG     = 3FF5F000H;
-    TIMG0_T0LO_REG         = 3FF5F004H;
-    TIMG0_T0HI_REG         = 3FF5F008H;
-    TIMG0_T0UPDATE_REG     = 3FF5F00CH;
-    TIMG0_T0ALARMLO_REG    = 3FF5F010H;
-    TIMG0_T0ALARMHI_REG    = 3FF5F014H;
-    TIMG0_T0LOADLO_REG     = 3FF5F018H;
-    TIMG0_T0LOADHI_REG     = 3FF5F01CH;
-    TIMG0_T0LOAD_REG       = 3FF5F020H;
+    TIMG0_T0CONFIG_REG       = 3FF5F000H;
+    TIMG0_T0LO_REG           = 3FF5F004H;
+    TIMG0_T0HI_REG           = 3FF5F008H;
+    TIMG0_T0UPDATE_REG       = 3FF5F00CH;
+    TIMG0_T0ALARMLO_REG      = 3FF5F010H;
+    TIMG0_T0ALARMHI_REG      = 3FF5F014H;
+    TIMG0_T0LOADLO_REG       = 3FF5F018H;
+    TIMG0_T0LOADHI_REG       = 3FF5F01CH;
+    TIMG0_T0LOAD_REG         = 3FF5F020H;
 
-    OneSecond*             = 1000000;
-    OneMinute*             = OneSecond * 60;
+    OneSecond*               = 1000000;
+    OneMinute*               = OneSecond * 60;
 
   TYPE
     ClockTime* = RECORD low*, high*: INTEGER END;
@@ -398,20 +399,20 @@ MODULE Kernel;
 *)
   (* ----- WatchDog ----- *)
 
-  PROCEDURE EnableWatchDog*;
+  PROCEDURE EnableWatchdog*;
   BEGIN 
+    Watchdog.Enable
+  END EnableWatchdog;
 
-  END EnableWatchDog;
-
-  PROCEDURE DisableWatchDog*;
+  PROCEDURE DisableWatchdog*;
   BEGIN 
-
-  END DisableWatchDog;
+    Watchdog.Disable
+  END DisableWatchdog;
   
-  PROCEDURE PingWatchDog*;
+  PROCEDURE FeedWatchdog*;
   BEGIN 
-
-  END PingWatchDog;
+    SYSTEM.PUT(Watchdog.RTC_CNTL_WDTFEED_REG, Watchdog.RTC_CNTL_WDTFEED);
+  END FeedWatchdog;
 
   (* ----- Internal Clock ----- *)
 
