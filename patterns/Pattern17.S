@@ -1,3 +1,4 @@
+
     .title "Module Pattern17, Key A5E3D3EC"
     .sbttl "Oberon ESP32 Compiler Version 0.1.0"
 
@@ -20,7 +21,6 @@ _Pattern17_s_bss:
 
     .align 4
     .section .init_Pattern17_A5E3D3EC
-
 _Pattern17_init:
     entry a1, 16
     movi a2, _Pattern17_s_bss
@@ -42,8 +42,8 @@ _Pattern17_init:
     l8ui a3, a2, 17
     s32i a3, a2, 4
 # -->   13:   n := FLOOR(x);
-    l32i a3, a2, 8
-    wfr f0, a3
+    l32i a3, a2, 8    wfr f0, a3
+
     floor.s a3, f0, 0
     s32i a3, a2, 4
 # -->   14:   y := FLT(m);
@@ -71,7 +71,7 @@ _Pattern17_init:
     .size _Pattern17_init, .-_Pattern17_init
 
 
+
     .align 4
     .section .init_table_Pattern17_A5E3D3EC
     .int _Pattern17_init
-

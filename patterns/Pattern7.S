@@ -1,3 +1,4 @@
+
     .title "Module Pattern7, Key ABE2D4B5"
     .sbttl "Oberon ESP32 Compiler Version 0.1.0"
 
@@ -17,7 +18,6 @@ _Pattern7_s_bss:
 
     .align 4
     .section .init_Pattern7_ABE2D4B5
-
 _Pattern7_init:
     entry a1, 16
     movi a2, _Pattern7_s_bss
@@ -42,7 +42,7 @@ _Pattern7_init:
     .size _Pattern7_init, .-_Pattern7_init
 
 
+
     .align 4
     .section .init_table_Pattern7_ABE2D4B5
     .int _Pattern7_init
-

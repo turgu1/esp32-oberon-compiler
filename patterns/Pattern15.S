@@ -1,3 +1,4 @@
+
     .title "Module Pattern15, Key A5E3D3EA"
     .sbttl "Oberon ESP32 Compiler Version 0.1.0"
 
@@ -21,11 +22,11 @@ _Pattern15_s_bss:
 # -->    5:   PROCEDURE P(x: ARRAY OF CHAR);
 # -->    6:   END P;
 
+
     .align 4
     .section .text_Pattern15_A5E3D3EA
     .global _Pattern15_A5E3D3EA_s_text
 _Pattern15_A5E3D3EA_s_text:
-
     .type _P, @function
 _P:
     entry a1, 32
@@ -34,13 +35,13 @@ _P:
     movi a2, _Pattern15_s_bss
     retw
     .size _P, .-_P
+
 # -->    7:   
 # -->    8: BEGIN 
 
 
     .align 4
     .section .init_Pattern15_A5E3D3EA
-
 _Pattern15_init:
     entry a1, 16
     movi a2, _Pattern15_s_bss
@@ -83,7 +84,7 @@ _Pattern15_init:
     .size _Pattern15_init, .-_Pattern15_init
 
 
+
     .align 4
     .section .init_table_Pattern15_A5E3D3EA
     .int _Pattern15_init
-

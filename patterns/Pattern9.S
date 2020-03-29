@@ -1,3 +1,4 @@
+
     .title "Module Pattern9, Key ADE2D4B5"
     .sbttl "Oberon ESP32 Compiler Version 0.1.0"
 
@@ -15,11 +16,11 @@ _Pattern9_s_bss:
 # -->    5:   PROCEDURE F(x: REAL): REAL;
 # -->    6:   BEGIN
 
+
     .align 4
     .section .text_Pattern9_ADE2D4B5
     .global _Pattern9_ADE2D4B5_s_text
 _Pattern9_ADE2D4B5_s_text:
-
     .type _F, @function
 _F:
     entry a1, 32
@@ -43,13 +44,13 @@ _F:
     l32i a3, a1, 0
     retw
     .size _F, .-_F
+
 # -->   12:   
 # -->   13: END Pattern9.
 
 
     .align 4
     .section .init_Pattern9_ADE2D4B5
-
 _Pattern9_init:
     entry a1, 16
     movi a2, _Pattern9_s_bss
@@ -57,7 +58,7 @@ _Pattern9_init:
     .size _Pattern9_init, .-_Pattern9_init
 
 
+
     .align 4
     .section .init_table_Pattern9_ADE2D4B5
     .int _Pattern9_init
-

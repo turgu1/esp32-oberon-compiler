@@ -1,11 +1,12 @@
+
     .title "Module Pattern14, Key A5E3D3E9"
     .sbttl "Oberon ESP32 Compiler Version 0.1.0"
+
 
     .align 4
     .section .data_types_Pattern14_A5E3D3E9
     .global _Pattern14_A5E3D3E9_s_data_types
-_Pattern14_A5E3D3E9_s_data_types:
-_Pattern14_s_types:
+_Pattern14_A5E3D3E9_s_data_types:_Pattern14_s_types:
     .int 32
     .int -1
     .int -1
@@ -40,11 +41,11 @@ _Pattern14_s_bss:
 # -->   14:   PROCEDURE P(VAR r: R0);
 # -->   15:   BEGIN
 
+
     .align 4
     .section .text_Pattern14_A5E3D3E9
     .global _Pattern14_A5E3D3E9_s_text
 _Pattern14_A5E3D3E9_s_text:
-
     .type _P, @function
 _P:
     entry a1, 32
@@ -70,13 +71,13 @@ _P:
     s32i a3, a4, 12
     retw
     .size _P, .-_P
+
 # -->   19:   
 # -->   20: BEGIN
 
 
     .align 4
     .section .init_Pattern14_A5E3D3E9
-
 _Pattern14_init:
     entry a1, 16
     movi a2, _Pattern14_s_bss
@@ -94,7 +95,7 @@ _Pattern14_init:
     .size _Pattern14_init, .-_Pattern14_init
 
 
+
     .align 4
     .section .init_table_Pattern14_A5E3D3E9
     .int _Pattern14_init
-

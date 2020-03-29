@@ -63,7 +63,7 @@ MODULE ORP; (*N. Wirth 1.7.97 / 8.2.2020  Oberon compiler for ESP32 in Oberon-07
     ELSIF (obj.lev > 0) & (obj.lev # level) &
           ((obj.class # ORB.Const) OR (obj.type.form # ORB.Proc)) THEN 
       ORS.Mark2("not accessible: ", obj.name);
-      Out.Ln; Out.Int(obj.lev, 0); Out.Ln; *)
+      Out.Ln; Out.Int(obj.lev, 0); *)
     END
   END qualident;
 
@@ -280,10 +280,10 @@ MODULE ORP; (*N. Wirth 1.7.97 / 8.2.2020  Oberon compiler for ESP32 in Oberon-07
             (par.type.size = x.type.size) THEN
         ORG.VarParam(x, par.type)
       ELSE ORS.Mark("incompatible parameters");
-        Out.Ln;Out.String("  x.type.form: "); Out.Int(x.type.form, 0);        Out.Ln;
-        Out.String("  par.type.form: ");      Out.Int(par.type.form, 0);      Out.Ln;
-        Out.String("  par.type.base.form: "); Out.Int(par.type.base.form, 0); Out.Ln;
-        Out.String("  par.type.len: ");       Out.Int(par.type.len, 0);       Out.Ln;
+        Out.Ln; Out.String("  x.type.form: "); Out.Int(x.type.form, 0);       
+        Out.Ln; Out.String("  par.type.form: ");      Out.Int(par.type.form, 0);     
+        Out.Ln; Out.String("  par.type.base.form: "); Out.Int(par.type.base.form, 0);
+        Out.Ln; Out.String("  par.type.len: ");       Out.Int(par.type.len, 0);      
       END
     END
   END Parameter;
@@ -677,9 +677,9 @@ MODULE ORP; (*N. Wirth 1.7.97 / 8.2.2020  Oberon compiler for ESP32 in Oberon-07
               ORG.StrToChar(y); ORG.Store(x, y)
             ELSE 
               ORS.Mark("illegal assignment");
-              (* Out.Ln;
-              Out.String("--> x.type.form: "); Out.Int(x.type.form, 0); Out.Ln;
-              Out.String("--> y.type.form: "); Out.Int(y.type.form, 0) *)
+              (* 
+              Out.Ln; Out.String("--> x.type.form: "); Out.Int(x.type.form, 0);
+              Out.Ln; Out.String("--> y.type.form: "); Out.Int(y.type.form, 0) *)
             END
           ELSIF sym = ORS.eql THEN ORS.Mark("should be :="); ORS.Get(sym); expression(y)
           ELSIF sym = ORS.lparen THEN (* ----- procedure call ----- *)
@@ -701,9 +701,9 @@ MODULE ORP; (*N. Wirth 1.7.97 / 8.2.2020  Oberon compiler for ESP32 in Oberon-07
             END
           ELSIF x.mode = ORB.Typ THEN 
             ORS.Mark("illegal assignment");
-            (* Out.Ln;
-            Out.String("--> x.type.form: "); Out.Int(x.type.form, 0); Out.Ln;
-            Out.String("--> y.type.form: "); Out.Int(y.type.form, 0) *)
+            (* 
+            Out.Ln; Out.String("--> x.type.form: "); Out.Int(x.type.form, 0);
+            Out.Ln; Out.String("--> y.type.form: "); Out.Int(y.type.form, 0) *)
           ELSE ORS.Mark("not a procedure")
           END
         END
@@ -1111,18 +1111,18 @@ MODULE ORP; (*N. Wirth 1.7.97 / 8.2.2020  Oberon compiler for ESP32 in Oberon-07
       IF sym = ORS.begin THEN ORS.Get(sym); StatSequence END ;
       IF sym = ORS.return THEN
         ORS.Get(sym); expression(x);
-            (* Out.Ln; 
-            Out.String("--> type.base.form: "); Out.Int(type.base.form, 0); Out.Ln;
-            Out.String("--> x.type.form: "); Out.Int(x.type.form, 0); *)
+            (* 
+            Out.Ln; Out.String("--> type.base.form: "); Out.Int(type.base.form, 0);
+            Out.Ln; Out.String("--> x.type.form: "); Out.Int(x.type.form, 0); *)
         IF type.base = ORB.noType THEN ORS.Mark("this is not a function")
         ELSIF ~CompTypes(type.base, x.type, FALSE) THEN 
           IF (type.base.form = ORB.Char) & (x.type.form = ORB.String) & (x.b = 2) THEN
             ORG.StrToChar(x);
           ELSIF (type.base.form # x.type.form) THEN
             ORS.Mark("wrong result type");
-            (* Out.Ln; 
-            Out.String("--> type.base.form: "); Out.Int(type.base.form, 0); Out.Ln;
-            Out.String("--> x.type.form: "); Out.Int(x.type.form, 0); *)
+            (* 
+            Out.Ln; Out.String("--> type.base.form: "); Out.Int(type.base.form, 0);
+            Out.Ln; Out.String("--> x.type.form: "); Out.Int(x.type.form, 0); *)
           END
         END
       ELSIF type.base.form # ORB.NoTyp THEN
@@ -1201,7 +1201,7 @@ MODULE ORP; (*N. Wirth 1.7.97 / 8.2.2020  Oberon compiler for ESP32 in Oberon-07
         IF verbose THEN Out.Int(dc, 6); Out.Hex(key) END
       ELSE 
         Out.Ln; Out.String("compilation FAILED; "); 
-        Out.Int(ORS.errcnt,0); Out.String(" error(s) detected."); Out.Ln; 
+        Out.Int(ORS.errcnt,0); Out.String(" error(s) detected.");
       END;
       IF verbose THEN Out.Ln END;
       ORB.CloseScope; pbsList := NIL
@@ -1231,8 +1231,8 @@ MODULE ORP; (*N. Wirth 1.7.97 / 8.2.2020  Oberon compiler for ESP32 in Oberon-07
       (*S: Texts.Scanner; *)
   BEGIN 
     IF verbose THEN
-      Out.String("ESP32 Oberon-07 Compiler Version ");
-      Out.String(ORB.CompilerVersion); Out.Ln
+    Out.Ln; Out.String("ESP32 Oberon-07 Compiler Version ");
+      Out.String(ORB.CompilerVersion);
     END;
     newSF := overrideSymbolFile;
 
@@ -1249,7 +1249,7 @@ MODULE ORP; (*N. Wirth 1.7.97 / 8.2.2020  Oberon compiler for ESP32 in Oberon-07
       Module(verbose);
       IF ORS.errcnt # 0 THEN Out.Ln; SYS.Exit(1) END;
     ELSE
-      Out.String(filename); Out.String(" not found"); Out.Ln; 
+      Out.Ln;  Out.String(filename); Out.String(" not found");
       SYS.Exit(1)
     END
   END Compile;

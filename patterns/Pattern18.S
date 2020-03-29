@@ -1,3 +1,4 @@
+
     .title "Module Pattern18, Key A5E3D3ED"
     .sbttl "Oberon ESP32 Compiler Version 0.1.0"
 
@@ -22,7 +23,6 @@ _Pattern18_s_bss:
 
     .align 4
     .section .init_Pattern18_A5E3D3ED
-
 _Pattern18_init:
     entry a1, 16
     movi a2, _Pattern18_s_bss
@@ -59,7 +59,7 @@ _Pattern18_init:
     .size _Pattern18_init, .-_Pattern18_init
 
 
+
     .align 4
     .section .init_table_Pattern18_A5E3D3ED
     .int _Pattern18_init
-

@@ -1,3 +1,4 @@
+
     .title "Module Pattern12c, Key A6E336E7"
     .sbttl "Oberon ESP32 Compiler Version 0.1.0"
 
@@ -20,7 +21,6 @@ _Pattern12c_s_bss:
 
     .align 4
     .section .init_Pattern12c_A6E336E7
-
 _Pattern12c_init:
     entry a1, 16
     movi a2, _Pattern12c_s_bss
@@ -39,7 +39,7 @@ _Pattern12c_init:
     .size _Pattern12c_init, .-_Pattern12c_init
 
 
+
     .align 4
     .section .init_table_Pattern12c_A6E336E7
     .int _Pattern12c_init
-

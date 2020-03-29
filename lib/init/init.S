@@ -127,11 +127,15 @@ _init_end:
 
 _stop_watchdog:
     entry a1, 16
-    movi a2, 0
-    movi a3, RTC_CNTL_WDTCONFIG0_REG
-    s32i a2, a3, 0
-    movi a3, TIMG0_T0_WDTCONFIG0_REG
-    s32i a2, a3, 0
+    movi a2, RTC_CNTL_WDTCONFIG0_REG
+    l32i a3, a2, 0
+    movi a4, 0x7FFFFFFF
+    and  a3, a3, a4
+    s32i a3, a2, 0
+    movi a2, TIMG0_T0_WDTCONFIG0_REG
+    l32i a3, a2, 0
+    and  a3, a3, a4
+    s32i a3, a2, 0
     retw
 
 /* ---- _set_160mhz ---- */

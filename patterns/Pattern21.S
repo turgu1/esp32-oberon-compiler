@@ -1,11 +1,12 @@
+
     .title "Module Pattern21, Key A6E3D3E6"
     .sbttl "Oberon ESP32 Compiler Version 0.1.0"
+
 
     .align 4
     .section .data_types_Pattern21_A6E3D3E6
     .global _Pattern21_A6E3D3E6_s_data_types
-_Pattern21_A6E3D3E6_s_data_types:
-_Pattern21_s_types:
+_Pattern21_A6E3D3E6_s_data_types:_Pattern21_s_types:
     .int 32
     .int -1
     .int -1
@@ -44,23 +45,22 @@ _Pattern21_s_bss:
 # -->    4:   R0 = RECORD (R) b: INTEGER END;
 # -->    5:   R1 = RECORD (R) b: REAL END;
 # -->    6:   R2 = RECORD (R) b: SET END;
-# -->    7:   P  = POINTER TO R; 
-# -->    8:   P0 = POINTER TO R0;
-# -->    9:   P1 = POINTER TO R1; 
-# -->   10:   P2 = POINTER TO R2;
-# -->   11: VAR 
-# -->   12:   p: P;
-# -->   13: BEGIN
+# -->    8:   P  = POINTER TO R; 
+# -->    9:   P0 = POINTER TO R0;
+# -->   10:   P1 = POINTER TO R1; 
+# -->   11:   P2 = POINTER TO R2;
+# -->   12: VAR 
+# -->   13:   p: P;
+# -->   15: BEGIN
 
 
     .align 4
     .section .init_Pattern21_A6E3D3E6
-
 _Pattern21_init:
     entry a1, 16
     movi a2, _Pattern21_s_bss
-# -->   14:   CASE p OF
-# -->   15:     P0: p.b := 10  |
+# -->   16:   CASE p OF
+# -->   17:     P0: p.b := 10  |
     l32i a3, a2, 0
     movi a4, 0
     beqz a3, 2$
@@ -79,7 +79,7 @@ _Pattern21_init:
     movi a4, 10
     s32i a4, a3, 4
     j 1$
-# -->   16:     P1: p.b := 2.5 |
+# -->   18:     P1: p.b := 2.5 |
 3$:
     l32i a3, a2, 0
     movi a4, 0
@@ -99,7 +99,7 @@ _Pattern21_init:
     movi a4, 1075838976
     s32i a4, a3, 4
     j 1$
-# -->   17:     P2: p.b := {0, 2} 
+# -->   19:     P2: p.b := {0, 2} 
 6$:
     l32i a3, a2, 0
     movi a4, 0
@@ -116,18 +116,18 @@ _Pattern21_init:
     movi a6, 1026
     call4 _OberonSyscallHandler
 10$:
-# -->   18:   END
+# -->   20:   END
     movi a4, 5
     s32i a4, a3, 4
     j 1$
 9$:
 1$:
-# -->   19: END Pattern21.
+# -->   21: END Pattern21.
     retw
     .size _Pattern21_init, .-_Pattern21_init
+
 
 
     .align 4
     .section .init_table_Pattern21_A6E3D3E6
     .int _Pattern21_init
-

@@ -1,3 +1,4 @@
+
     .title "Module Pattern16, Key A5E3D3EB"
     .sbttl "Oberon ESP32 Compiler Version 0.1.0"
 
@@ -26,7 +27,6 @@ _Pattern16_s_bss:
 
     .align 4
     .section .init_Pattern16_A5E3D3EB
-
 _Pattern16_init:
     entry a1, 16
     movi a2, _Pattern16_s_bss
@@ -109,7 +109,7 @@ _Pattern16_init:
     .size _Pattern16_init, .-_Pattern16_init
 
 
+
     .align 4
     .section .init_table_Pattern16_A5E3D3EB
     .int _Pattern16_init
-

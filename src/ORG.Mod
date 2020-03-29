@@ -94,16 +94,16 @@ MODULE ORG;
       Register content follow-up. This is an attempt to optimize the register load mechanism.
       Every time a register is set to someting, the strucure is updated with the following 
       information:
-        - r: other register from which the content has been used to load current register. 
+        - reg: other register from which the content has been used to load current register. 
           if r = -1, no other register; if r = -99, entry not valid.
-        - a: is a labeled locattion
-        - k: kind of value: immediate, location)
+        - lbl: is a labeled location
+        - kind: kind of value: immediate, location)
       *)
     RegisterContent = ARRAY 16 OF 
       RECORD 
-        r, i: INTEGER; 
-        a: ARRAY 256 OF CHAR;
-        k: INTEGER
+        reg, i: INTEGER; 
+        lbl: ARRAY 256 OF CHAR;
+        kind: INTEGER
       END;
 
   VAR 
@@ -245,22 +245,22 @@ MODULE ORG;
     PROCEDURE ShowType(t: ORB.Type; s: INTEGER);
     BEGIN 
       IF s <= 20 THEN
-        Spaces(s); Out.String("form: "  ); Out.Int(t.form,   0); ShowForm(t.form); Out.Ln;
-        Spaces(s); Out.String("ref: "   ); Out.Int(t.ref,    0); Out.Ln;
-        Spaces(s); Out.String("mno: "   ); Out.Int(t.mno,    0); Out.Ln;
-        Spaces(s); Out.String("nofPar: "); Out.Int(t.nofpar, 0); Out.Ln;
-        Spaces(s); Out.String("len: "   ); Out.Int(t.len,    0); Out.Ln;
-        Spaces(s); Out.String("size: "  ); Out.Int(t.size,   0); Out.Ln;
+        Out.Ln; Spaces(s); Out.String("form: "  ); Out.Int(t.form,   0); ShowForm(t.form); 
+        Out.Ln; Spaces(s); Out.String("ref: "   ); Out.Int(t.ref,    0);
+        Out.Ln; Spaces(s); Out.String("mno: "   ); Out.Int(t.mno,    0);
+        Out.Ln; Spaces(s); Out.String("nofPar: "); Out.Int(t.nofpar, 0);
+        Out.Ln; Spaces(s); Out.String("len: "   ); Out.Int(t.len,    0);
+        Out.Ln; Spaces(s); Out.String("size: "  ); Out.Int(t.size,   0);
         IF t.dsc # NIL THEN
-          Spaces(s); Out.String("dsc:"); Out.Ln;
+          Out.Ln; Spaces(s); Out.String("dsc:");
           ShowObject(t.dsc, s + 4);
         END;
         IF t.typobj # NIL THEN
-          Spaces(s); Out.String("typobj:"); Out.Ln;
+          Out.Ln; Spaces(s); Out.String("typobj:");
           ShowObject(t.typobj, s + 4);
         END;
         IF t.base # NIL THEN
-          Spaces(s); Out.String("base:"); Out.Ln;
+          Out.Ln; Spaces(s); Out.String("base:");
           ShowType(t.base, s + 4);
         END
       END
@@ -268,20 +268,19 @@ MODULE ORG;
 
   BEGIN
     IF s <= 20 THEN
-      Out.Ln;
-      Spaces(s); Out.String("class: "); Out.Int(o.class, 0); ShowClass(o.class); Out.Ln;
-      Spaces(s); Out.String("exno: " ); Out.Int(o.exno, 0); Out.Ln;
-      Spaces(s); Out.String("expo: " ); IF o.expo THEN Out.String("YES") ELSE Out.String("NO") END; Out.Ln;
-      Spaces(s); Out.String("rdo: "  ); IF o.rdo THEN Out.String("YES") ELSE Out.String("NO") END; Out.Ln;
-      Spaces(s); Out.String("lev: "  ); Out.Int(o.lev, 0); Out.Ln;
-      Spaces(s); Out.String("val: "  ); Out.Int(o.val, 0); Out.Ln;
-      Spaces(s); Out.String("name: " ); Out.String(o.name); Out.Ln;
+      Out.Ln; Spaces(s); Out.String("class: "); Out.Int(o.class, 0); ShowClass(o.class);
+      Out.Ln; Spaces(s); Out.String("exno: " ); Out.Int(o.exno, 0);
+      Out.Ln; Spaces(s); Out.String("expo: " ); IF o.expo THEN Out.String("YES") ELSE Out.String("NO") END; Out.Ln;
+      Out.Ln; Spaces(s); Out.String("rdo: "  ); IF o.rdo THEN Out.String("YES") ELSE Out.String("NO") END; Out.Ln;
+      Out.Ln; Spaces(s); Out.String("lev: "  ); Out.Int(o.lev, 0);
+      Out.Ln; Spaces(s); Out.String("val: "  ); Out.Int(o.val, 0);
+      Out.Ln; Spaces(s); Out.String("name: " ); Out.String(o.name);
       IF o.dsc # NIL THEN
-        Spaces(s); Out.String("dsc:"); Out.Ln;
+        Out.Ln; Spaces(s); Out.String("dsc:");
         ShowObject(o.dsc, s + 4);
       END;
       IF o.type # NIL THEN
-        Spaces(s); Out.String("type:"); Out.Ln;
+        Out.Ln; Spaces(s); Out.String("type:");
         ShowType(o.type, s + 4);
       END;
       IF o.next # NIL THEN
@@ -292,47 +291,93 @@ MODULE ORG;
 
   PROCEDURE ShowItem(x: Item);
   BEGIN
-    Out.Ln;
-    Out.String("Item:"); Out.Ln;
-    Out.String("  Mode: "); Out.Int(x.mode, 0); ShowMode(x.mode); Out.Ln;
-    Out.String("  a: "   ); Out.Int(x.a,    0); Out.Ln;
-    Out.String("  b: "   ); Out.Int(x.b,    0); Out.Ln;
-    Out.String("  r: "   ); Out.Int(x.r,    0); Out.Ln;
-    Out.String("  rdo: " ); IF x.rdo THEN Out.String("YES") ELSE Out.String("NO") END; Out.Ln;
+    Out.Ln; Out.String("Item:");
+    Out.Ln; Out.String("  Mode: "); Out.Int(x.mode, 0); ShowMode(x.mode);
+    Out.Ln; Out.String("  a: "   ); Out.Int(x.a,    0);
+    Out.Ln; Out.String("  b: "   ); Out.Int(x.b,    0);
+    Out.Ln; Out.String("  r: "   ); Out.Int(x.r,    0);
+    Out.Ln; Out.String("  rdo: " ); IF x.rdo THEN Out.String("YES") ELSE Out.String("NO") END;
     (*IF x.type # NIL THEN
-      Out.String("  type:" ); Out.Ln;
+      Out.Ln; Out.String("  type:" );
       ShowType(x.type, 4);
     END*)
   END ShowItem;
 *)
 
   (* Register optimization management *)
-  PROCEDURE InitRc;
+
+  (* Initialize all register content to Unknown (UNK) *)
+  PROCEDURE ClearAllRc;
   VAR
     i: INTEGER;
   BEGIN 
-    FOR i := 0 TO 15 DO rc[i].k := UNK END
-  END InitRc;
+    FOR i := 0 TO 15 DO rc[i].kind := UNK END
+  END ClearAllRc;
 
+  (* Set Register r to Unknown (UNK) *)
   PROCEDURE ClearRc(r: INTEGER);
   BEGIN 
-    rc[r].k := UNK;
+    rc[r].kind := UNK;
+
+    Texts.WriteString(CodeW, "    # a");
+    Texts.WriteInt(CodeW, r, 0);
+    Texts.WriteString(CodeW, " = UNK");
   END ClearRc;
 
   PROCEDURE SetRcI(r, fromR, i, k: INTEGER);
   BEGIN 
-    rc[r].r    := fromR;
-    rc[r].i    := i;
-    rc[r].a[0] := 0X;
-    rc[r].k    := k;
+    rc[r].reg    := fromR;
+    rc[r].i      := i;
+    rc[r].lbl[0] := 0X;
+    rc[r].kind   := k;
+    
+    Texts.WriteString(CodeW, "    # a");
+    Texts.WriteInt(CodeW, r, 0);
+    Texts.WriteString(CodeW, " = ");
+    IF fromR # -1 THEN
+      Texts.WriteString(CodeW, "a");
+      Texts.WriteInt(CodeW, fromR, 0);
+      Texts.WriteString(CodeW, " + ");
+    END;
+    Texts.WriteInt(CodeW, i, 0);
+    Texts.WriteString(CodeW, " (");
+
+    CASE k OF
+      UNK: Texts.WriteString(CodeW, "UNK") |
+      IMM: Texts.WriteString(CodeW, "IMM") |
+      LOC: Texts.WriteString(CodeW, "LOC") |
+      MEM: Texts.WriteString(CodeW, "MEM")
+    END;
+
+    Texts.WriteString(CodeW, ")");
   END SetRcI;
 
   PROCEDURE SetRcA(r, fromR: INTEGER; a: ARRAY OF CHAR; k: INTEGER);
   BEGIN 
-    rc[r].r    := fromR;
+    rc[r].reg  := fromR;
     rc[r].i    := -1;
-    rc[r].a    := a;
-    rc[r].k    := k;
+    rc[r].lbl  := a;
+    rc[r].kind := k;
+
+    Texts.WriteString(CodeW, "    # a");
+    Texts.WriteInt(CodeW, r, 0);
+    Texts.WriteString(CodeW, " = ");
+    IF fromR # -1 THEN
+      Texts.WriteString(CodeW, "a");
+      Texts.WriteInt(CodeW, fromR, 0);
+      Texts.WriteString(CodeW, " + ");
+    END;
+    Texts.WriteString(CodeW, a);
+    Texts.WriteString(CodeW, " (");
+
+    CASE k OF
+      UNK: Texts.WriteString(CodeW, "UNK") |
+      IMM: Texts.WriteString(CodeW, "IMM") |
+      LOC: Texts.WriteString(CodeW, "LOC") |
+      MEM: Texts.WriteString(CodeW, "MEM")
+    END;
+
+    Texts.WriteString(CodeW, ")");
   END SetRcA;
 
   PROCEDURE ModuleInfo(idx: INTEGER; VAR moduleId: ORS.Ident; VAR moduleKey: INTEGER);
@@ -443,15 +488,14 @@ MODULE ORG;
   BEGIN
     IF RH # FirstRH THEN 
       ORS.Mark("Reg Stack"); 
-      Out.Ln;
-      Out.String("Reg Stack error: "); Out.Int(RH, 0);
+      Out.Ln; Out.String("Reg Stack error: "); Out.Int(RH, 0);
       RH := FirstRH;
       UsedRegs := {}
     END ;
 
     IF frame # 0 THEN 
       ORS.Mark("frame error"); 
-      Out.String("Frame size error: "); Out.Int(frame, 0); Out.Ln;
+      Out.Ln; Out.String("Frame size error: "); Out.Int(frame, 0);
       frame := 0
     END
   END CheckRegs;
@@ -461,26 +505,27 @@ MODULE ORG;
 
   PROCEDURE PutA(op, a: ARRAY OF CHAR);
   BEGIN 
+    Texts.WriteLn(    CodeW);
     Texts.WriteString(CodeW, "    ");
     Texts.WriteString(CodeW, op);
     Texts.Write(      CodeW, " ");
     Texts.WriteString(CodeW, a);
-    Texts.WriteLn(    CodeW);
   END PutA;
 
   PROCEDURE PutRA(op: ARRAY OF CHAR; r: INTEGER; a: ARRAY OF CHAR);
   BEGIN 
+    Texts.WriteLn(    CodeW);
     Texts.WriteString(CodeW, "    ");
     Texts.WriteString(CodeW, op);
     Texts.WriteString(CodeW, " a");
     Texts.WriteInt(   CodeW, r, 0);
     Texts.WriteString(CodeW, ", _");
     Texts.WriteString(CodeW, a);
-    Texts.WriteLn(    CodeW);
   END PutRA;
 
   PROCEDURE PutRL(op: ARRAY OF CHAR; r, label: INTEGER);
   BEGIN 
+    Texts.WriteLn(    CodeW);
     Texts.WriteString(CodeW, "    ");
     Texts.WriteString(CodeW, op);
     Texts.WriteString(CodeW, " a");
@@ -488,11 +533,11 @@ MODULE ORG;
     Texts.WriteString(CodeW, ", ");
     Texts.WriteInt(   CodeW, label MOD MaxLabel, 0);
     Texts.Write(      CodeW, "$");
-    Texts.WriteLn(    CodeW);
   END PutRL;
 
   PROCEDURE PutRRR(op: ARRAY OF CHAR; r1, r2, r3: INTEGER);
   BEGIN
+    Texts.WriteLn(    CodeW);
     Texts.WriteString(CodeW, "    ");
     Texts.WriteString(CodeW, op);
     Texts.WriteString(CodeW, " a");
@@ -501,31 +546,31 @@ MODULE ORG;
     Texts.WriteInt(   CodeW, r2, 0);
     Texts.WriteString(CodeW, ", a");
     Texts.WriteInt(   CodeW, r3, 0);
-    Texts.WriteLn(    CodeW);
   END PutRRR;
 
   PROCEDURE PutRR(op: ARRAY OF CHAR; r1, r2: INTEGER);
   BEGIN
+    Texts.WriteLn(    CodeW);
     Texts.WriteString(CodeW, "    ");
     Texts.WriteString(CodeW, op);
     Texts.WriteString(CodeW, " a");
     Texts.WriteInt(   CodeW, r1, 0);
     Texts.WriteString(CodeW, ", a");
     Texts.WriteInt(   CodeW, r2, 0);
-    Texts.WriteLn(    CodeW);
   END PutRR;
 
   PROCEDURE PutR(op: ARRAY OF CHAR; r: INTEGER);
   BEGIN
+    Texts.WriteLn(    CodeW);
     Texts.WriteString(CodeW, "    ");
     Texts.WriteString(CodeW, op);
     Texts.WriteString(CodeW, " a");
     Texts.WriteInt(   CodeW, r, 0);
-    Texts.WriteLn(    CodeW);
   END PutR;
 
   PROCEDURE PutSSS(op: ARRAY OF CHAR; f1, f2, f3: INTEGER);
   BEGIN
+    Texts.WriteLn(    CodeW);
     Texts.WriteString(CodeW, "    ");
     Texts.WriteString(CodeW, op);
     Texts.WriteString(CodeW, " f");
@@ -534,33 +579,33 @@ MODULE ORG;
     Texts.WriteInt(   CodeW, f2, 0);
     Texts.WriteString(CodeW, ", f");
     Texts.WriteInt(   CodeW, f3, 0);
-    Texts.WriteLn(    CodeW);
   END PutSSS;
 
   PROCEDURE PutSS(op: ARRAY OF CHAR; f1, f2: INTEGER);
   BEGIN
+    Texts.WriteLn(    CodeW);
     Texts.WriteString(CodeW, "    ");
     Texts.WriteString(CodeW, op);
     Texts.WriteString(CodeW, " f");
     Texts.WriteInt(   CodeW, f1, 0);
     Texts.WriteString(CodeW, ", f");
     Texts.WriteInt(   CodeW, f2, 0);
-    Texts.WriteLn(    CodeW);
   END PutSS;
 
   PROCEDURE PutSR(op: ARRAY OF CHAR; f1, r2: INTEGER);
   BEGIN
+    Texts.WriteLn(    CodeW);
     Texts.WriteString(CodeW, "    ");
     Texts.WriteString(CodeW, op);
     Texts.WriteString(CodeW, " f");
     Texts.WriteInt(   CodeW, f1, 0);
     Texts.WriteString(CodeW, ", a");
     Texts.WriteInt(   CodeW, r2, 0);
-    Texts.WriteLn(    CodeW);
   END PutSR;
 
   PROCEDURE PutSRI(op: ARRAY OF CHAR; f1, r2, i: INTEGER);
   BEGIN
+    Texts.WriteLn(    CodeW);
     Texts.WriteString(CodeW, "    ");
     Texts.WriteString(CodeW, op);
     Texts.WriteString(CodeW, " f");
@@ -569,22 +614,22 @@ MODULE ORG;
     Texts.WriteInt(   CodeW, r2, 0);
     Texts.WriteString(CodeW, ", ");
     Texts.WriteInt(   CodeW, i, 0);
-    Texts.WriteLn(    CodeW);
   END PutSRI;
 
   PROCEDURE PutRS(op: ARRAY OF CHAR; r1, f2: INTEGER);
   BEGIN
+    Texts.WriteLn(    CodeW);
     Texts.WriteString(CodeW, "    ");
     Texts.WriteString(CodeW, op);
     Texts.WriteString(CodeW, " a");
     Texts.WriteInt(   CodeW, r1, 0);
     Texts.WriteString(CodeW, ", f");
     Texts.WriteInt(   CodeW, f2, 0);
-    Texts.WriteLn(    CodeW);
   END PutRS;
 
   PROCEDURE PutRSI(op: ARRAY OF CHAR; r1, f2, i: INTEGER);
   BEGIN
+    Texts.WriteLn(    CodeW);
     Texts.WriteString(CodeW, "    ");
     Texts.WriteString(CodeW, op);
     Texts.WriteString(CodeW, " a");
@@ -593,22 +638,22 @@ MODULE ORG;
     Texts.WriteInt(   CodeW, f2, 0);
     Texts.WriteString(CodeW, ", ");
     Texts.WriteInt(   CodeW, i, 0);
-    Texts.WriteLn(    CodeW);
   END PutRSI;
 
   PROCEDURE PutRI(op: ARRAY OF CHAR; r, v: INTEGER);
   BEGIN
+    Texts.WriteLn(    CodeW);
     Texts.WriteString(CodeW, "    ");
     Texts.WriteString(CodeW, op);
     Texts.WriteString(CodeW, " a");
     Texts.WriteInt(   CodeW, r, 0);
     Texts.WriteString(CodeW, ", ");
     Texts.WriteInt(   CodeW, v, 0);
-    Texts.WriteLn(    CodeW);
   END PutRI;
 
   PROCEDURE PutRRI(op: ARRAY OF CHAR; r1, r2, v: INTEGER);
   BEGIN
+    Texts.WriteLn(    CodeW);
     Texts.WriteString(CodeW, "    ");
     Texts.WriteString(CodeW, op);
     Texts.WriteString(CodeW, " a");
@@ -617,11 +662,11 @@ MODULE ORG;
     Texts.WriteInt(   CodeW, r2, 0);
     Texts.WriteString(CodeW, ", ");
     Texts.WriteInt(   CodeW, v, 0);
-    Texts.WriteLn(    CodeW);
   END PutRRI;
 
   PROCEDURE PutRRII(op: ARRAY OF CHAR; r1, r2, v1, v2: INTEGER);
   BEGIN
+    Texts.WriteLn(    CodeW);
     Texts.WriteString(CodeW, "    ");
     Texts.WriteString(CodeW, op);
     Texts.WriteString(CodeW, " a");
@@ -632,23 +677,22 @@ MODULE ORG;
     Texts.WriteInt(   CodeW, v1, 0);
     Texts.WriteString(CodeW, ", ");
     Texts.WriteInt(   CodeW, v2, 0);
-    Texts.WriteLn(    CodeW);
   END PutRRII;
 
   PROCEDURE PutI(op: ARRAY OF CHAR; v: INTEGER);
   BEGIN 
+    Texts.WriteLn(    CodeW);
     Texts.WriteString(CodeW, "    ");
     Texts.WriteString(CodeW, op);
     Texts.Write(      CodeW, " ");
     Texts.WriteInt(   CodeW, v, 0);
-    Texts.WriteLn(    CodeW);
   END PutI;
 
   PROCEDURE PutSingle(op: ARRAY OF CHAR);
   BEGIN 
+    Texts.WriteLn(CodeW);
     Texts.WriteString(CodeW, "    ");
     Texts.WriteString(CodeW, op);
-    Texts.WriteLn(CodeW);
   END PutSingle;
 
   PROCEDURE ImportName(VAR str: ARRAY OF CHAR; name, kind, moduleId: ARRAY OF CHAR;  moduleKey: INTEGER);
@@ -669,41 +713,41 @@ MODULE ORG;
   BEGIN
     ImportName(n, name, "p", moduleId, moduleKey);
 
+    Texts.WriteLn(CodeW);
     Texts.WriteString(CodeW, "movi a");
     Texts.WriteInt(   CodeW, r, 0);
     Texts.WriteString(CodeW, ", ");
     Texts.WriteString(CodeW, n);
-    Texts.WriteLn(CodeW);
     SetRcA(r, -1, n, IMM);
   END PutDataExternal;
 
   PROCEDURE PutCallR(callType: INTEGER; r: INTEGER);
   BEGIN 
+    Texts.WriteLn(    CodeW);
     Texts.WriteString(CodeW, "    callx");
     Texts.WriteInt(   CodeW, callType, 0);
     Texts.WriteString(CodeW, " a");
     Texts.WriteInt(   CodeW, r, 0);
-    Texts.WriteLn(    CodeW);
   END PutCallR;
 
   PROCEDURE PutCallLocal(callType: INTEGER; name: ORS.Ident);
   BEGIN 
+    Texts.WriteLn(    CodeW);
     Texts.WriteString(CodeW, "    call");
     Texts.WriteInt(   CodeW, callType, 0);
     Texts.WriteString(CodeW, " _");
     Texts.WriteString(CodeW, name);
-    Texts.WriteLn(    CodeW);
   END PutCallLocal;
 
   PROCEDURE PutCALLExternal(callType : INTEGER; name, moduleId: ORS.Ident; moduleKey: INTEGER);
   VAR n: ARRAY 256 OF CHAR;
   BEGIN
+    Texts.WriteLn(CodeW);
     ImportName(n, name, "p", moduleId, moduleKey);
     Texts.WriteString(CodeW, "    call");
     Texts.WriteInt(   CodeW, callType, 0);
     Texts.Write(      CodeW, " ");
     Texts.WriteString(CodeW, n);
-    Texts.WriteLn(CodeW)
   END PutCALLExternal;
 
   PROCEDURE NextLabel*(): INTEGER;
@@ -727,12 +771,12 @@ MODULE ORG;
       l := labels MOD MaxLabel;
       labels := labels DIV MaxLabel;
 
+      Texts.WriteLn( CodeW);
       Texts.WriteInt(CodeW, l, 0);
       Texts.Write(   CodeW, "$");
       Texts.Write(   CodeW, ":");
-      Texts.WriteLn( CodeW);
     END;
-    InitRc;
+    ClearAllRc
   END PutLabel;
 
   (* Put labels that are not equal to L *)
@@ -743,18 +787,19 @@ MODULE ORG;
       l := labels MOD MaxLabel;
       labels := labels DIV MaxLabel;
       IF l # L THEN
+        Texts.WriteLn( CodeW);
         Texts.WriteInt(CodeW, l, 0);
         Texts.Write(   CodeW, "$");
         Texts.Write(   CodeW, ":");
-        Texts.WriteLn( CodeW);
       END
     END;
-    InitRc;
+    ClearAllRc
   END PutLabel2;
 
   PROCEDURE PutBranchRR(op: ARRAY OF CHAR; r1, r2, label: INTEGER);
   BEGIN 
     e("PutBranchRR");
+    Texts.WriteLn(CodeW);
     Texts.WriteString(CodeW, "    ");
     Texts.WriteString(CodeW, op);
     Texts.WriteString(CodeW, " a");
@@ -764,12 +809,12 @@ MODULE ORG;
     Texts.WriteString(CodeW, ", ");
     Texts.WriteInt(   CodeW, label MOD MaxLabel, 0);
     Texts.Write(      CodeW, "$");
-    Texts.WriteLn(CodeW);
   END PutBranchRR;
 
   PROCEDURE PutBranchRI(op: ARRAY OF CHAR; r, imm, label: INTEGER);
   BEGIN 
     e("PutBranchRR");
+    Texts.WriteLn(CodeW);
     Texts.WriteString(CodeW, "    ");
     Texts.WriteString(CodeW, op);
     Texts.WriteString(CodeW, " a");
@@ -779,12 +824,12 @@ MODULE ORG;
     Texts.WriteString(CodeW, ", ");
     Texts.WriteInt(   CodeW, label MOD MaxLabel, 0);
     Texts.Write(      CodeW, "$");
-    Texts.WriteLn(CodeW);
   END PutBranchRI;
 
   PROCEDURE PutBranchR(op: ARRAY OF CHAR; r, label: INTEGER);
   BEGIN 
     e("PutBranchR");
+    Texts.WriteLn(CodeW);
     Texts.WriteString(CodeW, "    ");
     Texts.WriteString(CodeW, op);
     Texts.WriteString(CodeW, " a");
@@ -792,18 +837,17 @@ MODULE ORG;
     Texts.WriteString(CodeW, ", ");
     Texts.WriteInt(   CodeW, label MOD MaxLabel, 0);
     Texts.Write    (  CodeW, "$");
-    Texts.WriteLn(CodeW);
   END PutBranchR;
 
   PROCEDURE PutJump(op: ARRAY OF CHAR; label: INTEGER);
   BEGIN 
     e("PutJump");
+    Texts.WriteLn(CodeW);
     Texts.WriteString(CodeW, "    ");
     Texts.WriteString(CodeW, op);
     Texts.Write(      CodeW, " ");
     Texts.WriteInt(   CodeW, label MOD MaxLabel, 0);
     Texts.Write(      CodeW, "$");
-    Texts.WriteLn(CodeW);
   END PutJump;
 
   PROCEDURE PutCondBranch(cond, label: INTEGER);
@@ -823,7 +867,7 @@ MODULE ORG;
     ELSIF ((thisCond IN BrOneParam) & (RH < FirstRH + 1)) OR 
           ((thisCond IN BrTwoParam) & (RH < FirstRH + 2)) THEN
       ORS.Mark("Internal Error in PutCondBranch!! (Wrong registers mgmt)");
-      Out.Ln; Out.String("cond:"); Out.Int(thisCond, 0); Out.String(", RH:"); Out.Int(RH, 0); Out.Ln;
+      Out.Ln; Out.String("cond:"); Out.Int(thisCond, 0); Out.String(", RH:"); Out.Int(RH, 0);
     ELSE
       e(BrOp[thisCond]);
       IF thisCond IN BrOneParam THEN
@@ -951,10 +995,10 @@ MODULE ORG;
     line : ARRAY 256 OF CHAR;
   BEGIN 
     WHILE ORS.GetAssemblerLine(line) DO
-      Texts.WriteString(CodeW, line); 
       Texts.WriteLn(CodeW);
+      Texts.WriteString(CodeW, line); 
     END;
-    InitRc;
+    ClearAllRc;
   END assembler;
 
   (* loading of operands and addresses into registers *)
@@ -965,9 +1009,9 @@ MODULE ORG;
   BEGIN 
     e("GetLocalSB");
     name := "_"; AppendStr(name, thisModuleId); AppendStr(name, "_s_bss");
+    Texts.WriteLn(CodeW);
     Texts.WriteString(CodeW, "    movi a2, ");
     Texts.WriteString(CodeW, name);
-    Texts.WriteLn(CodeW);
     SetRcA(2, 0, name, LOC)
   END GetLocalSB;
 
@@ -984,11 +1028,11 @@ MODULE ORG;
       AppendHex(name, moduleKey);
       AppendStr(name, "_s_bss");
 
+      Texts.WriteLn(CodeW);
       Texts.WriteString(CodeW, "    movi a");
       Texts.WriteInt(   CodeW, RH, 0);
       Texts.WriteString(CodeW, ", ");
       Texts.WriteString(CodeW, name);
-      Texts.WriteLn(CodeW);
       SetRcA(RH, 0, name, LOC)
     END
   END GetExtSB;
@@ -1002,11 +1046,11 @@ MODULE ORG;
     e("GetTypesDescrSB base:");eInt(base);
     IF base = 0 THEN
       name := "_"; AppendStr(name, thisModuleId); AppendStr(name, "_s_types");
+      Texts.WriteLn(CodeW);
       Texts.WriteString(CodeW, "    movi a");
       Texts.WriteInt(CodeW, RH, 0);
       Texts.WriteString(CodeW, ", ");
       Texts.WriteString(CodeW, name);
-      Texts.WriteLn(CodeW);
     ELSE
       ModuleInfo(base, moduleId, moduleKey);
       name := "_"; AppendStr(name, moduleId); AppendStr(name, "_");
@@ -1014,11 +1058,11 @@ MODULE ORG;
       AppendStr(name, "_s_data_types");
       eStr(" moduleId:"); eStr(moduleId);
 
+      Texts.WriteLn(CodeW);
       Texts.WriteString(CodeW, "    movi a");
       Texts.WriteInt(CodeW, RH, 0);
       Texts.WriteString(CodeW, ", ");
       Texts.WriteString(CodeW, name);
-      Texts.WriteLn(CodeW);
     END;
     SetRcA(RH, 0, name, LOC);
   END GetTypesDescrSB;
@@ -1038,13 +1082,13 @@ MODULE ORG;
       IF (r1 = RH) OR (r2 = RH) THEN temp := RH+1 ELSE temp := RH END;
       IF (offset < 0) OR (offset > 32512) THEN
         PutRI("movi", temp, offset);
-        PutRRR("add", temp, temp, r2);
-        PutRRI(op, r1, temp, 0);
+        PutRRR("add", temp, temp, r2); ClearRc(temp);
+        PutRRI(op, r1, temp, 0);       SetRcI(r1, temp, 0, MEM);
       ELSE
-        PutRRI("addmi", temp, r2, (offset DIV 256) * 256);
+        PutRRI("addmi", temp, r2, (offset DIV 256) * 256); ClearRc(temp);
         PutRRI(op, r1, temp, offset MOD 256);
       END;
-      ClearRc(temp);
+      
     ELSE
       PutRRI(op, r1, r2, offset)
     END;
@@ -1075,8 +1119,7 @@ MODULE ORG;
             Put1a(Sub, RH, LNK, pc*4 - x.a)
             *)
             eStr(x.name);
-            PutRA("movi", RH, x.name);
-            SetRcA(RH, -1, x.name, LOC);
+            PutRA("movi", RH, x.name); SetRcA(RH, -1, x.name, LOC);
           ELSE 
             (* GetExtSB(x.r); *)
             eStr("(import) name:"); eStr(x.name); eStr(" module:"); eStr(moduleId); eStr(" key:"); eHex(moduleKey); 
@@ -1085,7 +1128,7 @@ MODULE ORG;
           END
         ELSE
           eStr("(const) "); eInt(x.a);
-          PutRI("movi", RH, x.a); SetRcI(RH, 0, x.a, IMM);
+          PutRI("movi", RH, x.a); SetRcI(RH, -1, x.a, IMM);
         END ;
         x.r := RH; incR
       ELSIF x.mode = ORB.Var THEN
@@ -1093,7 +1136,6 @@ MODULE ORG;
         IF x.r > 0 THEN (* local on the stack *) 
           eStr(" (stack) x.a:"); eInt(x.a); eStr(" frame:"); eInt(frame);
           PutMoveRRI(op, max, RH, SP, x.a + frame);
-          SetRcI(RH, SP, x.a + frame, MEM);
         ELSE  (* module globals or imported *)
           IF x.r = 0 THEN
             eStr("(SB) "); eInt(x.a); 
@@ -1109,24 +1151,23 @@ MODULE ORG;
         eStr("(par) x.a:"); eInt(x.a); eStr("frame:"); eInt(frame);
         PutMoveRRI("l32i", 1020, RH, SP, x.a + frame);
         PutMoveRRI(op, max, RH, RH, x.b);
-        ClearRc(RH);
         x.r := RH; incR
       ELSIF x.mode = RegI THEN
         eStr("(regi) x.a:"); eInt(x.a);
         PutMoveRRI(op, max, x.r, x.r, x.a);
-        ClearRc(x.r);
       ELSIF x.mode = Cond THEN
         eStr("(cond");
         IF x.lf = 0 THEN x.lf := NextLabel(); END;
         PutCondBranch(negated(x.r), x.lf);
         IF x.lt # 0 THEN PutLabel(x.lt); x.lt := 0 END;
-        PutRI("movi", RH, 1); 
+        PutRI("movi", RH, 1); SetRcI(RH, -1, 1, IMM);
         lbl := NextLabel();
         PutJump("j", lbl);
         PutLabel(x.lf); x.lf := 0;
-        PutRI("movi", RH, 0); 
+        PutRI("movi", RH, 0); SetRcI(RH, -1, 0, IMM);
         PutLabel(lbl);
-        x.r := RH; incR
+        ClearRc(RH);
+        x.r := RH; incR;
       END;
       x.mode := Reg
     ELSE eStr("(reg) no gen")
@@ -1144,9 +1185,9 @@ MODULE ORG;
         offset := x.a + frame;
         IF offset > 127 THEN
           PutRI("movi", RH, offset);
-          PutRRR("add", RH, RH, SP)
+          PutRRR("add", RH, RH, SP);
         ELSIF offset # 0 THEN
-          PutRRI("addi", RH, SP, offset); 
+          PutRRI("addi", RH, SP, offset);
         ELSE
           PutRR("mov", RH, SP);
         END;
@@ -1154,24 +1195,22 @@ MODULE ORG;
       ELSE 
         eStr(" (local/imported var) name:"); eStr(x.name); eStr(" x.a:"); eInt(x.a);
         IF x.a > 127 THEN
-          PutRI("movi", RH+1, x.a);
+          PutRI("movi", RH+1, x.a); SetRcI(RH+1, -1, x.a, IMM);
           IF x.r = 0 THEN
-            PutRRR("add", RH, SB, RH+1);
-            SetRcI(RH, SB, x.a, LOC);
+            PutRRR("add", RH, SB, RH+1); SetRcI(RH, SB, x.a, LOC);
           ELSE
             GetExtSB(x.r); 
-            PutRRR("add", RH, RH, RH+1);
-            ClearRc(RH);
+            PutRRR("add", RH, RH, RH+1); ClearRc(RH);
           END;
         ELSE (* TBC *)
           IF x.r = 0 THEN
             IF x.a = 0 THEN
-              PutRR("mov", RH, SB);
+              PutRR("mov", RH, SB); SetRcI(RH, SB, 0, IMM);
             ELSE
-              PutRRI("addi", RH, SB, x.a)
+              PutRRI("addi", RH, SB, x.a); ClearRc(RH);
             END
           ELSE
-            IF x.a # 0 THEN PutRRI("addi", RH, RH, x.a) END
+            IF x.a # 0 THEN PutRRI("addi", RH, RH, x.a); ClearRc(RH) END
           END
         END
       END ;
@@ -1181,10 +1220,10 @@ MODULE ORG;
       PutMoveRRI("l32i", 1020, RH, SP, x.a + frame);
       IF x.b # 0 THEN 
         IF x.b > 127 THEN
-          PutRI("movi", RH+1, x.b);
-          PutRRR("add", RH, RH, RH+1);
+          PutRI("movi", RH+1, x.b);    SetRcI(RH+1, -1, x.b, IMM);
+          PutRRR("add", RH, RH, RH+1); ClearRc(RH);
         ELSIF x.b # 0 THEN
-          PutRRI("addi", RH, RH, x.b);
+          PutRRI("addi", RH, RH, x.b); ClearRc(RH);
         END
       END;
       x.r := RH; incR
@@ -1192,10 +1231,10 @@ MODULE ORG;
       eStr(" (regi)");
       IF x.a # 0 THEN
         IF x.a > 127 THEN
-          PutRI("movi", RH, x.a);
-          PutRRR("add", x.r, x.r, RH);
+          PutRI("movi", RH, x.a);      SetRcI(RH, -1, x.a, IMM);
+          PutRRR("add", x.r, x.r, RH); ClearRc(x.r);
         ELSIF x.a # 0 THEN
-          PutRRI("addi", x.r, x.r, x.a);
+          PutRRI("addi", x.r, x.r, x.a); ClearRc(x.r);
         END
       END
     ELSE 
@@ -1209,7 +1248,7 @@ MODULE ORG;
     e("loadCond");
     IF x.type.form = ORB.Bool THEN
       IF x.mode = ORB.Const THEN (* TRUE of FALSE constants *)
-        PutRI("movi", RH, x.a);
+        PutRI("movi", RH, x.a); SetRcI(RH, -1, x.a, IMM);
         x.r := NE;
         incR
       ELSE  
@@ -1232,10 +1271,10 @@ MODULE ORG;
     GetTypesDescrSB(-T.mno);
     IF offset > 127 THEN
       CheckFreeRegs(2);
-      PutRI("movi", RH+1, offset);
-      PutRRR("add", RH, RH, RH+1)
+      PutRI("movi", RH+1, offset);  SetRcI(RH+1, -1, offset, IMM);
+      PutRRR("add", RH, RH, RH+1);  ClearRc(RH);
     ELSIF offset # 0 THEN
-      PutRRI("addi", RH, RH, offset)
+      PutRRI("addi", RH, RH, offset); ClearRc(RH);
     END;
     incR
   END loadTypTagAdr;
@@ -1244,18 +1283,18 @@ MODULE ORG;
   BEGIN 
     e("loadStringAdr");
     CheckFreeRegs(2);
+    Texts.WriteLn(CodeW);
     Texts.WriteString(CodeW, "    movi a");
     Texts.WriteInt(CodeW, RH, 0);
     Texts.WriteString(CodeW, ", _");
     Texts.WriteString(CodeW, thisModuleId);
     Texts.WriteString(CodeW, "_data_strs");
-    Texts.WriteLn(CodeW);
 
     IF x.a <= 127 THEN
-      IF x.a # 0 THEN PutRRI("addi", RH, RH, x.a) END
+      IF x.a # 0 THEN PutRRI("addi", RH, RH, x.a); ClearRc(RH) END
     ELSE
-      PutRI("movi", RH+1, x.a);
-      PutRRR("add", RH, RH, RH+1);
+      PutRI("movi", RH+1, x.a);    SetRcI(RH+1, -1, x.a, IMM);
+      PutRRR("add", RH, RH, RH+1); ClearRc(RH);
     END;
     x.mode := Reg; 
     x.r := RH; incR
@@ -1348,7 +1387,7 @@ MODULE ORG;
       load(y);
       IF check THEN  (* check array bounds *)
         IF limit >= 0 THEN 
-          PutRI("movi", RH, limit)
+          PutRI("movi", RH, limit); SetRcI(RH, -1, limit, IMM)
         ELSE (*open array*)
           IF x.mode IN {ORB.Var, ORB.Par} THEN
             PutMoveRRI("l32i", 1020, RH, SP, x.a + 4 + frame); 
@@ -1360,26 +1399,26 @@ MODULE ORG;
         Trap(GE, TrIndex); incR
       END;
       IF size = 4 THEN 
-        PutRRI("slli", y.r, y.r, 2)
+        PutRRI("slli", y.r, y.r, 2); ClearRc(y.r)
       ELSIF size > 1 THEN 
         CheckFreeRegs(1);
-        PutRI("movi", RH, size);
-        PutRRR("mull", y.r, y.r, RH) 
+        PutRI("movi", RH, size); SetRcI(RH, -1, size, IMM);
+        PutRRR("mull", y.r, y.r, RH); ClearRc(y.r);
       END;
       IF x.mode = ORB.Var THEN
         IF x.r > 0 THEN 
-          PutRRR("add", y.r, SP, y.r); 
+          PutRRR("add", y.r, SP, y.r); ClearRc(y.r);
           INC(x.a, frame)
         ELSE 
           CheckFreeRegs(1);
           IF x.r = 0 THEN 
-            PutRRR("add", y.r, SB, y.r)
+            PutRRR("add", y.r, SB, y.r); ClearRc(y.r)
           ELSE 
             GetExtSB(x.r);
             CheckFreeRegs(2);
-            PutRI("movi", RH+1, x.a);
-            PutRRR("add", RH, RH, RH+1); 
-            PutRRR("add", y.r, RH, y.r); 
+            PutRI("movi", RH+1, x.a);    SetRcI(RH+1, -1, x.a, IMM);
+            PutRRR("add", RH, RH, RH+1); ClearRc(RH);
+            PutRRR("add", y.r, RH, y.r); ClearRc(y.r);
             x.a := 0
           END
         END ;
@@ -1387,12 +1426,12 @@ MODULE ORG;
         x.mode := RegI
       ELSIF x.mode = ORB.Par THEN
         PutMoveRRI("l32i", 1020, RH, SP, x.a + frame);
-        PutRRR("add", y.r, RH, y.r); 
+        PutRRR("add", y.r, RH, y.r); ClearRc(y.r);
         x.mode := RegI; 
         x.r := y.r; 
         x.a := x.b
       ELSIF x.mode = RegI THEN 
-        PutRRR("add", RH - 2, x.r, y.r); 
+        PutRRR("add", RH - 2, x.r, y.r);  ClearRc(RH - 2);
         x.r := RH - 2;
         decR
       END
@@ -1528,10 +1567,10 @@ MODULE ORG;
         END
       ELSE
         load(x);                         (* Load pointer content (address)    *)
-        PutRI("movi", RH, 0);
+        PutRI("movi", RH, 0); SetRcI(RH, -1, 0, IMM);
         lbl := NextLabel();
         PutBranchR("beqz", x.r, lbl);  (* NIL belongs to every pointer type *)
-        PutRRI("addi", x.r, x.r, -8);
+        PutRRI("addi", x.r, x.r, -8); ClearRc(x.r);
         PutRRI("l32i", x.r, x.r,  0);
         PutMoveRRI("l32i", 1020, x.r, x.r, T.nofpar * 4);
         (* tag of T *)
@@ -1634,7 +1673,7 @@ MODULE ORG;
       IF x.mode = ORB.Const THEN x.a := -x.a
       ELSE 
         load(x); 
-        PutRR("neg", x.r, x.r)
+        PutRR("neg", x.r, x.r); ClearRc(x.r)
       END
     ELSIF x.type.form = ORB.Real THEN
       IF x.mode = ORB.Const THEN x.a := x.a + 7FFFFFFFH + 1
@@ -1642,14 +1681,14 @@ MODULE ORG;
         load(x); 
         PutSR("wfr",   0,   x.r);
         PutSS("neg.s", 0,   0  );
-        PutRS("rfr",   x.r, 0  );
+        PutRS("rfr",   x.r, 0  ); ClearRc(x.r)
       END
     ELSE (*form = Set*)
       IF x.mode = ORB.Const THEN x.a := -x.a - 1 
       ELSE
         load(x); 
-        PutRI("movi", RH, -1);
-        PutRRR("xor", x.r, x.r, RH)
+        PutRI("movi", RH, -1);       SetRcI(RH, -1, -1, IMM);
+        PutRRR("xor", x.r, x.r, RH); ClearRc(x.r);
       END
     END
   END Neg;
@@ -1665,15 +1704,15 @@ MODULE ORG;
           IF (y.a >= -128) & (y.a < 128) THEN
             IF y.a # 0 THEN PutRRI("addi", x.r, x.r, y.a) END
           ELSE
-            PutRI("movi", RH, y.a);
-            PutRRR("add", x.r, x.r, RH) 
+            PutRI("movi", RH, y.a);      SetRcI(RH, -1, y.a, IMM);
+            PutRRR("add", x.r, x.r, RH); ClearRc(x.r)
           END
         END
       ELSE 
         load(x); load(y); 
-        PutRRR("add", RH-2, x.r, y.r); 
+        PutRRR("add", RH - 2, x.r, y.r); ClearRc(RH - 2);
+        x.r := RH - 2;
         decR; 
-        x.r := RH-1
       END
     ELSE (*op = ORS.minus*)
       IF (x.mode = ORB.Const) & (y.mode = ORB.Const) THEN 
@@ -1682,15 +1721,15 @@ MODULE ORG;
         load(x);
         IF y.a # 0 THEN 
           IF (y.a > -128) & (y.a <= 128) THEN
-            IF y.a # 0 THEN PutRRI("addi", x.r, x.r, -y.a) END
+            IF y.a # 0 THEN PutRRI("addi", x.r, x.r, -y.a); ClearRc(x.r) END
           ELSE
-            PutRI("movi", RH, y.a);
-            PutRRR("sub", x.r, x.r, RH) 
+            PutRI("movi", RH, y.a);      SetRcI(RH, -1, y.a, IMM);
+            PutRRR("sub", x.r, x.r, RH); ClearRc(x.r)
           END
         END
       ELSE 
         load(x); load(y); 
-        PutRRR("sub", RH-2, x.r, y.r); 
+        PutRRR("sub", RH - 2, x.r, y.r); ClearRc(RH - 2);
         decR; 
         x.r := RH-1
       END
@@ -1711,27 +1750,27 @@ MODULE ORG;
     IF (x.mode = ORB.Const) & (y.mode = ORB.Const) THEN x.a := x.a * y.a
     ELSIF (y.mode = ORB.Const) & (y.a >= 2) & (log2(y.a, ex) = 1) THEN 
       load(x);
-      PutRRI("slli", x.r, x.r, ex)
+      PutRRI("slli", x.r, x.r, ex); ClearRc(x.r);
     ELSIF y.mode = ORB.Const THEN 
       load(x); 
-      PutRI("movi", RH, y.a);
-      PutRRR("mull", x.r, x.r, RH)
+      PutRI("movi", RH, y.a);       SetRcI(RH, -1, y.a, IMM);
+      PutRRR("mull", x.r, x.r, RH); ClearRc(x.r)
     ELSIF (x.mode = ORB.Const) & (x.a >= 2) & (log2(x.a, ex) = 1) THEN 
       load(y); 
-      PutRRI("slli", y.r, y.r, ex);
+      PutRRI("slli", y.r, y.r, ex); ClearRc(y.r);
       x.mode := Reg; 
       x.r := y.r
     ELSIF x.mode = ORB.Const THEN 
       load(y); 
-      PutRI("movi", RH, x.a);
-      PutRRR("mull", y.r, y.r, RH);
+      PutRI("movi", RH, x.a);       SetRcI(RH, -1, x.a, IMM);
+      PutRRR("mull", y.r, y.r, RH); ClearRc(y.r);
       x.mode := Reg; 
       x.r := y.r
     ELSE 
       load(x); load(y); 
-      PutRRR("mull", RH-2, x.r, y.r); 
-      decR; 
-      x.r := RH-1
+      PutRRR("mull", RH - 2, x.r, y.r); ClearRc(RH - 2);
+      x.r := RH - 2;
+      decR
     END
   END MulOp;
 
@@ -1748,12 +1787,12 @@ MODULE ORG;
         END
       ELSIF (y.mode = ORB.Const) & (y.a >= 2) & (log2(y.a, ex) = 1) THEN 
         load(x); 
-        PutRRI("srai", x.r, x.r, ex)
+        PutRRI("srai", x.r, x.r, ex); ClearRc(x.r)
       ELSIF y.mode = ORB.Const THEN
         IF y.a > 0 THEN
           load(x); 
-          PutRI("movi", RH, y.a);
-          PutRRR("quos", x.r, x.r, RH);
+          PutRI("movi", RH, y.a);       SetRcI(RH, -1, y.a, IMM);
+          PutRRR("quos", x.r, x.r, RH); ClearRc(x.r);
         ELSE
           ORS.Mark("bad divisor") 
         END
@@ -1761,9 +1800,9 @@ MODULE ORG;
         load(y);
         IF check THEN Trap(EQ, TrZeroDiv); incR END ;
         load(x); 
-        PutRRR("quos", RH-2, x.r, y.r); 
-        decR; 
-        x.r := RH-1
+        PutRRR("quos", RH - 2, x.r, y.r); ClearRc(RH - 2);
+        x.r := RH - 2;
+        decR
       END
     ELSE (* op = ORS.mod *)
       IF (x.mode = ORB.Const) & (y.mode = ORB.Const) THEN
@@ -1774,13 +1813,13 @@ MODULE ORG;
         END
       ELSIF (y.mode = ORB.Const) & (y.a >= 2) & (log2(y.a, ex) = 1) THEN
         load(x);
-        PutRI("movi", RH, y.a-1);
-        PutRRR("and", x.r, x.r, RH);
+        PutRI("movi", RH, y.a - 1);    SetRcI(RH, -1, y.a - 1, IMM);
+        PutRRR("and", x.r, x.r, RH);   ClearRc(x.r);
       ELSIF y.mode = ORB.Const THEN
         IF y.a > 0 THEN 
           load(x);
-          PutRI("movi", RH, y.a);
-          PutRRR("rems", x.r, x.r, RH);
+          PutRI("movi", RH, y.a);       SetRcI(RH, -1, y.a, IMM);
+          PutRRR("rems", x.r, x.r, RH); ClearRc(x.r);
         ELSE
           ORS.Mark("bad modulus")
         END
@@ -1788,7 +1827,8 @@ MODULE ORG;
         load(x);
         IF check THEN Trap(EQ, TrZeroDiv); incR END ;
         load(y); 
-        PutRRR("rems", RH-2, x.r, y.r);
+        PutRRR("rems", RH - 2, x.r, y.r); ClearRc(RH - 2);
+        x.r := RH - 2;
         decR
       END
     END
@@ -1799,8 +1839,8 @@ MODULE ORG;
     IF x.type.size > targetType.size THEN
       load(x);
       IF targetType.size = 1 THEN
-        PutRI("movi", RH, 255);
-        PutRRR("and", x.r, x.r, RH)
+        PutRI("movi", RH, 255);      SetRcI(RH, -1, 255, IMM);
+        PutRRR("and", x.r, x.r, RH); ClearRc(x.r);
       END
     END
   END AdjustVal;
@@ -1835,8 +1875,8 @@ MODULE ORG;
         PutA("call0", "__fdiv32");
         PutRR("mov", 0, RH); (* Restore return address (a0) *)
       END;
-      decR; x.r := RH-1;
-      PutRS("rfr", x.r, 2);
+      decR; x.r := RH - 1;
+      PutRS("rfr", x.r, 2);  ClearRc(x.r);
     END
   END RealOp;
 
@@ -1848,9 +1888,9 @@ MODULE ORG;
     IF x.mode = ORB.Const THEN x.a := LSL(1, x.a) 
     ELSE
       load(x);
-      PutRI("movi", RH, 1);
-      PutR( "ssl",  x.r);
-      PutRR("sll",  x.r, RH)
+      PutRI("movi", RH, 1);   SetRcI(RH, -1, 1, IMM);
+      PutR( "ssl",  x.r);     ClearRc(x.r);
+      PutRR("sll",  x.r, RH); ClearRc(x.r);
     END
   END Singleton;
 
@@ -1863,29 +1903,29 @@ MODULE ORG;
     ELSE
       IF x.mode = ORB.Const THEN
         x.a := LSL(-1, x.a);
-        PutRI("movi", RH, x.a);
+        PutRI("movi", RH, x.a); SetRcI(RH, -1, x.a, IMM);
         x.r := RH; x.mode := Reg; incR
       ELSE 
         load(x); 
-        PutRI("movi", RH,  -1);
-        PutR( "ssl",  x.r    );
-        PutRR("sll",  x.r, RH);
+        PutRI("movi", RH,  -1); SetRcI(RH, -1, -1, IMM);
+        PutR( "ssl",  x.r    ); ClearRc(x.r);
+        PutRR("sll",  x.r, RH); ClearRc(x.r);
       END ;
       IF (y.mode # ORB.Const) OR (y.a < 31) THEN 
         IF y.mode = ORB.Const THEN 
           y.a := LSL(-1, y.a + 1);
-          PutRI("movi", RH, y.a);
+          PutRI("movi", RH, y.a); SetRcI(RH, -1, y.a, IMM);
           y.r := RH; incR
         ELSE 
           load(y); 
           lbl := NextLabel();
-          PutRRI(     "addi", y.r, y.r,   1);
+          PutRRI(     "addi", y.r, y.r,   1); ClearRc(y.r);
           PutBranchRI("bgei", y.r,  32, lbl);
-          PutRI(      "movi", RH,   -1     );
-          PutR(       "ssl",  y.r          );
-          PutRR(      "sll",  y.r,  RH     );
+          PutRI(      "movi", RH,   -1     ); SetRcI(RH, -1, -1, IMM);
+          PutR(       "ssl",  y.r          ); ClearRc(y.r);
+          PutRR(      "sll",  y.r,  RH     ); ClearRc(y.r);
         END;
-        PutRRR("xor", RH - 2, x.r, y.r);
+        PutRRR("xor", RH - 2, x.r, y.r); ClearRc(RH - 2);
         x.r := RH - 2;
         IF y.mode # ORB.Const THEN PutLabel(lbl) END;
         decR
@@ -1898,7 +1938,7 @@ MODULE ORG;
     e("In");
     load(y);
     IF x.mode = ORB.Const THEN 
-      PutRRII("extui", y.r, y.r, x.a, 1);
+      PutRRII("extui", y.r, y.r, x.a, 1);  ClearRc(y.r);
       SetCC(x, NE)   (* Branch if not equal to zero *)
     ELSE 
       load(x); 
@@ -1921,29 +1961,29 @@ MODULE ORG;
       x.a := SYSTEM.VAL(INTEGER, xset)
     ELSIF y.mode = ORB.Const THEN
       load(x);
-      PutRI("movi", RH, y.a);
+      PutRI("movi", RH, y.a); SetRcI(RH, -1, y.a, IMM);
       IF op = ORS.plus THEN 
-        PutRRR("or", x.r, x.r, RH)
+        PutRRR("or", x.r, x.r, RH); ClearRc(x.r);
       ELSIF op = ORS.minus THEN 
-        PutRI( "movi", RH + 1, -1         ); 
-        PutRRR("xor",  RH,     RH,  RH + 1);
-        PutRRR("and",  x.r,    x.r, RH    )
+        PutRI( "movi", RH + 1, -1         ); SetRcI(RH + 1, -1, -1, IMM);
+        PutRRR("xor",  RH,     RH,  RH + 1); ClearRc(RH);
+        PutRRR("and",  x.r,    x.r, RH    ); ClearRc(x.r);
       ELSIF op = ORS.times THEN 
-        PutRRR("and", x.r, x.r, RH)
+        PutRRR("and", x.r, x.r, RH); ClearRc(x.r);
       ELSIF op = ORS.rdiv THEN
-        PutRRR("xor", x.r, x.r, RH)
+        PutRRR("xor", x.r, x.r, RH); ClearRc(x.r);
       END;
     ELSE 
       load(x); load(y);
-      IF op = ORS.plus THEN PutRRR("or", RH-2, x.r, y.r)
+      IF op = ORS.plus THEN PutRRR("or", RH - 2, x.r, y.r); ClearRc(RH - 2)
       ELSIF op = ORS.minus THEN 
-        PutRI( "movi",  RH,  -1     ); 
-        PutRRR("xor",  y.r, y.r,  RH);
-        PutRRR("and",  RH - 2, x.r, y.r)
+        PutRI( "movi",  RH,  -1     );    SetRcI(RH, -1, -1, IMM);
+        PutRRR("xor",  y.r, y.r,  RH);    ClearRc(y.r);
+        PutRRR("and",  RH - 2, x.r, y.r); ClearRc(RH - 2);
       ELSIF op = ORS.times THEN 
-        PutRRR("and", RH - 2, x.r, y.r)
+        PutRRR("and", RH - 2, x.r, y.r);  ClearRc(RH - 2);
       ELSIF op = ORS.rdiv THEN 
-        PutRRR("xor", RH - 2, x.r, y.r)
+        PutRRR("xor", RH - 2, x.r, y.r);  ClearRc(RH - 2);
       END;
       decR; 
       x.r := RH - 1
@@ -1958,23 +1998,23 @@ MODULE ORG;
     e("CaseHead");
     CheckFreeRegs(4);
     load(x);                              (* value of case expression *)
-    PutRL("movi", RH, L0);                (* Get address of case table *)
-    PutRRI("l32i", RH+1, RH, 0);          (* Low bound *)
-    PutRR("mov", RH+2, RH+1);             (* Save it for later *)
+    PutRL("movi", RH, L0);         ClearRc(RH);                    (* Get address of case table *)
+    PutRRI("l32i", RH + 1, RH, 0); SetRcI(RH + 1, RH, 0, MEM);     (* Low bound *)
+    PutRR("mov", RH + 2, RH + 1);  SetRcI(RH + 2, RH + 1, 0, IMM); (* Save it for later *)
     lbl := NextLabel();
     PutBranchRR("bge", x.r, RH+1, lbl);
     PutJump("j", L1);                     (* Else clause if lower *)
     PutLabel(lbl);
-    PutRRI("l32i", RH+1, RH, 4);
+    PutRRI("l32i", RH+1, RH, 4);   SetRcI(RH + 1, RH, 4, MEM);
     lbl := NextLabel();
     PutBranchRR("blt", x.r, RH+1, lbl);
     PutJump("j", L1);                     (* Else clause if higher *)
     PutLabel(lbl);
-    PutRRI("addi", RH, RH, 8);            (* Compute index in table *)
-    PutRRR("sub", x.r, x.r, RH+2);
-    PutRRI("slli", x.r, x.r, 2);
-    PutRRR("add", RH, RH, x.r);
-    PutRRI("l32i", RH, RH, 0);            (* Get address *)
+    PutRRI("addi", RH, RH, 8);     ClearRc(RH); (* Compute index in table *)
+    PutRRR("sub", x.r, x.r, RH+2); ClearRc(x.r);
+    PutRRI("slli", x.r, x.r, 2);   ClearRc(x.r);
+    PutRRR("add", RH, RH, x.r);    ClearRc(RH);
+    PutRRI("l32i", RH, RH, 0);     ClearRc(RH);       (* Get address *)
     PutR("jx", RH);
     decR;
   END CaseHead;
@@ -1984,22 +2024,22 @@ MODULE ORG;
 
     PROCEDURE PutEntry(lbl: INTEGER);
     BEGIN 
+      Texts.WriteLn(CodeW);
       Texts.WriteString(CodeW, "    .int ");
       Texts.WriteInt(CodeW, lbl, 0);
       Texts.WriteString(CodeW, "$");
-      Texts.WriteLn(CodeW);
     END PutEntry;
 
   BEGIN
     e("CaseTail");
-    Texts.WriteString(CodeW, ".align 4"); Texts.WriteLn(CodeW);
+    Texts.WriteLn(CodeW); Texts.WriteString(CodeW, ".align 4"); 
     PutLabel(L0);
     IF n > 0 THEN 
-      Texts.WriteString(CodeW, "    .int "); Texts.WriteInt(CodeW, tab[0].low, 0);        Texts.WriteLn(CodeW);  (* Low Bound *)
-      Texts.WriteString(CodeW, "    .int "); Texts.WriteInt(CodeW, tab[n-1].high + 1, 0); Texts.WriteLn(CodeW); (* High Bound *)
+      Texts.WriteLn(CodeW); Texts.WriteString(CodeW, "    .int "); Texts.WriteInt(CodeW, tab[0].low, 0);         (* Low Bound *)
+      Texts.WriteLn(CodeW); Texts.WriteString(CodeW, "    .int "); Texts.WriteInt(CodeW, tab[n-1].high + 1, 0); (* High Bound *)
     ELSIF L1 > 0 THEN  (* L1 will be negative if no ELSE case present *)
-      Texts.WriteString(CodeW, "    .int  0"); Texts.WriteLn(CodeW);  (* Low Bound *)
-      Texts.WriteString(CodeW, "    .int -1"); Texts.WriteLn(CodeW); (* High Bound *)
+      Texts.WriteLn(CodeW); Texts.WriteString(CodeW, "    .int  0");  (* Low Bound *)
+      Texts.WriteLn(CodeW); Texts.WriteString(CodeW, "    .int -1"); (* High Bound *)
     ELSE ORS.Mark("empty case") END;
 
     (* IF L1 = 0 THEN L1 := pc; Trap(7, 1) END ;  create else ???? *)
@@ -2029,7 +2069,7 @@ MODULE ORG;
     cond := relmap[op - ORS.eql];
     load(x); 
     IF y.mode = ORB.Const THEN
-      PutRI("movi", RH, y.a);
+      PutRI("movi", RH, y.a); SetRcI(RH, -1, y.a, IMM);
       incR
     ELSE
       IF (x.mode = Cond) OR (y.mode = Cond) THEN ORS.Mark("not implemented") END;
@@ -2053,7 +2093,7 @@ MODULE ORG;
     cond := relmap[op - ORS.eql];
     load(x); 
     IF y.mode = ORB.Const THEN
-      PutRI("movi", RH, y.a);
+      PutRI("movi", RH, y.a); SetRcI(RH, -1, y.a, IMM);
       incR
     ELSE
       load(y);
@@ -2078,10 +2118,10 @@ MODULE ORG;
     decR; decR; decR; decR;
     lbl1 := NextLabel();
     PutLabel(lbl1);
-    PutRRI("l8ui", RH, x.r, 0);
-    PutRRI("addi", x.r, x.r, 1);
-    PutRRI("l8ui", RH+1, y.r, 0);
-    PutRRI("addi", y.r, y.r, 1);
+    PutRRI("l8ui", RH, x.r, 0);     SetRcI(RH, x.r, 0, MEM);
+    PutRRI("addi", x.r, x.r, 1);    ClearRc(x.r);
+    PutRRI("l8ui", RH + 1, y.r, 0); SetRcI(RH + 1, y.r, 0, MEM);
+    PutRRI("addi", y.r, y.r, 1);    ClearRc(y.r);
     lbl2 := NextLabel();
     PutBranchRR("bne", RH, RH+1, lbl2);
     PutBranchR("bnez", RH, lbl1);
@@ -2151,7 +2191,7 @@ MODULE ORG;
       IF (x.type.form = ORB.Array) &  (x.type.len > 0) THEN
         IF y.type.len >= 0 THEN 
           IF x.type.size = y.type.size THEN 
-            PutRI("movi", RH, (y.type.size+3) DIV 4)
+            PutRI("movi", RH, (y.type.size + 3) DIV 4); SetRcI(RH, -1, (y.type.size + 3) DIV 4, IMM);
           ELSE 
             ORS.Mark("different length/size, not implemented")
           END
@@ -2161,30 +2201,30 @@ MODULE ORG;
           lbl := NextLabel();
           PutBranchR("beqz", RH, lbl);
           IF size = 1 THEN 
-            PutRRI("addi", RH, RH, 3); 
-            PutRRI("srai", RH, RH, 2)
+            PutRRI("addi", RH, RH, 3); ClearRc(RH);
+            PutRRI("srai", RH, RH, 2); ClearRc(RH);
           ELSIF size # 4 THEN
-            PutRI("movi", RH+1, size DIV 4);
-            PutRRR("mull", RH, RH, RH+1)
+            PutRI("movi", RH + 1, size DIV 4); SetRcI(RH + 1, -1, size DIV 4, IMM);
+            PutRRR("mull", RH, RH, RH+1);      ClearRc(RH);
           END;
           IF check THEN
-            PutRI("movi", RH+1, (x.type.size + 3) DIV 4); 
+            PutRI("movi", RH + 1, (x.type.size + 3) DIV 4); SetRcI(RH + 1, -1, (x.type.size + 3) DIV 4, IMM);
             incR; incR; 
             Trap(GT, TrCopy)
           END;
           PutLabel(lbl)
         END
       ELSIF x.type.form = ORB.Record THEN 
-        PutRI("movi", RH, x.type.size DIV 4)
+        PutRI("movi", RH, x.type.size DIV 4); SetRcI(RH, -1, x.type.size DIV 4, IMM);
       ELSE 
         ORS.Mark("inadmissible assignment")
       END;
       lbl := NextLabel();
-      PutBranchR("loop", RH, lbl);
-        PutRRI("l32i", RH+1, y.r, 0); 
-        PutRRI("addi", y.r, y.r, 4);
-        PutRRI("s32i", RH+1, x.r, 0); 
-        PutRRI("addi", x.r, x.r, 4);
+      PutBranchR("loop", RH, lbl);    ClearRc(RH);
+        PutRRI("l32i", RH+1, y.r, 0); ClearRc(RH + 1);
+        PutRRI("addi", y.r, y.r, 4);  ClearRc(y.r);
+        PutRRI("s32i", RH+1, x.r, 0); ClearRc(RH + 1);
+        PutRRI("addi", x.r, x.r, 4);  ClearRc(x.r);
       PutLabel(lbl)
     END ;
     RH := FirstRH; UsedRegs := {}
@@ -2201,18 +2241,18 @@ MODULE ORG;
       IF len <  y.b THEN ORS.Mark("string too long") END
     ELSIF check THEN 
       PutMoveRRI("l32i", 1020, RH, SP, x.a + 4); (* open array len, frame = 0 *)
-      PutRI("movi", RH+1, y.b);
+      PutRI("movi", RH + 1, y.b); SetRcI(RH + 1, -1, y.b, IMM);
       incR; incR;
       Trap(LT, TrCopy)
     END ;
     loadStringAdr(y);
-    PutRI("movi", RH, (y.b + 3) DIV 4);
+    PutRI("movi", RH, (y.b + 3) DIV 4); SetRcI(RH, -1, (y.b + 3) DIV 4, IMM);
     lbl := NextLabel();
-    PutBranchR("loop", RH, lbl);
-      PutRRI("l32i", RH+1,  y.r, 0); 
-      PutRRI("addi", y.r, y.r, 4);
-      PutRRI("s32i", RH+1,  x.r, 0); 
-      PutRRI("addi", x.r, x.r, 4);
+    PutBranchR("loop", RH, lbl);     ClearRc(RH);
+      PutRRI("l32i", RH+1,  y.r, 0); ClearRc(RH + 1);
+      PutRRI("addi", y.r, y.r, 4);   ClearRc(y.r);
+      PutRRI("s32i", RH+1,  x.r, 0); ClearRc(RH + 1);
+      PutRRI("addi", x.r, x.r, 4);   ClearRc(x.r);
     PutLabel(lbl);
     RH := FirstRH; UsedRegs := {}
    END CopyString;
@@ -2223,7 +2263,7 @@ MODULE ORG;
   BEGIN loadAdr(x);
     e("OpenArrayParam");
     IF x.type.len >= 0 THEN 
-      PutRI("movi", RH, x.type.len) 
+      PutRI("movi", RH, x.type.len); SetRcI(RH, -1, x.type.len, IMM);
     ELSE
       PutMoveRRI("l32i", 1020, RH, SP, x.a + 4 + frame); 
     END;
@@ -2237,7 +2277,7 @@ MODULE ORG;
     xmd := x.mode; loadAdr(x);
     IF (ftype.form = ORB.Array) & (ftype.len < 0) THEN (*open array*)
       IF x.type.len >= 0 THEN 
-        PutRI("movi", RH, x.type.len) 
+        PutRI("movi", RH, x.type.len); SetRcI(RH, -1, x.type.len, IMM);
       ELSE  
         PutMoveRRI("l32i", 1020, RH, SP, x.a + 4 + frame);
       END;
@@ -2262,7 +2302,7 @@ MODULE ORG;
   BEGIN 
     e("StringParam");
     loadStringAdr(x); 
-    PutRI("movi", RH, x.b);
+    PutRI("movi", RH, x.b); SetRcI(RH, -1, x.b, IMM);
     incR  (*len*)
   END StringParam;
 
@@ -2278,7 +2318,7 @@ MODULE ORG;
   BEGIN 
     e("For1");
     IF z.mode = ORB.Const THEN 
-      PutRI("movi", RH, z.a);
+      PutRI("movi", RH, z.a); SetRcI(RH, -1, x.a, IMM);
       incR
     ELSE
       load(z); 
@@ -2301,10 +2341,10 @@ MODULE ORG;
     e("For2");
     load(x); 
     IF (w.a >= -128) & (w.a <= 127) THEN
-      IF w.a # 0 THEN PutRRI("addi", x.r, x.r, w.a) END
+      IF w.a # 0 THEN PutRRI("addi", x.r, x.r, w.a); ClearRc(x.r) END
     ELSE
-      PutRI("movi", RH, w.a);
-      PutRRI("add",  x.r, x.r, RH)
+      PutRI("movi", RH, w.a);       SetRcI(RH, -1, w.a, IMM);
+      PutRRI("add",  x.r, x.r, RH); ClearRc(x.r)
     END;
     decR
   END For2;
@@ -2396,13 +2436,13 @@ MODULE ORG;
     ELSE
       cnt := (high - low + 1) * 4;
       cnt := ((cnt + 15) DIV 16) * 16; (* Must be a multiple of 16 *)
-      PutRI("movi", high + 1, cnt);
-      PutRRR("add", high + 1, high + 1, SP);
+      PutRI("movi", high + 1, cnt);           SetRcI(high + 1, -1, cnt, IMM);
+      PutRRR("add", high + 1, high + 1, SP);  ClearRc(high + 1);
       PutRR("movsp", SP, high + 1); 
       INC(frame, cnt);
       i := 0;
       REPEAT
-        PutRRI("s32i", low, SP, i * 4);
+        PutRRI("s32i", low, SP, i * 4);       SetRcI(low, SP, i * 4, MEM);
         INC(i); INC(low);
       UNTIL low > high
     END
@@ -2417,13 +2457,13 @@ MODULE ORG;
     IF cnt > 0 THEN
       i := 0;
       REPEAT
-        PutRRI("l32i", low, SP, i*4);
+        PutRRI("l32i", low, SP, i * 4);    SetRcI(low, SP, i * 4, MEM);
         INC(i); INC(low);
       UNTIL low > high;
       cnt := cnt * 4;
       cnt := ((cnt + 15) DIV 16) * 16; (* Must be a multiple of 16 *)
-      PutRI("movi", high + 1, cnt);
-      PutRRR("sub", high + 1, SP, high + 1);
+      PutRI("movi", high + 1, cnt);          SetRcI(high + 1, -1, cnt, IMM);
+      PutRRR("sub", high + 1, SP, high + 1); ClearRc(high + 1);
       PutRR("movsp", SP, high + 1); 
       DEC(frame, cnt)
     END
@@ -2505,8 +2545,8 @@ MODULE ORG;
         eStr(" (reg) "); eInt(x.r);
       ELSE (* Top of stack *)
         eStr(" (tos)");
-        PutRRI("l32i", RH, SP, 0);
-        PutRRI("addi", SP, SP, 4);
+        PutRRI("l32i", RH, SP, 0);  SetRcI(RH, SP, 0, MEM);
+        PutRRI("addi", SP, SP, 4);  ClearRc(SP);
         x.r := RH;
         DEC(r); 
         (* DEC(frame, 4) *)
@@ -2523,7 +2563,7 @@ MODULE ORG;
     ELSE (*function*)
       (* callType + 3 is the register containing the function result *)
       IF (callType + 3) > r THEN
-        PutRR("mov", r, callType + 3);
+        PutRR("mov", r, callType + 3); SetRcI(r, callType + 3, 0, IMM);
       END;
       RestoreRegs(callType, r - 1);
       x.mode := Reg; 
@@ -2537,36 +2577,34 @@ MODULE ORG;
   BEGIN
     (* interrupt procedures requires to be put in iram to be fast.  To be implemented *)
     e("Enter");
-    frame := 0;
-    theNextLabel := 1;
+    frame := 0; ClearAllRc; theNextLabel := 1;
     IF ~ProcPresent THEN
       ProcPresent := TRUE;
       (* Put a .text... section head *)
-      Texts.WriteString(CodeW, "%T"); Texts.WriteLn(CodeW);
+      Texts.WriteLn(CodeW); Texts.WriteString(CodeW, "%T");
     ELSE
-      Texts.WriteLn(CodeW);
-      Texts.WriteString(CodeW, "    .align 4"); Texts.WriteLn(CodeW);
+      Texts.WriteLn(CodeW); Texts.WriteString(CodeW, "    .align 4");
     END;
     IF exported THEN
+      Texts.WriteLn(    CodeW);
       Texts.Write(      CodeW, CHR(Marker2));
       Texts.WriteString(CodeW, procid);
-      Texts.WriteLn(    CodeW);
     END;
     IF int THEN
+      Texts.WriteLn(    CodeW);
       Texts.WriteString(CodeW, "    .global ");
       Texts.WriteString(CodeW, "_");
       Texts.WriteString(CodeW, procid);
-      Texts.WriteLn(    CodeW);
     END;
+    Texts.WriteLn(    CodeW);
     Texts.WriteString(CodeW, "    .type _");
     Texts.WriteString(CodeW, procid);
     Texts.WriteString(CodeW, ", @function");
-    Texts.WriteLn(    CodeW);
 
+    Texts.WriteLn(    CodeW);
     Texts.WriteString(CodeW, "_");
     Texts.WriteString(CodeW, procid);
     Texts.WriteString(CodeW, ":");
-    Texts.WriteLn(    CodeW);
 
     (* IF ~int THEN  procedure prolog *)
       IF locblksize >= 10000H THEN ORS.Mark("too many locals") END ;
@@ -2575,7 +2613,7 @@ MODULE ORG;
       a := 0;
       r := 2;
       WHILE a < parblksize DO
-        PutRRI("s32i", r, 1, a); 
+        PutRRI("s32i", r, SP, a); SetRcI(r, SP, a, MEM);
         INC(r); 
         INC(a, 4)
       END;
@@ -2590,9 +2628,9 @@ MODULE ORG;
     e("Return");
     IF type.base.form # ORB.NoTyp THEN 
       load(x);
-      IF type.size = 1 THEN
-        PutRI("movi", RH, 255);
-        PutRRR("and", x.r, x.r, RH)
+      IF type.size = 1 THEN (* byte / char *)
+        PutRI("movi", RH, 255);      SetRcI(RH, -1, 255, IMM);
+        PutRRR("and", x.r, x.r, RH); ClearRc(x.r)
       END
     END;
     PutSingle("retw");
@@ -2606,6 +2644,7 @@ MODULE ORG;
       PutRI("rsr", 0, 208 + intLevel);
       PutI("rfi", intLevel);
     END; *)
+    Texts.WriteLn(CodeW);
     Texts.WriteString(CodeW, "    .size _");
     Texts.WriteString(CodeW, procid);
     Texts.WriteString(CodeW, ", .-_");
@@ -2641,15 +2680,15 @@ MODULE ORG;
         IF upordown # 0 THEN y.a := - y.a END;
         eInt(y.a);
         IF (y.a >= -128) & (y.a <= 127) THEN
-          IF y.a # 0 THEN PutRRI("addi", zr, zr, y.a) END
+          IF y.a # 0 THEN PutRRI("addi", zr, zr, y.a); ClearRc(zr) END
         ELSE
-          PutRI("movi", RH, y.a);
-          PutRRR("add", zr, zr, RH)
+          PutRI("movi", RH, y.a);    SetRcI(RH, -1, y.a, IMM);
+          PutRRR("add", zr, zr, RH); ClearRc(zr);
         END
       ELSE 
         load(y); 
-        IF upordown # 0 THEN PutRR("neg", y.r, y.r) END;
-        PutRRR("add", zr, zr, y.r); 
+        IF upordown # 0 THEN PutRR("neg", y.r, y.r); ClearRc(y.r) END;
+        PutRRR("add", zr, zr, y.r); ClearRc(zr);
         decR 
       END;
       PutMoveRRI(storeOp, max, zr, SP, x.a);
@@ -2658,23 +2697,23 @@ MODULE ORG;
       eStr(" (var) name:"); eStr(x.name);
       loadAdr(x); 
       zr := RH; 
-      PutRRI(loadOp, RH, x.r, 0); 
+      PutRRI(loadOp, RH, x.r, 0); SetRcI(RH, x.r, 0, MEM);
       incR;
       IF y.mode = ORB.Const THEN 
         IF upordown # 0 THEN y.a := - y.a END;
         IF (y.a >= -128) & (y.a <= 127) THEN
-          IF y.a # 0 THEN PutRRI("addi", zr, zr, y.a) END
+          IF y.a # 0 THEN PutRRI("addi", zr, zr, y.a); ClearRc(zr) END
         ELSE
-          PutRI("movi", RH, y.a);
-          PutRRR("add", zr, zr, RH)
+          PutRI("movi", RH, y.a);    SetRcI(RH, -1, y.a, IMM);
+          PutRRR("add", zr, zr, RH); ClearRc(zr)
         END
       ELSE 
         load(y); 
-        IF upordown # 0 THEN PutRR("neg", y.r, y.r) END;
-        PutRRR("add", zr, zr, y.r); 
+        IF upordown # 0 THEN PutRR("neg", y.r, y.r); ClearRc(y.r) END;
+        PutRRR("add", zr, zr, y.r); ClearRc(zr);
         decR 
       END;
-      PutRRI(storeOp, zr, x.r, 0); 
+      PutRRI(storeOp, zr, x.r, 0); SetRcI(zr, x.r, 0, MEM);
       decR; decR
     END
   END Increment;
@@ -2685,27 +2724,27 @@ MODULE ORG;
     e("Include");
     loadAdr(x); 
     zr := RH; 
-    PutRRI("l32i", RH, x.r, 0); incR;
-    PutRI("movi", RH, 1);
+    PutRRI("l32i", RH, x.r, 0); SetRcI(RH, x.r, 0, MEM); incR;
+    PutRI("movi", RH, 1);       SetRcI(RH,  -1, 1, IMM);
     IF y.mode = ORB.Const THEN 
       IF y.a # 0 THEN
-        PutRRI("slli", RH, RH, y.a)
+        PutRRI("slli", RH, RH, y.a); ClearRc(RH);
       END
     ELSE
       incR; 
       load(y); 
-      PutR("ssl", y.r); 
+      PutR("ssl", y.r);             ClearRc(y.r);
       decR; decR;
-      PutRR("sll", RH, RH);
+      PutRR("sll", RH, RH);         ClearRc(RH);
     END;
     IF inorex = 0 THEN
-      PutRRR("or", zr, zr, RH);
+      PutRRR("or", zr, zr, RH);     ClearRc(zr);
     ELSE
-      PutRI("movi", RH+1, -1);
-      PutRRR("xor", RH, RH, RH+1);
-      PutRRR("and", zr, zr, RH);
+      PutRI("movi", RH+1, -1);      SetRcI(RH+1, -1, -1, IMM);
+      PutRRR("xor", RH, RH, RH+1);  ClearRc(RH);
+      PutRRR("and", zr, zr, RH);    ClearRc(zr);
     END;
-    PutRRI("s32i", zr, x.r, 0); 
+    PutRRI("s32i", zr, x.r, 0);     SetRcI(zr, x.r, 0, MEM);
     decR; decR
   END Include;
 
@@ -2756,8 +2795,8 @@ MODULE ORG;
     z := x; 
     load(x); 
     load(y);
-    PutRRI("slli", y.r, y.r, 23); 
-    PutRRR("add", x.r, x.r, y.r); 
+    PutRRI("slli", y.r, y.r, 23); ClearRc(y.r);
+    PutRRR("add", x.r, x.r, y.r); ClearRc(x.r);
     decR; 
     Store(z, x)
   END Pack;
@@ -2768,10 +2807,10 @@ MODULE ORG;
     e("Unpk");
     z := x; load(x); e0.mode := Reg; e0.r := RH; e0.type := ORB.intType;
     PutRRI("srai", RH, x.r, 23); 
-    PutRRI("addi", RH, RH, -127); 
+    PutRRI("addi", RH, RH, -127); ClearRc(RH);
     Store(y, e0); incR;
-    PutRRI("slli", RH, RH, 23); 
-    PutRRR("sub", x.r, x.r, RH); 
+    PutRRI("slli", RH, RH, 23);   ClearRc(RH);
+    PutRRR("sub", x.r, x.r, RH);  ClearRc(x.r);
     Store(z, x)
   END Unpk;
 
@@ -2812,11 +2851,11 @@ MODULE ORG;
       PutBranchR("beqz", z.r, lbl1);
     END ;
     lbl2 := NextLabel();
-    PutBranchR("loop", z.r, lbl2);
-      PutRRI("l32i", RH, x.r, 0); 
-      PutRRI("addi", x.r, x.r, 4);
-      PutRRI("s32i", RH, y.r, 0); 
-      PutRRI("addi", y.r, y.r, 4);
+    PutBranchR("loop", z.r, lbl2); ClearRc(z.r);
+      PutRRI("l32i", RH, x.r, 0);  SetRcI(RH, x.r, 0, MEM);
+      PutRRI("addi", x.r, x.r, 4); ClearRc(x.r);
+      PutRRI("s32i", RH, y.r, 0);  SetRcI(RH, y.r, 0, MEM);
+      PutRRI("addi", y.r, y.r, 4); ClearRc(y.r);
     PutLabel(lbl2);
     decR; decR; decR;
     PutLabel(lbl1);
@@ -2834,10 +2873,10 @@ MODULE ORG;
   BEGIN
     e("LDREG");
     IF y.mode = ORB.Const THEN 
-      PutRI("movi", x.a, y.a);
+      PutRI("movi", x.a, y.a); SetRcI(x.a, -1, y.a, IMM);
     ELSE 
       load(y); 
-      PutRR("mov", x.a, y.r); 
+      PutRR("mov", x.a, y.r); SetRcI(x.a, y.r, 0, IMM);
       decR
     END
   END LDREG;
@@ -2847,7 +2886,7 @@ MODULE ORG;
     IF x.mode # ORB.Const THEN ORS.Mark("first parameter must be a constant") END;
     IF (x.a < 0) OR (x.a > 255) THEN ORS.Mark("first parameter must be between 0 and 255") END;
     load(y);
-    PutRI("wsr", y.r, x.a);
+    PutRI("wsr", y.r, x.a); ClearRc(y.r);
     decR
   END WSR;
 
@@ -2857,7 +2896,7 @@ MODULE ORG;
   BEGIN
     IF x.mode # ORB.Const THEN ORS.Mark("must be a constant") END;
     IF (x.a < 0) OR (x.a > 255) THEN ORS.Mark("param must be between 0 and 255") END;
-    PutRI("rsr", RH, x.a);
+    PutRI("rsr", RH, x.a); ClearRc(RH);
     x.r := RH;
     x.mode := Reg;
     incR
@@ -2871,10 +2910,10 @@ PROCEDURE Abs*(VAR x: Item);
     ELSE 
       load(x);
       IF x.type.form = ORB.Real THEN 
-        PutRRI("slli", x.r, x.r, 1);
-        PutRRI("srli", x.r, x.r, 1);
+        PutRRI("slli", x.r, x.r, 1); ClearRc(x.r);
+        PutRRI("srli", x.r, x.r, 1); ClearRc(x.r);
       ELSE 
-        PutRR("abs", x.r, x.r);
+        PutRR("abs", x.r, x.r); ClearRc(x.r);
       END
     END
   END Abs;
@@ -2887,8 +2926,8 @@ PROCEDURE Abs*(VAR x: Item);
       x.type := ORB.boolType;
     ELSE
       load(x);
-      PutRI("movi", RH, 1);
-      PutRRR("and", x.r, x.r, RH); 
+      PutRI("movi", RH, 1);         SetRcI(RH, -1, 1, IMM);
+      PutRRR("and", x.r, x.r, RH);  ClearRc(x.r);
     END
   END Odd;
 
@@ -2904,7 +2943,7 @@ PROCEDURE Abs*(VAR x: Item);
     ELSE
       load(x); 
       PutSR("wfr", 0, x.r);
-      PutRSI("floor.s", x.r, 0, 0);
+      PutRSI("floor.s", x.r, 0, 0); ClearRc(x.r);
     END
   END Floor;
 
@@ -2916,7 +2955,7 @@ PROCEDURE Abs*(VAR x: Item);
     ELSE
       load(x); 
       PutSRI("float.s", 0, x.r, 0);
-      PutRS("rfr", x.r, 0);
+      PutRS("rfr", x.r, 0); ClearRc(x.r);
     END
   END Float;
 
@@ -2936,7 +2975,7 @@ PROCEDURE Abs*(VAR x: Item);
       x.a := x.type.len
     ELSE (*open array*) 
       eStr(" (open array) "); eStr("x.a+4:"); eInt(x.a); eStr(" frame:"); eInt(frame);
-      PutMoveRRI("l32i", 1020, RH, SP, x.a + 4 + frame); 
+      PutMoveRRI("l32i", 1020, RH, SP, x.a + 4 + frame); SetRcI(RH, SP, x.a + 4 + frame, MEM);
       x.mode := Reg; 
       x.r := RH; incR
     END 
@@ -2962,7 +3001,7 @@ PROCEDURE Abs*(VAR x: Item);
       ELSIF fct = 2 THEN op := "xor"
       END;
       load(x); load(y);
-      PutRRR(op, RH - 2, x.r, y.r);
+      PutRRR(op, RH - 2, x.r, y.r); ClearRc(RH - 2);
       x.r := RH - 2;
       decR
     END
@@ -2974,8 +3013,8 @@ PROCEDURE Abs*(VAR x: Item);
       x.a := ORD(SYSTEM.VAL(SET, x.a) / {0..31});
     ELSE
       load(x);
-      PutRI("movi", RH, -1);
-      PutRRR("xor", x.r, x.r, RH);
+      PutRI("movi", RH, -1);        SetRcI(RH, -1, -1, IMM);
+      PutRRR("xor", x.r, x.r, RH);  ClearRc(x.r);
     END
   END BitNot;
 
@@ -2986,7 +3025,7 @@ PROCEDURE Abs*(VAR x: Item);
     ELSIF fct = 1 THEN op := "max" 
     END;
     load(x); load(y);
-    PutRRR(op, RH - 2, x.r, y.r);
+    PutRRR(op, RH - 2, x.r, y.r); ClearRc(RH - 2);
     x.r := RH - 2;
     decR
   END MinMax;
@@ -2998,7 +3037,7 @@ PROCEDURE Abs*(VAR x: Item);
     PutRR("mov", RH, 0); (* Save return address (a0) *)
     PutA("call0", "__fsqrt32");
     PutRR("mov", 0, RH); (* Restore return address (a0) *)
-    PutRS("rfr", x.r, 1);
+    PutRS("rfr", x.r, 1); ClearRc(x.r);
   END Sqrt;
 
   PROCEDURE Shift*(fct: INTEGER; VAR x, y: Item);
@@ -3012,20 +3051,20 @@ PROCEDURE Abs*(VAR x: Item);
       load(x);
       IF fct = 0 THEN  (* LSL *)
         IF y.mode = ORB.Const THEN
-          PutRRI("slli", x.r, x.r, y.a MOD 20H)
+          PutRRI("slli", x.r, x.r, y.a MOD 20H); ClearRc(x.r);
         ELSE
           load(y);
-          PutR("ssl", y.r);
-          PutRR("sll", x.r, x.r);
+          PutR("ssl", y.r);       ClearRc(y.r);
+          PutRR("sll", x.r, x.r); ClearRc(x.r);
           decR
         END
       ELSIF fct = 1 THEN (* ASR *)
         IF y.mode = ORB.Const THEN
-          PutRRI("srai", x.r, x.r, y.a MOD 20H)
+          PutRRI("srai", x.r, x.r, y.a MOD 20H); ClearRc(x.r);
         ELSE
           load(y);
-          PutR("ssr", y.r);
-          PutRR("sra", x.r, x.r);
+          PutR("ssr", y.r);        ClearRc(y.r);
+          PutRR("sra", x.r, x.r);  ClearRc(x.r);
           decR
         END
       ELSE (* ROR *)
@@ -3033,11 +3072,11 @@ PROCEDURE Abs*(VAR x: Item);
           PutI("ssai", y.a MOD 20H)
         ELSE
           load(y);
-          PutR("ssr", y.r);
+          PutR("ssr", y.r); ClearRc(y.r);
           decR
         END;
-        PutRR("mov", RH, x.r);
-        PutRRR("src", x.r, x.r, RH)
+        PutRR("mov", RH, x.r);        SetRcI(RH, x.r, 0, IMM);
+        PutRRR("src", x.r, x.r, RH);  ClearRc(x.r);
       END
     END
   END Shift;
@@ -3067,7 +3106,7 @@ PROCEDURE Abs*(VAR x: Item);
   BEGIN 
     e("Bit");
     load(x); 
-    PutRRI("l32i", x.r, x.r, 0);
+    PutRRI("l32i", x.r, x.r, 0); ClearRc(x.r);
     load(y);
     SetCC(x, BST)
   END Bit;
@@ -3077,7 +3116,7 @@ PROCEDURE Abs*(VAR x: Item);
     e("Register");
     (*x.mode = Const*)
     (* Put0(Mov, RH, 0, x.a MOD 10H); x.mode := Reg; x.r := RH; incR *)
-    PutRR("mov", RH, x.a MOD 10H);
+    PutRR("mov", RH, x.a MOD 10H); SetRcI(RH, x.a MOD 10H, 0, IMM);
     x.mode := Reg; x.r := RH; incR
   END Register;
 
@@ -3114,7 +3153,6 @@ PROCEDURE Abs*(VAR x: Item);
     Texts.WriteString(CodeW, "_");
     Texts.WriteString(CodeW, thisModuleId);
     Texts.WriteString(CodeW, "_init:");
-    Texts.WriteLn(    CodeW);
     PutRI("entry", SP, 16);
     GetLocalSB
   END Header;
@@ -3136,11 +3174,11 @@ PROCEDURE Abs*(VAR x: Item);
     VAR fld: ORB.Object; i, s: INTEGER;
   BEGIN
     IF (typ.form = ORB.Pointer) OR (typ.form = ORB.NilTyp) THEN 
+      Texts.WriteLn(    AsW);
       Texts.WriteString(AsW, "    .int _");
       Texts.WriteString(AsW, thisModuleId);
       Texts.WriteString(AsW, "_s_bss + ");
       Texts.WriteInt(   AsW, adr, 0);
-      Texts.WriteLn(    AsW);
     ELSIF typ.form = ORB.Record THEN
       fld := typ.dsc;
       WHILE fld # NIL DO FindPtrs(fld.type, fld.val + adr); fld := fld.next END
@@ -3158,18 +3196,18 @@ PROCEDURE Abs*(VAR x: Item);
   PROCEDURE SectionHeader(sectionPrefix, moduleId: ARRAY OF CHAR;  moduleKey: INTEGER; global: BOOLEAN);
   BEGIN
     Texts.WriteLn(AsW);
+    Texts.WriteLn(AsW);
     Texts.WriteString(AsW, "    .align 4");
     Texts.WriteLn(AsW);
     Texts.WriteString(AsW, "    .section ");
     SectionName(sectionPrefix, moduleId, moduleKey);
-    Texts.WriteLn(AsW);
     IF global THEN
+      Texts.WriteLn(AsW);
       Texts.WriteString(AsW, "    .global ");
       ExportName(sectionPrefix, "s", moduleId, moduleKey);
       Texts.WriteLn(AsW);
       ExportName(sectionPrefix, "s", moduleId, moduleKey);
       Texts.WriteString(AsW, ":");
-      Texts.WriteLn(AsW)
     END
   END SectionHeader;
 
@@ -3211,6 +3249,7 @@ PROCEDURE Abs*(VAR x: Item);
               INC(i)
             END;
             name[i] := CHR(0);
+            Texts.WriteLn(AsW);
             Texts.WriteString(AsW, "    .global ");
             ExportName(name, "p", moduleId, moduleKey);
             Texts.WriteLn(AsW);
@@ -3220,7 +3259,6 @@ PROCEDURE Abs*(VAR x: Item);
             Texts.WriteLn(AsW);
             ExportName(name, "p", moduleId, moduleKey);
             Texts.Write(AsW, ":");
-            Texts.WriteLn(AsW);
           ELSE
             Texts.Write(AsW, CHR(b));
           END
@@ -3260,16 +3298,11 @@ PROCEDURE Abs*(VAR x: Item);
   PROCEDURE LineConsumer(lineNbr: INTEGER; line: ARRAY OF CHAR);
   (* VAR i : INTEGER; *)
   BEGIN
-    (* i := 0;
-    WHILE line[i] # 0X DO INC(i) END;
-    IF i > 0 THEN DEC(i) END;
-    line[i] := 0X; *)
-
+    Texts.WriteLn(CodeW);
     Texts.WriteString(CodeW, "# --> ");
     Texts.WriteInt(CodeW, lineNbr, 4);
     Texts.WriteString(CodeW, ": ");
     Texts.WriteString(CodeW, line);
-    Texts.WriteLn(CodeW)
   END LineConsumer;
 
   PROCEDURE Close*(VAR moduleId: ORS.Ident; moduleKey, nofent: INTEGER; outputFolder: ARRAY OF CHAR);
@@ -3285,6 +3318,7 @@ PROCEDURE Abs*(VAR x: Item);
     
     Texts.OpenWriterToFile(AsW, AsF);
 
+    Texts.WriteLn(    AsW);
     Texts.WriteString(AsW, "    .title ");
     Texts.Write(      AsW, 22X);
     Texts.WriteString(AsW, "Module ");
@@ -3292,25 +3326,25 @@ PROCEDURE Abs*(VAR x: Item);
     Texts.WriteString(AsW, ", Key");
     Texts.WriteHex(   AsW, moduleKey); 
     Texts.Write(      AsW, 22X);
-    Texts.WriteLn(    AsW);
 
+    Texts.WriteLn(    AsW);
     Texts.WriteString(AsW, "    .sbttl ");
     Texts.Write(      AsW, 22X);
     Texts.WriteString(AsW, "Oberon ESP32 Compiler Version ");
     Texts.WriteString(AsW, ORB.CompilerVersion);
     Texts.Write(      AsW, 22X);
-    Texts.WriteLn(    AsW);
     
     initPresent := FALSE;
 
     (* types description section *)
     IF tdx > 0 THEN
-      SectionHeader("data_types", moduleId, moduleKey, TRUE);
+    Texts.WriteLn(AsW);
+    SectionHeader("data_types", moduleId, moduleKey, TRUE);
       Texts.WriteString(AsW, "_");
       Texts.WriteString(AsW, moduleId);
       Texts.WriteString(AsW, "_s_types:");
-      Texts.WriteLn(AsW);
       FOR i := 0 TO tdx-1 DO 
+        Texts.WriteLn(AsW);
         Texts.WriteString(AsW, "    .int ");
         (* Type size for allocation *)
         IF (i MOD 5) = 0 THEN
@@ -3320,13 +3354,13 @@ PROCEDURE Abs*(VAR x: Item);
         ELSE
           TypePointer(data[i])
         END;
-        Texts.WriteLn(AsW);
       END;    
     END;
 
     (* Strings section *)
     IF strx > 0 THEN
       SectionHeader("data_strs", moduleId, moduleKey, FALSE);
+      Texts.WriteLn(AsW);
       Texts.WriteString(AsW, "_");
       Texts.WriteString(AsW, moduleId);
       Texts.WriteString(AsW, "_data_strs:");
@@ -3338,14 +3372,15 @@ PROCEDURE Abs*(VAR x: Item);
         Texts.WriteInt(AsW, ORD(str[i]), 0);
         IF (i < strx-1) & (((i+1) MOD 16) # 0) THEN Texts.Write(AsW, ",") END
       END;    
-      Texts.WriteLn(AsW);
     END;
 
     (* variables section *)
     SectionHeader("bss", moduleId, moduleKey, TRUE);
+    Texts.WriteLn(    AsW);
     Texts.WriteString(AsW, "_");
     Texts.WriteString(AsW, moduleId);
     Texts.WriteString(AsW, "_s_bss:");
+
     Texts.WriteLn(    AsW);
     Texts.WriteString(AsW, "    .space ");
     IF varsize > 0 THEN
@@ -3353,7 +3388,6 @@ PROCEDURE Abs*(VAR x: Item);
     ELSE
       Texts.WriteInt(   AsW, 4, 0);
     END;
-    Texts.WriteLn(    AsW);
 
     (* pointers section *)
     obj := ORB.topScope.next; nofptrs := 0;
@@ -3375,6 +3409,7 @@ PROCEDURE Abs*(VAR x: Item);
     IF CodeW.buf.len > 0 THEN
       initPresent := WriteCode(moduleId, moduleKey);
       IF initPresent THEN
+        Texts.WriteLn(AsW);
         Texts.WriteString(AsW, "    retw");
         Texts.WriteLn(AsW);
         Texts.WriteString(AsW, "    .size _");
@@ -3382,19 +3417,20 @@ PROCEDURE Abs*(VAR x: Item);
         Texts.WriteString(AsW, "_init, .-_");
         Texts.WriteString(AsW, moduleId);
         Texts.WriteString(AsW, "_init");
-        Texts.WriteLn(AsW);
       END
     END;
 
     (* Initialization Code Table *)
     IF initPresent THEN
       Texts.WriteLn(AsW);
+      Texts.WriteLn(AsW);
       SectionHeader("init_table", moduleId, moduleKey, FALSE);
+
+      Texts.WriteLn(AsW);
       Texts.WriteString(AsW, "    .int ");
       Texts.WriteString(AsW, "_");
       Texts.WriteString(AsW, moduleId);
       Texts.WriteString(AsW, "_init");
-      Texts.WriteLn(AsW);
     END;
 
     Texts.WriteLn(AsW);
@@ -3462,5 +3498,6 @@ BEGIN
   BrTwoParam := {2, 3, 5, 6, 10, 11, 13, 14};
   BrNoParam  := {4, 12};
 
-  UsedRegs := {}
+  UsedRegs := {};
+  ClearAllRc
 END ORG.

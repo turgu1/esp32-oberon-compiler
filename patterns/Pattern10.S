@@ -1,3 +1,4 @@
+
     .title "Module Pattern10, Key A5E3D3E5"
     .sbttl "Oberon ESP32 Compiler Version 0.1.0"
 
@@ -20,11 +21,11 @@ _Pattern10_s_bss:
 # -->   10:     i, n: INTEGER;
 # -->   11:   BEGIN
 
+
     .align 4
     .section .text_Pattern10_A5E3D3E5
     .global _Pattern10_A5E3D3E5_s_text
 _Pattern10_A5E3D3E5_s_text:
-
     .type _P, @function
 _P:
     entry a1, 32
@@ -60,13 +61,13 @@ _P:
     s32i a4, a3, 0
     retw
     .size _P, .-_P
+
 # -->   15:   
 # -->   16: BEGIN
 
 
     .align 4
     .section .init_Pattern10_A5E3D3E5
-
 _Pattern10_init:
     entry a1, 16
     movi a2, _Pattern10_s_bss
@@ -79,7 +80,7 @@ _Pattern10_init:
     .size _Pattern10_init, .-_Pattern10_init
 
 
+
     .align 4
     .section .init_table_Pattern10_A5E3D3E5
     .int _Pattern10_init
-

@@ -1,11 +1,12 @@
+
     .title "Module Pattern13, Key A5E3D3E8"
     .sbttl "Oberon ESP32 Compiler Version 0.1.0"
+
 
     .align 4
     .section .data_types_Pattern13_A5E3D3E8
     .global _Pattern13_A5E3D3E8_s_data_types
-_Pattern13_A5E3D3E8_s_data_types:
-_Pattern13_s_types:
+_Pattern13_A5E3D3E8_s_data_types:_Pattern13_s_types:
     .int 32
     .int -1
     .int -1
@@ -55,16 +56,15 @@ _Pattern13_s_bss:
 # -->   18:   p0: P0;
 # -->   19:   p1: P1;
 # -->   20:   p2: P2;
-# -->   21: BEGIN 
+# -->   22: BEGIN 
 
 
     .align 4
     .section .init_Pattern13_A5E3D3E8
-
 _Pattern13_init:
     entry a1, 16
     movi a2, _Pattern13_s_bss
-# -->   22:   p0.x := 0;
+# -->   23:   p0.x := 0;
     l32i a3, a2, 0
     bnez a3, 1$
     movi a6, 1026
@@ -72,7 +72,7 @@ _Pattern13_init:
 1$:
     movi a4, 0
     s32i a4, a3, 0
-# -->   23:   p1.y := 1;
+# -->   24:   p1.y := 1;
     l32i a3, a2, 4
     bnez a3, 2$
     movi a6, 1026
@@ -80,7 +80,7 @@ _Pattern13_init:
 2$:
     movi a4, 1
     s32i a4, a3, 4
-# -->   24:   p0(P1).y := 3;
+# -->   25:   p0(P1).y := 3;
     l32i a3, a2, 0
     movi a4, 0
     beqz a3, 3$
@@ -96,7 +96,7 @@ _Pattern13_init:
 4$:
     movi a4, 3
     s32i a4, a3, 4
-# -->   25:   p0(P2).z := 5;
+# -->   26:   p0(P2).z := 5;
     l32i a3, a2, 0
     movi a4, 0
     beqz a3, 5$
@@ -112,7 +112,7 @@ _Pattern13_init:
 6$:
     movi a4, 5
     s32i a4, a3, 8
-# -->   26:   IF p1 IS P2 THEN
+# -->   27:   IF p1 IS P2 THEN
     l32i a3, a2, 4
     movi a4, 0
     beqz a3, 7$
@@ -123,17 +123,17 @@ _Pattern13_init:
     addi a4, a4, 40
 7$:
     bne a3, a4, 8$
-# -->   27:     p0 := p2
-# -->   28:   END
+# -->   28:     p0 := p2
+# -->   29:   END
     l32i a3, a2, 8
     s32i a3, a2, 0
 8$:
-# -->   29: END Pattern13.
+# -->   30: END Pattern13.
     retw
     .size _Pattern13_init, .-_Pattern13_init
+
 
 
     .align 4
     .section .init_table_Pattern13_A5E3D3E8
     .int _Pattern13_init
-

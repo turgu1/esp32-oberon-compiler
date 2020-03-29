@@ -1,3 +1,4 @@
+
     .title "Module Pattern3, Key A7E2D4B5"
     .sbttl "Oberon ESP32 Compiler Version 0.1.0"
 
@@ -14,16 +15,15 @@ _Pattern3_s_bss:
 # -->    4:   a: ARRAY 10 OF INTEGER;
 # -->    5:   x: ARRAY 10, 10 OF INTEGER;
 # -->    6:   y: ARRAY 10, 10, 10 OF INTEGER;
-# -->    7: BEGIN 
+# -->    8: BEGIN 
 
 
     .align 4
     .section .init_Pattern3_A7E2D4B5
-
 _Pattern3_init:
     entry a1, 16
     movi a2, _Pattern3_s_bss
-# -->    8:   k := a[i]; 
+# -->    9:   k := a[i]; 
     l32i a3, a2, 0
     movi a4, 10
     blt a3, a4, 1$
@@ -34,10 +34,10 @@ _Pattern3_init:
     add a3, a2, a3
     l32i a3, a3, 16
     s32i a3, a2, 8
-# -->    9:   n := a[5]; 
+# -->   10:   n := a[5]; 
     l32i a3, a2, 36
     s32i a3, a2, 12
-# -->   10:   x[i, j] := 2;
+# -->   11:   x[i, j] := 2;
     l32i a3, a2, 0
     movi a4, 10
     blt a3, a4, 2$
@@ -57,7 +57,7 @@ _Pattern3_init:
     add a3, a3, a4
     movi a4, 2
     s32i a4, a3, 56
-# -->   11:   y[i, j, k] := 3;
+# -->   12:   y[i, j, k] := 3;
     l32i a3, a2, 0
     movi a4, 10
     blt a3, a4, 4$
@@ -86,8 +86,8 @@ _Pattern3_init:
     add a3, a3, a4
     movi a4, 3
     s32i a4, a3, 456
-# -->   12:   y[3, 4, 5] := 6
-# -->   13: END Pattern3.
+# -->   13:   y[3, 4, 5] := 6
+# -->   14: END Pattern3.
     movi a3, 6
     addmi a4, a2, 1792
     s32i a3, a4, 44
@@ -95,7 +95,7 @@ _Pattern3_init:
     .size _Pattern3_init, .-_Pattern3_init
 
 
+
     .align 4
     .section .init_table_Pattern3_A7E2D4B5
     .int _Pattern3_init
-
