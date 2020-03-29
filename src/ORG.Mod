@@ -118,6 +118,8 @@ MODULE ORG;
     str:    ARRAY maxStrx OF CHAR;
 
     rc: RegisterContent;
+    hitCount: INTEGER;      (* How many time we were able to save an instruction *)
+    regCopyCount: INTEGER;  (* How many register copy was done instead of reading from memory*)
 
     (* The end result of the compiler is an assembler file ready to be digested by the GNU Assembler *)
     AsF: Files.File;     (* Output file for the Assembly Language *)
@@ -143,6 +145,7 @@ MODULE ORG;
     BrNoParam: SET;           (* Unconditional branches      *)
 
     UsedRegs: SET;
+
 
   (* Compiler generator debugging support tools *)
 
@@ -311,7 +314,10 @@ MODULE ORG;
   VAR
     i: INTEGER;
   BEGIN 
-    FOR i := 0 TO 15 DO rc[i].kind := UNK END
+    FOR i := 0 TO 15 DO rc[i].kind := UNK END;
+
+    WHILE CodeW.linePos < 32 DO Texts.Write(CodeW, " ") END;
+    Texts.WriteString(CodeW, "# Clear all Reg info");
   END ClearAllRc;
 
   (* Set Register r to Unknown (UNK) *)
@@ -319,7 +325,8 @@ MODULE ORG;
   BEGIN 
     rc[r].kind := UNK;
 
-    Texts.WriteString(CodeW, "    # a");
+    WHILE CodeW.linePos < 32 DO Texts.Write(CodeW, " ") END;
+    Texts.WriteString(CodeW, "# a");
     Texts.WriteInt(CodeW, r, 0);
     Texts.WriteString(CodeW, " = UNK");
   END ClearRc;
@@ -331,7 +338,8 @@ MODULE ORG;
     rc[r].lbl[0] := 0X;
     rc[r].kind   := k;
     
-    Texts.WriteString(CodeW, "    # a");
+    WHILE CodeW.linePos < 32 DO Texts.Write(CodeW, " ") END;
+    Texts.WriteString(CodeW, "# a");
     Texts.WriteInt(CodeW, r, 0);
     Texts.WriteString(CodeW, " = ");
     IF fromR # -1 THEN
@@ -352,6 +360,22 @@ MODULE ORG;
     Texts.WriteString(CodeW, ")");
   END SetRcI;
 
+  PROCEDURE FindRc(fromR, i, k: INTEGER) : INTEGER;
+    VAR
+      idx: INTEGER;
+      found: BOOLEAN;
+  BEGIN
+    idx := 15; found := FALSE;
+    WHILE (idx >= 0) & ~found DO
+      found := (rc[idx].reg = fromR) & 
+               (rc[idx].i = i) &
+               (rc[idx].kind = k);
+      IF ~found THEN DEC(idx) END
+    END;
+    IF found THEN INC(hitCount) END
+    RETURN idx
+  END FindRc;
+
   PROCEDURE SetRcA(r, fromR: INTEGER; a: ARRAY OF CHAR; k: INTEGER);
   BEGIN 
     rc[r].reg  := fromR;
@@ -359,7 +383,8 @@ MODULE ORG;
     rc[r].lbl  := a;
     rc[r].kind := k;
 
-    Texts.WriteString(CodeW, "    # a");
+    WHILE CodeW.linePos < 32 DO Texts.Write(CodeW, " ") END;
+    Texts.WriteString(CodeW, "# a");
     Texts.WriteInt(CodeW, r, 0);
     Texts.WriteString(CodeW, " = ");
     IF fromR # -1 THEN
@@ -1012,7 +1037,7 @@ MODULE ORG;
     Texts.WriteLn(CodeW);
     Texts.WriteString(CodeW, "    movi a2, ");
     Texts.WriteString(CodeW, name);
-    SetRcA(2, 0, name, LOC)
+    SetRcA(2, -1, name, LOC)
   END GetLocalSB;
 
   PROCEDURE GetExtSB(base: INTEGER);
@@ -1076,23 +1101,30 @@ MODULE ORG;
   PROCEDURE PutMoveRRI(op: ARRAY OF CHAR; max, r1, r2, offset: INTEGER);
   VAR
     temp: INTEGER;
+    found: BOOLEAN;
   BEGIN 
     e("PutMoveRRI");
+    found := FALSE;
+    IF FindRc(r2, offset, MEM) # -1 THEN found := TRUE END;
     IF (offset > max) OR (offset < 0) THEN
       IF (r1 = RH) OR (r2 = RH) THEN temp := RH+1 ELSE temp := RH END;
       IF (offset < 0) OR (offset > 32512) THEN
-        PutRI("movi", temp, offset);
+        PutRI("movi", temp, offset);   SetRcI(temp, -1, offset, IMM);
         PutRRR("add", temp, temp, r2); ClearRc(temp);
-        PutRRI(op, r1, temp, 0);       SetRcI(r1, temp, 0, MEM);
+        PutRRI(op, r1, temp, 0);       
       ELSE
         PutRRI("addmi", temp, r2, (offset DIV 256) * 256); ClearRc(temp);
         PutRRI(op, r1, temp, offset MOD 256);
       END;
       
     ELSE
-      PutRRI(op, r1, r2, offset)
+      PutRRI(op, r1, r2, offset);
     END;
-    SetRcI(r1, r2, offset, MEM);
+    IF r1 # r2 THEN SetRcI(r1, r2, offset, MEM) ELSE ClearRc(r1) END;
+    IF found THEN 
+      Texts.WriteString(CodeW, " ==> POTENTIAL SAVE HERE <==");
+    END;
+    
   END PutMoveRRI;
 
   PROCEDURE load(VAR x: Item);
@@ -2577,7 +2609,7 @@ MODULE ORG;
   BEGIN
     (* interrupt procedures requires to be put in iram to be fast.  To be implemented *)
     e("Enter");
-    frame := 0; ClearAllRc; theNextLabel := 1;
+    frame := 0; theNextLabel := 1;
     IF ~ProcPresent THEN
       ProcPresent := TRUE;
       (* Put a .text... section head *)
@@ -2609,7 +2641,7 @@ MODULE ORG;
     (* IF ~int THEN  procedure prolog *)
       IF locblksize >= 10000H THEN ORS.Mark("too many locals") END ;
       IF locblksize = 0 THEN l := 16 ELSE l := (((locblksize + 15) DIV 16) * 16) + 16 END;
-      PutRI("entry", SP, l);
+      PutRI("entry", SP, l); ClearAllRc; 
       a := 0;
       r := 2;
       WHILE a < parblksize DO
@@ -2975,7 +3007,7 @@ PROCEDURE Abs*(VAR x: Item);
       x.a := x.type.len
     ELSE (*open array*) 
       eStr(" (open array) "); eStr("x.a+4:"); eInt(x.a); eStr(" frame:"); eInt(frame);
-      PutMoveRRI("l32i", 1020, RH, SP, x.a + 4 + frame); SetRcI(RH, SP, x.a + 4 + frame, MEM);
+      PutMoveRRI("l32i", 1020, RH, SP, x.a + 4 + frame);
       x.mode := Reg; 
       x.r := RH; incR
     END 
@@ -3153,7 +3185,7 @@ PROCEDURE Abs*(VAR x: Item);
     Texts.WriteString(CodeW, "_");
     Texts.WriteString(CodeW, thisModuleId);
     Texts.WriteString(CodeW, "_init:");
-    PutRI("entry", SP, 16);
+    PutRI("entry", SP, 16); ClearAllRc;
     GetLocalSB
   END Header;
 
@@ -3434,7 +3466,11 @@ PROCEDURE Abs*(VAR x: Item);
     END;
 
     Texts.WriteLn(AsW);
-    Files.Register(AsF) 
+    Files.Register(AsF);
+    
+    Out.Ln; Out.String("Hit Count: "); Out.Int(hitCount, 0);
+    Out.Ln; Out.String("Reg Copy Count: "); Out.Int(regCopyCount, 0);
+    Out.Ln;
   END Close;
 
   PROCEDURE Open*(modid: ORS.Ident);
@@ -3461,6 +3497,10 @@ PROCEDURE Abs*(VAR x: Item);
     Texts.WriteLn(CodeW);
 
     ProcPresent := FALSE;
+    
+    ClearAllRc;
+    hitCount := 0;
+    regCopyCount := 0;
 
     IF sourceToAssembly THEN ORS.SetLineConsumer(LineConsumer) END
   END Init;
@@ -3499,5 +3539,4 @@ BEGIN
   BrNoParam  := {4, 12};
 
   UsedRegs := {};
-  ClearAllRc
 END ORG.

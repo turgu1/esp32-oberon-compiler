@@ -67,8 +67,9 @@ MODULE Texts; (*JG 21.11.90 / NW 11.7.90 / 24.12.95 / 22.11.10 / 20.3.2017*)
     END;
 
     Writer* = RECORD
-      buf*  : Buffer;
-      rider : Files.Rider
+      buf*     : Buffer;
+      rider    : Files.Rider;
+      linePos* : INTEGER
     END;     
 
   VAR TrailerFile: Files.File;
@@ -349,7 +350,8 @@ MODULE Texts; (*JG 21.11.90 / NW 11.7.90 / 24.12.95 / 22.11.10 / 20.3.2017*)
   BEGIN 
     NEW(W.buf);
     OpenBuf(W.buf);
-    Files.Set(W.rider, Files.New(""), 0)
+    Files.Set(W.rider, Files.New(""), 0);
+    W.linePos := 0;
   END OpenWriter;
 
   PROCEDURE OpenWriterToFile* (VAR W: Writer; F: Files.File);
@@ -374,11 +376,12 @@ MODULE Texts; (*JG 21.11.90 / NW 11.7.90 / 24.12.95 / 22.11.10 / 20.3.2017*)
        W.buf.last := p
      END;
      Files.Write(W.rider, ORD(ch));
-     INC(W.buf.last.len); INC(W.buf.len)
+     INC(W.buf.last.len); INC(W.buf.len);
+     INC(W.linePos)
   END Write;
 
   PROCEDURE WriteLn* (VAR W: Writer);
-  BEGIN Write(W, NewLine)
+  BEGIN Write(W, NewLine); W.linePos := 0;
   END WriteLn;
 
   PROCEDURE WriteString* (VAR W: Writer; s: ARRAY OF CHAR);
