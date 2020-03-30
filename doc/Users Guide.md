@@ -5,7 +5,7 @@
 The ESP32 Oberon Compiler is a single executable that can be launched as follows:
 
 ```sh
-$ Oberon [-c][-l][-o folder][-p path][-s][-v] filename
+$ Oberon [-c][-l][-o folder][-p path][-s][-v][-x][-z] filename
 ```
 
 Where the parameters are:
@@ -24,7 +24,9 @@ Where the parameters are:
 - **-p path** : Search path for imported modules, as a list of folder names separated with character “:”. An imported module is first seached in the folder of the module being compiled, then in sequence in the folders part of the path.
 - **-s** : Override Symbol file. The symbol file will be generated in the same folder as the module source code.
 - **-v** : Output compiler version number.
-- **filename** : Oberon source filename to be compiled
+- **-x** : Optimize register usage.
+- **-z** : Output optimization information in assembler output.
+- **filename** : Oberon source filename to be compiled.
 
 The compiler will produce:
 - an ESP32 assembly language source code (extension `.S`); and 

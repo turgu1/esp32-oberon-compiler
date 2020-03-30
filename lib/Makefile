@@ -32,7 +32,7 @@ SRCDIR = src
 BLDDIR = build
 LIBDIR = ../lib
 
-OBFLAGS = -o $(BLDDIR) -p $(LIBDIR) -s -c -l
+OBFLAGS = -o $(BLDDIR) -p $(LIBDIR) -s -c -x
 
 INIT = init/init.S
 INITO = $(BLDDIR)/init.o

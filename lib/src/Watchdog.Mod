@@ -50,14 +50,14 @@ MODULE Watchdog;
   BEGIN
     SYSTEM.GET(RTC_CNTL_WDTCONFIG0_REG, i);
     Out.Ln; Out.String("RTC_CNTL_WDTCONFIG0_REG: "); Out.Hex(i, 0);
-    (* SYSTEM.GET(RTC_CNTL_WDTCONFIG1_REG, i);
+    SYSTEM.GET(RTC_CNTL_WDTCONFIG1_REG, i);
     Out.Ln; Out.String("RTC_CNTL_WDTCONFIG1_REG: "); Out.Hex(i, 0);
     SYSTEM.GET(RTC_CNTL_WDTCONFIG2_REG, i);
     Out.Ln; Out.String("RTC_CNTL_WDTCONFIG2_REG: "); Out.Hex(i, 0);
     SYSTEM.GET(RTC_CNTL_WDTCONFIG3_REG, i);
     Out.Ln; Out.String("RTC_CNTL_WDTCONFIG3_REG: "); Out.Hex(i, 0);
     SYSTEM.GET(RTC_CNTL_WDTCONFIG4_REG, i);
-    Out.Ln; Out.String("RTC_CNTL_WDTCONFIG4_REG: "); Out.Hex(i, 0); *)
+    Out.Ln; Out.String("RTC_CNTL_WDTCONFIG4_REG: "); Out.Hex(i, 0);
   END ShowRegs;
 
   (* EnableCtrlChanges must be called before *)

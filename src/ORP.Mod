@@ -1223,6 +1223,8 @@ MODULE ORP; (*N. Wirth 1.7.97 / 8.2.2020  Oberon compiler for ESP32 in Oberon-07
   PROCEDURE Compile*(filename : ARRAY OF CHAR; 
                      overrideSymbolFile,
                      generateCheckCode,
+                     regOptimization,
+                     regOptList,
                      verbose,
                      sourceToAssembly : BOOLEAN;
                      outFolder, impPath : ARRAY OF CHAR);
@@ -1244,7 +1246,7 @@ MODULE ORP; (*N. Wirth 1.7.97 / 8.2.2020  Oberon compiler for ESP32 in Oberon-07
     NEW(T);
     Texts.Open(T, filename);
     IF T.len > 0 THEN 
-      ORG.Init(generateCheckCode, sourceToAssembly);
+      ORG.Init(generateCheckCode, sourceToAssembly, regOptimization, regOptList);
       ORS.Init(T, 0);
       Module(verbose);
       IF ORS.errcnt # 0 THEN Out.Ln; SYS.Exit(1) END;

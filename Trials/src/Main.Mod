@@ -81,9 +81,9 @@ MODULE Main;
   PROCEDURE Check8;
   BEGIN
     Watchdog.ShowRegs;
-    Watchdog.Init;
+    (* Watchdog.Init;
     Watchdog.ShowRegs;
-    Kernel.EnableWatchdog
+    Kernel.EnableWatchdog *)
   END Check8;
 
 BEGIN

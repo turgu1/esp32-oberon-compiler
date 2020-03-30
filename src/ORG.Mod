@@ -117,6 +117,7 @@ MODULE ORG;
     data:   ARRAY maxTD   OF INTEGER;  (* type descriptors *)
     str:    ARRAY maxStrx OF CHAR;
 
+    regOpt, regOptListing: BOOLEAN;
     rc: RegisterContent;
     hitCount: INTEGER;      (* How many time we were able to save an instruction *)
     regCopyCount: INTEGER;  (* How many register copy was done instead of reading from memory*)
@@ -316,19 +317,39 @@ MODULE ORG;
   BEGIN 
     FOR i := 0 TO 15 DO rc[i].kind := UNK END;
 
-    WHILE CodeW.linePos < 32 DO Texts.Write(CodeW, " ") END;
-    Texts.WriteString(CodeW, "# Clear all Reg info");
+    IF regOptListing THEN
+      WHILE CodeW.linePos < 32 DO Texts.Write(CodeW, " ") END;
+      Texts.WriteString(CodeW, "# Clear all Reg info");
+    END
   END ClearAllRc;
+
+  (* Set Register r to Unknown (UNK) *)
+  PROCEDURE ClearRcFrom(r: INTEGER);
+  BEGIN 
+    IF regOptListing THEN
+      WHILE CodeW.linePos < 32 DO Texts.Write(CodeW, " ") END;
+      Texts.WriteString(CodeW, "# Clear Regs from a");
+      Texts.WriteInt(CodeW, r, 0);
+      Texts.WriteString(CodeW, " and up");
+    END;
+
+    WHILE r < 16 DO
+      rc[r].kind := UNK;
+      INC(r)
+    END;
+  END ClearRcFrom;
 
   (* Set Register r to Unknown (UNK) *)
   PROCEDURE ClearRc(r: INTEGER);
   BEGIN 
     rc[r].kind := UNK;
 
-    WHILE CodeW.linePos < 32 DO Texts.Write(CodeW, " ") END;
-    Texts.WriteString(CodeW, "# a");
-    Texts.WriteInt(CodeW, r, 0);
-    Texts.WriteString(CodeW, " = UNK");
+    IF regOptListing THEN
+      WHILE CodeW.linePos < 32 DO Texts.Write(CodeW, " ") END;
+      Texts.WriteString(CodeW, "# a");
+      Texts.WriteInt(CodeW, r, 0);
+      Texts.WriteString(CodeW, " = UNK");
+    END
   END ClearRc;
 
   PROCEDURE SetRcI(r, fromR, i, k: INTEGER);
@@ -338,26 +359,28 @@ MODULE ORG;
     rc[r].lbl[0] := 0X;
     rc[r].kind   := k;
     
-    WHILE CodeW.linePos < 32 DO Texts.Write(CodeW, " ") END;
-    Texts.WriteString(CodeW, "# a");
-    Texts.WriteInt(CodeW, r, 0);
-    Texts.WriteString(CodeW, " = ");
-    IF fromR # -1 THEN
-      Texts.WriteString(CodeW, "a");
-      Texts.WriteInt(CodeW, fromR, 0);
-      Texts.WriteString(CodeW, " + ");
-    END;
-    Texts.WriteInt(CodeW, i, 0);
-    Texts.WriteString(CodeW, " (");
+    IF regOptListing THEN
+      WHILE CodeW.linePos < 32 DO Texts.Write(CodeW, " ") END;
+      Texts.WriteString(CodeW, "# a");
+      Texts.WriteInt(CodeW, r, 0);
+      Texts.WriteString(CodeW, " = ");
+      IF fromR # -1 THEN
+        Texts.WriteString(CodeW, "a");
+        Texts.WriteInt(CodeW, fromR, 0);
+        Texts.WriteString(CodeW, " + ");
+      END;
+      Texts.WriteInt(CodeW, i, 0);
+      Texts.WriteString(CodeW, " (");
 
-    CASE k OF
-      UNK: Texts.WriteString(CodeW, "UNK") |
-      IMM: Texts.WriteString(CodeW, "IMM") |
-      LOC: Texts.WriteString(CodeW, "LOC") |
-      MEM: Texts.WriteString(CodeW, "MEM")
-    END;
+      CASE k OF
+        UNK: Texts.WriteString(CodeW, "UNK") |
+        IMM: Texts.WriteString(CodeW, "IMM") |
+        LOC: Texts.WriteString(CodeW, "LOC") |
+        MEM: Texts.WriteString(CodeW, "MEM")
+      END;
 
-    Texts.WriteString(CodeW, ")");
+      Texts.WriteString(CodeW, ")");
+    END
   END SetRcI;
 
   PROCEDURE FindRc(fromR, i, k: INTEGER) : INTEGER;
@@ -383,26 +406,28 @@ MODULE ORG;
     rc[r].lbl  := a;
     rc[r].kind := k;
 
-    WHILE CodeW.linePos < 32 DO Texts.Write(CodeW, " ") END;
-    Texts.WriteString(CodeW, "# a");
-    Texts.WriteInt(CodeW, r, 0);
-    Texts.WriteString(CodeW, " = ");
-    IF fromR # -1 THEN
-      Texts.WriteString(CodeW, "a");
-      Texts.WriteInt(CodeW, fromR, 0);
-      Texts.WriteString(CodeW, " + ");
-    END;
-    Texts.WriteString(CodeW, a);
-    Texts.WriteString(CodeW, " (");
+    IF regOptListing THEN
+      WHILE CodeW.linePos < 32 DO Texts.Write(CodeW, " ") END;
+      Texts.WriteString(CodeW, "# a");
+      Texts.WriteInt(CodeW, r, 0);
+      Texts.WriteString(CodeW, " = ");
+      IF fromR # -1 THEN
+        Texts.WriteString(CodeW, "a");
+        Texts.WriteInt(CodeW, fromR, 0);
+        Texts.WriteString(CodeW, " + ");
+      END;
+      Texts.WriteString(CodeW, a);
+      Texts.WriteString(CodeW, " (");
 
-    CASE k OF
-      UNK: Texts.WriteString(CodeW, "UNK") |
-      IMM: Texts.WriteString(CodeW, "IMM") |
-      LOC: Texts.WriteString(CodeW, "LOC") |
-      MEM: Texts.WriteString(CodeW, "MEM")
-    END;
+      CASE k OF
+        UNK: Texts.WriteString(CodeW, "UNK") |
+        IMM: Texts.WriteString(CodeW, "IMM") |
+        LOC: Texts.WriteString(CodeW, "LOC") |
+        MEM: Texts.WriteString(CodeW, "MEM")
+      END;
 
-    Texts.WriteString(CodeW, ")");
+      Texts.WriteString(CodeW, ")");
+    END
   END SetRcA;
 
   PROCEDURE ModuleInfo(idx: INTEGER; VAR moduleId: ORS.Ident; VAR moduleKey: INTEGER);
@@ -1099,32 +1124,58 @@ MODULE ORG;
     moving the data.
    *)
   PROCEDURE PutMoveRRI(op: ARRAY OF CHAR; max, r1, r2, offset: INTEGER);
-  VAR
-    temp: INTEGER;
-    found: BOOLEAN;
+    VAR
+      temp:     INTEGER;
+      foundReg: INTEGER;
+      found:    BOOLEAN;
   BEGIN 
     e("PutMoveRRI");
-    found := FALSE;
-    IF FindRc(r2, offset, MEM) # -1 THEN found := TRUE END;
-    IF (offset > max) OR (offset < 0) THEN
-      IF (r1 = RH) OR (r2 = RH) THEN temp := RH+1 ELSE temp := RH END;
-      IF (offset < 0) OR (offset > 32512) THEN
-        PutRI("movi", temp, offset);   SetRcI(temp, -1, offset, IMM);
-        PutRRR("add", temp, temp, r2); ClearRc(temp);
-        PutRRI(op, r1, temp, 0);       
-      ELSE
-        PutRRI("addmi", temp, r2, (offset DIV 256) * 256); ClearRc(temp);
-        PutRRI(op, r1, temp, offset MOD 256);
-      END;
-      
+    foundReg := FindRc(r2, offset, MEM);
+    found := (op[0] = "l") & (r1 # r2) & (foundReg # -1);
+    IF found & regOpt THEN
+      IF foundReg # r1 THEN
+        PutRR("mov", r1, foundReg); SetRcI(r1, r2, offset, MEM);
+        INC(regCopyCount);
+        IF regOptListing THEN
+          Texts.WriteString(CodeW, " ==> Reg Optimization <==");
+        END
+      ELSIF regOptListing THEN
+        Texts.WriteLn(CodeW);
+        WHILE CodeW.linePos < 32 DO Texts.Write(CodeW, " ") END;
+        Texts.WriteString(CodeW, "# ==> No Instruction optimization for a");
+        Texts.WriteInt(CodeW, r1, 0);
+        Texts.WriteString(CodeW, " := a");
+        Texts.WriteInt(CodeW, r2, 0);
+        Texts.WriteString(CodeW, " + ");
+        Texts.WriteInt(CodeW, offset, 0);
+      END
     ELSE
-      PutRRI(op, r1, r2, offset);
-    END;
-    IF r1 # r2 THEN SetRcI(r1, r2, offset, MEM) ELSE ClearRc(r1) END;
-    IF found THEN 
-      Texts.WriteString(CodeW, " ==> POTENTIAL SAVE HERE <==");
-    END;
-    
+      IF (offset > max) OR (offset < 0) THEN
+        IF (r1 = RH) OR (r2 = RH) THEN temp := RH+1 ELSE temp := RH END;
+        IF (offset < 0) OR (offset > 32512) THEN
+          PutRI("movi", temp, offset);   SetRcI(temp, -1, offset, IMM);
+          PutRRR("add", temp, temp, r2); ClearRc(temp);
+          PutRRI(op, r1, temp, 0);       
+        ELSE
+          PutRRI("addmi", temp, r2, (offset DIV 256) * 256); ClearRc(temp);
+          PutRRI(op, r1, temp, offset MOD 256);
+        END;
+        
+      ELSE
+        PutRRI(op, r1, r2, offset);
+      END;
+      IF r1 # r2 THEN SetRcI(r1, r2, offset, MEM) ELSE ClearRc(r1) END;
+      IF found & regOptListing THEN 
+        Texts.WriteString(CodeW, " ==> POTENTIAL SAVE HERE <== ");
+        IF foundReg = r1 THEN
+          Texts.WriteString(CodeW, "(No instruction)");
+        ELSE
+          Texts.WriteString(CodeW, "(Reg Copy From a");
+          Texts.WriteInt(CodeW, foundReg, 0);
+          Texts.WriteString(CodeW, ")");
+        END
+      END
+    END
   END PutMoveRRI;
 
   PROCEDURE load(VAR x: Item);
@@ -1603,7 +1654,7 @@ MODULE ORG;
         lbl := NextLabel();
         PutBranchR("beqz", x.r, lbl);  (* NIL belongs to every pointer type *)
         PutRRI("addi", x.r, x.r, -8); ClearRc(x.r);
-        PutRRI("l32i", x.r, x.r,  0);
+        PutRRI("l32i", x.r, x.r,  0); ClearRc(x.r);
         PutMoveRRI("l32i", 1020, x.r, x.r, T.nofpar * 4);
         (* tag of T *)
         loadTypTagAdr(T);
@@ -1734,7 +1785,7 @@ MODULE ORG;
       ELSIF y.mode = ORB.Const THEN load(x);
         IF y.a # 0 THEN 
           IF (y.a >= -128) & (y.a < 128) THEN
-            IF y.a # 0 THEN PutRRI("addi", x.r, x.r, y.a) END
+            IF y.a # 0 THEN PutRRI("addi", x.r, x.r, y.a); ClearRc(x.r) END
           ELSE
             PutRI("movi", RH, y.a);      SetRcI(RH, -1, y.a, IMM);
             PutRRR("add", x.r, x.r, RH); ClearRc(x.r)
@@ -2562,12 +2613,12 @@ MODULE ORG;
       eStr(" (const)");
       IF x.r >= 0 THEN (* local proc *)
         eStr(" local:"); eStr(x.name);
-        PutCallLocal(callType, x.name)
+        PutCallLocal(callType, x.name); ClearRcFrom(callType);
       ELSE (* imported *)
         eStr(" imported: "); eStr(x.name); 
         ModuleInfo(x.r, moduleId, moduleKey);  
         eStr(" from:"); eStr(moduleId); eStr(" Key:"); eHex(moduleKey);
-        PutCALLExternal(callType, x.name, moduleId, moduleKey)
+        PutCALLExternal(callType, x.name, moduleId, moduleKey); ClearRcFrom(callType);
       END
     ELSE
       IF x.mode <= ORB.Par THEN (* Variable or Parameter *)
@@ -2588,7 +2639,7 @@ MODULE ORG;
         Trap(EQ, TrCall); (* Trap if zero *)
         incR 
       END;
-      PutCallR(callType, x.r);
+      PutCallR(callType, x.r); ClearRcFrom(callType);
     END ;
     IF x.type.base.form = ORB.NoTyp THEN (*procedure*) 
       RH := FirstRH; UsedRegs := {}
@@ -3468,9 +3519,11 @@ PROCEDURE Abs*(VAR x: Item);
     Texts.WriteLn(AsW);
     Files.Register(AsF);
     
-    Out.Ln; Out.String("Hit Count: "); Out.Int(hitCount, 0);
-    Out.Ln; Out.String("Reg Copy Count: "); Out.Int(regCopyCount, 0);
-    Out.Ln;
+    IF regOptListing THEN
+      Out.Ln; Out.String("Hit Count: "); Out.Int(hitCount, 0);
+      Out.Ln; Out.String("Reg Copy Count: "); Out.Int(regCopyCount, 0);
+      Out.Ln;
+    END
   END Close;
 
   PROCEDURE Open*(modid: ORS.Ident);
@@ -3482,15 +3535,16 @@ PROCEDURE Abs*(VAR x: Item);
   BEGIN varsize := dc
   END SetDataSize;
 
-  PROCEDURE Init*(generateCheckCode, sourceToAssembly: BOOLEAN);
+  PROCEDURE Init*(generateCheckCode, sourceToAssembly, regOptimization, regOptList: BOOLEAN);
   BEGIN
-    check   := generateCheckCode;
-
-    tdx     := 0; 
-    strx    := 0;
-    varsize := 0; 
-    RH      := FirstRH; 
-    theNextLabel := 1;
+    check         := generateCheckCode;
+    regOpt        := regOptimization;
+    regOptListing := regOptList;
+    tdx           := 0; 
+    strx          := 0;
+    varsize       := 0; 
+    RH            := FirstRH; 
+    theNextLabel  := 1;
 
     CodeF := Files.New("");
     Texts.OpenWriterToFile(CodeW, CodeF);
@@ -3539,4 +3593,6 @@ BEGIN
   BrNoParam  := {4, 12};
 
   UsedRegs := {};
+  regOpt        := FALSE;
+  regOptListing := FALSE;
 END ORG.

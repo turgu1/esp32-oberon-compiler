@@ -9,13 +9,13 @@ Here is the list of ongoing tasks to complete the effort of building the ESP32 O
 - [x] Add SQRT function
 - [x] Add WSR/RSR SYSTEM functions
 - [ ] Revisit ORG.ChrToStr/ORG.StrToChr functions
-- [ ] Implement Const Char as a string parameter
+- [x] Implement Const Char as a string parameter
 - [x] Revisit Types descriptor
 - [x] Implement Pointers management structure
 - [ ] Revisit Interrupt procedure definition
-- [ ] Cleanup internal compiler debugging support
+- [x] Cleanup internal compiler debugging support
 - [x] Revisit Logging module. No longer required.
-- [ ] ORG.{load,store} procedures optimization
+- [x] ORG.{load,store} procedures optimization
 - [x] Revisit Procedure calls (function parameters) optimization
 - [ ] Implement other Extended Oberon features
  
@@ -40,6 +40,12 @@ Here is the list of ongoing tasks to complete the effort of building the ESP32 O
 - [x] Library folder
 - [ ] Interrupts management
 - [ ] ESP32 hardware interfaces
+  + [ ] Watchdog
+  + [ ] PWM
+  + [ ] I/O Pins
+  + [ ] WiFi
+  + [ ] Flash Memory
+  + *and many more...*
 
 # Potential future activities
 

@@ -120,21 +120,17 @@ _init_end:
 /* ---- _stop_watchdog ---- */
 
     # Registers to disable both Watchdog
-    .equ RTC_CNTL_WDTCONFIG0_REG, 0x3FF4808C
-    .equ TIMG0_T0_WDTCONFIG0_REG, 0x3FF5F048
+    .equ RTC_CNTL_WDTCONFIG0_REG,  0x3FF4808C
+    .equ TIMG0_T0_WDTCONFIG0_REG,  0x3FF5F048
 
     .align 4
 
 _stop_watchdog:
     entry a1, 16
+    movi a3, 0
     movi a2, RTC_CNTL_WDTCONFIG0_REG
-    l32i a3, a2, 0
-    movi a4, 0x7FFFFFFF
-    and  a3, a3, a4
     s32i a3, a2, 0
     movi a2, TIMG0_T0_WDTCONFIG0_REG
-    l32i a3, a2, 0
-    and  a3, a3, a4
     s32i a3, a2, 0
     retw
 

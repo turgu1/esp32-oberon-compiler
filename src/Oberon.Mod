@@ -18,17 +18,21 @@ VAR
   filePresent        : BOOLEAN;
   verbose            : BOOLEAN;
   sourceToAssembly   : BOOLEAN;
+  regOptimization    : BOOLEAN;
+  regOptList         : BOOLEAN;
 
 PROCEDURE Usage;
 BEGIN
   Out.Ln;
-  Out.String("Usage: Oberon [-c][-l][-o folder][-p path][-s][-v] filename"); Out.Ln;
-  Out.String("-c : Generate Verification Code"                        ); Out.Ln;
-  Out.String("-l : Add source code to the assembler output"           ); Out.Ln;
-  Out.String("-o : Output folder of generated code"                   ); Out.Ln;
-  Out.String("-p : Folder Path for imported modules (e.g. f1:f2:f3)"  ); Out.Ln;
-  Out.String("-s : Update Symbols File"                               ); Out.Ln;
-  Out.String("-v : Show compiler version and output information"      ); Out.Ln;
+  Out.String("Usage: Oberon [-c][-l][-o folder][-p path][-s][-v][-x][-z] filename"); Out.Ln;
+  Out.String("-c : Generate Verification Code"                            ); Out.Ln;
+  Out.String("-l : Add source code to the assembler output"               ); Out.Ln;
+  Out.String("-o : Output folder of generated code"                       ); Out.Ln;
+  Out.String("-p : Folder Path for imported modules (e.g. f1:f2:f3)"      ); Out.Ln;
+  Out.String("-s : Update Symbols File"                                   ); Out.Ln;
+  Out.String("-v : Show compiler version and output information"          ); Out.Ln;
+  Out.String("-x : Register use optimization"                             ); Out.Ln;
+  Out.String("-z : Add Register optimization info to the assembler output"); Out.Ln;
 END Usage;
 
 BEGIN
@@ -102,6 +106,18 @@ BEGIN
             Out.String("Generating Check Code");
             Out.Ln;
           END
+        ELSIF (arg = "-x") THEN
+          regOptimization := TRUE;
+          IF DEBUG THEN
+            Out.String("Register Optimization");
+            Out.Ln;
+          END
+        ELSIF (arg = "-z") THEN
+          regOptList := TRUE;
+          IF DEBUG THEN
+            Out.String("Reg Opt output to assembler output");
+            Out.Ln;
+          END
         ELSIF arg[0] # "-" THEN
           filename    := arg;
           filePresent := TRUE;
@@ -124,6 +140,8 @@ BEGIN
           filename, 
           overrideSymbolFile,
           generateCheckCode, 
+          regOptimization,
+          regOptList,
           verbose,
           sourceToAssembly,
           outputFolder,
