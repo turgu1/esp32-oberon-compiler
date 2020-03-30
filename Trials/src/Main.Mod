@@ -1,5 +1,5 @@
 MODULE Main;
-  IMPORT SYSTEM, Kernel, Out, In, Watchdog;
+  IMPORT SYSTEM, Kernel, Out, In, Watchdog, Math;
   TYPE
     Rec1 = RECORD x: INTEGER END;
     Rec2 = RECORD y: INTEGER END;
@@ -102,7 +102,11 @@ BEGIN
         5: proc := NIL; Check5 |
         6: Check6 |
         7: Check7 |
-        8: Check8 
+        8: Check8 |
+        9: Out.Real(Math.arcsin(0.3), 15); 
+           Out.Real(Math.arccos(0.3), 15);
+           Out.Real(Math.tan(0.3), 15);
+           Out.Real(Math.arctan(0.3), 15)
       END
     ELSE
       Out.String("[TimeOut]")

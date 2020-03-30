@@ -201,5 +201,10 @@ MODULE Math;
   PROCEDURE ln*(x: REAL): REAL;
   PROCEDURE sin*(x: REAL): REAL;
   PROCEDURE cos*(x: REAL): REAL;
+  PROCEDURE tan*(x: REAL): REAL;    (* -pi/2 <= x <= pi/2 *)
+  PROCEDURE arcsin*(x: REAL): REAL; (*  -1.0 <= x <=  1.0 *)
+  PROCEDURE arccos*(x: REAL): REAL; (*  -1.0 <= x <=  1.0 *)
+  PROCEDURE arctan2*(x, y: REAL): REAL;
+  PROCEDURE arctan*(x: REAL): REAL;
 END Math.
 ```
