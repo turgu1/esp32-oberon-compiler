@@ -1118,7 +1118,7 @@ MODULE ORG;
   END GetTypesDescrSB;
 
   (* 
-    Move (load or store) location r2+offset. The ESP32 uses l32i l8ui s32i s8ui
+    Move (load or store) location r2+offset. The ESP32 uses l32i l16ui l8ui s32i s16i s8ui
     with an offset that is limited to 255 for 8bits and 1020 for 32 bits moves. 
     If the offset parameter is too large, the address must be computed before 
     moving the data.
@@ -1180,13 +1180,15 @@ MODULE ORG;
 
   PROCEDURE load(VAR x: Item);
     VAR 
-      op: ARRAY 5 OF CHAR;
+      op: ARRAY 6 OF CHAR;
       max, moduleKey, lbl: INTEGER;
       moduleId: ORS.Ident;
   BEGIN
     e("load "); 
     IF x.type.size = 1 THEN 
       op := "l8ui"; max := 255 
+    ELSIF x.type.size = 2 THEN 
+      op := "l16ui"; max := 510
     ELSE 
       op := "l32i"; max := 1020 
     END;
@@ -1483,6 +1485,8 @@ MODULE ORG;
       END;
       IF size = 4 THEN 
         PutRRI("slli", y.r, y.r, 2); ClearRc(y.r)
+      ELSIF size = 2 THEN 
+        PutRRI("slli", y.r, y.r, 1); ClearRc(y.r)
       ELSIF size > 1 THEN 
         CheckFreeRegs(1);
         PutRI("movi", RH, size); SetRcI(RH, -1, size, IMM);
@@ -1582,8 +1586,8 @@ MODULE ORG;
       END
     ELSIF typ.form = ORB.Array THEN
       s := typ.base.size;
-      FOR i := 0 TO typ.len-1 DO 
-        FindPtrFlds(typ.base, i*s + off, dcw) 
+      FOR i := 0 TO typ.len - 1 DO 
+        FindPtrFlds(typ.base, i * s + off, dcw) 
       END
     END
   END FindPtrFlds;
@@ -1924,6 +1928,9 @@ MODULE ORG;
       IF targetType.size = 1 THEN
         PutRI("movi", RH, 255);      SetRcI(RH, -1, 255, IMM);
         PutRRR("and", x.r, x.r, RH); ClearRc(x.r);
+      ELSIF targetType.size = 2 THEN
+        PutRI("movi", RH, 65535);    SetRcI(RH, -1, 65535, IMM);
+        PutRRR("and", x.r, x.r, RH); ClearRc(x.r);
       END
     END
   END AdjustVal;
@@ -2235,7 +2242,13 @@ MODULE ORG;
   BEGIN
     load(y);
     e("Store ");
-    IF x.type.size = 1 THEN op := "s8i"; max := 255 ELSE op := "s32i"; max := 1020 END ;
+    IF x.type.size = 1 THEN 
+      op := "s8i"; max := 255 
+    ELSIF x.type.size = 2 THEN 
+      op := "s16i"; max := 510
+    ELSE 
+      op := "s32i"; max := 1020 
+    END;
     IF x.mode = ORB.Var THEN
       eStr("(var) "); eStr(x.name);
       IF x.r > 0 THEN (* local *)
@@ -2286,6 +2299,9 @@ MODULE ORG;
           IF size = 1 THEN 
             PutRRI("addi", RH, RH, 3); ClearRc(RH);
             PutRRI("srai", RH, RH, 2); ClearRc(RH);
+          ELSIF size = 2 THEN 
+            PutRRI("addi", RH, RH, 2); ClearRc(RH);
+            PutRRI("srai", RH, RH, 1); ClearRc(RH);
           ELSIF size # 4 THEN
             PutRI("movi", RH + 1, size DIV 4); SetRcI(RH + 1, -1, size DIV 4, IMM);
             PutRRR("mull", RH, RH, RH+1);      ClearRc(RH);
@@ -2304,9 +2320,9 @@ MODULE ORG;
       END;
       lbl := NextLabel();
       PutBranchR("loop", RH, lbl);    ClearRc(RH);
-        PutRRI("l32i", RH+1, y.r, 0); ClearRc(RH + 1);
+        PutRRI("l32i", RH + 1, y.r, 0); ClearRc(RH + 1);
         PutRRI("addi", y.r, y.r, 4);  ClearRc(y.r);
-        PutRRI("s32i", RH+1, x.r, 0); ClearRc(RH + 1);
+        PutRRI("s32i", RH + 1, x.r, 0); ClearRc(RH + 1);
         PutRRI("addi", x.r, x.r, 4);  ClearRc(x.r);
       PutLabel(lbl)
     END ;
@@ -2332,9 +2348,9 @@ MODULE ORG;
     PutRI("movi", RH, (y.b + 3) DIV 4); SetRcI(RH, -1, (y.b + 3) DIV 4, IMM);
     lbl := NextLabel();
     PutBranchR("loop", RH, lbl);     ClearRc(RH);
-      PutRRI("l32i", RH+1,  y.r, 0); ClearRc(RH + 1);
+      PutRRI("l32i", RH + 1,  y.r, 0); ClearRc(RH + 1);
       PutRRI("addi", y.r, y.r, 4);   ClearRc(y.r);
-      PutRRI("s32i", RH+1,  x.r, 0); ClearRc(RH + 1);
+      PutRRI("s32i", RH + 1,  x.r, 0); ClearRc(RH + 1);
       PutRRI("addi", x.r, x.r, 4);   ClearRc(x.r);
     PutLabel(lbl);
     RH := FirstRH; UsedRegs := {}
@@ -2714,6 +2730,9 @@ MODULE ORG;
       IF type.size = 1 THEN (* byte / char *)
         PutRI("movi", RH, 255);      SetRcI(RH, -1, 255, IMM);
         PutRRR("and", x.r, x.r, RH); ClearRc(x.r)
+      ELSIF type.size = 2 THEN (* shortint *)
+        PutRI("movi", RH, 65535);    SetRcI(RH, -1, 65535, IMM);
+        PutRRR("and", x.r, x.r, RH); ClearRc(x.r)
       END
     END;
     PutSingle("retw");
@@ -2740,13 +2759,16 @@ MODULE ORG;
 
   PROCEDURE Increment*(upordown: INTEGER; VAR x, y: Item);
     VAR
-      loadOp, storeOp: ARRAY 5 OF CHAR; 
+      loadOp, storeOp: ARRAY 6 OF CHAR; 
       max, zr: INTEGER;
   BEGIN (*frame = 0*)
     e("Increment" );
     IF x.type = ORB.byteType THEN
       eStr(" (byte)"); 
       loadOp := "l8ui"; storeOp := "s8i"; max :=  255
+    ELSIF x.type = ORB.shortType THEN
+      eStr(" (short)"); 
+      loadOp := "l16ui"; storeOp := "s16i"; max :=  510
     ELSE
       eStr(" (int)");
       loadOp := "l32i"; storeOp := "s32i"; max := 1020

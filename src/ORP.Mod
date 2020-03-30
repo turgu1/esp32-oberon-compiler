@@ -121,7 +121,7 @@ MODULE ORP; (*N. Wirth 1.7.97 / 8.2.2020  Oberon compiler for ESP32 in Oberon-07
 
  PROCEDURE CheckCaseExpr(VAR x: ORG.Item);
   BEGIN
-    IF ~(x.type.form IN {ORB.Int, ORB.Byte, ORB.Char}) THEN ORS.Mark("invalid type"); x.type := ORB.intType END
+    IF ~(x.type.form IN {ORB.Int, ORB.Short, ORB.Byte, ORB.Char}) THEN ORS.Mark("invalid type"); x.type := ORB.intType END
   END CheckCaseExpr;
 (*
   PROCEDURE CheckReceiver(proc: ORB.Object; deref: BOOLEAN);
@@ -279,6 +279,11 @@ MODULE ORP; (*N. Wirth 1.7.97 / 8.2.2020  Oberon compiler for ESP32 in Oberon-07
             (par.type.len >= 0) & 
             (par.type.size = x.type.size) THEN
         ORG.VarParam(x, par.type)
+      ELSIF (par.type.form = ORB.Array) & 
+            (par.type.base = ORB.shortType) & 
+            (par.type.len >= 0) & 
+            (par.type.size = x.type.size) THEN
+        ORG.VarParam(x, par.type)
       ELSE ORS.Mark("incompatible parameters");
         Out.Ln; Out.String("  x.type.form: "); Out.Int(x.type.form, 0);       
         Out.Ln; Out.String("  par.type.form: ");      Out.Int(par.type.form, 0);     
@@ -357,7 +362,7 @@ MODULE ORP; (*N. Wirth 1.7.97 / 8.2.2020  Oberon compiler for ESP32 in Oberon-07
         ORG.BitOp(fct - 22, x, y);
       ELSIF fct IN {25, 26} THEN (* MIN, MAX *) 
         IF ((x.type.form = ORB.Real) & (y.type.form = ORB.Real)) OR
-           ((x.type.form IN {ORB.Int, ORB.Byte}) & (y.type.form IN {ORB.Int, ORB.Byte})) THEN
+           ((x.type.form IN {ORB.Int, ORB.Short, ORB.Byte}) & (y.type.form IN {ORB.Int, ORB.Short, ORB.Byte})) THEN
           ORG.MinMax(fct - 25, x, y);
           restyp := x.type 
         ELSE ORS.Mark("bad type") END
@@ -879,7 +884,13 @@ MODULE ORP; (*N. Wirth 1.7.97 / 8.2.2020  Oberon compiler for ESP32 in Oberon-07
       END ;
       Check(ORS.colon, "colon expected"); Type(tp);
       IF (tp.form = ORB.Array) & (tp.len < 0) THEN ORS.Mark("dyn array not allowed") END ;
-      IF tp.size > 1 THEN offset := (offset+3) DIV 4 * 4 END ;
+      IF tp.size > 1 THEN
+        IF tp.size = 2 THEN
+          offset := (offset + 1) DIV 2 * 2
+        ELSE
+          offset := (offset + 3) DIV 4 * 4 
+        END
+      END;
       offset := offset + n * tp.size; off := offset; obj0 := obj;
       WHILE obj0 # bot DO obj0.type := tp; obj0.lev := 0; off := off - tp.size; obj0.val := off; obj0 := obj0.next END ;
       bot := obj;

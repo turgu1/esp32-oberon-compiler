@@ -65,9 +65,13 @@ END P;
 
 (Not working. Still, a work in progress)
 
-## BYTE vs INTEGER
+## SHORTINT
 
-The ESP32 Compiler allow for BYTE value to be the return answer to an INTEGER value function:
+As a new numerical type, SHORTINT allow for unsigned 16 bits values (0..65535). It has been added to get a complete range of one, two and four bytes variables. SHORTINT are aligned to 2-bytes boundaries in records.
+
+## BYTE vs SHORTINT vs INTEGER
+
+The ESP32 Compiler allow for BYTE and SHORTINT values to be the return answer to an INTEGER value function:
 
 ```Modula-2
 MODULE Example;

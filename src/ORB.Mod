@@ -18,11 +18,11 @@ MODULE ORB;   (*NW 25.6.2014  / 1.3.2019  in Oberon-07*)
       SFunc* = 7; Mod*   = 8;
 
     (* form values *)
-      Byte*    =  1; Bool*   =  2; Char*   = 3; 
-      Int*     =  4; Real*   =  5; Set*    = 6;
-      Pointer* =  7; NilTyp* =  8; NoTyp*  = 9; 
-      Proc*    = 10; String* = 11; Array*  = 12; 
-      Record*  = 13;
+      Byte*    =  1; Bool*    =  2; Char*   =  3; 
+      Short*   =  4; Int*     =  5; Real*   =  6; 
+      Set*     =  7; Pointer* =  8; NilTyp* =  9; 
+      NoTyp*   = 10; Proc*    = 11; String* = 12; 
+      Array*   = 13; Record*  = 14;
       
   TYPE 
     Object* = POINTER TO ObjDesc;
@@ -82,7 +82,8 @@ MODULE ORB;   (*NW 25.6.2014  / 1.3.2019  in Oberon-07*)
     system*: Object;
     byteType*, 
     boolType*, 
-    charType*: Type;
+    charType*,
+    shortType*,
     intType*, 
     realType*, 
     setType*, 
@@ -219,7 +220,7 @@ MODULE ORB;   (*NW 25.6.2014  / 1.3.2019  in Oberon-07*)
       t: Type;
       name, modname: ORS.Ident;
   BEGIN Read(R, ref);
-    IF ref < 0 THEN T := typtab[-ref]  (*already read*)
+    IF ref < 0 THEN T := typtab[-ref]  (* already read *)
     ELSE NEW(t); T := t; typtab[ref] := t; t.mno := thismod.lev;
       Read(R, form); t.form := form;
       IF form = Pointer THEN InType(R, thismod, t.base); t.size := 4
@@ -228,11 +229,11 @@ MODULE ORB;   (*NW 25.6.2014  / 1.3.2019  in Oberon-07*)
       ELSIF form = Record THEN
         InType(R, thismod, t.base);
         IF t.base.form = NoTyp THEN t.base := NIL; obj := NIL ELSE obj := t.base.dsc END ;
-        Files.ReadNum(R, t.len); (*TD adr/exno*)
-        Files.ReadNum(R, t.nofpar);  (*ext level*)
+        Files.ReadNum(R, t.len);     (* TD adr/exno *)
+        Files.ReadNum(R, t.nofpar);  (* ext level   *)
         Files.ReadNum(R, t.size);
         Read(R, class); last := NIL;
-        WHILE class # 0 DO  (*fields*)
+        WHILE class # 0 DO  (* fields *)
           NEW(fld); fld.class := class; Files.ReadString(R, fld.name);
           IF last = NIL THEN t.dsc := fld ELSE last.next := fld END ;
           last := fld;
@@ -243,20 +244,20 @@ MODULE ORB;   (*NW 25.6.2014  / 1.3.2019  in Oberon-07*)
       ELSIF form = Proc THEN
         InType(R, thismod, t.base);
         obj := NIL; np := 0; Read(R, class);
-        WHILE class # 0 DO  (*parameters*)
+        WHILE class # 0 DO  (* parameters *)
           NEW(par); par.class := class; Read(R, readonly); par.rdo := readonly = 1; 
           InType(R, thismod, par.type); par.next := obj; obj := par; INC(np); Read(R, class)
         END ;
         t.dsc := obj; t.nofpar := np; t.size := 4
       END ;
       Files.ReadString(R, modname);
-      IF modname[0] #  0X THEN  (*re-import*)
+      IF modname[0] #  0X THEN  (* re-import *)
         Files.ReadInt(R, key); Files.ReadString(R, name);
         mod := ThisModule(modname, modname, FALSE, key);
-        obj := mod.dsc;  (*search type*)
+        obj := mod.dsc;  (* search type *)
         WHILE (obj # NIL) & (obj.name # name) DO obj := obj.next END ;
-        IF obj # NIL THEN T := obj.type   (*type object found in object list of mod*)
-        ELSE (*insert new type object in object list of mod*)
+        IF obj # NIL THEN T := obj.type   (* type object found in object list of mod *)
+        ELSE (* insert new type object in object list of mod *)
           NEW(obj); obj.name := name; obj.class := Typ; obj.next := mod.dsc; mod.dsc := obj; obj.type := t;
           t.mno := mod.lev; t.typobj := obj; T := t
         END ;
@@ -289,7 +290,7 @@ MODULE ORB;   (*NW 25.6.2014  / 1.3.2019  in Oberon-07*)
           NEW(obj); obj.class := class; Files.ReadString(R, obj.name);
           InType(R, thismod, obj.type); obj.lev := -thismod.lev;
           IF class = Typ THEN
-            t := obj.type; t.typobj := obj; Read(R, k);  (*fixup bases of previously declared pointer types*)
+            t := obj.type; t.typobj := obj; Read(R, k);  (* fixup bases of previously declared pointer types *)
             WHILE k # 0 DO typtab[k].base := t; Read(R, k) END
           ELSE
             IF class = Const THEN
@@ -439,15 +440,16 @@ MODULE ORB;   (*NW 25.6.2014  / 1.3.2019  in Oberon-07*)
   END enter;
   
 BEGIN
-  byteType := type(Byte,   Int,    1);
-  boolType := type(Bool,   Bool,   1);
-  charType := type(Char,   Char,   1);
-  intType  := type(Int,    Int,    4);
-  realType := type(Real,   Real,   4);
-  setType  := type(Set,    Set,    4);
-  nilType  := type(NilTyp, NilTyp, 4);
-  noType   := type(NoTyp,  NoTyp,  4);
-  strType  := type(String, String, 8);
+  byteType  := type(Byte,   Int,    1);
+  boolType  := type(Bool,   Bool,   1);
+  charType  := type(Char,   Char,   1);
+  shortType := type(Short,  Int,    2);
+  intType   := type(Int,    Int,    4);
+  realType  := type(Real,   Real,   4);
+  setType   := type(Set,    Set,    4);
+  nilType   := type(NilTyp, NilTyp, 4);
+  noType    := type(NoTyp,  NoTyp,  4);
+  strType   := type(String, String, 8);
     
   (*initialize universe with data types and in-line procedures;
     LONGINT is synonym to INTEGER, LONGREAL to REAL.
@@ -491,6 +493,7 @@ BEGIN
   enter("CHAR",     Typ,   charType,   0);
   enter("LONGREAL", Typ,   realType,   0);
   enter("REAL",     Typ,   realType,   0);
+  enter("SHORTINT", Typ,   shortType,  0);
   enter("INTEGER",  Typ,   intType,    0);
   enter("LONGINT",  Typ,   intType,    0);
 

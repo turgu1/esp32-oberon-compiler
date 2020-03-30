@@ -53,6 +53,7 @@ SRC =  \
 	Pointer.Mod \
 	BitFunc.Mod \
 	ArrayAssignments.Mod \
+	ShortInt.Mod \
 	Byte.Mod \
 	DefFunc.Mod \
 	SimpleReal.Mod \
@@ -76,6 +77,7 @@ $(BLDDIR)/Assignments.S $(SRCDIR)/Assignments.smb: $(SRCDIR)/Assignments.Mod $(S
 $(BLDDIR)/SimpleMath.S $(SRCDIR)/SimpleMath.smb: $(SRCDIR)/SimpleMath.Mod $(SRCDIR)/Test.smb
 $(BLDDIR)/SimpleReal.S $(SRCDIR)/SimpleReal.smb: $(SRCDIR)/SimpleReal.Mod $(SRCDIR)/Test.smb
 $(BLDDIR)/DefFunc.S $(SRCDIR)/DefFunc.smb: $(SRCDIR)/DefFunc.Mod $(SRCDIR)/Test.smb
+$(BLDDIR)/ShortInt.S $(SRCDIR)/ShortInt.smb: $(SRCDIR)/ShortInt.Mod $(SRCDIR)/Test.smb
 $(BLDDIR)/Byte.S $(SRCDIR)/Byte.smb: $(SRCDIR)/Byte.Mod $(SRCDIR)/Test.smb
 $(BLDDIR)/ArrayAssignments.S $(SRCDIR)/ArrayAssignments.smb: $(SRCDIR)/ArrayAssignments.Mod $(SRCDIR)/Test.smb
 $(BLDDIR)/BitFunc.S $(SRCDIR)/BitFunc.smb: $(SRCDIR)/BitFunc.Mod $(SRCDIR)/Test.smb
