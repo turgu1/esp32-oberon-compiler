@@ -270,8 +270,8 @@ MODULE Math;   (* Standard functions;  NW 12.10.2013 *)
     	ASSERT(x # 0.0);
       result := PIOVER2
     ELSE
-      tmp := x; UNPK(tmp, expX);
-      tmp := y; UNPK(tmp, expY);
+      tmp := ABS(x); UNPK(tmp, expX);
+      tmp := ABS(y); UNPK(tmp, expY);
       IF (expX - expY) >= (DMAXEXP - 3) THEN		(* then overflow on V/U	*)
         result := PIOVER2
       ELSE
