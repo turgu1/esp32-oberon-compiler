@@ -69,23 +69,6 @@ END P;
 
 As a new numerical type, SHORTINT allow for unsigned 16 bits values (0..65535). It has been added to get a complete range of one, two and four bytes variables. SHORTINT are aligned to 2-bytes boundaries in records.
 
-## BYTE vs SHORTINT vs INTEGER
-
-The ESP32 Compiler allow for BYTE and SHORTINT values to be the return answer to an INTEGER value function:
-
-```Modula-2
-MODULE Example;
-
-VAR b : BYTE;
-
-PROCEDURE F() : INTEGER;
-BEGIN
-  RETURN b
-END F;
-
-END Example.
-```
-
 ## CHAR vs ARRAY OF CHAR
 
 The ESP32 Compiler allow char constants to be assignement compatible with strings. The example below shows 1) assignment of a CHAR constant to an ARRAY OF CHAR variable, parameter inside a procedure and when calling a procedure:
@@ -169,9 +152,3 @@ END Example;
 ```
 
 This introduce a new ASM keyword. Everyting up to a line that start with the keyword END will be added to the generated assembly language stream. No interpretation is done by the compiler. 
-
-## Compiler debugging pragmas
-
-### $D+ (Debug On) and $D- (Debug OFF)
-
-The pragmas `$D+` and `$D-`  can be put anywhere in the application source code inside a comment. This will allow to get a trace of the compiler code generator module (ORG) procedure calls during the compilation phase. This trace is to help resolve issues with the compiler.

@@ -208,3 +208,13 @@ MODULE Math;
   PROCEDURE arctan*(x: REAL): REAL;
 END Math.
 ```
+
+## Compiler debugging tools
+
+### $D+ (Debug On) and $D- (Debug OFF)
+
+The pragmas `$D+` and `$D-` can be put anywhere in the application source code inside comments. This will trigger the compiler to output code generator module (ORG) procedure calls during the compilation phase to the console. This trace is to help resolve issues with the compiler.
+
+### Source code as comments in assembler output
+
+The compiler option **-x** will trigger the compiler to emit source code lines as comments in the generated assembly language ouput. This is helpfull to compare generated assembly language instructions with the Oberon program statements.

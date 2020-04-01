@@ -2,6 +2,7 @@
 
 These are the document references and source code location that have helped the author to conduct this effort.
 
+- [The Programming Language Oberon-07 Report](https://inf.ethz.ch/personal/wirth/Oberon/Oberon07.Report.pdf)
 - [Prof. Niklaus Wirth Site](https://inf.ethz.ch/personal/wirth/)
 - [Project Oberon](http://www.projectoberon.com)
 - [The Extended Oberon operating system and the Revised Oberon-2 programming language by Mr. Andreas Pirklbauer](https://github.com/andreaspirklbauer/Oberon-extended)
