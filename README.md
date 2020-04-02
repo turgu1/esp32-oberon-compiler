@@ -28,14 +28,14 @@ In a Nutshell, the steps I'm taking to get a working compiler are the following:
 5. Modify ORP.Compile* to be calleable from the Oberon module
 6. Build an understanding of the code production compiler stage (from the documentation)
 7. Build an understanding of the target architecture (ESP32 and ESP-IDF)
-8. Generate machine code by hand for each pattern found in the Chapter 12 of [https://inf.ethz.ch/personal/wirth/ProjectOberon/PO.Applications.pdf], taking notes on the target formalisms required for code generation.
+8. Generate machine code by hand for each pattern found in the Chapter 12 of [PO.Applications](https://inf.ethz.ch/personal/wirth/ProjectOberon/PO.Applications.pdf), taking notes on the target formalisms required for code generation.
 9. Refine target architecture
 10. Cleanup ORG in preparation of machine code translation
 11. Build the translation
 12. Creates main support code (program statup, Module Out, garbage collector, serial port output)
 13. Test the results. Build a test suite and make it run
 14. Add language functionalities required in support of the ESP32 architecture
-15. Create other Oakridge compliant Modules 
+15. Create other Oakridge compliant Modules
 16. Build a PlatformIO Custom Development Platform
 17. Develop modules for some ESP32 subsystems
 18. Enjoy
@@ -85,17 +85,17 @@ Some potential bugs corrected:
 - Calls to T.notify without verifying if it is NIL.
 - Read Procedure modified to better manage eot.
 
-### Other changes:
+### Other changes
 
 - The .smb file output has been modified to get exported variable offsets instead of an export sequence number. The code generator is relying on the ELF linker to resolve the location of data sections. The imported variables are accessed through their offset.
 
 - The ESP32 doesn't supply a floating-point division instruction. A function called by the generated code is added.
 
-- The Module Static Base address (SB) is loaded in register a2 
+- The Module Static Base address (SB) is loaded in register a2.
 
 - Call to functions in parameters preparation, like `P(F(3.0))` is not very efficient in term of stack and register usage. It is better to use temporary variables and prepare parameters before the main call (will be revisited once the compiler is working properly). For example:
 
-```
+```Modula-2
      i := F(3.0); P(i)
 ```
 
@@ -109,7 +109,7 @@ Some potential bugs corrected:
 
 The OBNC Oberon-07 version 0.16.1 is used to build this compiler. The author is using it on both Linux and MacOs platforms without any major issue (Except for the SYSTEM.VAL() that needed to be replaced). It must be built using the following commands and option (after having changed current folder to OBNC):
 
-```
+```sh
 $ ./build --c-real-type=float
 $ ./install
 ```
@@ -121,7 +121,7 @@ The OBNC Oberon-07 compiler is required with the extension libraries to parse co
 ### ESP-IDF
 
 The ESP-IDF development framework must be present and setup in the user environment. Please follow the [receipe](https://docs.espressif.com/projects/esp-idf/en/latest/get-started/index.html#setting-up-development-environment), up to and including step 4.
-    
+
 ### ESP32 Oberon Compiler and run-time
 
 For now, there is a simple Makefile in the main folder that will automate the creation of the Oberon compiler executable. To build, simply use the command `make` to compile it. The result will be the executable file named `Oberon` in the main folder.

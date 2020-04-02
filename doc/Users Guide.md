@@ -19,7 +19,7 @@ Where the parameters are:
   + Array copy overflow
   + Illegal procedure call
 
-- **-l** : [lowercase L] Source code will be output as comments in assembly language generated code.
+- **-l** : (lowercase “L”) Source code will be output as comments in assembly language generated code.
 - **-o folder** : Output folder for the generated assembly language code. If not present, the module source code folder is being used.
 - **-p path** : Search path for imported modules, as a list of folder names separated with character “:”. An imported module is first seached in the folder of the module being compiled, then in sequence in the folders part of the path.
 - **-s** : Override Symbol file. The symbol file will be generated in the same folder as the module source code.
@@ -213,8 +213,8 @@ END Math.
 
 ### $D+ (Debug On) and $D- (Debug OFF)
 
-The pragmas `$D+` and `$D-` can be put anywhere in the application source code inside comments. This will trigger the compiler to output code generator module (ORG) procedure calls during the compilation phase to the console. This trace is to help resolve issues with the compiler.
+The pragmas `$D+` and `$D-` can be put anywhere in the application source code inside comments. This will trigger the compiler to output code generator module `ORG` procedure calls during the compilation phase to the console. This trace is to help resolve issues with the compiler.
 
 ### Source code as comments in assembler output
 
-The compiler option **-x** will trigger the compiler to emit source code lines as comments in the generated assembly language ouput. This is helpfull to compare generated assembly language instructions with the Oberon program statements.
+The compiler option **-l** (lowercase “L”) will trigger the compiler to emit source code lines as comments in the generated assembly language ouput. This is helpfull to compare generated assembly language instructions with Oberon program statements.
