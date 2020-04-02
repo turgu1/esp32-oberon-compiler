@@ -6,10 +6,10 @@ The code is being ported to [OBNC](https://miasap.se/obnc/) and produces ELF obj
 
 Up to 2020.03.31, I was targeting a 'bare metal' version, supplying everything necessary for building applications, relying only on the assembler linker and loader provided with [ESP-IDF](https://docs.espressif.com/projects/esp-idf/en/latest/). 
 
-I'm now migrating the compiler to supply de capability of interfacing with the ESP-IDF. Two main reasons for this are:
+I'm now migrating the compiler to supply the capability of interfacing with the ESP-IDF. Two main reasons for this are:
 
 - Some aspects of the ESP32 architecture are being kept unaccessible to third parties developpers. This is the case for the WiFi subsystem that is a mandatory use, at least, for me...; and
-- The richness of hardware interfaces available with the ESP32 would require a lot of recoding in the Oberon language. It is then beneficial to get access to components already available with the ESP-IDF.
+- The richness of hardware interfaces available with the ESP32 would require a lot of recoding in the Oberon language. It is then beneficial to get access to components already available with the ESP-IDF framework.
 
 My ToDo document has been modified to reflect this new orientation...
 
