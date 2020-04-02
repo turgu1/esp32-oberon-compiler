@@ -1242,15 +1242,29 @@ MODULE ORG;
         PutMoveRRI(op, max, x.r, x.r, x.a);
       ELSIF x.mode = Cond THEN
         eStr("(cond");
-        IF x.lf = 0 THEN x.lf := NextLabel(); END;
-        PutCondBranch(negated(x.r), x.lf);
-        IF x.lt # 0 THEN PutLabel(x.lt); x.lt := 0 END;
-        PutRI("movi", RH, 1); SetRcI(RH, -1, 1, IMM);
-        lbl := NextLabel();
-        PutJump("j", lbl);
-        PutLabel(x.lf); x.lf := 0;
-        PutRI("movi", RH, 0); SetRcI(RH, -1, 0, IMM);
-        PutLabel(lbl);
+        IF x.lt = 0 THEN 
+          x.lt := NextLabel();
+          PutRI("movi", RH, 1); SetRcI(RH, -1, 1, IMM);
+          PutCondBranch(x.r, x.lt);
+          IF x.lf # 0 THEN PutLabel(x.lf); x.lf := 0 END;
+          PutRI("movi", RH, 0); SetRcI(RH, -1, 0, IMM);
+          PutLabel(x.lt); x.lt := 0;
+        ELSIF x.lf = 0 THEN 
+          x.lf := NextLabel();
+          PutRI("movi", RH, 0); SetRcI(RH, -1, 0, IMM);
+          PutCondBranch(negated(x.r), x.lf);
+          IF x.lt # 0 THEN PutLabel(x.lt); x.lt := 0 END;
+          PutRI("movi", RH, 1); SetRcI(RH, -1, 1, IMM);
+          PutLabel(x.lf); x.lf := 0;
+        ELSE
+          PutCondBranch(x.r, x.lt);
+          PutLabel(x.lf); x.lf := 0;
+          PutRI("movi", RH, 0); SetRcI(RH, -1, 0, IMM);
+          lbl := NextLabel(); PutJump("j", lbl);
+          PutLabel(x.lt); x.lt := 0;
+          PutRI("movi", RH, 1); SetRcI(RH, -1, 1, IMM);
+          PutLabel(lbl);
+        END;
         ClearRc(RH);
         x.r := RH; incR;
       END;
