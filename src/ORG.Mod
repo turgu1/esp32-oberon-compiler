@@ -209,16 +209,18 @@ MODULE ORG;
     1: Out.String("Byte"     ); |
     2: Out.String("Bool"     ); |
     3: Out.String("Char"     ); |
-    4: Out.String("Int"      ); |
-    5: Out.String("Real"     ); |
-    6: Out.String("Set"      ); |
-    7: Out.String("Pointer"  ); |
-    8: Out.String("Nil Type" ); |
-    9: Out.String("NoType"   ); |
-    10: Out.String("Proc"    ); |
-    11: Out.String("String"  ); |
-    12: Out.String("Array"   ); |
-    13: Out.String("Record"  );
+    4: Out.String("Short"    ); |
+    5: Out.String("Int"      ); |
+    6: Out.String("Real"     ); |
+    7: Out.String("Set"      ); |
+    8: Out.String("Pointer"  ); |
+    9: Out.String("Nil Type" ); |
+    10: Out.String("NoType"  ); |
+    11: Out.String("Proc"    ); |
+    12: Out.String("String"  ); |
+    13: Out.String("Array"   ); |
+    14: Out.String("Record"  ); |
+    15: Out.String("CProc"   )
     END;
     Out.String(")");
   END ShowForm;
@@ -1194,8 +1196,8 @@ MODULE ORG;
     END;
     IF x.mode # Reg THEN (* if not already in a register *)
       IF x.mode = ORB.Const THEN (* Constant *)
-        IF x.type.form = ORB.Proc THEN
-          eStr(" (proc) ");
+        IF (x.type.form = ORB.Proc) OR (x.type.form = ORB.CProc) THEN
+          IF x.type.form = ORB.Proc THEN eStr(" (Proc) ") ELSE eStr(" (CProc) ") END;
           IF x.r > 0 THEN 
             ORS.Mark("not allowed")
           ELSIF x.r = 0 THEN
@@ -1248,14 +1250,14 @@ MODULE ORG;
           PutCondBranch(x.r, x.lt);
           IF x.lf # 0 THEN PutLabel(x.lf); x.lf := 0 END;
           PutRI("movi", RH, 0); SetRcI(RH, -1, 0, IMM);
-          PutLabel(x.lt); x.lt := 0;
+          PutLabel(x.lt); x.lt := 0
         ELSIF x.lf = 0 THEN 
           x.lf := NextLabel();
           PutRI("movi", RH, 0); SetRcI(RH, -1, 0, IMM);
           PutCondBranch(negated(x.r), x.lf);
           IF x.lt # 0 THEN PutLabel(x.lt); x.lt := 0 END;
           PutRI("movi", RH, 1); SetRcI(RH, -1, 1, IMM);
-          PutLabel(x.lf); x.lf := 0;
+          PutLabel(x.lf); x.lf := 0
         ELSE
           PutCondBranch(x.r, x.lt);
           PutLabel(x.lf); x.lf := 0;
@@ -1263,10 +1265,10 @@ MODULE ORG;
           lbl := NextLabel(); PutJump("j", lbl);
           PutLabel(x.lt); x.lt := 0;
           PutRI("movi", RH, 1); SetRcI(RH, -1, 1, IMM);
-          PutLabel(lbl);
+          PutLabel(lbl)
         END;
         ClearRc(RH);
-        x.r := RH; incR;
+        x.r := RH; incR
       END;
       x.mode := Reg
     ELSE eStr("(reg) no gen")
@@ -2636,7 +2638,8 @@ MODULE ORG;
   VAR
     moduleId: ORS.Ident;
     moduleKey: INTEGER;
-  BEGIN (*x.type.form = ORB.Proc*)
+    retReg: INTEGER;
+  BEGIN (*x.type.form = ORB.Proc OR x.type.form = ORB.CProc*)
     (* ShowItem(x); *)
     e("Call");
     IF x.mode = ORB.Const THEN
@@ -2674,9 +2677,11 @@ MODULE ORG;
     IF x.type.base.form = ORB.NoTyp THEN (*procedure*) 
       RH := FirstRH; UsedRegs := {}
     ELSE (*function*)
-      (* callType + 3 is the register containing the function result *)
-      IF (callType + 3) > r THEN
-        PutRR("mov", r, callType + 3); SetRcI(r, callType + 3, 0, IMM);
+      (* Proc: callType + 3 is the register containing the function result
+         CProc: callType + 2 is the register containing the function result *)
+      IF x.type.form = ORB.CProc THEN retReg := callType + 2 ELSE retReg := callType + 3 END;
+      IF retReg # r THEN
+        PutRR("mov", r, retReg); SetRcI(r, retReg, 0, IMM);
       END;
       RestoreRegs(callType, r - 1);
       x.mode := Reg; 
@@ -3251,7 +3256,7 @@ PROCEDURE Abs*(VAR x: Item);
   BEGIN 
     e("Adr");
     IF x.mode IN {ORB.Var, ORB.Par, RegI} THEN loadAdr(x)
-    ELSIF (x.mode = ORB.Const) & (x.type.form = ORB.Proc) THEN load(x)
+    ELSIF (x.mode = ORB.Const) & ((x.type.form = ORB.Proc) OR (x.type.form = ORB.CProc)) THEN load(x)
     ELSIF (x.mode = ORB.Const) & (x.type.form = ORB.String) THEN loadStringAdr(x)
     ELSE ORS.Mark("not addressable")
     END

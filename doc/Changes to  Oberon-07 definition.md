@@ -65,6 +65,18 @@ END P;
 
 (Not working. Still, a work in progress)
 
+## CDECL procedure
+
+You can declare a procedure to be using a C language compatible return value using the word “CDECL” in brackets before the procedure name:
+
+```Modula-2
+PROCEDURE [CDECL] P(): INTEGER;
+BEGIN
+END P;
+```
+
+For now, it is only being used by the compiler to take into account the return value of such a procedure to be in register a2 instead of a3, as register a2 contains the static base of a module. This behavior may be modified in a future version to take into account other aspects of the C compiler code generator.
+
 ## SHORTINT
 
 As a new numerical type, SHORTINT allow for unsigned 16 bits values (0..65535). It has been added to get a complete range of one, two and four bytes variables. SHORTINT are aligned to 2-bytes boundaries in records.

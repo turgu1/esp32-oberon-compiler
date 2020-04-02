@@ -40,7 +40,11 @@ INITO = $(BLDDIR)/init.o
 MATH = $(SRCDIR)/math_support.S
 MATHO = $(BLDDIR)/math_support.o
 
+QIO = $(SRCDIR)/Qio.Mod
+QIOS = ./Qio.smb
+
 SRC = \
+  QioDefs.Mod \
   Out.Mod \
   Watchdog.Mod \
   Kernel.Mod \
@@ -54,12 +58,19 @@ ARCHIVE = libesp32-oberon.a
 
 OBJS  = $(addprefix $(BLDDIR)/, $(SRC:.Mod=.o))
 
+all: $(ARCHIVE) $(QIOS)
+
 $(ARCHIVE) : $(OBJS) $(INITO) $(MATHO)
 	$(RL) $(ARCHIVE)
 
 $(INITO): $(INIT)
 	$(CC) -x assembler-with-cpp $(ASFLAGS) $< -o $@
 	@$(AR) r $(ARCHIVE) $@ 
+
+$(QIOS): $(QIO)
+	$(OB) $(OBFLAGS) $<
+	@mv $(SRCDIR)/$(patsubst %.Mod,%.smb,$(<F)) .
+	# @rm $(BLDDIR)/$(patsubst %.Mod,%.S,$(<F))
 
 $(MATHO): $(MATH)
 	$(CC) -x assembler-with-cpp $(ASFLAGS) $< -o $@

@@ -10,7 +10,7 @@ MODULE ORB;   (*NW 25.6.2014  / 1.3.2019  in Oberon-07*)
   CONST 
       CompilerVersion* = "0.1.0";
       
-      versionkey* = 1; maxTypTab = 64;
+      versionkey* = 2; maxTypTab = 64;
     (* class values *) 
       Head*  = 0;
       Const* = 1; Var*   = 2; Par*   = 3; 
@@ -22,7 +22,7 @@ MODULE ORB;   (*NW 25.6.2014  / 1.3.2019  in Oberon-07*)
       Short*   =  4; Int*     =  5; Real*   =  6; 
       Set*     =  7; Pointer* =  8; NilTyp* =  9; 
       NoTyp*   = 10; Proc*    = 11; String* = 12; 
-      Array*   = 13; Record*  = 14;
+      Array*   = 13; Record*  = 14; CProc*  = 15;
       
   TYPE 
     Object* = POINTER TO ObjDesc;
@@ -58,7 +58,7 @@ MODULE ORB;   (*NW 25.6.2014  / 1.3.2019  in Oberon-07*)
 
   (* Object classes and the meaning of "val":
     class    val
-    ----------
+    --------------------------------------
     Var      address
     Par      address
     Const    value
@@ -69,12 +69,12 @@ MODULE ORB;   (*NW 25.6.2014  / 1.3.2019  in Oberon-07*)
     Mod      key
 
   Type forms and the meaning of "dsc" and "base":
-    form     dsc      base
-    ------------------------
-    Pointer  -        type of dereferenced object
-    Proc     params   result type
-    Array    -        type of elements
-    Record   fields   extension *)
+    form        dsc      base
+    ----------------------------------------------
+    Pointer      -       type of dereferenced object
+    Proc, CProc params   result type
+    Array        -       type of elements
+    Record      fields   extension *)
 
   VAR 
     topScope*, 
@@ -241,7 +241,7 @@ MODULE ORB;   (*NW 25.6.2014  / 1.3.2019  in Oberon-07*)
           Files.ReadNum(R, fld.val); Read(R, class)
         END ;
         IF last = NIL THEN t.dsc := obj ELSE last.next := obj END
-      ELSIF form = Proc THEN
+      ELSIF (form = Proc) OR (form = CProc) THEN
         InType(R, thismod, t.base);
         obj := NIL; np := 0; Read(R, class);
         WHILE class # 0 DO  (* parameters *)
@@ -356,7 +356,7 @@ MODULE ORB;   (*NW 25.6.2014  / 1.3.2019  in Oberon-07*)
           fld := fld.next
         END ;
         Write(R, 0)
-      ELSIF t.form = Proc THEN OutType(R, t.base); OutPar(R, t.dsc, t.nofpar); Write(R, 0)
+      ELSIF (t.form = Proc) OR (t.form = CProc) THEN OutType(R, t.base); OutPar(R, t.dsc, t.nofpar); Write(R, 0)
       END ;
       IF (t.mno > 0) & (obj # NIL) THEN  (*re-export, output name*)
         mod := topScope.next;
@@ -396,7 +396,7 @@ MODULE ORB;   (*NW 25.6.2014  / 1.3.2019  in Oberon-07*)
           END ;
           Write(R, 0)
         ELSIF obj.class = Const THEN
-          IF obj.type.form = Proc THEN Files.WriteNum(R, obj.exno)
+          IF (obj.type.form = Proc) OR ((obj.type.form = CProc)) THEN Files.WriteNum(R, obj.exno)
           ELSIF obj.type.form = Real THEN Files.WriteInt(R, obj.val)
           ELSE Files.WriteNum(R, obj.val)
           END

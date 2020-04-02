@@ -23,7 +23,7 @@ Oberon: $(SIMS) $(SRC)/Oberon.Mod
 	cd $(SRC); $(LINK) Oberon.Mod
 	mv $(SRC)/Oberon .
 
-ORTool: $(SRC)/ORTool.Mod $(OUT)/ORB.sym $(OUT)/Texts.sym $(OUT)/Logger.sym
+ORTool: $(SRC)/ORTool.Mod $(OUT)/ORB.sym $(OUT)/Texts.sym
 	cd $(SRC); $(LINK) ORTool.Mod
 	mv $(SRC)/ORTool .
 

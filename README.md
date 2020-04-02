@@ -2,7 +2,18 @@
 
 This is an ongoing effort to build an ESP32 Oberon Compiler, using the Oberon-07 Compiler from [Project Oberon](http://www.projectoberon.com) by Niklaus Wirth and Jürg Gutknecht and some code from project [Oberon Extended](https://github.com/andreaspirklbauer/Oberon-extended) by Mr. Andreas Pirklbauer. Test cases are being designed in part using the [OberonC](https://github.com/lboasso) effort by Luca Boasso.
 
-The code is being ported to [OBNC](https://miasap.se/obnc/) and produces ELF object code through ESP32 assembly language generation. I'm currently targeting a 'bare metal' version, supplying everything necessary for building applications, relying only on the assembler linker and loader provided with [ESP-IDF](https://docs.espressif.com/projects/esp-idf/en/latest/). GDB and OpenOCD are also used to allow remote debugging through JTAG. 
+The code is being ported to [OBNC](https://miasap.se/obnc/) and produces ELF object code through ESP32 assembly language generation. 
+
+Up to 2020.03.31, I was targeting a 'bare metal' version, supplying everything necessary for building applications, relying only on the assembler linker and loader provided with [ESP-IDF](https://docs.espressif.com/projects/esp-idf/en/latest/). 
+
+I'm now migrating the compiler to supply de capability of interfacing with the ESP-IDF. Two main reasons for this are:
+
+- Some aspects of the ESP32 architecture are being kept unaccessible to third parties developpers. This is the case for the WiFi subsystem that is a mandatory use, at least, for me...; and
+- The richness of hardware interfaces available with the ESP32 would require a lot of recoding in the Oberon language. It is then beneficial to get access to components already available with the ESP-IDF.
+
+My ToDo document has been modified to reflect this new orientation...
+
+(GDB and OpenOCD are also used to allow remote debugging through JTAG.)
 
 This is the intent. A large portion of the compiler is in a workable condition at this point in time.
 
@@ -29,7 +40,7 @@ In a Nutshell, the steps I'm taking to get a working compiler are the following:
 17. Develop modules for some ESP32 subsystems
 18. Enjoy
 
-I'm now at step 13
+I'm now at step 13 and 14
 
 The file named OBG.Mod is the main module generator of assembly language instructions. It has been almost completly rewritten, considering the assembly language approach taken instead of direct code generation. Using the assembler gives the following facilities:
 
