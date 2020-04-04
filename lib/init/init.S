@@ -8,158 +8,70 @@
 #
 # Oberon Modules are compiled with the following memory organisation:
 #
-# - Constants that cannot be kept in registers are put in the
-#   .data section (maybe .rodata in the future...)
+# - Constants that cannot be kept in registers are put in
+#   .rodata sections 
 #
-# - Main code of a Module is put in an .init section. All init 
-#   sections (but the first) will be called in sequence to 
+# - Main code of a Module is put in .text_init sections. All init 
+#   sections will be called in reverse sequence order to 
 #   initialize modules. The first module in the list is considered
-#   the main module and its initialization code will be launched
-#   at the end.
+#   the main module and its initialization code is not expected to return.
 #
-# - One entry in the .init_table section must be defined to point
-#   at the module initialization code. Not required if the 
+# - Entries in the .init_table section must be defined to point
+#   at each module initialization code. Not required if the 
 #   initialization is empty
 #
-# - All procedural code is put in a .text section
+# - All procedural code is put in .text sections
 #
-# - Global variables are placed in a .bss section. They will be
-#   initialized with zeroes by this code.
+# - Global variables are placed in .bss sections. They will be
+#   initialized with zeroes by the ROM loader.
 #
 # - All procedure and initialization code must be using 
-#   the ENTRY A1, xxxx and RETW instructions (Windowing option).
+#   the ENTRY a1, xxxx and RETW instructions (Windowing option).
 # ----
 
-    #include "defs.S"
-
     .title Oberon ESP32 Startup code
-    .sbttl Oberon ESP32 Compiler Version 0.1.0
+    .sbttl Oberon ESP32 Compiler Version 0.2.0
 
-    .global _call_start_cpu0, _init_end
-    .extern _sbss, _ebss, _sdata, _edata, _sidata, _sitable, _eitable
+    .section .init_table_start
+  _sitable:
 
-/* ---- stack ---- */
+    .section .init_table_end
+  _eitable:
 
-    .align 4
-    .section .stack
-    .space 16384
+    .section .pointers_table_start
+  _sptable:
 
-/* ---- application entry_point ---- */
+    .section .pointers_table_end
+  _eptable:
 
+    .global oberon_startup
     .section .entry.text
 
-    j _call_start_cpu0
+  oberon_startup:
 
-    .align 4
-
-# Main entry point, as defined in the ld/esp32.ld file
-
-_call_start_cpu0:
-
-    # No interrupt vectors for now - TBD
-    # movi a0, _init_start      # Set Interrupt vector base address
-    # wsr  a0, VECBASE
-
-    movi a1, _tos              # Set Top of stack
-    movi a0, 0                 # Initialize return adress to nothing
-    addi a1, a1, -16           # stack frame initialization only
-    addi a4, sp, 16            #     call4 can be done as 1st call level
-    s32e a4, sp, -12
-
-    call4 _stop_watchdog       # Disable both Watchdog
-    call4 _set_160mhz          # Set CPU Speed to 160MHz
-
-    # Clear .bss section
-
-    movi a2, _ebss             # Compute size in 4-byte chunks (a2)
-    movi a3, _sbss             # a3 = address of .bss
-    sub  a2, a2, a3            # a2 = size of .bss in bytes
-    beqz a2, 1f                # if .bss is empty, nothing to do
-    srli a2, a2, 2             # a2 = size of .bss in words
-    movi a4, 0                 # a4 = 0
-    loop a2, 1f                # loop to clear memory
-    s32i a4, a3, 0             # @a3[0] = 0
-    addi a3, a3, 4             # adjust a3 to next word
-1:
-
-.if 0
-    # Copy initialized data (not used, seems to be done by the ROM loader)
-    movi a2, _edata            # Compute size in 4-byte chunks (a2)
-    movi a3, _sdata            # a3 = address of _data
-    movi a4, _sidata           # a4 = address of initialization data
-    sub  a2, a2, a3            # a2 = size of .data in bytes
-    beqz a2, 2f                # if .data is empty, nothing to do
-    srli a2, a2, 2             # a2 = size of .data in words
-    loop a2, 2f                # loop to initialize memory
-    l32i a5, a4, 0             # a5 = @a4[0]
-    s32i a5, a3, 0             # @a3[0] = a5
-    addi a4, a4, 4             # adjust a4 to next word
-    addi a3, a3, 4             # adjust a3 to next word
-2:
-.endif
+    entry sp, 16
 
     # Call modules initialization code (From the last to the first one)
     # The first one is the main program. It is not expected to come back,
-    # but if it does, Wathcdog will reset the processor if enabled.
+    # but if it does, it will return to the calling program.
 
-    movi a3, _eitable          # compute size of init table - 4
-    movi a2, _sitable          # a3 = init table address
+    # compute size of init table
+
+    movi a3, _eitable          # a3 = init table end address
+    movi a2, _sitable          # a2 = init table start address
     sub  a2, a3, a2            # a2 = size in bytes
     beqz a2, _init_end         # if table is empty, leave
     srli a2, a2, 2             # a2 = size in words
-    loop a2, 3f                # loop for each table entry
+
+    # initialize all modules
+
+    loop a2, 1$                # loop for each table entry
     addi a3, a3, -4            # Adjust pointer in table
     l32i a7, a3, 0             # load init code address
     callx4 a7                  # call the module initialization code
     nop
-3:
+  1$:
 
-_init_end:
-    j _init_end
-    
-/* ---- _stop_watchdog ---- */
-
-    # Registers to disable both Watchdog
-    .equ RTC_CNTL_WDTCONFIG0_REG,  0x3FF4808C
-    .equ TIMG0_T0_WDTCONFIG0_REG,  0x3FF5F048
-
-    .align 4
-
-_stop_watchdog:
-    entry a1, 16
-    movi a3, 0
-    movi a2, RTC_CNTL_WDTCONFIG0_REG
-    s32i a3, a2, 0
-    movi a2, TIMG0_T0_WDTCONFIG0_REG
-    s32i a3, a2, 0
+  _init_end:
     retw
-
-/* ---- _set_160mhz ---- */
-
-    .equ RTC_CNTL_CLK_CONF_REG,  0x3FF48070
-    .equ DPORT_CPU_PER_CONF_REG, 0x3ff0003C
-    .equ CLKCONF,                0x08002210
-
-    .align 4
-
-_set_160mhz:
-    entry a1, 16
-
-    # Switch SoC clock source to PLL (instead of the default which is XTAl).
-    # This switches the CPU (and APB) clock from 40MHz to 80MHz.
-    movi a2, RTC_CNTL_CLK_CONF_REG
-    movi a3, CLKCONF
-    s32i a3, a2, 0
-
-    # Switch CPU from 80MHz to 160MHz
-    movi a2, DPORT_CPU_PER_CONF_REG
-    movi a3, 1
-    s32i a3, a2, 0
-
-    retw 
-
-#if 0
-#include "interrupt_vectors.S"
-#include "syscall.S"
-#include "context.S"
-#endif
+    

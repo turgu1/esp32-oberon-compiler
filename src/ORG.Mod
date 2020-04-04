@@ -51,6 +51,22 @@ MODULE ORG;
     LOC = 2;  (* Memory address  *)
     MEM = 3;  (* Memory content, value + displacement is the address  *)
 
+    InitSectionPrefix          = "text_init";
+    
+    TextSectionPrefix          = "text";
+
+    BSSSectionPrefix           = "bss";
+    BSSSectionLabelSuffix      = "_s_bss";
+
+    StringSectionPrefix        = "rodata_strs";
+    StringSectionLabelSuffix   = "_data_strs";
+
+    DataTypeSectionPrefix      = "rodata_types";
+    DataTypeSectionLabelSuffix = "_s_data_types";
+
+    InitTableSectionPrefix     = "init_table";
+    PointerTableSectionPrefix  = "pointers_table";
+
   TYPE 
     (*
 
@@ -954,25 +970,25 @@ MODULE ORG;
   PROCEDURE ExportName(name, kind, moduleId: ARRAY OF CHAR;  moduleKey: INTEGER);
   BEGIN
     e("ExportName");
-    Texts.Write(AsW, "_");
+    Texts.Write(      AsW, "_");
     Texts.WriteString(AsW, moduleId);
-    Texts.Write(AsW, "_");
-    WriteHex(AsW, moduleKey);
-    Texts.Write(AsW, "_");
+    Texts.Write(      AsW, "_");
+    WriteHex(         AsW, moduleKey);
+    Texts.Write(      AsW, "_");
     Texts.WriteString(AsW, kind);
-    Texts.Write(AsW, "_");
+    Texts.Write(      AsW, "_");
     Texts.WriteString(AsW, name);
   END ExportName;
 
   PROCEDURE SectionName(sectionPrefix, moduleId: ARRAY OF CHAR;  moduleKey: INTEGER);
   BEGIN
     e("SectionName");
-    Texts.Write(AsW, ".");
+    Texts.Write(      AsW, ".");
     Texts.WriteString(AsW, sectionPrefix);
-    Texts.Write(AsW, "_");
+    Texts.Write(      AsW, "_");
     Texts.WriteString(AsW, moduleId);
-    Texts.Write(AsW, "_");
-    WriteHex(AsW, moduleKey);
+    Texts.Write(      AsW, "_");
+    WriteHex(         AsW, moduleKey);
   END SectionName;
 
   PROCEDURE SetCC(VAR x: Item; n: INTEGER);
@@ -1060,7 +1076,7 @@ MODULE ORG;
     name: ARRAY 256 OF CHAR;
   BEGIN 
     e("GetLocalSB");
-    name := "_"; AppendStr(name, thisModuleId); AppendStr(name, "_s_bss");
+    name := "_"; AppendStr(name, thisModuleId); AppendStr(name, BSSSectionLabelSuffix);
     Texts.WriteLn(CodeW);
     Texts.WriteString(CodeW, "    movi a2, ");
     Texts.WriteString(CodeW, name);
@@ -1078,7 +1094,7 @@ MODULE ORG;
       ModuleInfo(base, moduleId, moduleKey);
       name := "_"; AppendStr(name, moduleId); AppendStr(name, "_");
       AppendHex(name, moduleKey);
-      AppendStr(name, "_s_bss");
+      AppendStr(name, BSSSectionLabelSuffix);
 
       Texts.WriteLn(CodeW);
       Texts.WriteString(CodeW, "    movi a");
@@ -1097,7 +1113,7 @@ MODULE ORG;
   BEGIN
     e("GetTypesDescrSB base:");eInt(base);
     IF base = 0 THEN
-      name := "_"; AppendStr(name, thisModuleId); AppendStr(name, "_s_types");
+      name := "_"; AppendStr(name, thisModuleId); AppendStr(name, DataTypeSectionLabelSuffix);
       Texts.WriteLn(CodeW);
       Texts.WriteString(CodeW, "    movi a");
       Texts.WriteInt(CodeW, RH, 0);
@@ -1107,7 +1123,7 @@ MODULE ORG;
       ModuleInfo(base, moduleId, moduleKey);
       name := "_"; AppendStr(name, moduleId); AppendStr(name, "_");
       AppendHex(name, moduleKey);
-      AppendStr(name, "_s_data_types");
+      AppendStr(name, DataTypeSectionLabelSuffix);
       eStr(" moduleId:"); eStr(moduleId);
 
       Texts.WriteLn(CodeW);
@@ -1389,7 +1405,7 @@ MODULE ORG;
     Texts.WriteInt(CodeW, RH, 0);
     Texts.WriteString(CodeW, ", _");
     Texts.WriteString(CodeW, thisModuleId);
-    Texts.WriteString(CodeW, "_data_strs");
+    Texts.WriteString(CodeW, StringSectionLabelSuffix);
 
     IF x.a <= 127 THEN
       IF x.a # 0 THEN PutRRI("addi", RH, RH, x.a); ClearRc(RH) END
@@ -3301,7 +3317,8 @@ PROCEDURE Abs*(VAR x: Item);
       Texts.WriteLn(    AsW);
       Texts.WriteString(AsW, "    .int _");
       Texts.WriteString(AsW, thisModuleId);
-      Texts.WriteString(AsW, "_s_bss + ");
+      Texts.WriteString(AsW, BSSSectionLabelSuffix);
+      Texts.WriteString(AsW, " + ");
       Texts.WriteInt(   AsW, adr, 0);
     ELSIF typ.form = ORB.Record THEN
       fld := typ.dsc;
@@ -3358,10 +3375,10 @@ PROCEDURE Abs*(VAR x: Item);
           IF b = Marker1 THEN (* section marker *)
             Files.Read(F, b); DEC(len);
             IF CHR(b) = "I" THEN
-              SectionHeader("init", moduleId, moduleKey, FALSE);
+              SectionHeader(InitSectionPrefix, moduleId, moduleKey, FALSE);
               initPresent := TRUE;
             ELSIF CHR(b) = "T" THEN
-              SectionHeader("text", moduleId, moduleKey, TRUE);
+              SectionHeader(TextSectionPrefix, moduleId, moduleKey, TRUE);
             END
           ELSIF b = Marker2 THEN (* exported procedure marker *)
             Files.Read(F, b); DEC(len);
@@ -3407,12 +3424,12 @@ PROCEDURE Abs*(VAR x: Item);
     base := a DIV 1000H;
     offset := a MOD 1000H;
     IF base = 0 THEN
-      name := "_"; AppendStr(name, thisModuleId); AppendStr(name, "_s_types");
+      name := "_"; AppendStr(name, thisModuleId); AppendStr(name, DataTypeSectionLabelSuffix);
     ELSE
       ModuleInfo(base, moduleId, moduleKey);
       name := "_"; AppendStr(name, moduleId); AppendStr(name, "_");
       AppendHex(name, moduleKey);
-      AppendStr(name, "_s_data_types");
+      AppendStr(name, DataTypeSectionLabelSuffix);
     END;
     Texts.WriteString(AsW, name);
     Texts.WriteString(AsW, "+");
@@ -3463,10 +3480,11 @@ PROCEDURE Abs*(VAR x: Item);
     (* types description section *)
     IF tdx > 0 THEN
     Texts.WriteLn(AsW);
-    SectionHeader("data_types", moduleId, moduleKey, TRUE);
+    SectionHeader(DataTypeSectionPrefix, moduleId, moduleKey, TRUE);
       Texts.WriteString(AsW, "_");
       Texts.WriteString(AsW, moduleId);
-      Texts.WriteString(AsW, "_s_types:");
+      Texts.WriteString(AsW, DataTypeSectionLabelSuffix);
+      Texts.Write(AsW, ":");
       FOR i := 0 TO tdx-1 DO 
         Texts.WriteLn(AsW);
         Texts.WriteString(AsW, "    .int ");
@@ -3483,11 +3501,12 @@ PROCEDURE Abs*(VAR x: Item);
 
     (* Strings section *)
     IF strx > 0 THEN
-      SectionHeader("data_strs", moduleId, moduleKey, FALSE);
+      SectionHeader(StringSectionPrefix, moduleId, moduleKey, FALSE);
       Texts.WriteLn(AsW);
-      Texts.WriteString(AsW, "_");
+      Texts.Write(AsW, "_");
       Texts.WriteString(AsW, moduleId);
-      Texts.WriteString(AsW, "_data_strs:");
+      Texts.WriteString(AsW, StringSectionLabelSuffix);
+      Texts.Write(AsW, ":");
       FOR i := 0 TO strx-1 DO 
         IF (i MOD 16) = 0 THEN
           Texts.WriteLn(AsW);
@@ -3499,11 +3518,12 @@ PROCEDURE Abs*(VAR x: Item);
     END;
 
     (* variables section *)
-    SectionHeader("bss", moduleId, moduleKey, TRUE);
+    SectionHeader(BSSSectionPrefix, moduleId, moduleKey, TRUE);
     Texts.WriteLn(    AsW);
-    Texts.WriteString(AsW, "_");
+    Texts.Write(      AsW, "_");
     Texts.WriteString(AsW, moduleId);
-    Texts.WriteString(AsW, "_s_bss:");
+    Texts.WriteString(AsW, BSSSectionLabelSuffix);
+    Texts.Write(      AsW, ":");
 
     Texts.WriteLn(    AsW);
     Texts.WriteString(AsW, "    .space ");
@@ -3521,7 +3541,7 @@ PROCEDURE Abs*(VAR x: Item);
     END ;
 
     IF nofptrs > 0 THEN
-      SectionHeader("pointers_table", moduleId, moduleKey, FALSE);
+      SectionHeader(PointerTableSectionPrefix, moduleId, moduleKey, FALSE);
       obj := ORB.topScope.next;
       WHILE obj # NIL DO
         IF obj.class = ORB.Var THEN FindPtrs(obj.type, obj.val) END ;
@@ -3548,7 +3568,7 @@ PROCEDURE Abs*(VAR x: Item);
     IF initPresent THEN
       Texts.WriteLn(AsW);
       Texts.WriteLn(AsW);
-      SectionHeader("init_table", moduleId, moduleKey, FALSE);
+      SectionHeader(InitTableSectionPrefix, moduleId, moduleKey, FALSE);
 
       Texts.WriteLn(AsW);
       Texts.WriteString(AsW, "    .int ");
