@@ -76,7 +76,7 @@ Some potential bugs corrected:
 
 - Call to functions in parameters preparation, like `P(F(3.0))` is not very efficient in term of stack and register usage. It is better to use temporary variables and prepare parameters before the main call (will be revisited once the compiler is working properly). For example:
 
-```Modula-2
+```Pascal
      i := F(3.0); P(i)
 ```
 

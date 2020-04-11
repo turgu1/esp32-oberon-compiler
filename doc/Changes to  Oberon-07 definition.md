@@ -47,7 +47,7 @@ The following standard functions can also be used in such an expression if param
 
 A REAL NaN value will be generated if a division by zero is done. The value will be equal to `SYSTEM.VAL(REAL, 07FFFFFFFH)`. You can define a constant that would get this value:
 
-```Modula-2
+```Pascal
 CONST NaN = 0.0 / 0.0;
 ```
 
@@ -57,7 +57,7 @@ TBC: System interrupts behavior and Trap mechanism on compiler check (**-c**) ge
 
 You can declare a procedure to be called when an interrupt occurs. To do so, you have to put into brackets the interrupt level number associated to the procedure like this:
 
-```Modula-2
+```Pascal
 PROCEDURE [12] P();
 BEGIN
 END P;
@@ -75,7 +75,7 @@ It is then possible to declare C programming langage functions both in a normal 
 
 A module can be declared as a special C language declaration module as follows:
 
-```Modula-2
+```Pascal
 MODULE [CDECL] moduleName;
 
 END moduleName.
@@ -91,7 +91,7 @@ This kind of module will have the following consequences:
 
 You can declare a procedure to be a C programming language function using the word “CDECL” in brackets before the procedure name:
 
-```Modula-2
+```Pascal
 PROCEDURE [CDECL] P(): INTEGER;
 ```
 
@@ -113,7 +113,7 @@ As a new numerical type, SHORTINT allow for unsigned 16 bits values (0..65535). 
 
 The ESP32 Compiler allow char constants to be assignement compatible with strings. The example below shows 1) assignment of a CHAR constant to an ARRAY OF CHAR variable, parameter inside a procedure and when calling a procedure:
 
-```Modula-2
+```Pascal
 MODULE Example;
 
   CONST c = "a";
@@ -140,7 +140,7 @@ When assigning a CHAR constant to a variable or a parameter (ARRAY OF CHAR), it 
 
 The CASE statement is accepting INTEGER, BYTE or CHAR as CASE expression and constant case labels. This was not implemented in the Project Oberon version of the compiler but has been retrieved from the Extended Oberon project and modified to produce ESP32 assembly language instructions. When such statements are used, it is also possible to have an ELSE clause. For example:
 
-```Modula-2
+```Pascal
 CASE ch OF
   "a".."z" : i := 1
 ELSE
@@ -178,7 +178,7 @@ The ELSE clause has been re-introduced even though it is not part of the Oberon-
 
 The ESP32 Oberon compiler allows for direct entry of assembly language code inside the code generation stream. Here is an example:
 
-```Modula-2
+```Pascal
 MODULE Example;
 BEGIN
   i := 3;
