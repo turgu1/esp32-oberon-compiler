@@ -37,7 +37,6 @@ Here is the list of ongoing tasks to complete the effort of building the ESP32 O
 - [ ] FreeRTOS behavior validation
 - [ ] Interrupt procedure definition
 
-
 # Compiler Support
 
 - [x] Trap mechanism to use Break instructions/Interrupts. Abandonned. Uses call4 instruction.
@@ -65,7 +64,7 @@ Here is the list of ongoing tasks to complete the effort of building the ESP32 O
 - [ ] Implement other Extended Oberon features
 - [ ] Source code debug marking with GDB
 - [ ] Optimize CASE statements when ranges are supplied as selectors
-- [x] Add SHORTINT (16 bits) type 
+- [x] Add SHORTINT (16 bits) type
 - [ ] Add DOUBLE type (and/or DoubleMath Module)
 - [x] Add other transcendantal functions to Math.Mod
 - [ ] In and Out modules to be compliant with Texts module

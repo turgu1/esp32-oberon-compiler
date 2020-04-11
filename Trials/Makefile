@@ -11,7 +11,7 @@ LDFLAGS_PLATFORM = $(AFLAGS_PLATFORM)
 ###
 # General project build
 ###
-OB = ../Oberon
+OB = ../OberonESP32
 CC = $(TOOLCHAIN)gcc
 LD = $(TOOLCHAIN)ld
 OC = $(TOOLCHAIN)objcopy

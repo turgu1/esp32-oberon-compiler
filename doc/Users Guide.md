@@ -5,7 +5,7 @@
 The ESP32 Oberon Compiler is a single executable that can be launched as follows:
 
 ```sh
-$ Oberon [-c][-l][-o folder][-p path][-s][-v][-x][-z] filename
+$ OberonESP32 [-c][-l][-o folder][-p path][-s][-v][-x][-z] filename
 ```
 
 Where the parameters are:
@@ -32,7 +32,13 @@ The compiler will produce:
 - an ESP32 assembly language source code (extension `.S`); and 
 - a symbol file (extension `.smb`) if it does not exist or the **-s** option is present.
 
+## Compiler modification to support ESP-IDF Framework integration
+
+Please look in document [Changes to Oberon-07 definition](./Changes%20to%20%20Oberon-07%20definition.md) for additional functionalities in support of ESP-IDF integration.
+
 ## Runtime support files
+
+[This section will be substantially modified to supply ESP-IDF integration guidance.]
 
 An ESP32 Oberon program requires runtime support. The compiler is supplied with many files that you can find in the lib folder:
 

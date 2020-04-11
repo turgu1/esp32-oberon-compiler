@@ -65,17 +65,45 @@ END P;
 
 (Not working. Still, a work in progress)
 
-## CDECL procedure
+## CDECL
 
-You can declare a procedure to be using a C language compatible return value using the word “CDECL” in brackets before the procedure name:
+Integrating Oberon code with the ESP-IDF Framework requires support to access C programming language functions and definitions outside of the Oberon realm. Some limited functionality has been added to the ESP32 Oberon Compiler to simplify part of this requirement.
+
+It is then possible to declare C programming langage functions both in a normal Oberon module and in special declaration modules into which every declaration is considered to be related to external C.
+
+### Module level CDECL declaration
+
+A module can be declared as a special C language declaration module as follows:
+
+```Modula-2
+MODULE [CDECL] moduleName;
+
+END moduleName.
+```
+
+This kind of module will have the following consequences:
+
+- No object code will be generated. This will only produce a `.smb` module declaration file.
+- Every procedure declared in the module will be automatically tagged as a CDECL declaration (see next sub-section for more information).
+- As no object code is generated, it is not permitted to put any executable statements in the module. 
+
+### Procedure CDECL declaration
+
+You can declare a procedure to be a C programming language function using the word “CDECL” in brackets before the procedure name:
 
 ```Modula-2
 PROCEDURE [CDECL] P(): INTEGER;
-BEGIN
-END P;
 ```
 
-For now, it is only being used by the compiler to take into account the return value of such a procedure to be in register a2 instead of a3, as register a2 contains the static base of a module. This behavior may be modified in a future version to take into account other aspects of the C compiler code generator.
+Such a declaration does not allow to include any procedure contain (both procedure level declarations and statements) as it identifies an external procedure that can be called by other Oberon procedures. 
+
+CDECL procedure declaration is also permitted for procedure type declarations and procedures as a parameter value.
+
+Some important properties of these declarations:
+
+- Open array, string array and record parameters are passed by address. Other informations like length or type information are not automatically supplied, as is the case for usual Oberon procedure calls.
+- There is no support for variable number of parameters. If such procedure needs to be called, you can write your own C function that will be used as a proxy for these calls.
+- Even if an external C function declare default parameter values, all parameters must be supplied to the call.
 
 ## SHORTINT
 
@@ -160,7 +188,7 @@ BEGIN
     movi a5, 44
     add  a4, a4, a5
   END
-END Example;
+END Example.
 ```
 
 This introduce a new ASM keyword. Everyting up to a line that start with the keyword END will be added to the generated assembly language stream. No interpretation is done by the compiler. 

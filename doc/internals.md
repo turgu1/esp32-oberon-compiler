@@ -24,9 +24,9 @@ This document describes the internal structure of the ESP32 Oberon Compiler gene
 The generated code and data are put in different sections that will be placed at appropriate locations in memory by the linker (see file lib/ld/esp32.ld). Each section name contains the module name and symbol file checksum. This is to insure a minimal validation of proper module linkage. For example, assume that de module name is ModuleName and the symbol file checksum is 1234ABCD in hex, you will then get, as a suffix, `_ModuleName_1234ABCD`. Here is the list of sections with their name prefix:
 
 - Module variables: `.bss`
-- String constants: `.data_strs`
-- Record Types descriptors: `.data_types`
-- Module initialisation code: `.init`
+- String constants: `.rodata_strs`
+- Record Types descriptors: `.rodata_types`
+- Module initialisation code: `.text_init`
 - Procedure code: `.text`
 
 The following sections define also an external entry point (a `.global` name) using the previously defined suffix as a prefix and with the following suffixes:

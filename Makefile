@@ -19,9 +19,9 @@ SIMS = \
 $(OUT)/%.sym: $(SRC)/%.Mod
 	cd $(SRC); $(OC) $(<F)
 
-Oberon: $(SIMS) $(SRC)/Oberon.Mod
+OberonESP32: $(SIMS) $(SRC)/Oberon.Mod
 	cd $(SRC); $(LINK) Oberon.Mod
-	mv $(SRC)/Oberon .
+	mv $(SRC)/Oberon ./OberonESP32
 
 ORTool: $(SRC)/ORTool.Mod $(OUT)/ORB.sym $(OUT)/Texts.sym
 	cd $(SRC); $(LINK) ORTool.Mod

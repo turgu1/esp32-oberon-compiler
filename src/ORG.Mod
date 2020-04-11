@@ -798,12 +798,12 @@ MODULE ORG;
     Texts.WriteInt(   CodeW, r, 0);
   END PutCallR;
 
-  PROCEDURE PutCallLocal(callType: INTEGER; name: ORS.Ident);
+  PROCEDURE PutCallLocal(callType: INTEGER; name: ORS.Ident; cdecl: BOOLEAN);
   BEGIN 
     Texts.WriteLn(    CodeW);
     Texts.WriteString(CodeW, "    call");
     Texts.WriteInt(   CodeW, callType, 0);
-    Texts.WriteString(CodeW, " _");
+    IF cdecl THEN Texts.Write(CodeW, " ") ELSE Texts.WriteString(CodeW, " _") END;
     Texts.WriteString(CodeW, name);
   END PutCallLocal;
 
@@ -1035,7 +1035,7 @@ MODULE ORG;
     PutCondBranch(negated(cond), lbl);
     PutRI("movi", 6, (num * 256) + 2);       (* 2 is TRAP EXCEPTION, num is REASON *)
     (* PutA("syscall", "# Trap"); Not supposed to come back here *)
-    PutCallLocal(4, "OberonSyscallHandler");
+    PutCallLocal(4, "OberonSyscallHandler", FALSE);
     PutLabel(lbl); 
   END Trap;
 
@@ -2390,35 +2390,39 @@ MODULE ORG;
   
   (* Code generation for parameters *)
   
-  PROCEDURE OpenArrayParam*(VAR x: Item);
+  PROCEDURE OpenArrayParam*(VAR x: Item; cdecl: BOOLEAN);
   BEGIN loadAdr(x);
     e("OpenArrayParam");
-    IF x.type.len >= 0 THEN 
-      PutRI("movi", RH, x.type.len); SetRcI(RH, -1, x.type.len, IMM);
-    ELSE
-      PutMoveRRI("l32i", 1020, RH, SP, x.a + 4 + frame); 
-    END;
-    incR
+    IF ~cdecl THEN
+      IF x.type.len >= 0 THEN 
+        PutRI("movi", RH, x.type.len); SetRcI(RH, -1, x.type.len, IMM);
+      ELSE
+        PutMoveRRI("l32i", 1020, RH, SP, x.a + 4 + frame); 
+      END;
+      incR
+    END
   END OpenArrayParam;
 
-  PROCEDURE VarParam*(VAR x: Item; ftype: ORB.Type);
+  PROCEDURE VarParam*(VAR x: Item; ftype: ORB.Type; cdecl: BOOLEAN);
   VAR xmd: INTEGER;
   BEGIN 
     e("VarParam");
     xmd := x.mode; loadAdr(x);
-    IF (ftype.form = ORB.Array) & (ftype.len < 0) THEN (*open array*)
-      IF x.type.len >= 0 THEN 
-        PutRI("movi", RH, x.type.len); SetRcI(RH, -1, x.type.len, IMM);
-      ELSE  
-        PutMoveRRI("l32i", 1020, RH, SP, x.a + 4 + frame);
-      END;
-      incR
-    ELSIF ftype.form = ORB.Record THEN
-      IF xmd = ORB.Par THEN
-        PutMoveRRI("l32i", 1020, RH, SP, x.a + 4 + frame); 
-        incR 
-      ELSE 
-        loadTypTagAdr(x.type) 
+    IF ~cdecl THEN
+      IF (ftype.form = ORB.Array) & (ftype.len < 0) THEN (*open array*)
+        IF x.type.len >= 0 THEN 
+          PutRI("movi", RH, x.type.len); SetRcI(RH, -1, x.type.len, IMM);
+        ELSE  
+          PutMoveRRI("l32i", 1020, RH, SP, x.a + 4 + frame);
+        END;
+        incR
+      ELSIF ftype.form = ORB.Record THEN
+        IF xmd = ORB.Par THEN
+          PutMoveRRI("l32i", 1020, RH, SP, x.a + 4 + frame); 
+          incR 
+        ELSE 
+          loadTypTagAdr(x.type) 
+        END
       END
     END
   END VarParam;
@@ -2429,12 +2433,14 @@ MODULE ORG;
     load(x)
   END ValueParam;
 
-  PROCEDURE StringParam*(VAR x: Item);
+  PROCEDURE StringParam*(VAR x: Item; cdecl: BOOLEAN);
   BEGIN 
     e("StringParam");
     loadStringAdr(x); 
-    PutRI("movi", RH, x.b); SetRcI(RH, -1, x.b, IMM);
-    incR  (*len*)
+    IF ~cdecl THEN
+      PutRI("movi", RH, x.b); SetRcI(RH, -1, x.b, IMM);
+      incR  (*len*)
+    END
   END StringParam;
 
   (* For Statements *)
@@ -2660,9 +2666,12 @@ MODULE ORG;
     e("Call");
     IF x.mode = ORB.Const THEN
       eStr(" (const)");
-      IF x.r >= 0 THEN (* local proc *)
+      IF x.type.form = ORB.CProc THEN
+        eStr(" cdecl:"); eStr(x.name);
+        PutCallLocal(callType, x.name, TRUE); ClearRcFrom(callType);
+      ELSIF x.r >= 0 THEN (* local proc *)
         eStr(" local:"); eStr(x.name);
-        PutCallLocal(callType, x.name); ClearRcFrom(callType);
+        PutCallLocal(callType, x.name, FALSE); ClearRcFrom(callType);
       ELSE (* imported *)
         eStr(" imported: "); eStr(x.name); 
         ModuleInfo(x.r, moduleId, moduleKey);  
@@ -2922,7 +2931,7 @@ MODULE ORG;
     
     (* PutA("syscall", "# New");  <-- Not used. Interrupts is a pain *)
     
-    PutCallLocal(4, "OberonSyscallHandler");
+    PutCallLocal(4, "OberonSyscallHandler", FALSE);
 
     (* GetLocalSB; Not needed with call4 *)
     RH := FirstRH; UsedRegs := {}
@@ -3393,13 +3402,14 @@ PROCEDURE Abs*(VAR x: Item);
             Texts.WriteLn(AsW);
             Texts.WriteString(AsW, "    .global ");
             ExportName(name, "p", moduleId, moduleKey);
-            Texts.WriteLn(AsW);
+            (* Texts.WriteLn(AsW);
             Texts.WriteString(AsW, "    .type ");
             ExportName(name, "p", moduleId, moduleKey);
-            Texts.WriteString(AsW, ", @function");
+            Texts.WriteString(AsW, ", @function"); *)
             Texts.WriteLn(AsW);
             ExportName(name, "p", moduleId, moduleKey);
             Texts.Write(AsW, ":");
+            Texts.WriteLn(AsW);
           ELSE
             Texts.Write(AsW, CHR(b));
           END
@@ -3479,8 +3489,9 @@ PROCEDURE Abs*(VAR x: Item);
 
     (* types description section *)
     IF tdx > 0 THEN
-    Texts.WriteLn(AsW);
-    SectionHeader(DataTypeSectionPrefix, moduleId, moduleKey, TRUE);
+      Texts.WriteLn(AsW);
+      SectionHeader(DataTypeSectionPrefix, moduleId, moduleKey, TRUE);
+      Texts.WriteLn(AsW);
       Texts.WriteString(AsW, "_");
       Texts.WriteString(AsW, moduleId);
       Texts.WriteString(AsW, DataTypeSectionLabelSuffix);
@@ -3561,20 +3572,17 @@ PROCEDURE Abs*(VAR x: Item);
         Texts.WriteString(AsW, "_init, .-_");
         Texts.WriteString(AsW, moduleId);
         Texts.WriteString(AsW, "_init");
+
+        Texts.WriteLn(AsW);
+        Texts.WriteLn(AsW);
+        SectionHeader(InitTableSectionPrefix, moduleId, moduleKey, FALSE);
+  
+        Texts.WriteLn(AsW);
+        Texts.WriteString(AsW, "    .int ");
+        Texts.WriteString(AsW, "_");
+        Texts.WriteString(AsW, moduleId);
+        Texts.WriteString(AsW, "_init");  
       END
-    END;
-
-    (* Initialization Code Table *)
-    IF initPresent THEN
-      Texts.WriteLn(AsW);
-      Texts.WriteLn(AsW);
-      SectionHeader(InitTableSectionPrefix, moduleId, moduleKey, FALSE);
-
-      Texts.WriteLn(AsW);
-      Texts.WriteString(AsW, "    .int ");
-      Texts.WriteString(AsW, "_");
-      Texts.WriteString(AsW, moduleId);
-      Texts.WriteString(AsW, "_init");
     END;
 
     Texts.WriteLn(AsW);

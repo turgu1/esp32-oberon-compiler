@@ -24,7 +24,8 @@ VAR
 PROCEDURE Usage;
 BEGIN
   Out.Ln;
-  Out.String("Usage: Oberon [-c][-l][-o folder][-p path][-s][-v][-x][-z] filename"); Out.Ln;
+  Out.String("Usage: OberonESP32 [-c][-l][-o folder][-p path][-s][-v][-x][-z] filename"); 
+  Out.Ln; Out.Ln;
   Out.String("-c : Generate Verification Code"                            ); Out.Ln;
   Out.String("-l : Add source code to the assembler output"               ); Out.Ln;
   Out.String("-o : Output folder of generated code"                       ); Out.Ln;

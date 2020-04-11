@@ -8,9 +8,9 @@ MODULE ORB;   (*NW 25.6.2014  / 1.3.2019  in Oberon-07*)
     the symbol table (universe), and that of the pseudo-module SYSTEM are initialized. *)
 
   CONST 
-      CompilerVersion* = "0.1.0";
+      CompilerVersion* = "0.2.0";
       
-      versionkey* = 2; maxTypTab = 64;
+      versionkey* = 3; maxTypTab = 64;
     (* class values *) 
       Head*  = 0;
       Const* = 1; Var*   = 2; Par*   = 3; 
@@ -42,7 +42,7 @@ MODULE ORB;   (*NW 25.6.2014  / 1.3.2019  in Oberon-07*)
       val*:   INTEGER
     END ;
 
-    ModDesc* = RECORD (ObjDesc) orgname*: ORS.Ident END ;
+    ModDesc* = RECORD (ObjDesc) orgname*: ORS.Ident; cdecl: BOOLEAN END ;
 
     TypeDesc* = RECORD
       form*, 
@@ -192,12 +192,12 @@ MODULE ORB;   (*NW 25.6.2014  / 1.3.2019  in Oberon-07*)
     UNTIL (i >= 10) OR (importPaths[i][0] = 0X) OR (Files.Old(FName) # NIL)
   END FindFileName;
 
-  PROCEDURE ThisModule(name, orgname: ORS.Ident; non: BOOLEAN; key: INTEGER): Object;
+  PROCEDURE ThisModule(name, orgname: ORS.Ident; non: BOOLEAN; key: INTEGER; cdecl: BOOLEAN): Object;
     VAR mod: Module; obj, obj1: Object;
   BEGIN obj1 := topScope; obj := obj1.next;  (*search for module*)
     WHILE (obj # NIL) & (obj.name # name) DO obj1 := obj; obj := obj1.next END ;
     IF obj = NIL THEN  (*insert new module*)
-      NEW(mod); mod.class := Mod; mod.rdo := FALSE;
+      NEW(mod); mod.class := Mod; mod.rdo := FALSE; mod.cdecl := cdecl;
       mod.name := name; mod.orgname := orgname; mod.val := key;
       mod.lev := nofmod; INC(nofmod); mod.type := noType; mod.dsc := NIL; mod.next := NIL;
       obj1.next := mod; obj := mod
@@ -219,6 +219,7 @@ MODULE ORB;   (*NW 25.6.2014  / 1.3.2019  in Oberon-07*)
       fld, par, obj, mod, last: Object;
       t: Type;
       name, modname: ORS.Ident;
+      cdecl: BOOLEAN;
   BEGIN Read(R, ref);
     IF ref < 0 THEN T := typtab[-ref]  (* already read *)
     ELSE NEW(t); T := t; typtab[ref] := t; t.mno := thismod.lev;
@@ -251,9 +252,11 @@ MODULE ORB;   (*NW 25.6.2014  / 1.3.2019  in Oberon-07*)
         t.dsc := obj; t.nofpar := np; t.size := 4
       END ;
       Files.ReadString(R, modname);
-      IF modname[0] #  0X THEN  (* re-import *)
+      IF modname[0] # 0X THEN  (* re-import *)
         Files.ReadInt(R, key); Files.ReadString(R, name);
-        mod := ThisModule(modname, modname, FALSE, key);
+        Read(R, class); (* cdecl *)
+        cdecl := class = 1;
+        mod := ThisModule(modname, modname, FALSE, key, cdecl);
         obj := mod.dsc;  (* search type *)
         WHILE (obj # NIL) & (obj.name # name) DO obj := obj.next END ;
         IF obj # NIL THEN T := obj.type   (* type object found in object list of mod *)
@@ -273,18 +276,21 @@ MODULE ORB;   (*NW 25.6.2014  / 1.3.2019  in Oberon-07*)
       modname: ORS.Ident;
       F: Files.File; R: Files.Rider;
       fname: ARRAY 256 OF CHAR;
+      cdecl: BOOLEAN;
   BEGIN
     IF modid1 = "SYSTEM" THEN
-      thismod := ThisModule(modid, modid1, TRUE, key); DEC(nofmod);
+      thismod := ThisModule(modid, modid1, TRUE, key, FALSE); DEC(nofmod);
       thismod.lev := 0; thismod.dsc := system; thismod.rdo := TRUE
     ELSE 
       FindFileName(fname, modid1, ".smb"); 
       F := Files.Old(fname);
       IF F # NIL THEN
         Files.Set(R, F, 0); Files.ReadInt(R, key); Files.ReadInt(R, key); Files.ReadString(R, modname);
-        thismod := ThisModule(modid, modid1, TRUE, key); thismod.rdo := TRUE;
         Read(R, class); (* version key *)
-        IF class # versionkey THEN ORS.Mark("wrong version") END ;
+        IF class # versionkey THEN ORS.Mark("wrong version") END;
+        Read(R, class); (* cdecl *)
+        cdecl := class = 1;
+        thismod := ThisModule(modid, modid1, TRUE, key, cdecl); thismod.rdo := TRUE;
         Read(R, class);
         WHILE class # 0 DO
           NEW(obj); obj.class := class; Files.ReadString(R, obj.name);
@@ -361,7 +367,11 @@ MODULE ORB;   (*NW 25.6.2014  / 1.3.2019  in Oberon-07*)
       IF (t.mno > 0) & (obj # NIL) THEN  (*re-export, output name*)
         mod := topScope.next;
         WHILE (mod # NIL) & (mod.lev # t.mno) DO mod := mod.next END ;
-        IF mod # NIL THEN Files.WriteString(R, mod(Module).orgname); Files.WriteInt(R, mod.val); Files.WriteString(R, obj.name)
+        IF mod # NIL THEN 
+          Files.WriteString(R, mod(Module).orgname); 
+          Files.WriteInt(R, mod.val); 
+          Files.WriteString(R, obj.name);
+          Write(R, ORD(mod(Module).cdecl))
         ELSE ORS.Mark("re-export not found"); Write(R, 0)
         END
       ELSE Write(R, 0)
@@ -369,7 +379,7 @@ MODULE ORB;   (*NW 25.6.2014  / 1.3.2019  in Oberon-07*)
     END
   END OutType;
 
-  PROCEDURE Export*(VAR modid: ORS.Ident; VAR newSF: BOOLEAN; VAR key: INTEGER; folder: ARRAY OF CHAR);
+  PROCEDURE Export*(VAR modid: ORS.Ident; VAR newSF: BOOLEAN; VAR key: INTEGER; cdecl: BOOLEAN; folder: ARRAY OF CHAR);
     VAR x, sum, oldkey: INTEGER;
       obj, obj0: Object;
       filename: ORS.Ident;
@@ -381,6 +391,7 @@ MODULE ORB;   (*NW 25.6.2014  / 1.3.2019  in Oberon-07*)
     Files.WriteInt(R, 0); (*placeholder*)
     Files.WriteInt(R, 0); (*placeholder for key to be inserted at the end*)
     Files.WriteString(R, modid); Write(R, versionkey);
+    IF cdecl THEN Write(R, 1) ELSE Write(R, 0) END;
     obj := topScope.next;
     WHILE obj # NIL DO
       IF obj.expo THEN

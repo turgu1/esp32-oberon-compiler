@@ -560,7 +560,8 @@ MODULE Kernel;
       Out.Ln; Out.Flush;
 
       ASM
-        j _init_end # Loop at nauseam
+      loop:
+        j loop # Loop at nauseam
       END
     END
   END OberonSyscallHandler;
