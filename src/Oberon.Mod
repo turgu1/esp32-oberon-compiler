@@ -33,17 +33,16 @@ BEGIN
   Out.String("-s : Update Symbols File"                                   ); Out.Ln;
   Out.String("-v : Show compiler version and output information"          ); Out.Ln;
   Out.String("-x : Register use optimization"                             ); Out.Ln;
-  Out.String("-z : Add Register optimization info to the assembler output"); Out.Ln;
+  Out.String("-z : Add Register optimization info to the assembler output"); Out.Ln
 END Usage;
 
 BEGIN
 
-  IF (SYSTEM.SIZE(INTEGER) # 4) OR
-     (SYSTEM.SIZE(REAL) # 4) THEN
-     Out.Ln;
-     Out.String("INTEGER or REAL not of size 4!!"); Out.Ln;
-     Out.String("INTEGER: "); Out.Int(SYSTEM.SIZE(INTEGER), 0); Out.Ln;
-     Out.String("REAL: "   ); Out.Int(SYSTEM.SIZE(REAL), 0);    Out.Ln;
+  IF (SYSTEM.SIZE(INTEGER) # 4) OR (SYSTEM.SIZE(REAL) # 4) THEN
+    Out.Ln;
+    Out.String("INTEGER or REAL not of size 4!!"); Out.Ln;
+    Out.String("INTEGER: "); Out.Int(SYSTEM.SIZE(INTEGER), 0); Out.Ln;
+    Out.String("REAL: "   ); Out.Int(SYSTEM.SIZE(REAL), 0);    Out.Ln
   ELSE
     overrideSymbolFile := FALSE;
     generateCheckCode  := FALSE;
@@ -52,73 +51,48 @@ BEGIN
     sourceToAssembly   := FALSE;
     argCount           := extArgs.count;
 
+    outputFolder := ".";
+
     IF (argCount > 0) THEN
       i := 0;
       WHILE i < argCount DO
         extArgs.Get(i, arg, res);
 
         IF DEBUG THEN
-          Out.String("Argument "); 
-          Out.Int(i + 1, 0); 
-          Out.String(": "); 
-          Out.String(arg);
-          Out.Ln;
+          Out.String("Argument "); Out.Int(i + 1, 0); Out.String(": "); 
+          Out.String(arg); Out.Ln
         END;
 
         IF (arg = "-c") THEN
           generateCheckCode := TRUE;
-          IF DEBUG THEN
-            Out.String("Generating Check Code");
-            Out.Ln;
-          END
+          IF DEBUG THEN Out.String("Generating Check Code"); Out.Ln END
         ELSIF (arg = "-l") THEN
           sourceToAssembly := TRUE;
-          IF DEBUG THEN
-            Out.String("Add Source code to assembler output");
-            Out.Ln;
-          END
+          IF DEBUG THEN Out.String("Add Source code to assembler output"); Out.Ln END
         ELSIF (arg = "-o") THEN
           INC(i);
           IF i < argCount THEN
             extArgs.Get(i, outputFolder, res);
-            IF DEBUG THEN
-              Out.String("Output Folder");
-              Out.Ln;
-            END
+            IF DEBUG THEN Out.String("Output Folder"); Out.Ln END
           END
         ELSIF (arg = "-p") THEN
           INC(i);
           IF i < argCount THEN
             extArgs.Get(i, importPath, res);
-            IF DEBUG THEN
-              Out.String("Import Path");
-              Out.Ln;
-            END
+            IF DEBUG THEN Out.String("Import Path"); Out.Ln END
           END
         ELSIF (arg = "-s") THEN
           overrideSymbolFile := TRUE;
-          IF DEBUG THEN
-            Out.String("Overriding Symbol File");
-            Out.Ln;
-          END
+          IF DEBUG THEN Out.String("Overriding Symbol File"); Out.Ln END
         ELSIF (arg = "-v") THEN
           verbose := TRUE;
-          IF DEBUG THEN
-            Out.String("Generating Check Code");
-            Out.Ln;
-          END
+          IF DEBUG THEN Out.String("Generating Check Code"); Out.Ln END
         ELSIF (arg = "-x") THEN
           regOptimization := TRUE;
-          IF DEBUG THEN
-            Out.String("Register Optimization");
-            Out.Ln;
-          END
+          IF DEBUG THEN Out.String("Register Optimization"); Out.Ln END
         ELSIF (arg = "-z") THEN
           regOptList := TRUE;
-          IF DEBUG THEN
-            Out.String("Reg Opt output to assembler output");
-            Out.Ln;
-          END
+          IF DEBUG THEN Out.String("Reg Opt output to assembler output"); Out.Ln END
         ELSIF arg[0] # "-" THEN
           filename    := arg;
           filePresent := TRUE;
@@ -131,13 +105,10 @@ BEGIN
 
       IF filePresent THEN
         IF verbose THEN
-          Out.String("Compiling "); 
-          Out.String(filename); 
-          Out.String(" ..."); 
-          Out.Ln;
+          Out.String("Compiling "); Out.String(filename); Out.String(" ..."); Out.Ln
         END;
         
-        ORP.Compile(
+        ORP.Compile(  (* Never return *)
           filename, 
           overrideSymbolFile,
           generateCheckCode, 
@@ -146,12 +117,12 @@ BEGIN
           verbose,
           sourceToAssembly,
           outputFolder,
-          importPath);
+          importPath)
       ELSE
-        Usage;
+        Usage
       END
     ELSE
-      Usage;
+      Usage
     END
   END
 END Oberon.

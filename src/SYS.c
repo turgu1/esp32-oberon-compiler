@@ -37,37 +37,40 @@ static char cmd[1024];
 
 OBNC_INTEGER SYS__Assembler_(const char fromFile_[], OBNC_INTEGER fromFile_len, const char toFile_[], OBNC_INTEGER toFile_len)
 {
-#if 0
-  const char *pgm = "xtensa-esp32-elf-gcc";
-  char * args[] = {
-    "-x assembler-with-cpp",
-    "-c",
-	"-O0",
-	"-Wall",
-	"-fmessage-length=0",
-    "-mlongcalls",
-	"-mauto-litpools",
-	"-mtext-section-literals",
-	"-fstrict-volatile-bitfields",
-	"-g",
-	(char *) fromFile_,
-	"-o",
-	(char *) toFile_,
-	NULL
-  };
-  
-  execv(pgm, args);
-  perror("Call to assembler error");
-  return 1;
-#else
-  strcpy(cmd, "xtensa-esp32-elf-gcc -x assembler-with-cpp -c -O0 -Wall -fmessage-length=0 -mlongcalls -mauto-litpools -mtext-section-literals -fstrict-volatile-bitfields -g ");
-  strcat(cmd, fromFile_);
-  strcat(cmd, " -o ");
-  strcat(cmd, toFile_);
+  #if 0
+    // This doesn't work... yet.
+    const char *pgm = "xtensa-esp32-elf-gcc";
+    char * args[] = {
+      "-x assembler-with-cpp",
+      "-c",
+      "-O0",
+      "-Wall",
+      "-fmessage-length=0",
+        "-mlongcalls",
+      "-mauto-litpools",
+      "-mtext-section-literals",
+      "-fstrict-volatile-bitfields",
+      "-g",
+      (char *) fromFile_,
+      "-o",
+      (char *) toFile_,
+      NULL
+    };
+    
+    execv(pgm, args);
+    perror("Call to assembler error");
+    return 1;
+  #else
+    int res;
 
-  if (system(cmd)) perror("Call to assembler error");
-  return 1;
-#endif
+    strcpy(cmd, "xtensa-esp32-elf-gcc -x assembler-with-cpp -c -O0 -Wall -fmessage-length=0 -mlongcalls -mauto-litpools -mtext-section-literals -fstrict-volatile-bitfields -g ");
+    strcat(cmd, fromFile_);
+    strcat(cmd, " -o ");
+    strcat(cmd, toFile_);
+
+    if ((res = system(cmd))) perror("Last assembler msg");
+    return res;
+  #endif
 }
 
 

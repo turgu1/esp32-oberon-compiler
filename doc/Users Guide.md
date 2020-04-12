@@ -20,17 +20,20 @@ Where the parameters are:
   + Illegal procedure call
 
 - **-l** : (lowercase “L”) Source code will be output as comments in assembly language generated code.
-- **-o folder** : Output folder for the generated assembly language code. If not present, the module source code folder is being used.
-- **-p path** : Search path for imported modules, as a list of folder names separated with character “:”. An imported module is first seached in the folder of the module being compiled, then in sequence in the folders part of the path.
-- **-s** : Override Symbol file. The symbol file will be generated in the same folder as the module source code.
+- **-o folder** : Output folder for generated files. If not present, the current folder is used.
+- **-p path** : Search path for imported modules, as a list of folder names separated with character “:”. An imported module is first seached in the current folder, then the folder of the module being compiled, then in sequence in each folder of the path.
+- **-s** : Override Symbol file. The symbol file will be generated even if it already exists.
 - **-v** : Output compiler version number.
 - **-x** : Optimize register usage.
 - **-z** : Output optimization information in assembler output.
 - **filename** : Oberon source filename to be compiled.
 
 The compiler will produce:
-- an ESP32 assembly language source code (extension `.S`); and 
-- a symbol file (extension `.smb`) if it does not exist or the **-s** option is present.
+- an ESP32 assembly language source code (extension `.S`); 
+- the object code (extension `.o`); 
+- a symbol file (extension `.smb`) if it does not exist; or the **-s** option is present.
+
+Note that for CDECL module, only the symbol file (extension `.smb`) will be generated.
 
 ## Compiler modification to support ESP-IDF Framework integration
 

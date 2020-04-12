@@ -1208,7 +1208,7 @@ MODULE ORP; (*N. Wirth 1.7.97 / 8.2.2020  Oberon compiler for ESP32 in Oberon-07
     UNTIL sym # ORS.comma
   END ImportList;
 
-  PROCEDURE Assembling(moduleId: ORS.Ident; outputFolder: ARRAY OF CHAR);
+  PROCEDURE Assembler(moduleId: ORS.Ident; outputFolder: ARRAY OF CHAR);
     VAR 
       inFile, outFile: ARRAY 256 OF CHAR;
       res : INTEGER;
@@ -1216,7 +1216,8 @@ MODULE ORP; (*N. Wirth 1.7.97 / 8.2.2020  Oberon compiler for ESP32 in Oberon-07
     ORB.MakeFileName(inFile,  outputFolder, moduleId, ".S");
     ORB.MakeFileName(outFile, outputFolder, moduleId, ".o");
     res := SYS.Assembler(inFile, outFile);
-  END Assembling;
+    IF res # 0 THEN ORS.Mark("There is some assembler error.") END
+  END Assembler;
 
   PROCEDURE Module(verbose : BOOLEAN);
     VAR
@@ -1262,21 +1263,17 @@ MODULE ORP; (*N. Wirth 1.7.97 / 8.2.2020  Oberon compiler for ESP32 in Oberon-07
         ORS.Mark("period missing")
       END;
       IF ORS.errcnt = 0 THEN
-        ORB.Export(modid, newSF, key, cdecl, sourceFolder);
+        ORB.Export(modid, newSF, key, cdecl, outputFolder);
         IF newSF & verbose THEN Out.String(" new symbol file") END
       END;
       IF DEBUG OR (ORS.errcnt = 0) THEN
         IF ~cdecl THEN
-          IF outputFolder[0] = 0X THEN
-            ORG.Close(modid, key, exno, sourceFolder);
-            IF ORS.errcnt = 0 THEN Assembling(modid, sourceFolder) END;
-          ELSE
-            ORG.Close(modid, key, exno, outputFolder);
-            IF ORS.errcnt = 0 THEN Assembling(modid, outputFolder) END;
-          END;
+          ORG.Close(modid, key, exno, outputFolder);
+          IF ORS.errcnt = 0 THEN Assembler(modid, outputFolder) END;
         END;
         IF verbose THEN Out.Int(dc, 6); Out.Hex(key) END
-      ELSE 
+      END;
+      IF ORS.errcnt # 0 THEN 
         Out.Ln; Out.String("compilation FAILED; "); 
         Out.Int(ORS.errcnt,0); Out.String(" error(s) detected.");
       END;
@@ -1310,8 +1307,8 @@ MODULE ORP; (*N. Wirth 1.7.97 / 8.2.2020  Oberon compiler for ESP32 in Oberon-07
       (*S: Texts.Scanner; *)
   BEGIN 
     IF verbose THEN
-    Out.Ln; Out.String("ESP32 Oberon-07 Compiler Version ");
-      Out.String(ORB.CompilerVersion);
+      Out.Ln; Out.String("ESP32 Oberon-07 Compiler Version ");
+      Out.String(ORB.CompilerVersion)
     END;
     newSF := overrideSymbolFile;
 
@@ -1326,7 +1323,7 @@ MODULE ORP; (*N. Wirth 1.7.97 / 8.2.2020  Oberon compiler for ESP32 in Oberon-07
       ORG.Init(generateCheckCode, sourceToAssembly, regOptimization, regOptList);
       ORS.Init(T, 0);
       Module(verbose);
-      IF ORS.errcnt # 0 THEN Out.Ln; SYS.Exit(1) END;
+      IF ORS.errcnt # 0 THEN Out.Ln; SYS.Exit(1) END
     ELSE
       Out.Ln;  Out.String(filename); Out.String(" not found");
       SYS.Exit(1)

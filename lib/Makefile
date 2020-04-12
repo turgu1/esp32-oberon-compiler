@@ -67,13 +67,12 @@ $(MATHO): $(MATH)
 	$(CC) -x assembler-with-cpp $(ASFLAGS) $< -o $@
 	@$(AR) r $(ARCHIVE) $@ 
 
-$(BLDDIR)/%.o %.smb : $(SRCDIR)/%.Mod
+$(BLDDIR)/%.o ./%.smb : $(SRCDIR)/%.Mod
 	$(OB) $(OBFLAGS) $<
-	@mv $(SRCDIR)/$(patsubst %.Mod,%.smb,$(<F)) .
+	@mv $(BLDDIR)/$(patsubst %.Mod,%.smb,$(<F)) .
 	@$(AR) r $(ARCHIVE) $@ 
 
 clean:
 	-rm build/*
-	-rm src/*.smb
 	-rm *.smb
 	-rm libesp32-oberon.a
