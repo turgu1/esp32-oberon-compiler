@@ -1378,6 +1378,13 @@ MODULE ORG;
     END
   END loadCond;
 
+(* 
+  PROCEDURE loadTypTagAdr(T: ORB.Type);
+    VAR x: Item;
+  BEGIN x.mode := ORB.Var; x.a := T.len; x.r := -T.mno; loadAdr(x)
+  END loadTypTagAdr;
+ *)
+
   PROCEDURE loadTypTagAdr(T: ORB.Type);
     VAR 
       offset : INTEGER;
@@ -3587,6 +3594,7 @@ PROCEDURE Abs*(VAR x: Item);
 
     Texts.WriteLn(AsW);
     Files.Register(AsF);
+    Files.Close(AsF);
     
     IF regOptListing THEN
       Out.Ln; Out.String("Hit Count: "); Out.Int(hitCount, 0);

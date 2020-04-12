@@ -3,6 +3,10 @@
 #include ".obnc/SYS.h"
 #include <obnc/OBNC.h>
 
+#include <stdio.h>
+#include <stdlib.h> 
+#include <unistd.h> 
+
 #define OBERON_SOURCE_FILENAME "SYS.Mod"
 
 extern void exit(int);
@@ -27,6 +31,43 @@ void SYS__RealToInt_(OBNC_REAL r_, OBNC_INTEGER *i_)
 void SYS__Exit_(OBNC_INTEGER i_)
 {
   exit(i_);
+}
+
+static char cmd[1024];
+
+OBNC_INTEGER SYS__Assembler_(const char fromFile_[], OBNC_INTEGER fromFile_len, const char toFile_[], OBNC_INTEGER toFile_len)
+{
+#if 0
+  const char *pgm = "xtensa-esp32-elf-gcc";
+  char * args[] = {
+    "-x assembler-with-cpp",
+    "-c",
+	"-O0",
+	"-Wall",
+	"-fmessage-length=0",
+    "-mlongcalls",
+	"-mauto-litpools",
+	"-mtext-section-literals",
+	"-fstrict-volatile-bitfields",
+	"-g",
+	(char *) fromFile_,
+	"-o",
+	(char *) toFile_,
+	NULL
+  };
+  
+  execv(pgm, args);
+  perror("Call to assembler error");
+  return 1;
+#else
+  strcpy(cmd, "xtensa-esp32-elf-gcc -x assembler-with-cpp -c -O0 -Wall -fmessage-length=0 -mlongcalls -mauto-litpools -mtext-section-literals -fstrict-volatile-bitfields -g ");
+  strcat(cmd, fromFile_);
+  strcat(cmd, " -o ");
+  strcat(cmd, toFile_);
+
+  if (system(cmd)) perror("Call to assembler error");
+  return 1;
+#endif
 }
 
 

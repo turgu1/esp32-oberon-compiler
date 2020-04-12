@@ -104,6 +104,7 @@ Some important properties of these declarations:
 - Open array, string array and record parameters are passed by address. Other informations like length or type information are not automatically supplied, as is the case for usual Oberon procedure calls.
 - There is no support for variable number of parameters. If such procedure needs to be called, you can write your own C function that will be used as a proxy for these calls.
 - Even if an external C function declare default parameter values, all parameters must be supplied to the call.
+- There is no name mangling. The procedure name will be used as-is with call instructions.
 
 ## SHORTINT
 

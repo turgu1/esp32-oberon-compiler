@@ -40,11 +40,7 @@ INITO = $(BLDDIR)/init.o
 MATH = $(SRCDIR)/math_support.S
 MATHO = $(BLDDIR)/math_support.o
 
-ESP = $(SRCDIR)/Esp.Mod
-ESPS = ./Esp.smb
-
 SRC = \
-  EspDefs.Mod \
   Out.Mod \
   Watchdog.Mod \
   Kernel.Mod \
@@ -58,7 +54,7 @@ ARCHIVE = libesp32-oberon.a
 
 OBJS  = $(addprefix $(BLDDIR)/, $(SRC:.Mod=.o))
 
-all: $(ARCHIVE) $(ESPS)
+all: $(ARCHIVE)
 
 $(ARCHIVE) : $(OBJS) $(INITO) $(MATHO)
 	$(RL) $(ARCHIVE)
@@ -67,21 +63,13 @@ $(INITO): $(INIT)
 	$(CC) -x assembler-with-cpp $(ASFLAGS) $< -o $@
 	@$(AR) r $(ARCHIVE) $@ 
 
-$(ESPS): $(ESP)
-	$(OB) $(OBFLAGS) $<
-	@mv $(SRCDIR)/$(patsubst %.Mod,%.smb,$(<F)) .
-	# @rm $(BLDDIR)/$(patsubst %.Mod,%.S,$(<F))
-
 $(MATHO): $(MATH)
 	$(CC) -x assembler-with-cpp $(ASFLAGS) $< -o $@
 	@$(AR) r $(ARCHIVE) $@ 
 
-$(BLDDIR)/%.S %.smb : $(SRCDIR)/%.Mod
+$(BLDDIR)/%.o %.smb : $(SRCDIR)/%.Mod
 	$(OB) $(OBFLAGS) $<
 	@mv $(SRCDIR)/$(patsubst %.Mod,%.smb,$(<F)) .
-
-$(BLDDIR)/%.o : $(BLDDIR)/%.S
-	@$(CC) -x assembler-with-cpp $(ASFLAGS) $< -o $@
 	@$(AR) r $(ARCHIVE) $@ 
 
 clean:

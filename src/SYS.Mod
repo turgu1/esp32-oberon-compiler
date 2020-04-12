@@ -1,0 +1,20 @@
+MODULE SYS;
+
+PROCEDURE IntToReal*(i: INTEGER; VAR r: REAL);
+BEGIN
+END IntToReal;
+
+PROCEDURE RealToInt*(r: REAL; VAR i: INTEGER);
+BEGIN
+END RealToInt;
+
+PROCEDURE Exit*(i : INTEGER);
+BEGIN
+END Exit;
+
+PROCEDURE Assembler*(fromFile, toFile: ARRAY OF CHAR) : INTEGER;
+BEGIN
+RETURN 1
+END Assembler;
+
+END SYS.

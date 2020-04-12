@@ -1208,6 +1208,16 @@ MODULE ORP; (*N. Wirth 1.7.97 / 8.2.2020  Oberon compiler for ESP32 in Oberon-07
     UNTIL sym # ORS.comma
   END ImportList;
 
+  PROCEDURE Assembling(moduleId: ORS.Ident; outputFolder: ARRAY OF CHAR);
+    VAR 
+      inFile, outFile: ARRAY 256 OF CHAR;
+      res : INTEGER;
+  BEGIN
+    ORB.MakeFileName(inFile,  outputFolder, moduleId, ".S");
+    ORB.MakeFileName(outFile, outputFolder, moduleId, ".o");
+    res := SYS.Assembler(inFile, outFile);
+  END Assembling;
+
   PROCEDURE Module(verbose : BOOLEAN);
     VAR
       key: INTEGER;
@@ -1259,8 +1269,10 @@ MODULE ORP; (*N. Wirth 1.7.97 / 8.2.2020  Oberon compiler for ESP32 in Oberon-07
         IF ~cdecl THEN
           IF outputFolder[0] = 0X THEN
             ORG.Close(modid, key, exno, sourceFolder);
+            IF ORS.errcnt = 0 THEN Assembling(modid, sourceFolder) END;
           ELSE
             ORG.Close(modid, key, exno, outputFolder);
+            IF ORS.errcnt = 0 THEN Assembling(modid, outputFolder) END;
           END;
         END;
         IF verbose THEN Out.Int(dc, 6); Out.Hex(key) END

@@ -14,9 +14,6 @@ void SYS__RealToInt_(OBNC_REAL r_, OBNC_INTEGER *i_);
 #define SYS__Exit_ src__SYS__Exit_
 void SYS__Exit_(OBNC_INTEGER i_);
 
-#define SYS__Assembler_ src__SYS__Assembler_
-OBNC_INTEGER SYS__Assembler_(const char fromFile_[], OBNC_INTEGER fromFile_len, const char toFile_[], OBNC_INTEGER toFile_len);
-
 #define SYS__Init src__SYS__Init
 void SYS__Init(void);
 
