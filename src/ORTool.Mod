@@ -1,5 +1,5 @@
 MODULE ORTool;  (*NW 18.2.2013*)
-  IMPORT SYSTEM, Strings, extArgs, Files, Texts, ORB, Out;
+  IMPORT SYSTEM, Strings, extArgs, Files, Texts, ORB, Out, Config;
   VAR
     Form: INTEGER;  (*result of ReadType*)
     mnemo0, mnemo1: ARRAY 16, 4 OF CHAR;  (*mnemonics*)
@@ -74,7 +74,7 @@ MODULE ORTool;  (*NW 18.2.2013*)
         Files.Set(R, F, 0); Files.ReadInt(R, k); Files.ReadInt(R, k);
         Files.ReadString(R, name); Out.String(name); Out.Hex(k);
         Read(R, class); Out.Int(class, 3); (*sym file version*)
-        IF class = ORB.versionkey THEN
+        IF class = Config.SmbVersionKey THEN
           Out.Ln; Read(R, class);
           WHILE class # 0 DO
             Out.Int(class, 4); Files.ReadString(R, name); Out.Char(" "); Out.String(name);

@@ -6,12 +6,12 @@ This document describes the internal structure of the ESP32 Oberon Compiler gene
 
 - Assembly language instead of direct code generation
 - Bare metal. For now, no code from ESP-IDF is being used
-- ESP32 Windowing calls 
+- ESP32 Windowing calls
   + Only call4 and call8 are used. Registers beyond A4 or A8 will be pushed on stack prior to the call4 or call8, if required
 
 ## Registers usage
 
-- A0 : Procedure Return address 
+- A0 : Procedure Return address
 - A1 : Stack pointer
 - A2 : Static Base Pointer (Module level variables)
 - Registers used as a stack allocating registers for statements execution
@@ -52,7 +52,7 @@ Procedure names are locally defined using the procedure name prefixed with `_`. 
 
 The Module Initialisation code is not publicly available. It registers an entry to be put in the Module Initialization Table with a section with the following name prefix: `.init_table`. For example: `.init_table_ModuleName_1234ABCD`.
 
-The pointers table section is using `.pointers_table` as prefix. For example: `.pointers_table_ModuleName_1234ABCD`. 
+The pointers table section is using `.pointers_table` as prefix. For example: `.pointers_table_ModuleName_1234ABCD`.
 
 Both Initialization and Pointer table sections are merged with other modules by the linker.
 
@@ -66,7 +66,7 @@ Memory mapping is done by the linker, using a descriptor located in file `lib/ld
 
 (TBC)
 
-## Symbol File
+## Symbol File (`.smb`)
 
 - Added Forms: Short and CProc: Many form identifiers have changed
 - Added cdecl: If = 1, the whole module is a CDECL and no code has been generated, else = 0
@@ -85,14 +85,14 @@ Forms:
 Syntax:
   SymFile = null key name versionkey cdecl imodcnt {imodname} {object}.
   object = (
-    CON name type (value | exno) | 
-    TYP name type [{fix} 0] | 
-    VAR name type expno). 
+    CON name type (value | exno) |
+    TYP name type [{fix} 0] |
+    VAR name type expno).
   type = ref (
-    PTR type | 
-    ARR type len | 
-    REC type {field} 0 | 
+    PTR type |
+    ARR type len |
+    REC type {field} 0 |
     PRO type {param} 0).  (* PRO = Proc OR CProc *)
-  field = FLD name type offset. 
+  field = FLD name type offset.
   param = (VAR | PAR) type.
 ```

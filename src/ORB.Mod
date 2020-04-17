@@ -1,5 +1,5 @@
 MODULE ORB;   (*NW 25.6.2014  / 1.3.2019  in Oberon-07*)
-  IMPORT Files, Out, ORS;
+  IMPORT Files, Out, ORS, Config;
   (*Definition of data types Object and Type, which together form the data structure
     called "symbol table". Contains procedures for creation of Objects, and for search:
     NewObj, this, thisimport, thisfield (and OpenScope, CloseScope).
@@ -8,9 +8,7 @@ MODULE ORB;   (*NW 25.6.2014  / 1.3.2019  in Oberon-07*)
     the symbol table (universe), and that of the pseudo-module SYSTEM are initialized. *)
 
   CONST 
-      CompilerVersion* = "0.2.0";
-      
-      versionkey* = 2; maxTypTab = 64;
+      maxTypTab = 64;
     (* class values *) 
       Head*  = 0;
       Const* = 1; Var*   = 2; Par*   = 3; 
@@ -295,7 +293,7 @@ MODULE ORB;   (*NW 25.6.2014  / 1.3.2019  in Oberon-07*)
       IF F # NIL THEN
         Files.Set(R, F, 0); Files.ReadInt(R, key); Files.ReadInt(R, key); Files.ReadString(R, modname);
         Read(R, class); (* version key *)
-        IF class # versionkey THEN ORS.Mark("wrong version") END;
+        IF class # Config.SmbVersionKey THEN ORS.Mark("wrong version") END;
         Read(R, class); (* cdecl *)
         cdecl := class = 1;
         thismod := ThisModule(modid, modid1, TRUE, key, cdecl); thismod.rdo := TRUE;
@@ -419,7 +417,7 @@ MODULE ORB;   (*NW 25.6.2014  / 1.3.2019  in Oberon-07*)
     F := Files.New(filename); Files.Set(R, F, 0);
     Files.WriteInt(R, 0); (* placeholder *)
     Files.WriteInt(R, 0); (* placeholder for key to be inserted at the end *)
-    Files.WriteString(R, modid); Write(R, versionkey); Write(R, ORD(cdecl));
+    Files.WriteString(R, modid); Write(R, Config.SmbVersionKey); Write(R, ORD(cdecl));
     OutImported(R);
     obj := topScope.next;
     WHILE obj # NIL DO

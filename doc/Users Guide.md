@@ -1,4 +1,18 @@
-#  ESP32 Oberon Compiler User's Guide
+# ESP32 Oberon Compiler User's Guide
+
+Three applications are supplied:
+
+- The ESP32 Oberon compiler (named OberonESP32)
+- The module initialization table generator (named OIOrderESP32)
+- The smb file viewer (named ORToolESP32)
+
+The sequence of use of the compiler is as follow:
+
+1. The compiler must be called once for each module that is part of the targeted application. It will generate an assembly language file (extension `.S`) and will call the assembler to generate the object file (extension `.o`).
+
+2. After that, the modules init table generator must be called to create the table that will be used by the application initialization code to call each module init code in sequence. This table is an assembly language file (extension `.S`). The generator will then call the assembler to generate the corresponding object file (extension `.o`).
+
+3. The linker can then be called to generate the application. (TBC)
 
 ## Compiler parameters
 
@@ -29,8 +43,8 @@ Where the parameters are:
 - **filename** : Oberon source filename to be compiled.
 
 The compiler will produce:
-- an ESP32 assembly language source code (extension `.S`); 
-- the object code (extension `.o`); 
+- an ESP32 assembly language source code (extension `.S`);
+- the object code (extension `.o`);
 - a symbol file (extension `.smb`) if it does not exist; or the **-s** option is present.
 
 Note that for CDECL module, only the symbol file (extension `.smb`) will be generated.
@@ -140,7 +154,7 @@ This module requires the Out and Kernel modules. The Kernel module must have bee
 
 ```Pascal
 MODULE In;
-  VAR 
+  VAR
     Done*: BOOLEAN;                           (* status of last operation *)
   PROCEDURE SetBaudRate*(baudRate: INTEGER);
   PROCEDURE SetTimeout*(seconds: INTEGER);

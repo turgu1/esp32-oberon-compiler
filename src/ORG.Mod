@@ -2,7 +2,7 @@ MODULE ORG;
   (* N.Wirth, 16.4.2016 / 4.4.2017 / 31.5.2019  Oberon compiler; code generator for RISC*)
   (* G.Turcotte XX.X.2020 Version for the ESP32 processor chip *)
 
-  IMPORT SYSTEM, Files, Texts, ORS, ORB, Out, SYS;
+  IMPORT SYSTEM, Files, Texts, ORS, ORB, Out, SYS, Config;
   
   (* Code generator for Oberon compiler for ESP32 processor.
      Procedural interface to Parser ORP; result in stream "CodeW".
@@ -3491,7 +3491,7 @@ PROCEDURE Abs*(VAR x: Item);
     Texts.WriteString(AsW, "    .sbttl ");
     Texts.Write(      AsW, 22X);
     Texts.WriteString(AsW, "Oberon ESP32 Compiler Version ");
-    Texts.WriteString(AsW, ORB.CompilerVersion);
+    Texts.WriteString(AsW, Config.CompilerVersion);
     Texts.Write(      AsW, 22X);
     
     initPresent := FALSE;

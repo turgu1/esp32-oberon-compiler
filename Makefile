@@ -11,6 +11,7 @@ SRC=src
 OUT=$(SRC)/$(ODIR)
 
 SIMS = \
+  $(OUT)/Config.sym \
 	$(OUT)/Texts.sym \
 	$(OUT)/ORS.sym \
 	$(OUT)/ORB.sym \
@@ -28,11 +29,11 @@ OberonESP32: $(SIMS) $(SRC)/Oberon.Mod
 	cd $(SRC); $(LINK) Oberon.Mod
 	mv $(SRC)/Oberon ./OberonESP32
 
-ORTool: $(SRC)/ORTool.Mod $(OUT)/ORB.sym $(OUT)/Texts.sym
+ORTool: $(SRC)/ORTool.Mod $(OUT)/ORB.sym $(OUT)/Texts.sym $(OUT)/Config.sym
 	cd $(SRC); $(LINK) ORTool.Mod
 	mv $(SRC)/ORTool ./ORToolESP32
 
-OIOrder: $(SRC)/ORTool.Mod $(OUT)/Texts.sym
+OIOrder: $(SRC)/ORTool.Mod $(OUT)/Texts.sym $(OUT)/Config.sym
 	cd $(SRC); $(LINK) OIOrder.Mod
 	mv $(SRC)/OIOrder ./OIOrderESP32
 
@@ -45,6 +46,8 @@ $(OUT)/ORB.sym: $(SRC)/ORB.Mod $(OUT)/ORS.sym
 $(OUT)/ORG.sym: $(SRC)/ORG.Mod $(OUT)/ORS.sym $(OUT)/ORB.sym $(OUT)/SYS.sym
 
 $(OUT)/ORP.sym: $(SRC)/ORP.Mod $(OUT)/ORS.sym $(OUT)/ORB.sym $(OUT)/ORG.sym $(OUT)/Texts.sym
+
+$(OUT)/Config.sym: $(SRC)/Config.Mod
 
 $(OUT)/SYS.sym: $(SRC)/SYS.c
 	cd $(SRC); cp SYS.sym SYS.h $(ODIR)

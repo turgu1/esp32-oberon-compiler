@@ -1,5 +1,5 @@
 MODULE ORP; (*N. Wirth 1.7.97 / 8.2.2020  Oberon compiler for ESP32 in Oberon-07*)
-  IMPORT Texts, Out, ORS, ORB, ORG, SYS;
+  IMPORT Texts, Out, ORS, ORB, ORG, SYS, Config;
   (*Author: Niklaus Wirth, 2014. Modification from Guy Turcotte and Andreas Pirklbauer.
     Parser of Oberon-RISC compiler modified for the ESP32. 
     Uses Scanner ORS to obtain symbols (tokens),
@@ -1324,7 +1324,7 @@ MODULE ORP; (*N. Wirth 1.7.97 / 8.2.2020  Oberon compiler for ESP32 in Oberon-07
   BEGIN 
     IF verbose THEN
       Out.Ln; Out.String("ESP32 Oberon-07 Compiler Version ");
-      Out.String(ORB.CompilerVersion)
+      Out.String(Config.CompilerVersion)
     END;
     newSF := overrideSymbolFile;
 

@@ -20,10 +20,9 @@ Here is the list of ongoing tasks to complete the effort of building the ESP32 O
 # ESP-IDF Migration
 
 - [x] Add CDECL Procedure calls support
-- [x] Qio Interface Module (bridge module with ESP-IDF)
-- [ ] Init code to be called from ESP-IDF
+- [x] Init table generator
+- [x] Init code to be called from ESP-IDF
 - [ ] Flash memory-based code execution -> ESP-IDF ld integration
-- [ ] Kernel modification to use Qio
 - [ ] Some Qio interaces
   + [ ] WatchDog
   + [ ] Memory allocation
@@ -65,6 +64,7 @@ Here is the list of ongoing tasks to complete the effort of building the ESP32 O
 - [ ] Source code debug marking with GDB
 - [ ] Optimize CASE statements when ranges are supplied as selectors
 - [x] Add SHORTINT (16 bits) type
+- [ ] Add LONGINT (64 bits) type
 - [ ] Add DOUBLE type (and/or DoubleMath Module)
 - [x] Add other transcendantal functions to Math.Mod
 - [ ] In and Out modules to be compliant with Texts module

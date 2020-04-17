@@ -1,12 +1,11 @@
 MODULE OIOrder;
 
-  IMPORT Files, Texts, Out, extArgs, SYS;
+  IMPORT Files, Texts, Out, extArgs, SYS, Config;
 
 (* Oberon Init Code Ordering *)
 
   CONST 
     DEBUG = FALSE;
-    versionkey = 2;  (* .smb file version, as defined in ORB compiler module *)
   TYPE
     Ident   = ARRAY 64 OF CHAR;
     ModPtr  = POINTER TO ModNode;
@@ -148,7 +147,7 @@ MODULE OIOrder;
         IF modname # moduleName THEN Error("Reading wrong module .smb file.") END;
         
         Read(R, version); (* version key *)
-        IF version # versionkey THEN Error("Wrong .smb version.") END;
+        IF version # Config.SmbVersionKey THEN Error("Wrong .smb version.") END;
         
         Read(R, cnt);   (* cdecl *)
         cdecl := cnt = 1;
@@ -210,23 +209,35 @@ MODULE OIOrder;
       fname:     ArgStr;
       mod:       ModPtr;
   BEGIN
-    mod := head;
     MakeFileName(fname, outputFolder, outputName, "");
     F := Files.New(fname);
     Texts.OpenWriterToFile(W, F);
 
+    Texts.WriteLn(    W);
+    Texts.WriteString(W, "    .title ");
+    Texts.Write(      W, 22X);
+    Texts.WriteString(W, "Modules Init Table");
+    Texts.Write(      W, 22X);
+
+    Texts.WriteLn(    W);
+    Texts.WriteString(W, "    .sbttl ");
+    Texts.Write(      W, 22X);
+    Texts.WriteString(W, "Oberon ESP32 Compiler Version ");
+    Texts.WriteString(W, Config.CompilerVersion);
+    Texts.Write(      W, 22X);
+  
     Texts.WriteString(W, "    .section .text_init_table" ); Texts.WriteLn(W);
     Texts.WriteString(W, "    .global _sitable, _eitable"); Texts.WriteLn(W);
     Texts.WriteString(W, "    .align 4"                  ); Texts.WriteLn(W);
     Texts.WriteString(W, "_sitable:"                     ); Texts.WriteLn(W);
 
+    mod := head;
     WHILE mod # NIL DO
-      Texts.WriteString(W, "    .int ");
-      Texts.Write(      W, "_"        );
-      Texts.WriteString(W, mod.name   );
-      Texts.Write(      W, "_"        );
-      WriteHex(         W, mod.key    );
-      Texts.WriteString(W, "_p__init" );
+      Texts.WriteString(W, "    .int _");
+      Texts.WriteString(W, mod.name    );
+      Texts.Write(      W, "_"         );
+      WriteHex(         W, mod.key     );
+      Texts.WriteString(W, "_p__init"  ); (* Yes, there is two '_' glued together *)
       Texts.WriteLn(W);
 
       mod := mod.next
