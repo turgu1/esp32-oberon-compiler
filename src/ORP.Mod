@@ -1238,7 +1238,7 @@ MODULE ORP; (*N. Wirth 1.7.97 / 8.2.2020  Oberon compiler for ESP32 in Oberon-07
     IF sym = ORS.module THEN
       ORS.Get(sym);
       dc := 0; tdc := 0;
-      ORB.Init(importPath, outputFolder, sourceFolder); ORB.OpenScope;
+      ORB.Init(importPath); ORB.OpenScope;
       cdecl := FALSE;
       IF sym = ORS.lbrak THEN ORS.Get(sym); 
         IF sym = ORS.ident THEN

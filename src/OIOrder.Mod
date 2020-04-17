@@ -18,10 +18,10 @@ MODULE OIOrder;
     filePresent: BOOLEAN;
     Head: POINTER TO ModNode;
 
-  PROCEDURE DecodePath(impPath, outputFolder: ARRAY OF CHAR);
+  PROCEDURE DecodePath(impPath: ARRAY OF CHAR);
     VAR i, j, k: INTEGER;
   BEGIN
-    importPaths[0] := outputFolder;
+    importPaths[0] := ".";
     i := 1; j := 0; k := 0;
     WHILE (i < LEN(importPaths)) & (j < LEN(impPath)) & (impPath[j] # 0X) DO
       IF impPath[j] = ":" THEN
@@ -78,10 +78,10 @@ MODULE OIOrder;
   PROCEDURE Usage;
   BEGIN
     Out.Ln;
-    Out.String("Usage: OISeq [-o folder][-p path] -O ObjectFileName filename ..."); 
+    Out.String("Usage: OISeq [-o folder][-p path] -O OutputFileName {smb-filename ...}"); 
     Out.Ln; Out.Ln;
     Out.String("-o : Output folder of generated code"                 ); Out.Ln;
-    Out.String("-O : Object code filename"                            ); Out.Ln;
+    Out.String("-O : Output init table filename"                      ); Out.Ln;
     Out.String("-p : Folder Path for imported modules (e.g. f1:f2:f3)"); Out.Ln;
 
     SYS.Exit(1)

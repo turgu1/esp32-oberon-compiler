@@ -3391,7 +3391,7 @@ PROCEDURE Abs*(VAR x: Item);
           IF b = Marker1 THEN (* section marker *)
             Files.Read(F, b); DEC(len);
             IF CHR(b) = "I" THEN
-              SectionHeader(InitSectionPrefix, moduleId, moduleKey, FALSE);
+              SectionHeader(InitSectionPrefix, moduleId, moduleKey, TRUE);
               initPresent := TRUE;
             ELSIF CHR(b) = "T" THEN
               SectionHeader(TextSectionPrefix, moduleId, moduleKey, TRUE);
@@ -3579,6 +3579,7 @@ PROCEDURE Abs*(VAR x: Item);
         Texts.WriteString(AsW, moduleId);
         Texts.WriteString(AsW, "_init");
 
+        (* 
         Texts.WriteLn(AsW);
         Texts.WriteLn(AsW);
         SectionHeader(InitTableSectionPrefix, moduleId, moduleKey, FALSE);
@@ -3587,7 +3588,8 @@ PROCEDURE Abs*(VAR x: Item);
         Texts.WriteString(AsW, "    .int ");
         Texts.WriteString(AsW, "_");
         Texts.WriteString(AsW, moduleId);
-        Texts.WriteString(AsW, "_init");  
+        Texts.WriteString(AsW, "_init");
+        *)
       END
     END;
 

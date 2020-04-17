@@ -95,17 +95,11 @@ MODULE ORB;   (*NW 25.6.2014  / 1.3.2019  in Oberon-07*)
     typtab: ARRAY maxTypTab OF Type;
     importPaths: ARRAY 20, 256 OF CHAR;
 
-  PROCEDURE DecodePath(impPath, outputFolder, sourceFolder: ARRAY OF CHAR);
+  PROCEDURE DecodePath(impPath: ARRAY OF CHAR);
     VAR i, j, k: INTEGER;
   BEGIN
-    importPaths[0] := outputFolder;
-    IF sourceFolder[0] # 0X THEN
-      importPaths[1] := sourceFolder;
-      i := 2;
-    ELSE
-      i := 1;
-    END;
-    j := 0; k := 0;
+    importPaths[0] := ".";
+    i := 1; j := 0; k := 0;
     WHILE (i < LEN(importPaths)) & (j < LEN(impPath)) & (impPath[j] # 0X) DO
       IF impPath[j] = ":" THEN
         importPaths[i][k] := 0X; k := 0; INC(i)
@@ -468,9 +462,9 @@ MODULE ORB;   (*NW 25.6.2014  / 1.3.2019  in Oberon-07*)
     END
   END Export;
 
-  PROCEDURE Init*(impPath, outputFolder, sourceFolder: ARRAY OF CHAR);
+  PROCEDURE Init*(impPath: ARRAY OF CHAR);
   BEGIN
-    DecodePath(impPath, outputFolder, sourceFolder); 
+    DecodePath(impPath); 
     topScope := universe; nofmod := 1
   END Init;
   
