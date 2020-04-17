@@ -1,0 +1,5 @@
+cmake_minimum_required(VERSION 3.5)
+include($ENV{IDF_PATH}/tools/cmake/project.cmake)
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/CMake")
+project(trials LANGUAGES OBERON)
+enable_language(OBERON)

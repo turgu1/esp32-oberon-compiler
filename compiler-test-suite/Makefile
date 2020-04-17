@@ -175,11 +175,8 @@ OBJS = $(ASSS:.S=.o)
 EXECS = $(ASSS:.S=.elf)
 OTHERS = $(addprefix $(BLDDIR)/, $(Others))
 
-$(BLDDIR)/%.S : $(SRCDIR)/%.Mod
+$(BLDDIR)/%.o : $(SRCDIR)/%.Mod
 	$(OB) $(OBFLAGS) $<
-
-$(BLDDIR)/%.o : $(BLDDIR)/%.S
-	@$(CC) -x assembler-with-cpp $(ASFLAGS) $< -o $@
 
 $(BLDDIR)/%.elf : $(BLDDIR)/%.o
 	$(CC) $^ $(LDFLAGS) -o $@
@@ -187,13 +184,13 @@ $(BLDDIR)/%.elf : $(BLDDIR)/%.o
 .PHONY: all
 all: oth $(EXECS) 
 
-$(BLDDIR)/TestCyclicImport00.S : $(SRCDIR)/TestCyclicImport00A.Mod
+$(BLDDIR)/TestCyclicImport00.o : $(SRCDIR)/TestCyclicImport00A.Mod
 	$(OB) $(OBFLAGS) $<
 
-$(BLDDIR)/TestCyclicImport01.S : $(SRCDIR)/TestCyclicImport01B.Mod
+$(BLDDIR)/TestCyclicImport01.o : $(SRCDIR)/TestCyclicImport01B.Mod
 	$(OB) $(OBFLAGS) $<
 
-$(BLDDIR)/TestCyclicImport10.S : $(SRCDIR)/TestCyclicImport10A.Mod
+$(BLDDIR)/TestCyclicImport10.o : $(SRCDIR)/TestCyclicImport10A.Mod
 	$(OB) $(OBFLAGS) $<
 
 .PHONY: oth

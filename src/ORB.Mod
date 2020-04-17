@@ -10,7 +10,7 @@ MODULE ORB;   (*NW 25.6.2014  / 1.3.2019  in Oberon-07*)
   CONST 
       CompilerVersion* = "0.2.0";
       
-      versionkey* = 3; maxTypTab = 64;
+      versionkey* = 2; maxTypTab = 64;
     (* class values *) 
       Head*  = 0;
       Const* = 1; Var*   = 2; Par*   = 3; 
@@ -95,10 +95,10 @@ MODULE ORB;   (*NW 25.6.2014  / 1.3.2019  in Oberon-07*)
     typtab: ARRAY maxTypTab OF Type;
     importPaths: ARRAY 20, 256 OF CHAR;
 
-  PROCEDURE DecodePath(impPath, sourceFolder: ARRAY OF CHAR);
+  PROCEDURE DecodePath(impPath, outputFolder, sourceFolder: ARRAY OF CHAR);
     VAR i, j, k: INTEGER;
   BEGIN
-    importPaths[0] := ".";
+    importPaths[0] := outputFolder;
     IF sourceFolder[0] # 0X THEN
       importPaths[1] := sourceFolder;
       i := 2;
@@ -180,18 +180,22 @@ MODULE ORB;   (*NW 25.6.2014  / 1.3.2019  in Oberon-07*)
     IF (j > 0) & (FName[j - 1] # "/") THEN FName[j] := "/"; INC(j) END;
     WHILE (j < LEN(FName) - 5) & (name[i] # 0X) DO FName[j] := name[i]; INC(i); INC(j) END ;
     i := 0;
-    REPEAT FName[j] := ext[i]; INC(i); INC(j) UNTIL ext[i] = 0X;
+    WHILE ext[i] # 0X DO FName[j] := ext[i]; INC(i); INC(j) END;
     FName[j] := 0X
   END MakeFileName;
   
   PROCEDURE FindFileName*(VAR FName: ARRAY OF CHAR; name, ext: ARRAY OF CHAR);
-    VAR i: INTEGER;
+    VAR 
+      i: INTEGER;
+      found: BOOLEAN;
   BEGIN
-    i := -1;
-    REPEAT 
+    i := 0;
+    found := FALSE;
+    WHILE (i < LEN(importPaths)) & (importPaths[i][0] # 0X) & ~found DO
+      MakeFileName(FName, importPaths[i], name, ext);
+      found := Files.Old(FName) # NIL;
       INC(i);
-      MakeFileName(FName, importPaths[i], name, ext)
-    UNTIL (i >= LEN(importPaths)) OR (importPaths[i][0] = 0X) OR (Files.Old(FName) # NIL)
+    END
   END FindFileName;
 
   PROCEDURE ThisModule(name, orgname: ORS.Ident; non: BOOLEAN; key: INTEGER; cdecl: BOOLEAN): Object;
@@ -271,6 +275,14 @@ MODULE ORB;   (*NW 25.6.2014  / 1.3.2019  in Oberon-07*)
     END
   END InType;
   
+  (* Skip imported module name *)
+  PROCEDURE SkipImported(VAR R: Files.Rider);
+    VAR cnt: INTEGER; name: ORS.Ident;
+  BEGIN
+    Read(R, cnt);
+    WHILE cnt > 0 DO Files.ReadString(R, name); DEC(cnt) END;
+  END SkipImported;
+
   PROCEDURE Import*(VAR modid, modid1: ORS.Ident);
     VAR key: INTEGER; class, k: INTEGER;
       obj: Object;  t: Type;
@@ -293,6 +305,7 @@ MODULE ORB;   (*NW 25.6.2014  / 1.3.2019  in Oberon-07*)
         Read(R, class); (* cdecl *)
         cdecl := class = 1;
         thismod := ThisModule(modid, modid1, TRUE, key, cdecl); thismod.rdo := TRUE;
+        SkipImported(R);
         Read(R, class);
         WHILE class # 0 DO
           NEW(obj); obj.class := class; Files.ReadString(R, obj.name);
@@ -381,19 +394,39 @@ MODULE ORB;   (*NW 25.6.2014  / 1.3.2019  in Oberon-07*)
     END
   END OutType;
 
+  (* Write imported module names *)
+  PROCEDURE OutImported(VAR R: Files.Rider);
+  VAR cnt: INTEGER; obj: Object;
+  BEGIN
+    obj := topScope.next;
+    cnt := 0;
+    WHILE obj # NIL DO
+      IF (obj.class = Mod) & (obj.dsc # system) THEN INC(cnt) END;
+      obj := obj.next
+    END;
+    Write(R, cnt);
+    obj := topScope.next;
+    WHILE obj # NIL DO
+      IF (obj.class = Mod) & (obj.dsc # system) THEN 
+        Files.WriteString(R, obj(Module).orgname) 
+      END;
+      obj := obj.next
+    END;
+  END OutImported;
+
   PROCEDURE Export*(VAR modid: ORS.Ident; VAR newSF: BOOLEAN; VAR key: INTEGER; cdecl: BOOLEAN; folder: ARRAY OF CHAR);
     VAR x, sum, oldkey: INTEGER;
       obj, obj0: Object;
-      filename: ORS.Ident;
+      filename: ARRAY 256 OF CHAR;
       F, F1: Files.File; R, R1: Files.Rider;
   BEGIN 
     Ref := Record + 1; 
     MakeFileName(filename, folder, modid, ".smb");
     F := Files.New(filename); Files.Set(R, F, 0);
-    Files.WriteInt(R, 0); (*placeholder*)
-    Files.WriteInt(R, 0); (*placeholder for key to be inserted at the end*)
-    Files.WriteString(R, modid); Write(R, versionkey);
-    IF cdecl THEN Write(R, 1) ELSE Write(R, 0) END;
+    Files.WriteInt(R, 0); (* placeholder *)
+    Files.WriteInt(R, 0); (* placeholder for key to be inserted at the end *)
+    Files.WriteString(R, modid); Write(R, versionkey); Write(R, ORD(cdecl));
+    OutImported(R);
     obj := topScope.next;
     WHILE obj # NIL DO
       IF obj.expo THEN
@@ -401,7 +434,7 @@ MODULE ORB;   (*NW 25.6.2014  / 1.3.2019  in Oberon-07*)
         OutType(R, obj.type);
         IF obj.class = Typ THEN
           IF obj.type.form = Record THEN
-            obj0 := topScope.next;  (*check whether this is base of previously declared pointer types*)
+            obj0 := topScope.next;  (* check whether this is base of previously declared pointer types *)
             WHILE obj0 # obj DO
               IF (obj0.type.form = Pointer) & (obj0.type.base = obj.type) & (obj0.type.ref > 0) THEN Write(R, obj0.type.ref) END ;
               obj0 := obj0.next
@@ -422,20 +455,22 @@ MODULE ORB;   (*NW 25.6.2014  / 1.3.2019  in Oberon-07*)
     FOR Ref := Record+1 TO maxTypTab-1 DO typtab[Ref] := NIL END ;
     Files.Set(R, F, 0); sum := 0; Files.ReadInt(R, x);  (* compute key (checksum) *)
     WHILE ~R.eof DO sum := sum + x; Files.ReadInt(R, x) END ;
-    F1 := Files.Old(filename); (*sum is new key*)
+    F1 := Files.Old(filename); (* sum is new key *)
     IF F1 # NIL THEN Files.Set(R1, F1, 4); Files.ReadInt(R1, oldkey) ELSE oldkey := sum+1 END ;
     IF sum # oldkey THEN
       IF newSF OR (F1 = NIL) THEN
-        key := sum; newSF := TRUE; Files.Set(R, F, 4); Files.WriteInt(R, sum); Files.Register(F)  (*insert checksum*)
+        key := sum; newSF := TRUE; Files.Set(R, F, 4); Files.WriteInt(R, sum);   (* insert checksum *)
+        Files.Register(F);
+        Files.Close(F);
       ELSE ORS.Mark("new symbol file inhibited")
       END
     ELSE newSF := FALSE; key := sum
     END
   END Export;
 
-  PROCEDURE Init*(impPath, sourceFolder: ARRAY OF CHAR);
+  PROCEDURE Init*(impPath, outputFolder, sourceFolder: ARRAY OF CHAR);
   BEGIN
-    DecodePath(impPath, sourceFolder); 
+    DecodePath(impPath, outputFolder, sourceFolder); 
     topScope := universe; nofmod := 1
   END Init;
   
@@ -491,7 +526,7 @@ BEGIN
   enter("FLOOR",    SFunc, intType,   21);
   enter("ODD",      SFunc, boolType,  11);
   enter("ABS",      SFunc, intType,    1);
-  enter("LED",      SProc, noType,    81);  (*procedures*)
+  enter("LED",      SProc, noType,    81);  (* procedures *)
   enter("UNPK",     SProc, noType,    72);
   enter("PACK",     SProc, noType,    62);
   enter("NEW",      SProc, noType,    51);
@@ -500,7 +535,7 @@ BEGIN
   enter("INCL",     SProc, noType,    22);
   enter("DEC",      SProc, noType,    11);
   enter("INC",      SProc, noType,     1);
-  enter("SET",      Typ,   setType,    0);  (*types*)
+  enter("SET",      Typ,   setType,    0);  (* types *)
   enter("BOOLEAN",  Typ,   boolType,   0);
   enter("BYTE",     Typ,   byteType,   0);
   enter("CHAR",     Typ,   charType,   0);
@@ -514,7 +549,7 @@ BEGIN
   
   system := NIL;  (* initialize "unsafe" pseudo-module SYSTEM*)
 
-  enter("RSR",      SFunc, intType,  281);  (*functions*)
+  enter("RSR",      SFunc, intType,  281);  (* functions *)
   enter("H",        SFunc, intType,  201);
   enter("COND",     SFunc, boolType, 191);
   enter("SIZE",     SFunc, intType,  181);
@@ -522,7 +557,7 @@ BEGIN
   enter("VAL",      SFunc, intType,  162);
   enter("REG",      SFunc, intType,  151);
   enter("BIT",      SFunc, boolType, 142);
-  enter("WSR",      SProc, intType,  152);  (*procedures*)
+  enter("WSR",      SProc, intType,  152);  (* procedures *)
   enter("LDREG",    SProc, noType,   142);
   enter("LDPSR",    SProc, noType,   131);
   enter("COPY",     SProc, noType,   123);

@@ -10,7 +10,7 @@ VAR
   i        : INTEGER;
   res      : INTEGER;
 
-  outputFolder, filename, arg : ARRAY 256 OF CHAR;
+  outputFolder, filename, objName, arg : ARRAY 256 OF CHAR;
   importPath : ARRAY 1024 OF CHAR;
 
   overrideSymbolFile : BOOLEAN;
@@ -24,11 +24,12 @@ VAR
 PROCEDURE Usage;
 BEGIN
   Out.Ln;
-  Out.String("Usage: OberonESP32 [-c][-l][-o folder][-p path][-s][-v][-x][-z] filename"); 
+  Out.String("Usage: OberonESP32 [-c][-l][-o folder][-O ObjectFileName][-p path][-s][-v][-x][-z] filename"); 
   Out.Ln; Out.Ln;
   Out.String("-c : Generate Verification Code"                            ); Out.Ln;
   Out.String("-l : Add source code to the assembler output"               ); Out.Ln;
   Out.String("-o : Output folder of generated code"                       ); Out.Ln;
+  Out.String("-O : Object code filename"                                  ); Out.Ln;
   Out.String("-p : Folder Path for imported modules (e.g. f1:f2:f3)"      ); Out.Ln;
   Out.String("-s : Update Symbols File"                                   ); Out.Ln;
   Out.String("-v : Show compiler version and output information"          ); Out.Ln;
@@ -52,6 +53,7 @@ BEGIN
     argCount           := extArgs.count;
 
     outputFolder := ".";
+    objName := "";
 
     IF (argCount > 0) THEN
       i := 0;
@@ -74,6 +76,12 @@ BEGIN
           IF i < argCount THEN
             extArgs.Get(i, outputFolder, res);
             IF DEBUG THEN Out.String("Output Folder"); Out.Ln END
+          END
+        ELSIF (arg = "-O") THEN
+          INC(i);
+          IF i < argCount THEN
+            extArgs.Get(i, objName, res);
+            IF DEBUG THEN Out.String("Object Filename"); Out.Ln END
           END
         ELSIF (arg = "-p") THEN
           INC(i);
@@ -117,7 +125,8 @@ BEGIN
           verbose,
           sourceToAssembly,
           outputFolder,
-          importPath)
+          importPath,
+          objName)
       ELSE
         Usage
       END

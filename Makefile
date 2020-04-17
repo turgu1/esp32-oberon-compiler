@@ -1,6 +1,8 @@
 OC=obnc-compile
 LINK=obnc
 
+INSTALL_DIR=/usr/local/bin
+
 OBNC_CONFIG_C_REAL_TYPE=OBNC_CONFIG_FLOAT
 OBNC_CONFIG_C_INT_TYPE=OBNC_CONFIG_INT
 
@@ -45,3 +47,7 @@ $(OUT)/SYS.sym: $(SRC)/SYS.c
 .PHONY: clean
 clean:
 	rm -rf $(OUT)/*
+
+.PHONY: install
+install: OberonESP32
+	sudo mv ./OberonESP32 $(INSTALL_DIR)

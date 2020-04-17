@@ -29,7 +29,8 @@ MODULE ORP; (*N. Wirth 1.7.97 / 8.2.2020  Oberon compiler for ESP32 in Oberon-07
     pbsList: PtrBase;   (*list of names of pointer base types*)
     dummy: ORB.Object;
 
-    sourceFolder, outputFolder: ARRAY 256 OF CHAR;
+    sourceFolder, outputFolder, objectFileName: ARRAY 256 OF CHAR;
+    fileExtension: ARRAY 10 OF CHAR;
     importPath: ARRAY 1024 OF CHAR;
 
   PROCEDURE Check(s: INTEGER; msg: ARRAY OF CHAR);
@@ -1211,12 +1212,19 @@ MODULE ORP; (*N. Wirth 1.7.97 / 8.2.2020  Oberon compiler for ESP32 in Oberon-07
   PROCEDURE Assembler(moduleId: ORS.Ident; outputFolder: ARRAY OF CHAR);
     VAR 
       inFile, outFile: ARRAY 256 OF CHAR;
-      res : INTEGER;
+      ext: ARRAY 20 OF CHAR;
+      i : INTEGER;
   BEGIN
     ORB.MakeFileName(inFile,  outputFolder, moduleId, ".S");
-    ORB.MakeFileName(outFile, outputFolder, moduleId, ".o");
-    res := SYS.Assembler(inFile, outFile);
-    IF res # 0 THEN ORS.Mark("There is some assembler error.") END
+    IF objectFileName[0] = 0X THEN i := 0; 
+      WHILE fileExtension[i] # 0X DO ext[i] := fileExtension[i]; INC(i) END;
+      ext[i] := "."; ext[i + 1] := "o"; ext[i + 2] := 0X;
+      ORB.MakeFileName(outFile, outputFolder, moduleId, ext);
+    ELSE
+      ORB.MakeFileName(outFile, outputFolder, objectFileName, "");
+    END;
+    i := SYS.Assembler(inFile, outFile);
+    IF i # 0 THEN ORS.Mark("There is some assembler error.") END
   END Assembler;
 
   PROCEDURE Module(verbose : BOOLEAN);
@@ -1230,7 +1238,7 @@ MODULE ORP; (*N. Wirth 1.7.97 / 8.2.2020  Oberon compiler for ESP32 in Oberon-07
     IF sym = ORS.module THEN
       ORS.Get(sym);
       dc := 0; tdc := 0;
-      ORB.Init(importPath, sourceFolder); ORB.OpenScope;
+      ORB.Init(importPath, outputFolder, sourceFolder); ORB.OpenScope;
       cdecl := FALSE;
       IF sym = ORS.lbrak THEN ORS.Get(sym); 
         IF sym = ORS.ident THEN
@@ -1294,6 +1302,17 @@ MODULE ORP; (*N. Wirth 1.7.97 / 8.2.2020  Oberon compiler for ESP32 in Oberon-07
     folder[j] := 0X;
   END ExtractFolder;
 
+  PROCEDURE ExtractExtension(VAR ext: ARRAY OF CHAR; filename: ARRAY OF CHAR);
+    VAR i, j: INTEGER;
+  BEGIN 
+    i := 0;
+    WHILE (i < LEN(filename)) & (filename[i] # 0X) DO INC(i) END;
+    WHILE (i >= 0) & (filename[i] # ".") DO DEC(i) END;
+    j := 0;
+    WHILE (i < LEN(filename)) & (filename[i] # 0X) & (j < 9) DO ext[j] := filename[i]; INC(j); INC(i) END;
+    ext[j] := 0X;
+  END ExtractExtension;
+  
   PROCEDURE Compile*(filename : ARRAY OF CHAR; 
                      overrideSymbolFile,
                      generateCheckCode,
@@ -1301,7 +1320,7 @@ MODULE ORP; (*N. Wirth 1.7.97 / 8.2.2020  Oberon compiler for ESP32 in Oberon-07
                      regOptList,
                      verbose,
                      sourceToAssembly : BOOLEAN;
-                     outFolder, impPath : ARRAY OF CHAR);
+                     outFolder, impPath, objName : ARRAY OF CHAR);
     VAR (* beg, end, time: INTEGER; *)
       T: Texts.Text;
       (*S: Texts.Scanner; *)
@@ -1314,8 +1333,10 @@ MODULE ORP; (*N. Wirth 1.7.97 / 8.2.2020  Oberon compiler for ESP32 in Oberon-07
 
     outputFolder := outFolder;
     importPath := impPath;
+    objectFileName := objName;
     
     ExtractFolder(sourceFolder, filename);
+    ExtractExtension(fileExtension, filename);
 
     NEW(T);
     Texts.Open(T, filename);

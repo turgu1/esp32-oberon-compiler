@@ -3467,13 +3467,12 @@ PROCEDURE Abs*(VAR x: Item);
     VAR 
       obj: ORB.Object;
       i, nofptrs: INTEGER;
-      name: ORS.Ident;
+      name: ARRAY 256 OF CHAR;
       initPresent: BOOLEAN;
   BEGIN  (* exit code *)
-
-    ORB.MakeFileName(name, outputFolder, moduleId, ".S"); (* write code file *)
+    ORB.MakeFileName(name, outputFolder, moduleId, ".S");
     AsF := Files.New(name);
-    
+
     Texts.OpenWriterToFile(AsW, AsF);
 
     Texts.WriteLn(    AsW);
@@ -3601,6 +3600,7 @@ PROCEDURE Abs*(VAR x: Item);
       Out.Ln; Out.String("Reg Copy Count: "); Out.Int(regCopyCount, 0);
       Out.Ln;
     END
+
   END Close;
 
   PROCEDURE Open*(modid: ORS.Ident);
