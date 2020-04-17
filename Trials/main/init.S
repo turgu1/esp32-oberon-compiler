@@ -16,11 +16,11 @@
 #   initialize modules. The first module in the list is considered
 #   the main module and its initialization code is not expected to return.
 #
-# - Entries in the .init_table section must be defined to point
-#   at each module initialization code. Not required if the 
-#   initialization is empty
+# - Entries in the .text_init_table section must be defined to point
+#   at each module initialization code. Program OIOrderESP32 is used to
+#   automate the creation of this table.
 #
-# - All procedural code is put in .text sections
+# - All procedural code is put in .text... sections
 #
 # - Global variables are placed in .bss sections. They will be
 #   initialized with zeroes by the ROM loader.
