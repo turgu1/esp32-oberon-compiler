@@ -21,13 +21,20 @@ SIMS = \
 $(OUT)/%.sym: $(SRC)/%.Mod
 	cd $(SRC); $(OC) $(<F)
 
+.PHONY: all
+all: OberonESP32 ORTool OIOrder
+
 OberonESP32: $(SIMS) $(SRC)/Oberon.Mod
 	cd $(SRC); $(LINK) Oberon.Mod
 	mv $(SRC)/Oberon ./OberonESP32
 
 ORTool: $(SRC)/ORTool.Mod $(OUT)/ORB.sym $(OUT)/Texts.sym
 	cd $(SRC); $(LINK) ORTool.Mod
-	mv $(SRC)/ORTool .
+	mv $(SRC)/ORTool ./ORToolESP32
+
+OIOrder: $(SRC)/ORTool.Mod $(OUT)/Texts.sym
+	cd $(SRC); $(LINK) OIOrder.Mod
+	mv $(SRC)/OIOrder ./OIOrderESP32
 
 $(OUT)/Texts.sym: $(SRC)/Texts.Mod
 
@@ -49,5 +56,5 @@ clean:
 	rm -rf $(OUT)/*
 
 .PHONY: install
-install: OberonESP32
+install: OberonESP32 OIOrderESP32 ORToolESP32
 	sudo mv ./OberonESP32 $(INSTALL_DIR)

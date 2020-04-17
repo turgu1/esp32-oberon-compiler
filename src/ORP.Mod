@@ -1212,14 +1212,11 @@ MODULE ORP; (*N. Wirth 1.7.97 / 8.2.2020  Oberon compiler for ESP32 in Oberon-07
   PROCEDURE Assembler(moduleId: ORS.Ident; outputFolder: ARRAY OF CHAR);
     VAR 
       inFile, outFile: ARRAY 256 OF CHAR;
-      ext: ARRAY 20 OF CHAR;
       i : INTEGER;
   BEGIN
     ORB.MakeFileName(inFile,  outputFolder, moduleId, ".S");
     IF objectFileName[0] = 0X THEN i := 0; 
-      WHILE fileExtension[i] # 0X DO ext[i] := fileExtension[i]; INC(i) END;
-      ext[i] := "."; ext[i + 1] := "o"; ext[i + 2] := 0X;
-      ORB.MakeFileName(outFile, outputFolder, moduleId, ext);
+      ORB.MakeFileName(outFile, outputFolder, moduleId, ".o");
     ELSE
       ORB.MakeFileName(outFile, outputFolder, objectFileName, "");
     END;

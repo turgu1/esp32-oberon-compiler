@@ -4,20 +4,32 @@ MODULE OIOrder;
 
 (* Oberon Init Code Ordering *)
 
-  CONST DEBUG = FALSE;
-
+  CONST 
+    DEBUG = FALSE;
+    versionkey = 2;  (* .smb file version, as defined in ORB compiler module *)
   TYPE
-    Ident = ARRAY 64 OF CHAR;
-    KeyStr = ARRAY 9 OF CHAR;
-    Mod = RECORD name: Ident; key: KeyStr; initialized: BOOLEAN END;
-    ModNode = RECORD mod: POINTER TO Mod; prev: POINTER TO ModNode END;
-    ArgStr = ARRAY 256 OF CHAR;
+    Ident   = ARRAY 64 OF CHAR;
+    ModPtr  = POINTER TO ModNode;
+    ModNode = RECORD name: Ident; key: INTEGER; initialized: BOOLEAN; next: ModPtr END;
+    ArgStr  = ARRAY 256 OF CHAR;
   VAR
     importPaths: ARRAY 20, 256 OF CHAR;
-    outputFolder, outputName : ArgStr;
     filePresent: BOOLEAN;
-    Head: POINTER TO ModNode;
+    head: ModPtr;
+    outputFolder, outputName: ArgStr;
 
+  PROCEDURE Error(msg: ARRAY OF CHAR);
+  BEGIN
+    Out.Ln; Out.String("Error: "); Out.String(msg); 
+    SYS.Exit(1)
+  END Error;
+
+  PROCEDURE Error2(msg, msg2: ARRAY OF CHAR);
+  BEGIN
+    Out.Ln; Out.String("Error: "); Out.String(msg); Out.String(msg2); Out.Char(".");
+    SYS.Exit(1)
+  END Error2;
+  
   PROCEDURE DecodePath(impPath: ARRAY OF CHAR);
     VAR i, j, k: INTEGER;
   BEGIN
@@ -64,41 +76,199 @@ MODULE OIOrder;
     END
   END FindFileName;
 
-  PROCEDURE ProcessImpFile(filename: ArgStr);
+  PROCEDURE RemoveModNode(mod: ModPtr);
+    VAR p: ModPtr;
   BEGIN
-  END ProcessImpFile;
+    p := head;
+    IF head = mod THEN head := mod.next
+    ELSE
+      WHILE (p # NIL) & (p.next # mod) DO p := p.next END;
+      IF p = NIL THEN Error("OIOrder Internal problem."); SYS.Exit(1)
+      ELSE p := mod.next END
+    END;
+  END RemoveModNode;
+
+  PROCEDURE GetModNode(moduleName: Ident) : ModPtr;
+    VAR p, q: ModPtr;
+  BEGIN
+    p := head;
+    q := NIL;
+    WHILE (p # NIL) & (p.name # moduleName) DO q := p; p := p.next END;
+    IF p = NIL THEN 
+      NEW(p); p.initialized := FALSE; p.next := NIL;
+      IF q = NIL THEN head := q ELSE q.next := p END;
+     END;
+    RETURN p
+  END GetModNode;
+
+  PROCEDURE Read(VAR R: Files.Rider; VAR x: INTEGER);
+    VAR b: BYTE;
+  BEGIN Files.Read(R, b);
+    IF b < 80H THEN x := b ELSE x := b - 100H END
+  END Read;
+  
+  PROCEDURE AdjustLocation(mod, mod2: ModPtr);
+    VAR p, q, r: ModPtr;
+  BEGIN
+    p := head; q := NIL; r := NIL;
+    WHILE p # mod DO
+      IF p = mod2 THEN
+        r := mod2;
+        q.next := mod2.next;
+        p := mod;
+      ELSE
+        q := p;
+        p := p.next;
+      END
+    END;
+    IF r # NIL THEN
+      r.next := mod.next; mod.next := r
+    END
+  END AdjustLocation;
+
+  PROCEDURE ProcessModule(moduleName: Ident);
+    VAR 
+      version,
+      cnt:       INTEGER;
+      mod, mod2: ModPtr;
+      F:         Files.File; 
+      R:         Files.Rider;
+      fname:     ArgStr;
+      modname:   Ident;
+      cdecl:     BOOLEAN;
+  BEGIN
+    mod := GetModNode(moduleName);
+    IF ~mod.initialized THEN
+      FindFileName(fname, moduleName, ".smb"); 
+      F := Files.Old(fname);
+      IF F # NIL THEN
+        Files.Set(R, F, 0); Files.ReadInt(R, cnt); Files.ReadInt(R, mod.key);
+
+        Files.ReadString(R, modname);
+        IF modname # moduleName THEN Error("Reading wrong module .smb file.") END;
+        
+        Read(R, version); (* version key *)
+        IF version # versionkey THEN Error("Wrong .smb version.") END;
+        
+        Read(R, cnt);   (* cdecl *)
+        cdecl := cnt = 1;
+        IF cdecl THEN
+          RemoveModNode(mod)
+        ELSE
+          Read(R, cnt);   (* imported module count *)
+          WHILE cnt > 0 DO
+            Files.ReadString(R, modname);
+            mod2 := GetModNode(modname);
+            AdjustLocation(mod, mod2);
+            DEC(cnt)
+          END
+        END;
+        mod.initialized := TRUE
+      ELSE
+        Error2("Unable to find .smb file for module", moduleName);
+      END
+    END
+  END ProcessModule;
 
   PROCEDURE CompleteInfo;
     VAR
-      filename: ArgStr;
-
+      mod : ModPtr;
+      cnt: INTEGER;
   BEGIN
+    cnt := 1;
+    WHILE cnt > 0 DO
+      cnt := 0; mod := head;
+      WHILE mod # NIL DO
+        IF ~mod.initialized THEN
+          ProcessModule(mod.name); 
+          INC(cnt)
+        END;
+        mod := mod.next
+      END
+    END
   END CompleteInfo;
+
+  PROCEDURE WriteHex (VAR W: Texts.Writer; x: INTEGER);
+    VAR 
+      i: INTEGER; 
+      y: INTEGER;
+      a: ARRAY 10 OF CHAR;
+  BEGIN 
+    i := 0;
+    REPEAT 
+      y := x MOD 10H;
+      IF y < 10 THEN a[i] := CHR(y + 30H) ELSE a[i] := CHR(y + 37H) END;
+      x := x DIV 10H; INC(i)
+    UNTIL i = 8;
+    REPEAT DEC(i); Texts.Write(W, a[i]) UNTIL i = 0
+  END WriteHex;
+
+  PROCEDURE GenerateInitFile;
+    VAR
+      F:         Files.File; 
+      W:         Texts.Writer;
+      fname:     ArgStr;
+      mod:       ModPtr;
+  BEGIN
+    mod := head;
+    MakeFileName(fname, outputFolder, outputName, "");
+    F := Files.New(fname);
+    Texts.OpenWriterToFile(W, F);
+
+    Texts.WriteString(W, "    .section .text_init_table" ); Texts.WriteLn(W);
+    Texts.WriteString(W, "    .global _sitable, _eitable"); Texts.WriteLn(W);
+    Texts.WriteString(W, "    .align 4"                  ); Texts.WriteLn(W);
+    Texts.WriteString(W, "_sitable:"                     ); Texts.WriteLn(W);
+
+    WHILE mod # NIL DO
+      Texts.WriteString(W, "    .int ");
+      Texts.Write(      W, "_"        );
+      Texts.WriteString(W, mod.name   );
+      Texts.Write(      W, "_"        );
+      WriteHex(         W, mod.key    );
+      Texts.WriteString(W, "_p__init" );
+      Texts.WriteLn(W);
+
+      mod := mod.next
+    END;
+    Texts.WriteString(W, "_eitable:"); Texts.WriteLn(W);
+
+    Files.Register(F);
+    Files.Close(F)
+  END GenerateInitFile;
+
+  PROCEDURE CopyStr(from: ARRAY OF CHAR; VAR to: ARRAY OF CHAR);
+    VAR i: INTEGER;
+  BEGIN
+    i := 0;
+    WHILE (i < (LEN(to) - 1)) & (from[i] # 0X) DO to[i] := from[i]; INC(i) END;
+    to[i] := 0X
+  END CopyStr;
 
   PROCEDURE Usage;
   BEGIN
     Out.Ln;
-    Out.String("Usage: OISeq [-o folder][-p path] -O OutputFileName {smb-filename ...}"); 
+    Out.String("Usage: OIOrder [-o folder][-p path] -O outputFileName {moduleName ...}"); 
     Out.Ln; Out.Ln;
     Out.String("-o : Output folder of generated code"                 ); Out.Ln;
     Out.String("-O : Output init table filename"                      ); Out.Ln;
     Out.String("-p : Folder Path for imported modules (e.g. f1:f2:f3)"); Out.Ln;
-
     SYS.Exit(1)
   END Usage;
 
   PROCEDURE ProcessCommand;
     VAR
       res, i, argCount: INTEGER;
-      arg, importPath, filename : ArgStr;
-      firstFilename: BOOLEAN;
+      arg, importPath: ArgStr;
+      moduleName: Ident;
+      firstModuleName: BOOLEAN;
   BEGIN
     argCount := extArgs.count;
 
-    outputFolder  := ".";
-    outputName    := "";
-    importPath    := "";
-    firstFilename := TRUE;
+    outputFolder    := ".";
+    outputName      := "";
+    importPath      := "";
+    firstModuleName := TRUE;
   
     IF (argCount > 0) THEN
       i := 0;
@@ -127,13 +297,13 @@ MODULE OIOrder;
           END
         ELSIF arg[0] # "-" THEN
           IF outputName[0] # 0X THEN
-            filename := arg;
-            IF firstFilename THEN
-              firstFilename := FALSE;
-              DecodePath(importPath, outputFolder)
+            CopyStr(arg, moduleName);
+            IF firstModuleName THEN
+              firstModuleName := FALSE;
+              DecodePath(importPath)
             END;
-            ProcessImpFile(filename);
-            filePresent := TRUE;
+            ProcessModule(moduleName);
+            filePresent := TRUE
           ELSE
             Out.Ln; Out.String("Error: Output Filename required (-O).");
             Usage
@@ -150,12 +320,13 @@ MODULE OIOrder;
   END ProcessCommand;
 
 BEGIN
-  Head := NIL;
+  head := NIL;
   ProcessCommand;
   IF filePresent THEN 
-    CompleteInfo
+    CompleteInfo;
+    GenerateInitFile
   ELSE
-    Out.Ln; Out.String("Error: At least one filename required.");
+    Out.Ln; Out.String("Error: At least one module name required.");
     Usage
   END;
 
