@@ -2,9 +2,9 @@
 .obnc/*
 .vscode/*
 
-Oberon
-ORTool
-OIOrder
+OberonESP32
+ORToolESP32
+OIOrderESP32
 ORP
 patterns/*.rsc
 patterns/*.smb

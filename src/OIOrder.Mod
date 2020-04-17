@@ -1,11 +1,18 @@
+(* Oberon Init Code Ordering Table Generator *)
+
+(* This program generates the assembly language structure required to
+   permit the proper sequence of initialization of modules that are
+   part of a project. It reads all modules .smb files, sorts the
+   modules in the proper initialization sequence and write the list
+   of pointers in a file that is then assembled through the ESP32
+   assembly language. *)
+
 MODULE OIOrder;
 
   IMPORT Files, Texts, Out, extArgs, SYS, Config;
 
-(* Oberon Init Code Ordering *)
-
   CONST 
-    DEBUG = FALSE;
+    DEBUG = TRUE;
   TYPE
     Ident   = ARRAY 64 OF CHAR;
     ModPtr  = POINTER TO ModNode;
@@ -16,6 +23,35 @@ MODULE OIOrder;
     filePresent: BOOLEAN;
     head: ModPtr;
     outputFolder, outputName: ArgStr;
+
+  PROCEDURE Enter(msg: ARRAY OF CHAR);
+  BEGIN
+    IF DEBUG THEN
+      Out.Ln;
+      Out.String("Entering ");
+      Out.String(msg);
+    END
+  END Enter;
+
+  PROCEDURE Enter2(msg, msg2: ARRAY OF CHAR);
+  BEGIN
+    IF DEBUG THEN
+      Out.Ln;
+      Out.String("Entering ");
+      Out.String(msg);
+      Out.String(" : ");
+      Out.String(msg2);
+    END
+  END Enter2;
+
+  PROCEDURE Leave(msg: ARRAY OF CHAR);
+  BEGIN
+    IF DEBUG THEN
+      Out.Ln;
+      Out.String("Leaving ");
+      Out.String(msg);
+    END
+  END Leave;
 
   PROCEDURE Error(msg: ARRAY OF CHAR);
   BEGIN
@@ -78,6 +114,7 @@ MODULE OIOrder;
   PROCEDURE RemoveModNode(mod: ModPtr);
     VAR p: ModPtr;
   BEGIN
+    Enter("RemoveModeNode");
     p := head;
     IF head = mod THEN head := mod.next
     ELSE
@@ -85,18 +122,20 @@ MODULE OIOrder;
       IF p = NIL THEN Error("OIOrder Internal problem."); SYS.Exit(1)
       ELSE p := mod.next END
     END;
+    Leave("RemoveModeNode");
   END RemoveModNode;
 
   PROCEDURE GetModNode(moduleName: Ident) : ModPtr;
     VAR p, q: ModPtr;
   BEGIN
-    p := head;
-    q := NIL;
+    Enter2("GetModeNode", moduleName);
+    p := head; q := NIL;
     WHILE (p # NIL) & (p.name # moduleName) DO q := p; p := p.next END;
     IF p = NIL THEN 
-      NEW(p); p.initialized := FALSE; p.next := NIL;
-      IF q = NIL THEN head := q ELSE q.next := p END;
-     END;
+      NEW(p); p.initialized := FALSE; p.next := NIL; p.name := moduleName;
+      IF q = NIL THEN head := p ELSE q.next := p END;
+    END;
+    Leave("GetModeNode");
     RETURN p
   END GetModNode;
 
@@ -109,20 +148,16 @@ MODULE OIOrder;
   PROCEDURE AdjustLocation(mod, mod2: ModPtr);
     VAR p, q, r: ModPtr;
   BEGIN
+    Enter("AdjustLocation");
     p := head; q := NIL; r := NIL;
-    WHILE p # mod DO
-      IF p = mod2 THEN
-        r := mod2;
-        q.next := mod2.next;
-        p := mod;
-      ELSE
-        q := p;
-        p := p.next;
-      END
+    WHILE (p # NIL) & (p # mod) DO
+      IF p = mod2 THEN r := mod2; q.next := mod2.next; p := mod
+      ELSE q := p; p := p.next END
     END;
     IF r # NIL THEN
       r.next := mod.next; mod.next := r
-    END
+    END;
+    Leave("AdjustLocation")
   END AdjustLocation;
 
   PROCEDURE ProcessModule(moduleName: Ident);
@@ -136,6 +171,7 @@ MODULE OIOrder;
       modname:   Ident;
       cdecl:     BOOLEAN;
   BEGIN
+    Enter2("ProcessModule", moduleName);
     mod := GetModNode(moduleName);
     IF ~mod.initialized THEN
       FindFileName(fname, moduleName, ".smb"); 
@@ -157,6 +193,7 @@ MODULE OIOrder;
           Read(R, cnt);   (* imported module count *)
           WHILE cnt > 0 DO
             Files.ReadString(R, modname);
+            Out.Ln; Out.String(modname); Out.String("...");
             mod2 := GetModNode(modname);
             AdjustLocation(mod, mod2);
             DEC(cnt)
@@ -166,7 +203,8 @@ MODULE OIOrder;
       ELSE
         Error2("Unable to find .smb file for module", moduleName);
       END
-    END
+    END;
+    Leave("ProcessModule");
   END ProcessModule;
 
   PROCEDURE CompleteInfo;
@@ -174,6 +212,7 @@ MODULE OIOrder;
       mod : ModPtr;
       cnt: INTEGER;
   BEGIN
+    Enter("CompleteInfo");
     cnt := 1;
     WHILE cnt > 0 DO
       cnt := 0; mod := head;
@@ -184,7 +223,8 @@ MODULE OIOrder;
         END;
         mod := mod.next
       END
-    END
+    END;
+    Leave("CompleteInfo")
   END CompleteInfo;
 
   PROCEDURE WriteHex (VAR W: Texts.Writer; x: INTEGER);
@@ -226,6 +266,7 @@ MODULE OIOrder;
     Texts.WriteString(W, Config.CompilerVersion);
     Texts.Write(      W, 22X);
   
+    Texts.WriteLn(    W);
     Texts.WriteString(W, "    .section .text_init_table" ); Texts.WriteLn(W);
     Texts.WriteString(W, "    .global _sitable, _eitable"); Texts.WriteLn(W);
     Texts.WriteString(W, "    .align 4"                  ); Texts.WriteLn(W);
@@ -287,24 +328,24 @@ MODULE OIOrder;
         extArgs.Get(i, arg, res);
   
         IF DEBUG THEN
-          Out.String("Argument "); Out.Int(i + 1, 0); Out.String(": "); 
-          Out.String(arg); Out.Ln
+          Out.Ln; Out.String("Argument "); Out.Int(i + 1, 0); 
+          Out.String(": "); Out.String(arg);
         END;
   
         IF (arg = "-o") THEN INC(i);
           IF i < argCount THEN
             extArgs.Get(i, outputFolder, res);
-            IF DEBUG THEN Out.String("Output Folder"); Out.Ln END
+            IF DEBUG THEN Out.Ln; Out.String("Output Folder") END
           END
         ELSIF (arg = "-O") THEN INC(i);
           IF i < argCount THEN
             extArgs.Get(i, outputName, res);
-            IF DEBUG THEN Out.String("Output Filename"); Out.Ln END
+            IF DEBUG THEN Out.Ln; Out.String("Output Filename") END
           END
         ELSIF (arg = "-p") THEN INC(i);
           IF i < argCount THEN
             extArgs.Get(i, importPath, res);
-            IF DEBUG THEN Out.String("Import Path"); Out.Ln END
+            IF DEBUG THEN Out.Ln; Out.String("Import Path") END
           END
         ELSIF arg[0] # "-" THEN
           IF outputName[0] # 0X THEN
@@ -340,6 +381,8 @@ BEGIN
     Out.Ln; Out.String("Error: At least one module name required.");
     Usage
   END;
+
+  IF DEBUG THEN Out.Ln; Out.String("Completed."); Out.Ln END;
 
   SYS.Exit(0);
 END OIOrder.

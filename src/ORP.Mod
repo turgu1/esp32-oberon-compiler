@@ -1256,7 +1256,8 @@ MODULE ORP; (*N. Wirth 1.7.97 / 8.2.2020  Oberon compiler for ESP32 in Oberon-07
       ORG.Open(modid); Declarations(dc); ORG.SetDataSize((dc + 3) DIV 4 * 4);
       WHILE sym = ORS.procedure DO ProcedureDecl(cdecl); Check(ORS.semicolon, "; expected") END;
       IF ~cdecl THEN
-        IF sym = ORS.begin THEN ORS.Get(sym); ORG.Header; StatSequence END
+        ORG.Header;
+        IF sym = ORS.begin THEN ORS.Get(sym); StatSequence END
       END;
       Check(ORS.end, "END expected");
       IF sym = ORS.ident THEN
