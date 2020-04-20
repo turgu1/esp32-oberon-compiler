@@ -11,7 +11,7 @@ LDFLAGS_PLATFORM = $(AFLAGS_PLATFORM)
 ###
 # General project build
 ###
-OB = ../OberonESP32
+OBERON = OberonESP32
 CC = $(TOOLCHAIN)gcc
 LD = $(TOOLCHAIN)ld
 OC = $(TOOLCHAIN)objcopy
@@ -48,7 +48,7 @@ SRC = \
   Math.Mod \
   Strings.Mod
 
-ARCHIVE = libesp32-oberon.a
+ARCHIVE = liboberonesp32.a
 
 #	Pattern13.Mod
 
@@ -68,11 +68,11 @@ $(MATHO): $(MATH)
 	@$(AR) r $(ARCHIVE) $@ 
 
 $(BLDDIR)/%.o ./%.smb : $(SRCDIR)/%.Mod
-	$(OB) $(OBFLAGS) $<
+	$(OBERON) $(OBFLAGS) $<
 	@mv $(BLDDIR)/$(patsubst %.Mod,%.smb,$(<F)) .
 	@$(AR) r $(ARCHIVE) $@ 
 
 clean:
 	-rm build/*
 	-rm *.smb
-	-rm libesp32-oberon.a
+	-rm $(ARCHIVE)

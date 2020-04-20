@@ -29,11 +29,11 @@ OberonESP32: $(SIMS) $(SRC)/Oberon.Mod
 	cd $(SRC); $(LINK) Oberon.Mod
 	mv $(SRC)/Oberon ./OberonESP32
 
-ORTool: $(SRC)/ORTool.Mod $(OUT)/ORB.sym $(OUT)/Texts.sym $(OUT)/Config.sym
+ORToolESP32: $(SRC)/ORTool.Mod $(OUT)/ORB.sym $(OUT)/Texts.sym $(OUT)/Config.sym
 	cd $(SRC); $(LINK) ORTool.Mod
 	mv $(SRC)/ORTool ./ORToolESP32
 
-OIOrder: $(SRC)/ORTool.Mod $(OUT)/Texts.sym $(OUT)/Config.sym
+OIOrderESP32: $(SRC)/ORTool.Mod $(OUT)/Texts.sym $(OUT)/Config.sym
 	cd $(SRC); $(LINK) OIOrder.Mod
 	mv $(SRC)/OIOrder ./OIOrderESP32
 
@@ -61,3 +61,5 @@ clean:
 .PHONY: install
 install: OberonESP32 OIOrderESP32 ORToolESP32
 	sudo mv ./OberonESP32 $(INSTALL_DIR)
+	sudo mv ./OIOrderESP32 $(INSTALL_DIR)
+	sudo mv ./ORToolESP32 $(INSTALL_DIR)

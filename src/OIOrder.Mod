@@ -12,35 +12,31 @@ MODULE OIOrder;
   IMPORT Files, Texts, Out, extArgs, SYS, Config;
 
   CONST 
-    DEBUG = TRUE;
+    DEBUG = FALSE;
   TYPE
     Ident   = ARRAY 64 OF CHAR;
     ModPtr  = POINTER TO ModNode;
     ModNode = RECORD name: Ident; key: INTEGER; initialized: BOOLEAN; next: ModPtr END;
-    ArgStr  = ARRAY 256 OF CHAR;
+    BigStr  = ARRAY 256 OF CHAR;
   VAR
-    importPaths: ARRAY 20, 256 OF CHAR;
+    importPaths: ARRAY 20 OF BigStr;
     filePresent: BOOLEAN;
     head: ModPtr;
-    outputFolder, outputName: ArgStr;
+    outputFolder, outputName: BigStr;
+    result: INTEGER;
 
   PROCEDURE Enter(msg: ARRAY OF CHAR);
   BEGIN
     IF DEBUG THEN
-      Out.Ln;
-      Out.String("Entering ");
-      Out.String(msg);
+      Out.Ln; Out.String("Entering "); Out.String(msg);
     END
   END Enter;
 
   PROCEDURE Enter2(msg, msg2: ARRAY OF CHAR);
   BEGIN
     IF DEBUG THEN
-      Out.Ln;
-      Out.String("Entering ");
-      Out.String(msg);
-      Out.String(" : ");
-      Out.String(msg2);
+      Out.Ln; Out.String("Entering "); Out.String(msg);
+      Out.String(" : "); Out.String(msg2);
     END
   END Enter2;
 
@@ -167,7 +163,7 @@ MODULE OIOrder;
       mod, mod2: ModPtr;
       F:         Files.File; 
       R:         Files.Rider;
-      fname:     ArgStr;
+      fname:     BigStr;
       modname:   Ident;
       cdecl:     BOOLEAN;
   BEGIN
@@ -193,7 +189,7 @@ MODULE OIOrder;
           Read(R, cnt);   (* imported module count *)
           WHILE cnt > 0 DO
             Files.ReadString(R, modname);
-            Out.Ln; Out.String(modname); Out.String("...");
+            (* Out.Ln; Out.String(modname); Out.String("..."); *)
             mod2 := GetModNode(modname);
             AdjustLocation(mod, mod2);
             DEC(cnt)
@@ -242,14 +238,16 @@ MODULE OIOrder;
     REPEAT DEC(i); Texts.Write(W, a[i]) UNTIL i = 0
   END WriteHex;
 
-  PROCEDURE GenerateInitFile;
+  PROCEDURE GenerateInitFile() : INTEGER;
     VAR
-      F:         Files.File; 
-      W:         Texts.Writer;
-      fname:     ArgStr;
-      mod:       ModPtr;
+      F:             Files.File; 
+      W:             Texts.Writer;
+      fname, ofname: BigStr;
+      mod:           ModPtr;
   BEGIN
-    MakeFileName(fname, outputFolder, outputName, "");
+    MakeFileName(fname,  outputFolder, outputName, ".S");
+    MakeFileName(ofname, outputFolder, outputName, ".o");
+
     F := Files.New(fname);
     Texts.OpenWriterToFile(W, F);
 
@@ -286,7 +284,10 @@ MODULE OIOrder;
     Texts.WriteString(W, "_eitable:"); Texts.WriteLn(W);
 
     Files.Register(F);
-    Files.Close(F)
+    Files.Close(F);
+
+    RETURN SYS.Assembler(fname, ofname)
+
   END GenerateInitFile;
 
   PROCEDURE CopyStr(from: ARRAY OF CHAR; VAR to: ARRAY OF CHAR);
@@ -300,10 +301,10 @@ MODULE OIOrder;
   PROCEDURE Usage;
   BEGIN
     Out.Ln;
-    Out.String("Usage: OIOrder [-o folder][-p path] -O outputFileName {moduleName ...}"); 
+    Out.String("Usage: OIOrderESP32 [-o folder][-p path] -O outputFileName {moduleName ...}"); 
     Out.Ln; Out.Ln;
     Out.String("-o : Output folder of generated code"                 ); Out.Ln;
-    Out.String("-O : Output init table filename"                      ); Out.Ln;
+    Out.String("-O : Output init table filename (without extension)"  ); Out.Ln;
     Out.String("-p : Folder Path for imported modules (e.g. f1:f2:f3)"); Out.Ln;
     SYS.Exit(1)
   END Usage;
@@ -311,7 +312,7 @@ MODULE OIOrder;
   PROCEDURE ProcessCommand;
     VAR
       res, i, argCount: INTEGER;
-      arg, importPath: ArgStr;
+      arg, importPath: BigStr;
       moduleName: Ident;
       firstModuleName: BOOLEAN;
   BEGIN
@@ -358,7 +359,7 @@ MODULE OIOrder;
             filePresent := TRUE
           ELSE
             Out.Ln; Out.String("Error: Output Filename required (-O).");
-            Usage
+            Usage (* never return *)
           END
         ELSE
           i := argCount
@@ -367,22 +368,22 @@ MODULE OIOrder;
         INC(i)
       END (* WHILE *)
     ELSE
-      Usage
+      Usage (* never return *)
     END (* IF *)
   END ProcessCommand;
 
 BEGIN
-  head := NIL;
+  head := NIL; result := 0;
   ProcessCommand;
   IF filePresent THEN 
     CompleteInfo;
-    GenerateInitFile
+    result := GenerateInitFile();
   ELSE
     Out.Ln; Out.String("Error: At least one module name required.");
-    Usage
+    Usage (* never return *)
   END;
 
   IF DEBUG THEN Out.Ln; Out.String("Completed."); Out.Ln END;
 
-  SYS.Exit(0);
+  SYS.Exit(result);
 END OIOrder.

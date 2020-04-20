@@ -1,3 +1,2 @@
-*.smb
-tmp
 .DS_Store
+build
