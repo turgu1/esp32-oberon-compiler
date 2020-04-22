@@ -1,7 +1,13 @@
+
+#PREFIX is environment variable, but if it is not set, then set default value
+ifeq ($(PREFIX),)
+    PREFIX := /usr/local
+endif
+
+INSTALL_DIR=$(PREFIX)/bin
+
 OC=obnc-compile
 LINK=obnc
-
-INSTALL_DIR=/usr/local/bin
 
 OBNC_CONFIG_C_REAL_TYPE=OBNC_CONFIG_FLOAT
 OBNC_CONFIG_C_INT_TYPE=OBNC_CONFIG_INT
@@ -17,13 +23,13 @@ SIMS = \
 	$(OUT)/ORB.sym \
 	$(OUT)/ORG.sym \
 	$(OUT)/ORP.sym \
-    $(OUT)/SYS.sym
+	$(OUT)/SYS.sym
 
 $(OUT)/%.sym: $(SRC)/%.Mod
 	cd $(SRC); $(OC) $(<F)
 
 .PHONY: all
-all: OberonESP32 ORTool OIOrder
+all: OberonESP32 ORToolESP32 OIOrderESP32
 
 OberonESP32: $(SIMS) $(SRC)/Oberon.Mod
 	cd $(SRC); $(LINK) Oberon.Mod
@@ -60,6 +66,6 @@ clean:
 
 .PHONY: install
 install: OberonESP32 OIOrderESP32 ORToolESP32
-	sudo mv ./OberonESP32 $(INSTALL_DIR)
-	sudo mv ./OIOrderESP32 $(INSTALL_DIR)
-	sudo mv ./ORToolESP32 $(INSTALL_DIR)
+	sudo install -m 755 ./OberonESP32  $(INSTALL_DIR)
+	sudo install -m 755 ./OIOrderESP32 $(INSTALL_DIR)
+	sudo install -m 755 ./ORToolESP32  $(INSTALL_DIR)

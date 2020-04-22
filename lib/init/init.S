@@ -16,11 +16,11 @@
 #   initialize modules. The first module in the list is considered
 #   the main module and its initialization code is not expected to return.
 #
-# - Entries in the .init_table section must be defined to point
-#   at each module initialization code. Not required if the 
-#   initialization is empty
+# - Entries in the .text_init_table section must be defined to point
+#   at each module initialization code. Program OIOrderESP32 is used to
+#   automate the creation of this table.
 #
-# - All procedural code is put in .text sections
+# - All procedural code is put in .text... sections
 #
 # - Global variables are placed in .bss sections. They will be
 #   initialized with zeroes by the ROM loader.
@@ -32,15 +32,10 @@
     .title Oberon ESP32 Startup code
     .sbttl Oberon ESP32 Compiler Version 0.2.0
 
-
-    .section .pointers_table_start
-  _sptable:
-
-    .section .pointers_table_end
-  _eptable:
-
     .global oberon_startup
     .section .entry.text
+
+    .extern _sitable, _eitable
 
   oberon_startup:
 
@@ -56,7 +51,7 @@
     movi a2, _sitable          # a2 = init table start address
     sub  a2, a3, a2            # a2 = size in bytes
     beqz a2, _init_end         # if table is empty, leave
-    srli a2, a2, 2             # a2 = size in words
+    srli a2, a2, 2             # a2 = size in 32bits words
 
     # initialize all modules
 

@@ -11,8 +11,8 @@ include makefile.inc
 # files must have extension .Mod
 
 MAIN = Main
-OTHERS = \
-  Out
+OTHERS = 
+
 SRC = $(OTHERS) $(MAIN)
 
 INIT = $(SRCDIR)/init.S
@@ -21,36 +21,32 @@ INITO = $(BLDDIR)/init.o
 TBL = init_table
 TBLO = $(BLDDIR)/$(TBL).o
 
-MATH = $(SRCDIR)/math_support.S
-MATHO = $(BLDDIR)/math_support.o
-
 SRCS = $(addsuffix .Mod, $(addprefix $(SRCDIR)/, $(SRC)))
 SYMS = $(addsuffix .smb, $(addprefix $(BLDDIR)/, $(SRC)))
 OBJS = $(addsuffix .o, $(addprefix $(BLDDIR)/, $(SRC)))
 
 ARCHIVE = liboberon.a
 
+# OBERON_PATH MUST be defined to properly initialise the search path
+# used both with the OberonESP32 compiler and the OIOrderESP32 apps.
+
 OBERON_PATH = $(BLDDIR)
 
 # Rules to build files.
 
 $(INITO): $(INIT)
-	$(CC) -x assembler-with-cpp $(ASFLAGS) $< -o $@
-	$(AR) r $(ARCHIVE) $@ 
-
-$(MATHO): $(MATH)
-	$(CC) -x assembler-with-cpp $(ASFLAGS) $< -o $@
-	$(AR) r $(ARCHIVE) $@ 
+	$(CC) $(ASFLAGS) $< -o $@
+	@$(AR) r $(ARCHIVE) $@ 
 
 $(TBLO):
-	$(OIORDER) -p $(OBERON_PATH) -o $(BLDDIR) -O $(TBL) $(MAIN) $(OTHERS)
+	$(OIORDER) -p $(OBERON_PATH):$(OBERON_LIB_DIR) -o $(BLDDIR) -O $(TBL) $(MAIN) $(OTHERS)
 	$(AR) r $(ARCHIVE) $@ 
 
 .PHONY: $(BLDDIR)
 $(BLDDIR):
 	mkdir -p $(BLDDIR)
 
-$(ARCHIVE) : $(BLDDIR) $(OBJS) $(INITO) $(TBLO) $(MATHO)
+$(ARCHIVE) : $(BLDDIR) $(OBJS) $(INITO) $(TBLO)
 	$(RL) $(ARCHIVE)
 
 # Target to clean build artifacts.

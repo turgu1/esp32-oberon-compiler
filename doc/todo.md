@@ -23,16 +23,13 @@ Here is the list of ongoing tasks to complete the effort of building the ESP32 O
 - [x] Init table generator
 - [x] Init code to be called from ESP-IDF
 - [ ] Flash memory-based code execution -> ESP-IDF ld integration
-- [ ] Some Qio interaces
-  + [ ] WatchDog
-  + [ ] Memory allocation
-  + [ ] WiFi and TCP/IP
-  + [ ] GPIO / PWM / A2D
-  + [ ] Flash memory
-  + [ ] Deep Sleep
-  + *and many more...*
-- [ ] Oberon Lib as an ESP-IDF component
-- [ ] CMake integration
+- [x] Oberon Lib as an ESP-IDF component -> external compilation. Integration not possible.
+- [x] CMake integration
+- [ ] Standard modules adjustments
+  + [ ] Kernel
+  + [ ] In
+  + [ ] Out
+  + [ ] ...
 - [ ] FreeRTOS behavior validation
 - [ ] Interrupt procedure definition
 
@@ -41,8 +38,6 @@ Here is the list of ongoing tasks to complete the effort of building the ESP32 O
 - [x] Trap mechanism to use Break instructions/Interrupts. Abandonned. Uses call4 instruction.
 - [x] Kernel Module (New, Garbage Collector, Timer)
 - [ ] Complete Kernel module (WatchDog, Flash disk access)
-- [ ] OTA capability
-- [ ] PlatformIO integration
 - [x] Makefile cleanup
 - [ ] Standard Modules
   + [ ] Out -> Needs a better standard RealFix procedure.
@@ -53,13 +48,12 @@ Here is the list of ongoing tasks to complete the effort of building the ESP32 O
   + [ ] File
   + [ ] Texts (ASCII only version)
 - [x] Library folder
-- [ ] Interrupts management
-- [ ] ESP32 hardware interfaces
-  + [ ] ESP-IDF generic interfacing
   + *and many more...*
 
 # Potential future activities
 
+- [ ] OTA capability
+- [ ] PlatformIO integration
 - [ ] Implement other Extended Oberon features
 - [ ] Source code debug marking with GDB
 - [ ] Optimize CASE statements when ranges are supplied as selectors

@@ -52,12 +52,14 @@ MODULE OIOrder;
   PROCEDURE Error(msg: ARRAY OF CHAR);
   BEGIN
     Out.Ln; Out.String("Error: "); Out.String(msg); 
+    Out.Ln;
     SYS.Exit(1)
   END Error;
 
   PROCEDURE Error2(msg, msg2: ARRAY OF CHAR);
   BEGIN
     Out.Ln; Out.String("Error: "); Out.String(msg); Out.String(msg2); Out.Char(".");
+    Out.Ln;
     SYS.Exit(1)
   END Error2;
   
@@ -197,7 +199,7 @@ MODULE OIOrder;
         END;
         mod.initialized := TRUE
       ELSE
-        Error2("Unable to find .smb file for module", moduleName);
+        Error2("Unable to find .smb file for module ", moduleName);
       END
     END;
     Leave("ProcessModule");

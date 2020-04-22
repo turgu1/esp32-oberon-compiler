@@ -3,6 +3,13 @@
 
 .SECONDARY:  # Keep intermediary files
 
+#PREFIX is environment variable, but if it is not set, then set default value
+ifeq ($(PREFIX),)
+    PREFIX := /usr/local
+endif
+
+LIB_INSTALL_DIR = $(PREFIX)/lib/OberonESP32
+
 TOOLCHAIN = xtensa-esp32-elf-
 
 ASFLAGS_PLATFORM  = -mlongcalls -mauto-litpools -mtext-section-literals -fstrict-volatile-bitfields
@@ -32,7 +39,7 @@ SRCDIR = src
 BLDDIR = build
 LIBDIR = ../lib
 
-OBFLAGS = -o $(BLDDIR) -p $(LIBDIR) -s -c -x
+OBERON_FLAGS = -o $(BLDDIR) -p $(BLDDIR) -s -c -x
 
 INIT = init/init.S
 INITO = $(BLDDIR)/init.o
@@ -53,10 +60,16 @@ ARCHIVE = liboberonesp32.a
 #	Pattern13.Mod
 
 OBJS  = $(addprefix $(BLDDIR)/, $(SRC:.Mod=.o))
+SMBS  = $(addprefix $(BLDDIR)/, $(SRC:.Mod=.smb))
 
-all: $(ARCHIVE)
+all: $(BLDDIR) $(ARCHIVE)
 
-$(ARCHIVE) : $(OBJS) $(INITO) $(MATHO)
+$(BLDDIR):
+	mkdir -p $(BLDDIR)
+
+# $(ARCHIVE) : $(OBJS) $(INITO) $(MATHO)
+
+$(ARCHIVE) : $(OBJS) $(MATHO)
 	$(RL) $(ARCHIVE)
 
 $(INITO): $(INIT)
@@ -68,11 +81,14 @@ $(MATHO): $(MATH)
 	@$(AR) r $(ARCHIVE) $@ 
 
 $(BLDDIR)/%.o ./%.smb : $(SRCDIR)/%.Mod
-	$(OBERON) $(OBFLAGS) $<
-	@mv $(BLDDIR)/$(patsubst %.Mod,%.smb,$(<F)) .
+	$(OBERON) $(OBERON_FLAGS) $<
 	@$(AR) r $(ARCHIVE) $@ 
+
+install: all
+	sudo install -d $(LIB_INSTALL_DIR)
+	sudo install -m 644 $(ARCHIVE) $(LIB_INSTALL_DIR)
+	$(foreach file, $(SMBS), sudo install -m 644 $(file) $(LIB_INSTALL_DIR) ; )
 
 clean:
 	-rm build/*
-	-rm *.smb
 	-rm $(ARCHIVE)
