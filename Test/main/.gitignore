@@ -1,0 +1,3 @@
+*.smb
+tmp
+.DS_Store

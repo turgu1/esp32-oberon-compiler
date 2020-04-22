@@ -1,6 +1,6 @@
-# Test folder
+# Trials Folder
 
-This folder contains a suite of basic tests to be used on a ESP32 module to verify basic compiler generation capabilities. 
+This folder contains a template to use to instanciate a new application. Simply copy the hole folder to another location on the computer.
 
 To build everything and upload to the ESP32 development board, do the following commands:
 

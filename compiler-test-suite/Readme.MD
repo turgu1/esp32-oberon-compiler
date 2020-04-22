@@ -1,4 +1,4 @@
- # ESP32 Oberon Compiler (kind of) Test Suite
+# ESP32 Oberon Compiler (kind of) Test Suite
 
 This folder contains 128 modules that are able to be compiled with the ESP32 Oberon Compiler.
 
@@ -18,7 +18,7 @@ I'm working on:
 
 Update (2020.04.01):
 
-I'm still using this folder as a first cut of trials with the compiler to ensure compilation-assembly-linkage is at least producing executables. 
+I'm still using this folder as a first cut of trials with the compiler to ensure compilation-assembly-linkage is at least producing executables.
 
 Then I'm using the patterns folder to verify by close inspection the result of compilation.
 

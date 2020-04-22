@@ -3,15 +3,24 @@
 
 include makefile.inc
 
-# The last module in the list is the main program. Modules must
-# be put in the reverse order of dependencies to insure that
-# IMPORT statements wont fail.
+# The last module in the list is the main program. 
 #
 # All modules listed must be identified without the extension. All module
 # files must have extension .Mod
 
 MAIN = Main
-OTHERS = 
+OTHERS =      \
+	Test        \
+	Case        \
+	Pointer     \
+	BitFunc     \
+	ArrayAssignments \
+	ShortInt    \
+	Byte        \
+	DefFunc     \
+	SimpleReal  \
+	SimpleMath  \
+	Assignments
 
 SRC = $(OTHERS) $(MAIN)
 

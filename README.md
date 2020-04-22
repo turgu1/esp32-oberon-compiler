@@ -21,7 +21,7 @@ The folder `test-baremetal` demonstrates the feasibility of independent coding f
 
 ### OBNC
 
-The OBNC Oberon-07 version 0.16.1 is used to build this compiler. The author is using it on both Linux and MacOs platforms without any major issue (Except for the SYSTEM.VAL() that needed to be replaced). It must be built using the following commands and option (after having changed current folder to OBNC):
+The OBNC Oberon-07 version 0.16.1 is used to build this compiler. The author is using it on both Linux and MacOs platforms without any major issue (Except for the SYSTEM.VAL() that needed to be replaced and some support functions. See the `SYS.*` files in the `src` folder). It must be built using the following commands and option (after having changed current folder to OBNC):
 
 ```sh
 $ ./build --c-real-type=float
@@ -38,14 +38,18 @@ The ESP-IDF development framework must be present and setup in the user environm
 
 ### ESP32 Oberon Compiler and run-time
 
-For now, there is a simple Makefile in the main folder that will automate the creation of the Oberon compiler executable. To build, simply use the command `make` to compile it. The result will be the executable file named `Oberon` in the main folder.
+For now, there is a simple Makefile in the main folder that will automate the creation of the Oberon compiler and additional executables. To build, simply use the command `make` to compile them, then `make install` to install them. The result will be the executable files named `OberonESP32`, `OIOrderESP32` and `ORToolESP32` in the installation folder. By default, the files will be installed in folder /usr/local/bin. Information about the use of these application can be found in the [User's guide](./doc/Users Guide.md).
 
-The runtime environment is located in the `lib/` sub-folder. It must also be built after the compiler. Simply change current folder to `lib/` and then use the command `make`.
+The runtime environment is located in the `lib/` sub-folder. It must also be built after the compiler. Simply change current folder to `lib/` and then use the command `make`. Again, to install, `make install`. By default, the library named liboberonesp32.a will be installed in folder /usr/local/lib/OberonESP32. Definition files (with extension `.smb`) for all oberon modules that are part of the library will also be copied to that folder.
 
-You can then create your own program. The folder `Test` and `Trial` contains two programs with appropriate makefiles to automate the built and the transmission of the application to a connected ESP32 board through USB. The `Makefile` present in these folders would give some lignts on how to organise your own program.
+You can then create your own program. The folder `Template`, `Test` and `Trial` contain programs with appropriate makefiles to automate the built and the transmission of the application to a connected ESP32 board through USB. The `Makefile` and `CMakeFiles.txt` present in these folders would give some lignts on how to organise your own program. (Some documentation remains to be supplied on the way to use the ESP-IDF framework)
 
 As stated, this is still under eavy development and is regularly being updated (like several times a day). There is still some bugs presents and many modules to control the ESP32 hardware interfaces remains to be added.
 
-The `compiler-test-suite/` is currently being constructed and is still not ready. The aim is to get all the programs there to be compiled and run in sequence on an ESP32 board. When completed, I would then declare the compiler ready...
+Testing the compiler is done through the use of:
+
+- modules in folder `patterns` that are compiled and checked by hand to verify that the generated code is correct, 
+- the application located in folder `Test` that is compiled, linked and uploaded to a working ESP32 development board for execution, and
+- a suite of compiled modules located in folder `compiler-test-suite/` that are used to verify the overall capability of the compiler.
 
 Guy

@@ -1,0 +1,107 @@
+MODULE Test;
+
+  IMPORT Out;
+
+  CONST 
+    MaxTestProc = 200;
+
+  TYPE
+    TestProc* = PROCEDURE ();
+
+  VAR
+    assertCallCount: INTEGER;
+    errorCount:      INTEGER; 
+    registryCount:   INTEGER;
+    testProcs: ARRAY MaxTestProc OF TestProc;
+
+    nextCh, firstCh, maxCh: CHAR;
+
+    initialized:     BOOLEAN;
+
+  PROCEDURE Put(ch: CHAR);
+  BEGIN
+    Out.Char(ch); Out.Flush
+  END Put;
+
+  PROCEDURE End*;
+  BEGIN
+    Put(".");
+  END End;
+  
+  PROCEDURE First*(ch: CHAR);
+  BEGIN
+    firstCh := ch;
+    nextCh := firstCh;
+    maxCh := CHR(ORD(ch) + 26)
+  END First;
+
+  PROCEDURE Next*;
+  BEGIN
+    Put(nextCh);
+    nextCh := CHR(ORD(nextCh) + 1);
+    IF nextCh >= maxCh THEN nextCh := firstCh END
+  END Next;
+
+  PROCEDURE Exec*() : INTEGER;
+  VAR
+    i : INTEGER;
+  BEGIN
+    Out.String("Start"); Out.Ln; Out.Ln;
+    errorCount := 0;
+    FOR i := 0 TO registryCount - 1 DO
+      testProcs[i]();
+    END;
+    RETURN errorCount
+  END Exec;
+
+  PROCEDURE Assert*(cond: BOOLEAN; msg: ARRAY OF CHAR);
+  BEGIN 
+    INC(assertCallCount);
+    Next;
+    IF  ~cond THEN
+      Out.Ln;
+      Out.String("=====> Assert Failed: ");
+      Out.String(msg);
+      Out.String(" <=====");
+      Out.Ln;
+      Out.Flush;
+      INC(errorCount)
+    END
+  END Assert;
+
+  PROCEDURE Completed*(): INTEGER;
+  BEGIN
+    Out.Ln;
+    Out.Ln; Out.String("Test Completed. "); 
+    Out.Ln; Out.String("Number of Test Procedures: "); Out.Int(registryCount, 0); 
+    Out.Ln; Out.String("Number of Assertion made: ");  Out.Int(assertCallCount, 0); 
+    IF errorCount > 0 THEN
+      Out.Ln; Out.String("There is "); Out.Int(errorCount, 0); Out.String(" error(s) observed.")
+    ELSE
+      Out.Ln; Out.String("No Error! Life is good!!")
+    END;
+    RETURN errorCount
+  END Completed;
+
+  PROCEDURE Setup*;
+  BEGIN
+    assertCallCount :=    0;
+    errorCount      :=    0;
+    registryCount   :=    0;
+    initialized     := TRUE;
+  END Setup;
+
+  PROCEDURE Register*(proc: TestProc);
+  BEGIN
+    IF ~initialized THEN Setup END;
+    Out.Ln;
+    IF registryCount < (MaxTestProc - 1) THEN
+      testProcs[registryCount] := proc;
+      INC(registryCount)
+    END
+  END Register;
+
+BEGIN
+  Setup
+END Test.
+

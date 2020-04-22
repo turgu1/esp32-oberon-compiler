@@ -2,9 +2,9 @@
 
 Three applications are supplied:
 
-- The ESP32 Oberon compiler (named OberonESP32)
-- The module initialization table generator (named OIOrderESP32)
-- The smb file viewer (named ORToolESP32)
+- The ESP32 Oberon compiler (named `OberonESP32`)
+- The module initialization table generator (named `OIOrderESP32`)
+- The smb file viewer (named `ORToolESP32`)
 
 The sequence of use of the compiler is as follow:
 
@@ -12,7 +12,7 @@ The sequence of use of the compiler is as follow:
 
 2. After that, the modules init table generator must be called to create the table that will be used by the application initialization code to call each module init code in sequence. This table is an assembly language file (extension `.S`). The generator will then call the assembler to generate the corresponding object file (extension `.o`).
 
-3. The linker can then be called to generate the application. (TBC)
+3. The linker can then be called to generate the application. In the context of the ESP-IDF framework, a template is available to show how to integrate an Oberon program to the framework. This is using a combination of CMake and Make related configuration files and source code that will be used to produce and upload an application. (TBC)
 
 ## Compiler parameters
 
@@ -45,9 +45,9 @@ Where the parameters are:
 The compiler will produce:
 - an ESP32 assembly language source code (extension `.S`);
 - the object code (extension `.o`);
-- a symbol file (extension `.smb`) if it does not exist; or the **-s** option is present.
+- a symbol file (extension `.smb`) if it does not exists; or the **-s** option is present.
 
-Note that for CDECL module, only the symbol file (extension `.smb`) will be generated.
+Note that for a CDECL module, only the symbol file (extension `.smb`) will be generated.
 
 ## Compiler modification to support ESP-IDF Framework integration
 
@@ -67,15 +67,11 @@ An ESP32 Oberon program requires runtime support. The compiler is supplied with 
 
 ## Modules Initialization Sequence
 
-The application startup code is a piece of assembly language program that is called by the ESP32 bootstrap ROM. Once started, it is calling initialization code of each Oberon module in sequence. The order of these calls is important to understand as some module may rely on other modules to be initialized prior to their own initialization code can be initiated.
+The application startup code is a piece of assembly language program that is called by the ESP32 bootstrap ROM. Once started, it is calling initialization code of each Oberon module in sequence. The order of these calls is important as some module may rely on other modules to be initialized prior to their own initialization code can be initiated.
 
-At link time, modules must be presented to the linker in the reverse order of initialization, with the application startup object code as the first file.
+The supplied `OIOrderESP32` application is responsible of generating a module initialization table that will allow for the proper sequencing of initialisation calls made to all modules at startup time.
 
-For example, imagine an application that uses 3 Oberon modules: Main.Mod, Module1.Mod and Module2.Mod. Main.Mod represents your principal portion of the program. As such, it is needed to be the last Oberon module to get its module initialization code to be launched. If the module named Module1.Mod rely on Module2.Mod to be initialized before itself, Module2.Mod will then need to be put after Module1.Mod in the list. Here is the order of object files to be supplied to the linker:
-
-```
-init.o Main.o Module1.o Module2.o
-```
+(TBC)
 
 ## Standard Module
 

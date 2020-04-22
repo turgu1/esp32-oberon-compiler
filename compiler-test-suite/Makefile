@@ -1,5 +1,12 @@
 .SECONDARY:  # Keep intermediary files
 
+#PREFIX is environment variable, but if it is not set, then set default value
+ifeq ($(PREFIX),)
+    PREFIX := /usr/local
+endif
+
+OBERON_LIB_DIR = $(PREFIX)/lib/OberonESP32
+
 TOOLCHAIN = xtensa-esp32-elf-
 
 ASFLAGS_PLATFORM  = -mlongcalls -mauto-litpools -mtext-section-literals -fstrict-volatile-bitfields
@@ -8,7 +15,7 @@ LDFLAGS_PLATFORM = $(AFLAGS_PLATFORM)
 ###
 # General project build
 ###
-OB = ../OberonESP32
+OBERON = OberonESP32
 CC = $(TOOLCHAIN)gcc
 LD = $(TOOLCHAIN)ld
 OC = $(TOOLCHAIN)objcopy
@@ -16,7 +23,6 @@ OS = $(TOOLCHAIN)size
 
 BLDDIR = ./build
 SRCDIR = ./src
-LIBDIR = ../lib
 
 ESP32LIB = esp32-oberon
 # Linker script location.
@@ -29,7 +35,7 @@ ASFLAGS += -c -O0 -Wall -fmessage-length=0
 ASFLAGS += $(ASFLAGS_PLATFORM)
 ASFLAGS += -g
 
-OBFLAGS = -o $(BLDDIR) -p $(LIBDIR) -s -c -l
+OBERON_FLAGS = -o $(BLDDIR) -p $(OBERON_LIB_DIR) -s -c -l
 
 SRC = \
   ArrayAssignment.Mod \
@@ -176,13 +182,13 @@ EXECS = $(ASSS:.S=.elf)
 OTHERS = $(addprefix $(BLDDIR)/, $(Others))
 
 $(BLDDIR)/%.o : $(SRCDIR)/%.Mod
-	$(OB) $(OBFLAGS) $<
+	$(OBERON) $(OBERON_FLAGS) $<
 
 $(BLDDIR)/%.elf : $(BLDDIR)/%.o
 	$(CC) $^ $(LDFLAGS) -o $@
 
 .PHONY: all
-all: oth $(EXECS) 
+all: oth $(OBJS) 
 
 $(BLDDIR)/TestCyclicImport00.o : $(SRCDIR)/TestCyclicImport00A.Mod
 	$(OB) $(OBFLAGS) $<

@@ -3,6 +3,6 @@
 # project subdirectory.
 #
 
-PROJECT_NAME := test
+PROJECT_NAME := template_app
 
 include $(IDF_PATH)/make/project.mk
