@@ -51,13 +51,36 @@ A REAL NaN value will be generated if a division by zero is done. The value will
 CONST NaN = 0.0 / 0.0;
 ```
 
-TBC: System interrupts behavior and Trap mechanism on compiler check (**-c**) generation
-
 ## ESP-IDF Integration
 
 Integrating Oberon code with the ESP-IDF Framework requires support to access C programming language functions and definitions outside of the Oberon realm. Some limited functionalities have been added to the ESP32 Oberon Compiler to simplify part of this requirement.
 
-The Oberon language has been extended with a CDECL qualifier for module, procedure, record, array and pointer declarations. The following subsections describe each of these extensions.
+The Oberon language has been extended with a CDECL qualifier for module, procedure, record, array and pointer declarations. The following subsections describe each of these extensions. In a nutshell, here are the modifications done to the language in support of ESP-IDF integration:
+
+```
+Module           = OberonModule | CModule.
+OberonModule     = MODULE ident ";" [ImportList] DeclarationSequence
+                   [BEGIN StatementSequence] END ident "." .           (* No change here *)
+CModule          = MODULE "[" CDECL "]" ident ";" [ImportList]
+                   CDeclarationSequence END ident "." .
+CDeclarationSequence = DeclarationSequence =
+                           [CONST {ConstDeclaration ";"}]
+                           [TYPE {TypeDeclaration ";"}]
+                           {CProcedureDeclaration ";"}.
+
+ArrayType        = ARRAY     ["[" CDECL "]"] length {"," length} OF type.
+PointerType      = POINTER   ["[" CDECL "]"] TO type.
+ProcedureType    = PROCEDURE ["[" CDECL "]"] [FormalParameters].
+
+ProcedureDeclaration = OberonProcedureDeclaration | CProcedureDeclaration.
+OberonProcedureDeclaration = ProcedureHeading ";" ProcedureBody ident. (* No change here *)
+CProcedureDeclaration = CProcedureHeading ";" .
+CProcedureHeading = PROCEDURE ["[" CDECL "]"] identdef [FormalParameters].
+
+RecordType       = OberonRecordType | CRecordType.
+OberonRecordType = RECORD ["(" BaseType ")"] [FieldListSequence] END.  (* No change here *)
+CRecordType      = RECORD    ["[" CDECL "]"]   [FieldListSequence] END.
+```
 
 ### CDECL Module declaration
 
@@ -90,7 +113,7 @@ A CDECL procedure declaration is also permitted for procedure type declarations 
 
 Some important properties of these declarations:
 
-- Arrays, records, procedures and pointers used as parameters must be declared as CDECL.
+- Arrays, records, procedures and pointers used as parameter types must be declared as CDECL.
 - Arrays and record parameters are passed by address, other parameter types are passed by value. Other informations like length or type information are not automatically supplied as additionnal hidden parameters, as is the case for usual Oberon procedure calls with open array and/or record parameters.
 - There is no support for variable number of parameters. If such procedure needs to be called, you can write your own C function that will be used as a proxy for these calls.
 - Even if an external C function declares default parameter values, all parameters must be supplied to the call.
