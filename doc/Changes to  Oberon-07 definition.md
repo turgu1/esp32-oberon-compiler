@@ -53,6 +53,110 @@ CONST NaN = 0.0 / 0.0;
 
 TBC: System interrupts behavior and Trap mechanism on compiler check (**-c**) generation
 
+## ESP-IDF Integration
+
+Integrating Oberon code with the ESP-IDF Framework requires support to access C programming language functions and definitions outside of the Oberon realm. Some limited functionalities have been added to the ESP32 Oberon Compiler to simplify part of this requirement.
+
+The Oberon language has been extended with a CDECL qualifier for module, procedure, record, array and pointer declarations. The following subsections describe each of these extensions.
+
+### CDECL Module declaration
+
+A module can be declared as a special C language declaration module as follows:
+
+```Pascal
+MODULE [CDECL] moduleName;
+
+END moduleName.
+```
+
+This kind of module will have the following properties:
+
+- No code will be generated. This will only produce a `.smb` module declaration file and an object file for declared exported string constants.
+- No variables can be declared.
+- Every type and procedure declared in a CDECL module will be automatically tagged as a CDECL declaration (see next sub-sections for more information). Using the `[CDECL]` tagging for ARRAY, POINTER, RECORD types and PROCEDURE is then not necessary, but will not cause any error if present in the declarations.
+- As no code is generated, it is not permitted to put any executable statement in a CDECL module. 
+
+### CDECL Procedure declaration
+
+You can declare a procedure to be a C programming language function using the word “CDECL” in brackets after the PROCEDURE name:
+
+```Pascal
+PROCEDURE [CDECL] P(): INTEGER;
+```
+
+Such a declaration does not allow to include any procedure contain (both procedure level declarations and statements) as it identifies an external procedure that can be called by other Oberon procedures. 
+
+A CDECL procedure declaration is also permitted for procedure type declarations and procedures as a parameter value.
+
+Some important properties of these declarations:
+
+- Arrays, records, procedures and pointers used as parameters must be declared as CDECL.
+- Arrays and record parameters are passed by address, other parameter types are passed by value. Other informations like length or type information are not automatically supplied as additionnal hidden parameters, as is the case for usual Oberon procedure calls with open array and/or record parameters.
+- There is no support for variable number of parameters. If such procedure needs to be called, you can write your own C function that will be used as a proxy for these calls.
+- Even if an external C function declares default parameter values, all parameters must be supplied to the call.
+- There is no name mangling. The procedure name will be used as-is with esp32 call instructions.
+
+### CDECL Record declaration
+
+You can declare a record to be equivalent to a C `struct` declaration using the word “CDECL” in brackets after the RECORD symbol:
+
+```Pascal
+TYPE R = RECORD [CDECL] i, j: INTEGER END;
+```
+
+Some important properties of these declarations:
+
+- A CDECL Record cannot accept record extensions. 
+- All pointer, record and procedure fields declared inside such a record must be CDECL. 
+
+For now, it is not possible to declare a type equivalent to the C `union` structure type.
+
+### CDECL ARRAY declaration
+
+You can declare an ARRAY to be equivalent to a C `vector` using the word "CDECL" in brackets after the ARRAY symbol:
+
+```Pascal
+TYPE A = ARRAY [CDECL] 20 OF CHAR;
+```
+
+Some important properties of these declarations:
+
+- A pointer, record and procedure subtype must be CDECL. 
+
+### CDECL Pointer declaration
+
+You can declare a procedure to be a C pointer using the word “CDECL” in brackets after the POINTER symbol:
+
+```Pascal
+TYPE P = POINTER [CDECL] TO ARRAY OF CHAR;
+```
+
+You can declare CDECL pointers to be of the following types: BYTE, CHAR, SHORTINT, INTEGER, REAL, ARRAY [CDECL], RECORD [CDECL] and PROCEDURE [CDECL]. These pointers cannot be allocated through the `NEW()` procedure. You can assign variables of the proper type to these pointers through assignments and parameters in CDECL procedure calls. The address of the variable will then be used to initialize the pointer content. Elsewere in code, using a pointer will dereference the variable. For example:
+
+```Pascal
+MODULE M;
+  TYPE 
+    P  = POINTER [CDECL] TO INTEGER;
+    AP = POINTER [CDECL] TO ARRAY [CDECL] OF CHAR;
+    R  = RECORD  [CDECL] i, j: INTEGER END;
+    RP = POINTER [CDECL] TO R;
+  VAR 
+    i: INTEGER; p: P;
+    a: ARRAY [CDECL] 20 OF CHAR; ap: AP; c: CHAR;
+    r : R; rp : RP;
+BEGIN
+  p := i;              (* p receives the address of i  *)
+  i := p * i;          (* i receives i * i             *)
+  a := "Hello World!";
+  ap := a;             (* ap receives the address of a *)
+  c  := ap[6];         (* c receives character 'W'     *)
+  rp := r;             (* rp receives the adress of r  *)
+  i  := rp.i;          (* i receives value of r.i      *)
+END M.
+```
+
+As for the C programming language, using such pointer requires great care when assigning values, in particular using procedure local variables in a pointer assignment. Be certain that the pointer will not be dereferencing such variable after procedure execution completion.
+
 ## Interrupt procedure
 
 You can declare a procedure to be called when an interrupt occurs. To do so, you have to put into brackets the interrupt level number associated to the procedure like this:
@@ -64,47 +168,6 @@ END P;
 ```
 
 (Not working. Still, a work in progress)
-
-## CDECL
-
-Integrating Oberon code with the ESP-IDF Framework requires support to access C programming language functions and definitions outside of the Oberon realm. Some limited functionality has been added to the ESP32 Oberon Compiler to simplify part of this requirement.
-
-It is then possible to declare C programming langage functions both in a normal Oberon module and in special declaration modules into which every declaration is considered to be related to external C.
-
-### Module level CDECL declaration
-
-A module can be declared as a special C language declaration module as follows:
-
-```Pascal
-MODULE [CDECL] moduleName;
-
-END moduleName.
-```
-
-This kind of module will have the following consequences:
-
-- No object code will be generated. This will only produce a `.smb` module declaration file.
-- Every procedure declared in the module will be automatically tagged as a CDECL declaration (see next sub-section for more information).
-- As no object code is generated, it is not permitted to put any executable statements in the module. 
-
-### Procedure CDECL declaration
-
-You can declare a procedure to be a C programming language function using the word “CDECL” in brackets before the procedure name:
-
-```Pascal
-PROCEDURE [CDECL] P(): INTEGER;
-```
-
-Such a declaration does not allow to include any procedure contain (both procedure level declarations and statements) as it identifies an external procedure that can be called by other Oberon procedures. 
-
-CDECL procedure declaration is also permitted for procedure type declarations and procedures as a parameter value.
-
-Some important properties of these declarations:
-
-- Open array, string array and record parameters are passed by address. Other informations like length or type information are not automatically supplied, as is the case for usual Oberon procedure calls.
-- There is no support for variable number of parameters. If such procedure needs to be called, you can write your own C function that will be used as a proxy for these calls.
-- Even if an external C function declare default parameter values, all parameters must be supplied to the call.
-- There is no name mangling. The procedure name will be used as-is with call instructions.
 
 ## SHORTINT
 

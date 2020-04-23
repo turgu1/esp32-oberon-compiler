@@ -16,11 +16,12 @@ MODULE ORB;   (*NW 25.6.2014  / 1.3.2019  in Oberon-07*)
       SFunc* = 7; Mod*   = 8;
 
     (* form values *)
-      Byte*    =  1; Bool*    =  2; Char*   =  3; 
-      Short*   =  4; Int*     =  5; Real*   =  6; 
-      Set*     =  7; Pointer* =  8; NilTyp* =  9; 
-      NoTyp*   = 10; Proc*    = 11; String* = 12; 
-      Array*   = 13; Record*  = 14; CProc*  = 15;
+      Byte*     =  1; Bool*     =  2; Char*    =  3; 
+      Short*    =  4; Int*      =  5; Real*    =  6; 
+      Set*      =  7; Pointer*  =  8; NilTyp*  =  9; 
+      NoTyp*    = 10; Proc*     = 11; String*  = 12; 
+      CProc*    = 13; CPointer* = 14; Array*   = 15; 
+      CArray    = 16; Record*   = 17; CRecord* = 18;
       
   TYPE 
     Object* = POINTER TO ObjDesc;
@@ -67,12 +68,12 @@ MODULE ORB;   (*NW 25.6.2014  / 1.3.2019  in Oberon-07*)
     Mod      key
 
   Type forms and the meaning of "dsc" and "base":
-    form        dsc      base
-    ----------------------------------------------
-    Pointer      -       type of dereferenced object
-    Proc, CProc params   result type
-    Array        -       type of elements
-    Record      fields   extension *)
+    form               dsc      base
+    -----------------------------------------------------
+    Pointer, CPointer   -       type of dereferenced object
+    Proc, CProc        params   result type
+    Array               -       type of elements
+    Record, CRecord    fields   extension *)
 
   VAR 
     topScope*, 
@@ -222,10 +223,10 @@ MODULE ORB;   (*NW 25.6.2014  / 1.3.2019  in Oberon-07*)
     IF ref < 0 THEN T := typtab[-ref]  (* already read *)
     ELSE NEW(t); T := t; typtab[ref] := t; t.mno := thismod.lev;
       Read(R, form); t.form := form;
-      IF form = Pointer THEN InType(R, thismod, t.base); t.size := 4
-      ELSIF form = Array THEN
+      IF (form = Pointer) OR (form = CPointer) THEN InType(R, thismod, t.base); t.size := 4
+      ELSIF (form = Array) OR (form = CArray) THEN
         InType(R, thismod, t.base); Files.ReadNum(R, t.len); Files.ReadNum(R, t.size)
-      ELSIF form = Record THEN
+      ELSIF (form = Record) OR (form = CRecord) THEN
         InType(R, thismod, t.base);
         IF t.base.form = NoTyp THEN t.base := NIL; obj := NIL ELSE obj := t.base.dsc END ;
         Files.ReadNum(R, t.len);     (* TD adr/exno *)
@@ -354,9 +355,9 @@ MODULE ORB;   (*NW 25.6.2014  / 1.3.2019  in Oberon-07*)
     ELSE obj := t.typobj;
       IF obj # NIL THEN Write(R, Ref); t.ref := Ref; INC(Ref) ELSE (*anonymous*) Write(R, 0) END ;
       Write(R, t.form);
-      IF t.form = Pointer THEN OutType(R, t.base)
-      ELSIF t.form = Array THEN OutType(R, t.base); Files.WriteNum(R, t.len); Files.WriteNum(R, t.size)
-      ELSIF t.form = Record THEN
+      IF (t.form = Pointer) OR (t.form = CPointer) THEN OutType(R, t.base)
+      ELSIF (t.form = Array) OR (t.form = CArray) THEN OutType(R, t.base); Files.WriteNum(R, t.len); Files.WriteNum(R, t.size)
+      ELSIF (t.form = Record) OR (t.form = CRecord) THEN
         IF t.base # NIL THEN OutType(R, t.base); bot := t.base.dsc ELSE OutType(R, noType); bot := NIL END ;
         IF obj # NIL THEN Files.WriteNum(R, obj.exno) ELSE Write(R, 0) END ;
         Files.WriteNum(R, t.nofpar); Files.WriteNum(R, t.size);
@@ -425,16 +426,16 @@ MODULE ORB;   (*NW 25.6.2014  / 1.3.2019  in Oberon-07*)
         Write(R, obj.class); Files.WriteString(R, obj.name);
         OutType(R, obj.type);
         IF obj.class = Typ THEN
-          IF obj.type.form = Record THEN
+          IF (obj.type.form = Record) OR (obj.type.form = CRecord) THEN
             obj0 := topScope.next;  (* check whether this is base of previously declared pointer types *)
             WHILE obj0 # obj DO
-              IF (obj0.type.form = Pointer) & (obj0.type.base = obj.type) & (obj0.type.ref > 0) THEN Write(R, obj0.type.ref) END ;
+              IF ((obj0.type.form = Pointer) OR (obj0.type.form = CPointer)) & (obj0.type.base = obj.type) & (obj0.type.ref > 0) THEN Write(R, obj0.type.ref) END ;
               obj0 := obj0.next
             END
           END ;
           Write(R, 0)
         ELSIF obj.class = Const THEN
-          IF (obj.type.form = Proc) OR ((obj.type.form = CProc)) THEN Files.WriteNum(R, obj.exno)
+          IF (obj.type.form = Proc) OR (obj.type.form = CProc) THEN Files.WriteNum(R, obj.exno)
           ELSIF obj.type.form = Real THEN Files.WriteInt(R, obj.val)
           ELSE Files.WriteNum(R, obj.val)
           END

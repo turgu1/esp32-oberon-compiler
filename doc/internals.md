@@ -68,7 +68,7 @@ Memory mapping is done by the linker, using a descriptor located in file `lib/ld
 
 ## Symbol File (`.smb`)
 
-- Added Forms: Short and CProc: Many form identifiers have changed
+- Added Forms: Short, CProc, CRecord, CArray and CPointer: Many form identifiers have changed
 - Added cdecl: If = 1, the whole module is a CDECL and no code has been generated, else = 0
 - Added list of imported module ids (imodcnt {imodname})
 - Versionkey: 2
@@ -78,9 +78,10 @@ Classes:
   Con = 1, Var = 2, Par = 3, Fld = 4; Typ = 5
 
 Forms:
-  Byte    =  1, Bool   =  2, Char    =  3, Short  =  4, Int   =  5,
-  LInt    =  6, Set    =  7, Pointer =  8, NilTyp =  9, NoTyp = 10,
-  ProcTyp = 11, String = 12, Array   = 13, Record = 14, CProc = 15
+  Byte     =  1, Bool     =  2, Char    =  3, Short    =  4, Int   =  5,
+  LInt     =  6, Set      =  7, Pointer =  8, NilTyp   =  9, NoTyp = 10,
+  ProcTyp  = 11, String   = 12, CProc   = 13, CPointer = 14, Array = 15,
+  CArray   = 16, Record   = 17, CRecord = 18
 
 Syntax:
   SymFile = null key name versionkey cdecl imodcnt {imodname} {object}.
