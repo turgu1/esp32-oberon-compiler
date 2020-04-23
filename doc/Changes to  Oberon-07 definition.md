@@ -101,7 +101,7 @@ This kind of module will have the following properties:
 
 ### CDECL Procedure declaration
 
-You can declare a procedure to be a C programming language function using the word “CDECL” in brackets after the PROCEDURE name:
+You can declare a procedure to be a C programming language function using the word “CDECL” in brackets after the PROCEDURE symbol:
 
 ```Pascal
 PROCEDURE [CDECL] P(): INTEGER;
@@ -130,7 +130,7 @@ TYPE R = RECORD [CDECL] i, j: INTEGER END;
 Some important properties of these declarations:
 
 - A CDECL Record cannot accept record extensions. 
-- All pointer, record and procedure fields declared inside such a record must be CDECL. 
+- All array, pointer, record and procedure fields declared inside such a record must be CDECL. 
 
 For now, it is not possible to declare a type equivalent to the C `union` structure type.
 
