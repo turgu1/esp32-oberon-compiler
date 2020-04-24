@@ -6,7 +6,7 @@ VAR
   BEGIN
     IF x >= 1.0 THEN
       x := F(F(x))
-    END;
+    END ;
     RETURN x
   END F;
   

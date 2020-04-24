@@ -21,7 +21,7 @@ MODULE ORB;   (*NW 25.6.2014  / 1.3.2019  in Oberon-07*)
       Set*      =  7; Pointer*  =  8; NilTyp*  =  9; 
       NoTyp*    = 10; Proc*     = 11; String*  = 12; 
       CProc*    = 13; CPointer* = 14; Array*   = 15; 
-      CArray    = 16; Record*   = 17; CRecord* = 18;
+      CArray*   = 16; Record*   = 17; CRecord* = 18;
       
   TYPE 
     Object* = POINTER TO ObjDesc;
@@ -104,9 +104,9 @@ MODULE ORB;   (*NW 25.6.2014  / 1.3.2019  in Oberon-07*)
         importPaths[i][k] := 0X; k := 0; INC(i)
       ELSE
         importPaths[i][k] := impPath[j]; INC(k)
-      END;
+      END ;
       INC(j)
-    END;
+    END ;
     IF i < LEN(importPaths) THEN
       importPaths[i][k] := 0X; INC(i);
       WHILE i < 10 DO importPaths[i][0] := 0X; INC(i) END
@@ -169,11 +169,11 @@ MODULE ORB;   (*NW 25.6.2014  / 1.3.2019  in Oberon-07*)
   PROCEDURE MakeFileName*(VAR FName: ARRAY OF CHAR; folder, name, ext: ARRAY OF CHAR);
     VAR i, j: INTEGER;
   BEGIN i := 0; j := 0;  (*assume name suffix less than 4 characters*)
-    WHILE (j < LEN(FName) - 5) & (folder[j] # 0X) DO FName[j] := folder[j]; INC(j) END;
-    IF (j > 0) & (FName[j - 1] # "/") THEN FName[j] := "/"; INC(j) END;
+    WHILE (j < LEN(FName) - 5) & (folder[j] # 0X) DO FName[j] := folder[j]; INC(j) END ;
+    IF (j > 0) & (FName[j - 1] # "/") THEN FName[j] := "/"; INC(j) END ;
     WHILE (j < LEN(FName) - 5) & (name[i] # 0X) DO FName[j] := name[i]; INC(i); INC(j) END ;
     i := 0;
-    WHILE ext[i] # 0X DO FName[j] := ext[i]; INC(i); INC(j) END;
+    WHILE ext[i] # 0X DO FName[j] := ext[i]; INC(i); INC(j) END ;
     FName[j] := 0X
   END MakeFileName;
   
@@ -273,7 +273,7 @@ MODULE ORB;   (*NW 25.6.2014  / 1.3.2019  in Oberon-07*)
     VAR cnt: INTEGER; name: ORS.Ident;
   BEGIN
     Read(R, cnt);
-    WHILE cnt > 0 DO Files.ReadString(R, name); DEC(cnt) END;
+    WHILE cnt > 0 DO Files.ReadString(R, name); DEC(cnt) END ;
   END SkipImported;
 
   PROCEDURE Import*(VAR modid, modid1: ORS.Ident);
@@ -294,7 +294,7 @@ MODULE ORB;   (*NW 25.6.2014  / 1.3.2019  in Oberon-07*)
       IF F # NIL THEN
         Files.Set(R, F, 0); Files.ReadInt(R, key); Files.ReadInt(R, key); Files.ReadString(R, modname);
         Read(R, class); (* version key *)
-        IF class # Config.SmbVersionKey THEN ORS.Mark("wrong version") END;
+        IF class # Config.SmbVersionKey THEN ORS.Mark("wrong version") END ;
         Read(R, class); (* cdecl *)
         cdecl := class = 1;
         thismod := ThisModule(modid, modid1, TRUE, key, cdecl); thismod.rdo := TRUE;
@@ -394,17 +394,17 @@ MODULE ORB;   (*NW 25.6.2014  / 1.3.2019  in Oberon-07*)
     obj := topScope.next;
     cnt := 0;
     WHILE obj # NIL DO
-      IF (obj.class = Mod) & (obj.dsc # system) THEN INC(cnt) END;
+      IF (obj.class = Mod) & (obj.dsc # system) THEN INC(cnt) END ;
       obj := obj.next
-    END;
+    END ;
     Write(R, cnt);
     obj := topScope.next;
     WHILE obj # NIL DO
       IF (obj.class = Mod) & (obj.dsc # system) THEN 
         Files.WriteString(R, obj(Module).orgname) 
-      END;
+      END ;
       obj := obj.next
-    END;
+    END ;
   END OutImported;
 
   PROCEDURE Export*(VAR modid: ORS.Ident; VAR newSF: BOOLEAN; VAR key: INTEGER; cdecl: BOOLEAN; folder: ARRAY OF CHAR);

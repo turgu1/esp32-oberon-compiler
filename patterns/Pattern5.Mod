@@ -6,13 +6,13 @@ VAR
 BEGIN
   IF n = 0 THEN
     INC(n)
-  END;
+  END ;
   IF (n >= 0) & (n < 100) THEN
     DEC(n)
-  END;
+  END ;
   IF ODD(n) OR (n IN s) THEN
     n := -1000
-  END;
+  END ;
   IF n < 0 THEN
     s := {}
   ELSIF n < 10 THEN

@@ -29,7 +29,7 @@ MODULE Kernel;
     OneMinute*               = OneSecond * 60;
 
   TYPE
-    ClockTime* = RECORD low*, high*: INTEGER END;
+    ClockTime* = RECORD low*, high*: INTEGER END ;
 (*
   CONST SectorLength* = 1024;
     timer = -64; spiData = -48; spiCtrl = -44;
@@ -81,7 +81,7 @@ MODULE Kernel;
           SYSTEM.PUT(q0 + 8, q1) 
         ELSE list0 := q1 END
       END
-    END;
+    END ;
     IF ~done THEN p := 0 END
   END GetBlock;
 
@@ -140,7 +140,7 @@ MODULE Kernel;
     ELSIF size = 64 THEN GetBlock64(p)
     ELSIF size = 128 THEN GetBlock128(p)
     ELSE GetBlock(p, (size + 255) DIV 256 * 256)
-    END;
+    END ;
     IF p = 0 THEN 
       SYSTEM.PUT(ptr, 0); 
       (* Out.Ln;Out.String("Nothing to give..."); *)
@@ -175,7 +175,7 @@ MODULE Kernel;
             offadr := tag + 16
           ELSE 
             INC(offadr, 4) 
-          END;
+          END ;
           SYSTEM.PUT(p - 4, offadr); 
           SYSTEM.GET(offadr, offset);
           IF offset # -1 THEN (* down *)
@@ -195,7 +195,7 @@ MODULE Kernel;
             END
           END
         UNTIL (p = q) & (offset = -1)
-      END;
+      END ;
       INC(pref, 4); 
       DEC(count)
     END
@@ -210,7 +210,7 @@ MODULE Kernel;
         SYSTEM.GET(p,    tag); 
         SYSTEM.GET(tag, size); INC(p, size); 
         SYSTEM.GET(p + 4, mark)
-      END;
+      END ;
       size := p - q; 
       DEC(allocated, size);  (* size of free block *)
       IF size > 0 THEN
@@ -220,21 +220,21 @@ MODULE Kernel;
           SYSTEM.PUT(q + 8, list3); 
           list3 := q; 
           INC(q, 32); DEC(size, 32)
-        END;
+        END ;
         IF size MOD 128 # 0 THEN
           SYSTEM.PUT(q,     64); 
           SYSTEM.PUT(q + 4, -1); 
           SYSTEM.PUT(q + 8, list2); 
           list2 := q; 
           INC(q, 64); DEC(size, 64)
-        END;
+        END ;
         IF size MOD 256 # 0 THEN
           SYSTEM.PUT(q,     128); 
           SYSTEM.PUT(q + 4, -1); 
           SYSTEM.PUT(q + 8, list1); 
           list1 := q; 
           INC(q, 128); DEC(size, 128)
-        END;
+        END ;
         IF size > 0 THEN
           SYSTEM.PUT(q,     size); 
           SYSTEM.PUT(q + 4, -1); 
@@ -242,7 +242,7 @@ MODULE Kernel;
           list0 := q; 
           INC(q, size)
         END
-      END;
+      END ;
       IF mark > 0 THEN 
         SYSTEM.GET(p,     tag); 
         SYSTEM.GET(tag,   size); 
@@ -276,9 +276,9 @@ MODULE Kernel;
   BEGIN (* send cmd *)
     REPEAT SPIIdle(1) UNTIL data = 255; (* flush while unselected *)
     REPEAT SPI(255) UNTIL data = 255; (* flush while selected *)
-    IF n = 8 THEN crc := 135 ELSIF n = 0 THEN crc := 149 ELSE crc := 255 END;
+    IF n = 8 THEN crc := 135 ELSIF n = 0 THEN crc := 149 ELSE crc := 255 END ;
     SPI(n MOD 64 + 64); (* send command *)
-    FOR i := 24 TO 0 BY -8 DO SPI(ROR(arg, i)) END; (* send arg *)
+    FOR i := 24 TO 0 BY -8 DO SPI(ROR(arg, i)) END ; (* send arg *)
     SPI(crc); i := 32;
     REPEAT SPI(255); DEC(i) UNTIL (data < 80H) OR (i = 0)
   END SPICmd;
@@ -301,7 +301,7 @@ MODULE Kernel;
       SYSTEM.PUT(spiData, -1);
       REPEAT UNTIL SYSTEM.BIT(spiCtrl, 0);
       SYSTEM.GET(spiData, data); SYSTEM.PUT(dst, data); INC(dst, 4)
-    END;
+    END ;
     SPI(255); SPI(255); SPIIdle(1) (* may be a checksum; deselect card *)
   END ReadSD;
 
@@ -313,7 +313,7 @@ MODULE Kernel;
     FOR i := 0 TO 508 BY 4 DO
       SYSTEM.GET(src, n); INC(src, 4); SYSTEM.PUT(spiData, n);
       REPEAT UNTIL SYSTEM.BIT(spiCtrl, 0)
-    END;
+    END ;
     SPI(255); SPI(255); (* dummy checksum *) i := 0;
     REPEAT SPI(-1); INC(i); UNTIL (data MOD 32 = 5) OR (i = 10000);
     ASSERT(data MOD 32 = 5); SPIIdle(1) (* deselect card *)
@@ -443,7 +443,7 @@ MODULE Kernel;
         movi a7, -1            #    overflow
     997$:
         s32i a7, a1, 16        # Save value in result
-    END;
+    END ;
   RETURN result
   END GetElapseTime;
 
@@ -464,7 +464,7 @@ MODULE Kernel;
     998$:
         s32i a6, a1, 12        # Save low
         s32i a4, a1, 16        # Save high
-    END;
+    END ;
     REPEAT
       GetTime(time);
       ASM
@@ -554,7 +554,7 @@ MODULE Kernel;
         8: Out.String("Heap exausted."                )
       ELSE
         Out.String("Unknown raison.")
-      END;
+      END ;
       Out.String(" PC: ");
       Out.Hex(adr, 0);
       Out.Ln; Out.Flush;
@@ -577,7 +577,7 @@ MODULE Kernel;
       s32i a3, sp, 0
       movi a3, _heap_end
       s32i a3, sp, 4
-    END;
+    END ;
 
     heapOrg := heapBottom;
     heapLim := heapTop;

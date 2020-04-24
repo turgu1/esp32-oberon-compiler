@@ -59,7 +59,7 @@ MODULE Strings; (*HM 94-06-22, LB 2017 *)
 PROCEDURE Length* (s: ARRAY OF CHAR): INTEGER;
   VAR i: INTEGER;
 BEGIN
-  i := 0; WHILE (i < LEN(s)) & (s[i] # 0X) DO INC(i) END;
+  i := 0; WHILE (i < LEN(s)) & (s[i] # 0X) DO INC(i) END ;
   RETURN i
 END Length;
 
@@ -75,7 +75,7 @@ BEGIN
       dest[at] := src[i];
       INC(at);
       INC(i)
-    END;
+    END ;
     dest[at] := 0X;
     IF (i < lsrc) & (src[i] # 0X) THEN at := -1 END
   ELSE at := -1
@@ -87,7 +87,7 @@ PROCEDURE Append* (extra: ARRAY OF CHAR; VAR dest: ARRAY OF CHAR);
   VAR n1, n2, i: INTEGER;
 BEGIN
   n1 := Length(dest); n2 := Length(extra); i := 0;
-  WHILE (i < n2) & (i + n1 < LEN(dest)) DO dest[i + n1] := extra[i]; INC(i) END;
+  WHILE (i < n2) & (i + n1 < LEN(dest)) DO dest[i + n1] := extra[i]; INC(i) END ;
   IF i + n1 < LEN(dest) THEN dest[i + n1] := 0X
   ELSIF LEN(dest) # 0 THEN dest[LEN(dest)-1] := 0X END
 END Append;
@@ -116,16 +116,16 @@ PROCEDURE WriteInt* (x, n: INTEGER; VAR dest: ARRAY OF CHAR;
 BEGIN
   IF ROR(x, 31) = 1 THEN at := Write(" -2147483648", dest, at)
   ELSE i := 0;
-    IF x < 0 THEN DEC(n); x := -x; neg := 1 ELSE neg := 0 END;
+    IF x < 0 THEN DEC(n); x := -x; neg := 1 ELSE neg := 0 END ;
     REPEAT
       a[i] := CHR(x MOD 10 + 30H); x := x DIV 10; INC(i)
     UNTIL x = 0;
     size := LEN(dest);
     tot := at + i + neg;
-    IF n >= i THEN tot := tot + (n - i) END;
+    IF n >= i THEN tot := tot + (n - i) END ;
     IF (at >= 0) & (tot < size) THEN
-      WHILE n > i  DO dest[at] := " "; DEC(n); INC(at) END;
-      IF neg = 1 THEN dest[at] := "-"; INC(at) END;
+      WHILE n > i  DO dest[at] := " "; DEC(n); INC(at) END ;
+      IF neg = 1 THEN dest[at] := "-"; INC(at) END ;
       REPEAT DEC(i); dest[at] := a[i]; INC(at) UNTIL i = 0;
       dest[at] := 0X
     ELSE at := -1
@@ -150,7 +150,7 @@ BEGIN
     WHILE (i < ldest) & (i < lsrc) & (src[i] # 0X) DO
       dest[i] := src[i];
       INC(i)
-    END;
+    END ;
     dest[i] := 0X
   END
 END Copy;
@@ -160,23 +160,23 @@ PROCEDURE Insert* (source: ARRAY OF CHAR; pos: INTEGER;
   VAR n1, n2, len, i, j: INTEGER;
 BEGIN
   n1 := Length(dest); n2 := Length(source); len := LEN(dest);
-  IF pos < 0 THEN pos := 0 END;
+  IF pos < 0 THEN pos := 0 END ;
   IF pos > n1 THEN Append(source, dest)
   ELSE
     (*--- make room for source*)
     IF pos + n2 < len THEN
       i := n1; j := i + n2; (*move also 0X if it is there*)
       WHILE i >= pos DO
-        IF j < len THEN dest[j] := dest[i] END;
+        IF j < len THEN dest[j] := dest[i] END ;
         DEC(i); DEC(j)
       END
-    END;
+    END ;
     (*--- copy source to dest*)
     i := 0; j := pos;
     WHILE (i < n2) & (j < len) DO
       dest[j] := source[i];
       INC(i); INC(j)
-    END;
+    END ;
     IF (j >= len) & (LEN(dest) # 0) THEN dest[len-1] := 0X END
   END
 END Insert;
@@ -187,9 +187,9 @@ PROCEDURE Delete* (VAR s: ARRAY OF CHAR; pos, n: INTEGER);
 BEGIN
   len:=Length(s);
   IF pos < len THEN
-    IF pos < 0 THEN pos:=0 END;
+    IF pos < 0 THEN pos:=0 END ;
     IF pos + n < len THEN
-      i:=pos + n; WHILE i < len DO s[i - n]:=s[i]; INC(i) END;
+      i:=pos + n; WHILE i < len DO s[i - n]:=s[i]; INC(i) END ;
       IF i - n < LEN(s) THEN s[i - n]:=0X END
     ELSIF LEN(s) # 0 THEN s[pos]:=0X
     END
@@ -211,14 +211,14 @@ PROCEDURE Extract* (source: ARRAY OF CHAR; pos, n: INTEGER;
 BEGIN
   IF (LEN(dest) # 0) & (LEN(source) # 0) THEN
     len := Length(source); destLen := LEN(dest) - 1;
-    IF pos < 0 THEN pos := 0 END;
+    IF pos < 0 THEN pos := 0 END ;
     IF pos >= len THEN dest[0] := 0X
     ELSE
       i := 0;
       WHILE (pos + i <= LEN(source)) & (source[pos + i] # 0X) & (i < n) DO
-        IF i < destLen THEN dest[i] := source[pos + i] END;
+        IF i < destLen THEN dest[i] := source[pos + i] END ;
         INC(i)
-      END;
+      END ;
       dest[i] := 0X
     END
   END
@@ -236,11 +236,11 @@ BEGIN
     i := pos;
     WHILE ~done & (i <= n1 - n2) DO
       IF s[i] = pattern[0] THEN
-        j := 1; WHILE (j < n2) & (s[i + j] = pattern[j]) DO INC(j) END;
+        j := 1; WHILE (j < n2) & (s[i + j] = pattern[j]) DO INC(j) END ;
         IF j = n2 THEN res := i; done := TRUE END
-      END;
+      END ;
       INC(i)
-    END;
+    END ;
   END
   RETURN res
 END Pos;
@@ -254,7 +254,7 @@ BEGIN
     WHILE s[i] # 0X DO
       IF ("a" <= s[i]) & (s[i] <= "z") THEN
         s[i] := CHR(ORD(s[i]) - ORD("a") + ORD("A"))
-      END;
+      END ;
       INC(i)
     END
   END
@@ -268,21 +268,21 @@ PROCEDURE Match* (string, pattern: ARRAY OF CHAR): BOOLEAN;
   BEGIN
     res := TRUE;
     WHILE (n >= 0) & (m >= 0) & (mask[m] # "*") DO
-      IF name[n] # mask[m] THEN res := FALSE; n := 0; END;
+      IF name[n] # mask[m] THEN res := FALSE; n := 0; END ;
       DEC(n); DEC(m)
-    END;
+    END ;
     IF res THEN
       res := FALSE;
       (* ----- name empty | mask empty | mask ends with "*" *)
       IF m < 0 THEN res := n < 0
       ELSE
         (* ----- name empty | mask ends with "*" *)
-        WHILE (m >= 0) & (mask[m] = "*") DO DEC(m) END;
+        WHILE (m >= 0) & (mask[m] = "*") DO DEC(m) END ;
         IF m < 0 THEN res := TRUE
         ELSE
           (* ----- name empty | mask still to be matched *)
           WHILE n >= 0 DO
-            IF M(name, mask, n, m) THEN res := TRUE; n := 0 END;
+            IF M(name, mask, n, m) THEN res := TRUE; n := 0 END ;
             DEC(n)
           END
         END

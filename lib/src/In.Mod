@@ -63,7 +63,7 @@ MODULE In;
   PROCEDURE Flush*;
   VAR ch: CHAR;
   BEGIN
-    WHILE FifoCount() > 0 DO SYSTEM.GET(UART_FIFO, ch) END;
+    WHILE FifoCount() > 0 DO SYSTEM.GET(UART_FIFO, ch) END ;
   END Flush;
 
   PROCEDURE Char*(VAR ch: CHAR);
@@ -91,28 +91,28 @@ MODULE In;
         IF Echo THEN Out.Char(BS); Out.Char(SPACE); Out.Char(BS) END
       ELSIF Echo & (ch >= SPACE) THEN 
         Out.Char(ch)
-      END;
+      END ;
       Char(ch);
-    END;
+    END ;
     IF ch = DQUOTE THEN
       i := 0;
       Char(ch);
       WHILE Done & (ch # CR) & (ch # DQUOTE) & (i < LEN(str)) DO
         IF (ch = BS) & (i > 0) THEN
-          IF Echo THEN Out.Char(BS); Out.Char(SPACE); Out.Char(BS) END;
+          IF Echo THEN Out.Char(BS); Out.Char(SPACE); Out.Char(BS) END ;
           DEC(i);
         ELSIF ch >= SPACE THEN
-          IF Echo THEN Out.Char(ch) END;
+          IF Echo THEN Out.Char(ch) END ;
           str[i] := ch;
           INC(i)
-        END;
+        END ;
         Char(ch)
       END
-    END;
+    END ;
     IF Done & Echo THEN
        Out.Char(ch);
        IF ch = CR THEN Out.Char(LF) END
-    END;
+    END ;
     IF i < LEN(str) THEN str[i] := 0X END
   END String;
 
@@ -129,38 +129,38 @@ MODULE In;
         IF Echo THEN Out.Char(BS); Out.Char(SPACE); Out.Char(BS) END
       ELSIF Echo & (ch >= SPACE) THEN 
         Out.Char(ch)
-      END;
+      END ;
       Char(ch);
-    END;
+    END ;
     i := 0; j := 0;
     WHILE Done & ((ch = BS) OR (ch = "-") OR ((ch >= "0") & (ch <= "9"))) & (j < LEN(str)) DO
     IF (ch = BS) & (j > 0) THEN
-        IF Echo THEN Out.Char(BS); Out.Char(SPACE); Out.Char(BS) END;
+        IF Echo THEN Out.Char(BS); Out.Char(SPACE); Out.Char(BS) END ;
         DEC(j);
       ELSIF ch > SPACE THEN
-        IF Echo THEN Out.Char(ch) END;
+        IF Echo THEN Out.Char(ch) END ;
         str[j] := ch;
         INC(j)
-      END;
+      END ;
       Char(ch)
-    END;
+    END ;
     IF Done & Echo THEN
       Out.Char(ch);
       IF ch = CR THEN Out.Char(LF) END
-    END;
-    IF j < LEN(str) THEN str[j] := 0X END;
+    END ;
+    IF j < LEN(str) THEN str[j] := 0X END ;
 
     i := 0;
     IF Done THEN
       j := 0;
       neg := FALSE;
-      WHILE (j < 16) & (str[j] # 0X) & (str[j] # "-") & ((str[j] < "0") OR (str[j] > "9")) DO INC(j) END;
-      IF str[j] = "-" THEN neg := TRUE; INC(j) END;
+      WHILE (j < 16) & (str[j] # 0X) & (str[j] # "-") & ((str[j] < "0") OR (str[j] > "9")) DO INC(j) END ;
+      IF str[j] = "-" THEN neg := TRUE; INC(j) END ;
       WHILE (j < 16) & (str[j] # 0X) & (str[j] >= "0") & (str[j] <= "9") DO 
         i := (i * 10) + (ORD(str[j]) - ORD("0"));
         INC(j) 
-      END;
-      IF neg THEN i := -i END;
+      END ;
+      IF neg THEN i := -i END ;
     END
   END Int;
 
@@ -181,16 +181,16 @@ MODULE In;
     i := 0;
     WHILE Done & (ch # CR) & (i < LEN(line)) DO
       IF (ch = BS) & (i > 0) THEN
-        IF Echo THEN Out.Char(BS); Out.Char(SPACE); Out.Char(BS) END;
+        IF Echo THEN Out.Char(BS); Out.Char(SPACE); Out.Char(BS) END ;
         DEC(i);
       ELSIF ch >= SPACE THEN
-        IF Echo THEN Out.Char(ch) END;
+        IF Echo THEN Out.Char(ch) END ;
         line[i] := ch;
         INC(i)
-      END;
+      END ;
       Char(ch)
-    END;
-    IF Done & Echo & (ch = CR) THEN Out.Char(CR); Out.Char(LF) END;
+    END ;
+    IF Done & Echo & (ch = CR) THEN Out.Char(CR); Out.Char(LF) END ;
     IF i < LEN(line) THEN line[i] := 0X END
   END Line;
 

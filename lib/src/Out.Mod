@@ -39,7 +39,7 @@ MODULE Out;
 
   PROCEDURE Char*(ch: CHAR);
   BEGIN
-    WHILE FifoCount() > 120 DO END; (* Wait for some space in UART xmit FIFO *)
+    WHILE FifoCount() > 120 DO END ; (* Wait for some space in UART xmit FIFO *)
     SYSTEM.PUT(UART_FIFO, ORD(ch))
   END Char;
 
@@ -64,7 +64,7 @@ MODULE Out;
       x0 := -x; DEC(n) 
     ELSE
       x0 := x 
-    END;
+    END ;
     REPEAT
       a[i] := CHR(x0 MOD 10 + 30H); 
       x0 := x0 DIV 10; 
@@ -72,10 +72,10 @@ MODULE Out;
     UNTIL x0 = 0;
     WHILE n > i DO
       Char(" "); DEC(n) 
-    END;
+    END ;
     IF x < 0 THEN 
       Char("-") 
-    END;
+    END ;
     REPEAT DEC(i); Char(a[i]) UNTIL i = 0
   END Int;
 
@@ -91,13 +91,13 @@ MODULE Out;
         a[i] := CHR(y + 30H) 
       ELSE 
         a[i] := CHR(y + 37H) 
-      END;
+      END ;
       x := x DIV 10H;
       INC(i)
     UNTIL (i = 8);
     WHILE n > 8 DO
       Char(" "); DEC(n) 
-    END;
+    END ;
     REPEAT DEC(i); Char(a[i]) UNTIL i = 0
   END Hex;
 
@@ -106,7 +106,7 @@ MODULE Out;
   BEGIN 
     t := 1.0; p := 10.0;   (* compute 10^n *)
     WHILE n > 0 DO
-      IF ODD(n) THEN t := p * t END;
+      IF ODD(n) THEN t := p * t END ;
       p := p * p; n := n DIV 2
     END ;
     RETURN t
@@ -158,7 +158,7 @@ MODULE Out;
       ELSE 
         neg := FALSE 
       END ;
-      IF k > 7 THEN k := 7 END;
+      IF k > 7 THEN k := 7 END ;
       x := Ten(k) * x; 
       m := FLOOR(x + 0.5);
       i := 0;
@@ -168,10 +168,10 @@ MODULE Out;
       UNTIL m = 0;
       Char(" ");
       WHILE n > i + 3 DO Char(" "); DEC(n) END ;
-      IF neg THEN Char("-"); DEC(n) ELSE Char(" ") END;
-      WHILE i > k DO DEC(i); Char(d[i]) END;
+      IF neg THEN Char("-"); DEC(n) ELSE Char(" ") END ;
+      WHILE i > k DO DEC(i); Char(d[i]) END ;
       Char(".");
-      WHILE k > i DO DEC(k); Char("0") END;
+      WHILE k > i DO DEC(k); Char("0") END ;
       WHILE i > 0 DO DEC(i); Char(d[i]) END
     END
   END RealFix;

@@ -6,7 +6,7 @@ BEGIN
   ASSERT(3 < 5);
   IF 3 < 5 THEN
     ASSERT(b);
-  END;
+  END ;
   ASSERT(i = j);
   ASSERT(i = 0);
   ASSERT(b)

@@ -6,13 +6,13 @@ TYPE
   
   R0 = RECORD
         x: INTEGER
-      END;
+      END ;
   R1 = RECORD (R0)
         y: INTEGER
-      END;
+      END ;
   R2 = RECORD (R1)
         z: INTEGER
-      END;
+      END ;
       
 VAR
   p0: P0;

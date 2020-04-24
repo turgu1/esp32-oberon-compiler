@@ -1,6 +1,6 @@
-OB = ../Oberon
+OBERON = OberonESP32
 
-OBFLAGS = -c -l -s 
+OBERON_FLAGS = -c -l -s 
 
 SRCS = \
 	Pattern1.Mod \
@@ -25,14 +25,16 @@ SRCS = \
 	Pattern18.Mod \
 	Pattern19.Mod \
 	Pattern20.Mod \
-	Pattern21.Mod
+	Pattern21.Mod \
+	Pattern22.Mod \
+	Pattern23.Mod
 
 #	Pattern13.Mod \
 
 ASS = $(SRCS:.Mod=.S)
 
 %.S : %.Mod
-	$(OB) $(OBFLAGS) $(<F)
+	$(OBERON) $(OBERON_FLAGS) $(<F)
 
 .PHONY: all
 all: $(ASS)

@@ -68,7 +68,7 @@ MODULE ORS; (* NW 19.9.93 / 15.3.2017  Scanner in Oberon-07*)
     k: INTEGER;
     KWX: ARRAY 10 OF INTEGER;
     keyTab: ARRAY NKW OF
-        RECORD sym: INTEGER; id: ARRAY 12 OF CHAR END;
+        RECORD sym: INTEGER; id: ARRAY 12 OF CHAR END ;
 
     debugging*: BOOLEAN;
 
@@ -106,18 +106,18 @@ MODULE ORS; (* NW 19.9.93 / 15.3.2017  Scanner in Oberon-07*)
             Texts.Read(R, ch);
             line[i] := ch; INC(i) (* First character after the end of line will be kept *)
           END
-        END;
+        END ;
         line[i] := 0X;
         INC(lineNbr);
         columnNbr := 0;
-        IF lineConsumer # NIL THEN lineConsumer(lineNbr, line) END;
+        IF lineConsumer # NIL THEN lineConsumer(lineNbr, line) END ;
       END
     END
   END GetLine;
 
   PROCEDURE GetCh;
   BEGIN
-    WHILE (line[columnNbr] = 0X) & ~eof DO GetLine END;
+    WHILE (line[columnNbr] = 0X) & ~eof DO GetLine END ;
     IF eof THEN
       ch := 0FFX
     ELSE
@@ -137,7 +137,7 @@ MODULE ORS; (* NW 19.9.93 / 15.3.2017  Scanner in Oberon-07*)
       Out.String("] ");
       Out.String(msg1);
       Out.String(msg2)
-    END;
+    END ;
     INC(errcnt)
   END Mark2;
 
@@ -172,7 +172,7 @@ MODULE ORS; (* NW 19.9.93 / 15.3.2017  Scanner in Oberon-07*)
         IF i < stringBufSize - 1 THEN str[i] := ch; INC(i) ELSE Mark("string too long") END ;
       END ;
       GetCh()
-    END;
+    END ;
     str[i] := 0X; INC(i); GetCh(); slen := i
   END String;
 
@@ -180,21 +180,21 @@ MODULE ORS; (* NW 19.9.93 / 15.3.2017  Scanner in Oberon-07*)
     VAR i, m, n: INTEGER;
   BEGIN i := 0; GetCh();
     WHILE ~eof & (ch # "$") DO
-      WHILE ~eof & (ch <= SPACE) DO GetCh() END;  (* skip *)
+      WHILE ~eof & (ch <= SPACE) DO GetCh() END ;  (* skip *)
       IF    ("0" <= ch) & (ch <= "9") THEN m := ORD(ch) - 30H
       ELSIF ("A" <= ch) & (ch <= "F") THEN m := ORD(ch) - 37H
       ELSE m := 0; Mark("hexdig expected")
-      END;
+      END ;
       GetCh();
       IF    ("0" <= ch) & (ch <= "9") THEN n := ORD(ch) - 30H
       ELSIF ("A" <= ch) & (ch <= "F") THEN n := ORD(ch) - 37H
       ELSE n := 0; Mark("hexdig expected")
-      END;
+      END ;
       IF i < stringBufSize THEN str[i] := CHR(m * 10H + n); INC(i) 
       ELSE Mark("string too long") 
-      END;
+      END ;
       GetCh()
-    END;
+    END ;
     GetCh(); slen := i  (* no 0X appended! *)
   END HexString;
 
@@ -271,7 +271,7 @@ MODULE ORS; (* NW 19.9.93 / 15.3.2017  Scanner in Oberon-07*)
         IF d[i] < 10 THEN
           IF k <= (max - d[i]) DIV 10 THEN k := k * 10 + d[i] ELSE Mark("too large"); k := 0 END
         ELSE Mark("bad integer")
-        END;
+        END ;
         INC(i)
       UNTIL i = n;
       sym := int; ival := k
@@ -294,13 +294,13 @@ MODULE ORS; (* NW 19.9.93 / 15.3.2017  Scanner in Oberon-07*)
               debugging := TRUE; GetCh();
               Out.Ln; Out.String("Debugging is ON");
             ELSIF ch = "-" THEN
-              IF debugging THEN Out.Ln; Out.String("Debugging is OFF"); Out.Ln END;
+              IF debugging THEN Out.Ln; Out.String("Debugging is OFF"); Out.Ln END ;
               debugging := FALSE; GetCh();
             END
           END
         ELSE GetCh()
         END
-      END;
+      END ;
       WHILE ch = "*" DO GetCh() END
     UNTIL (ch = ")") OR eof;
     IF ~eof THEN GetCh() ELSE Mark("unterminated comment") END
@@ -316,7 +316,7 @@ MODULE ORS; (* NW 19.9.93 / 15.3.2017  Scanner in Oberon-07*)
     ELSE
       GetLine();
       i := 0;
-      WHILE (line[i] # 0X) & ((line[i] = SPACE) OR (line[i] = TAB)) DO INC(i) END;
+      WHILE (line[i] # 0X) & ((line[i] = SPACE) OR (line[i] = TAB)) DO INC(i) END ;
       IF (line[i] = "E") & (line[i + 1] = "N") & (line[i + 2] = "D") THEN
         columnNbr := i + 3;
         theEnd := TRUE;
@@ -325,12 +325,12 @@ MODULE ORS; (* NW 19.9.93 / 15.3.2017  Scanner in Oberon-07*)
         WHILE (line[i] # 0X) & (j < (LEN(theLine) - 1)) DO
           IF (line[i] >= SPACE) OR (line[i] = TAB) THEN
             theLine[j] := line[i]; INC(j);
-          END;
+          END ;
           INC(i) 
-        END;
-        IF j < (LEN(theLine) - 1) THEN theLine[j] := 0X END;
+        END ;
+        IF j < (LEN(theLine) - 1) THEN theLine[j] := 0X END ;
         theEnd := FALSE;
-      END;
+      END ;
     END
     RETURN ~theEnd
   END GetAssemblerLine;
@@ -338,7 +338,7 @@ MODULE ORS; (* NW 19.9.93 / 15.3.2017  Scanner in Oberon-07*)
   PROCEDURE Get*(VAR sym: INTEGER);
   BEGIN
     REPEAT
-      WHILE ~eof & (ch <= SPACE) DO GetCh() END;
+      WHILE ~eof & (ch <= SPACE) DO GetCh() END ;
       IF ch < "A" THEN
         IF ch < "0" THEN
           IF ch = 22X THEN String; sym := string

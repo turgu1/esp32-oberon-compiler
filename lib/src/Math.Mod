@@ -91,7 +91,7 @@ MODULE Math;   (* Standard functions;  NW 12.10.2013 *)
       n := FLOOR(y + 0.5) 
     ELSE 
       n := FLOOR(y - 0.5) 
-    END;
+    END ;
     y := (y - FLT(n)) * 2.0; yy := y * y;
     IF ODD(n) THEN 
       f := (((((q6 * yy + q5) * yy + q4) * yy + q3) * yy + q2) * yy + q1) * yy + q0
@@ -166,7 +166,7 @@ MODULE Math;   (* Standard functions;  NW 12.10.2013 *)
       g := f * f;
       xnum := ((p2 * g + p1) * g + p0) * g * f + f;
       xden := (((q4 * g + q3) * g + q2) * g + q1) * g + q0;
-    END;
+    END ;
     IF ODD(n) THEN
       result := -xden / xnum;
     ELSE
@@ -202,7 +202,7 @@ MODULE Math;   (* Standard functions;  NW 12.10.2013 *)
         a := 0.0; b := PIOVER2
       ELSE 
         a := PIOVER4; b := PIOVER4 
-      END;
+      END ;
       g := (1.0 - y) / 2.0;     (* g = (1-y)/2		*)
       y := -2.0 * SQRT(g);      (* y = -2 * g ** .5	*)
       poly := TRUE
@@ -211,19 +211,19 @@ MODULE Math;   (* Standard functions;  NW 12.10.2013 *)
         a := PIOVER4; b := PIOVER4 
       ELSE 
         a := 0.0; b := PIOVER2
-      END;
+      END ;
       IF y < EPS THEN
         result := y
       ELSE
        	g := y * y;
         poly := TRUE
       END
-    END;
+    END ;
     IF poly THEN
       r := (g * ((((p4 * g + p3) * g + p2) * g + p1) * g + p0)) / 
            (((((q5 * g + q4) * g + q3) * g + q2) * g + q1) * g + q0);
       result := y + y * r;
-    END;
+    END ;
     IF acos THEN    (* arccos(x) *)
       IF x < 0.0 THEN
         result := result + b + b
@@ -281,17 +281,17 @@ MODULE Math;   (* Standard functions;  NW 12.10.2013 *)
           f := ABS(x / y);
           IF f > 1.0 THEN
             f := 1.0 / f;
-            IF f > TWOMINUSSQRT3 THEN a := PIOVER3 ELSE a := PIOVER2 END;
+            IF f > TWOMINUSSQRT3 THEN a := PIOVER3 ELSE a := PIOVER2 END ;
             negate := TRUE
           ELSE
-            IF f > TWOMINUSSQRT3 THEN a := PIOVER6 ELSE a := 0.0 END;
+            IF f > TWOMINUSSQRT3 THEN a := PIOVER6 ELSE a := 0.0 END ;
             negate := FALSE
-          END;
+          END ;
           IF f > TWOMINUSSQRT3 THEN
             tmp := (SQRT3 - 1.0) * f - 0.5;
             tmp := tmp - 0.5;
             f   := (tmp + f) / (SQRT3 + f)
-          END;
+          END ;
           IF ABS(f) < EPS THEN
             result := f
           ELSE
@@ -299,13 +299,13 @@ MODULE Math;   (* Standard functions;  NW 12.10.2013 *)
             result := (g * (((p3 * g + p2) * g + p1) * g + p0)) /
                       ((((q4 * g + q3) * g + q2) * g + q1) * g + q0);
             result := f + f * result
-          END;
-          IF negate THEN result := -result END;
+          END ;
+          IF negate THEN result := -result END ;
           result := result + a
-        END;
+        END ;
         IF y < 0.0 THEN result := PI - result END
       END
-    END;
+    END ;
     IF x < 0.0 THEN result := -result END
     RETURN result
   END arctan2;

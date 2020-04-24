@@ -63,7 +63,7 @@ BEGIN
         IF DEBUG THEN
           Out.String("Argument "); Out.Int(i + 1, 0); Out.String(": "); 
           Out.String(arg); Out.Ln
-        END;
+        END ;
 
         IF (arg = "-c") THEN
           generateCheckCode := TRUE;
@@ -106,15 +106,15 @@ BEGIN
           filePresent := TRUE;
         ELSE
           i := argCount
-        END;
+        END ;
 
         INC(i)
-      END;
+      END ;
 
       IF filePresent THEN
         IF verbose THEN
           Out.String("Compiling "); Out.String(filename); Out.String(" ..."); Out.Ln
-        END;
+        END ;
         
         ORP.Compile(  (* Never return *)
           filename, 

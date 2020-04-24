@@ -16,7 +16,7 @@ MODULE OIOrder;
   TYPE
     Ident   = ARRAY 64 OF CHAR;
     ModPtr  = POINTER TO ModNode;
-    ModNode = RECORD name: Ident; key: INTEGER; initialized: BOOLEAN; next: ModPtr END;
+    ModNode = RECORD name: Ident; key: INTEGER; initialized: BOOLEAN; next: ModPtr END ;
     BigStr  = ARRAY 256 OF CHAR;
   VAR
     importPaths: ARRAY 20 OF BigStr;
@@ -73,9 +73,9 @@ MODULE OIOrder;
         importPaths[i][k] := 0X; k := 0; INC(i)
       ELSE
         importPaths[i][k] := impPath[j]; INC(k)
-      END;
+      END ;
       INC(j)
-    END;
+    END ;
     IF i < LEN(importPaths) THEN
       importPaths[i][k] := 0X; INC(i);
       WHILE i < 10 DO importPaths[i][0] := 0X; INC(i) END
@@ -87,11 +87,11 @@ MODULE OIOrder;
       i, j: INTEGER;
   BEGIN 
     i := 0; j := 0;  (*assume name suffix less than 4 characters*)
-    WHILE (j < LEN(FName) - 5) & (folder[j] # 0X) DO FName[j] := folder[j]; INC(j) END;
-    IF (j > 0) & (FName[j - 1] # "/") THEN FName[j] := "/"; INC(j) END;
+    WHILE (j < LEN(FName) - 5) & (folder[j] # 0X) DO FName[j] := folder[j]; INC(j) END ;
+    IF (j > 0) & (FName[j - 1] # "/") THEN FName[j] := "/"; INC(j) END ;
     WHILE (j < LEN(FName) - 5) & (name[i] # 0X) DO FName[j] := name[i]; INC(i); INC(j) END ;
     i := 0;
-    WHILE ext[i] # 0X DO FName[j] := ext[i]; INC(i); INC(j) END;
+    WHILE ext[i] # 0X DO FName[j] := ext[i]; INC(i); INC(j) END ;
     FName[j] := 0X
   END MakeFileName;
 
@@ -116,10 +116,10 @@ MODULE OIOrder;
     p := head;
     IF head = mod THEN head := mod.next
     ELSE
-      WHILE (p # NIL) & (p.next # mod) DO p := p.next END;
+      WHILE (p # NIL) & (p.next # mod) DO p := p.next END ;
       IF p = NIL THEN Error("OIOrder Internal problem."); SYS.Exit(1)
       ELSE p := mod.next END
-    END;
+    END ;
     Leave("RemoveModeNode");
   END RemoveModNode;
 
@@ -128,11 +128,11 @@ MODULE OIOrder;
   BEGIN
     Enter2("GetModeNode", moduleName);
     p := head; q := NIL;
-    WHILE (p # NIL) & (p.name # moduleName) DO q := p; p := p.next END;
+    WHILE (p # NIL) & (p.name # moduleName) DO q := p; p := p.next END ;
     IF p = NIL THEN 
       NEW(p); p.initialized := FALSE; p.next := NIL; p.name := moduleName;
-      IF q = NIL THEN head := p ELSE q.next := p END;
-    END;
+      IF q = NIL THEN head := p ELSE q.next := p END ;
+    END ;
     Leave("GetModeNode");
     RETURN p
   END GetModNode;
@@ -151,10 +151,10 @@ MODULE OIOrder;
     WHILE (p # NIL) & (p # mod) DO
       IF p = mod2 THEN r := mod2; q.next := mod2.next; p := mod
       ELSE q := p; p := p.next END
-    END;
+    END ;
     IF r # NIL THEN
       r.next := mod.next; mod.next := r
-    END;
+    END ;
     Leave("AdjustLocation")
   END AdjustLocation;
 
@@ -178,10 +178,10 @@ MODULE OIOrder;
         Files.Set(R, F, 0); Files.ReadInt(R, cnt); Files.ReadInt(R, mod.key);
 
         Files.ReadString(R, modname);
-        IF modname # moduleName THEN Error("Reading wrong module .smb file.") END;
+        IF modname # moduleName THEN Error("Reading wrong module .smb file.") END ;
         
         Read(R, version); (* version key *)
-        IF version # Config.SmbVersionKey THEN Error("Wrong .smb version.") END;
+        IF version # Config.SmbVersionKey THEN Error("Wrong .smb version.") END ;
         
         Read(R, cnt);   (* cdecl *)
         cdecl := cnt = 1;
@@ -196,12 +196,12 @@ MODULE OIOrder;
             AdjustLocation(mod, mod2);
             DEC(cnt)
           END
-        END;
+        END ;
         mod.initialized := TRUE
       ELSE
         Error2("Unable to find .smb file for module ", moduleName);
       END
-    END;
+    END ;
     Leave("ProcessModule");
   END ProcessModule;
 
@@ -218,10 +218,10 @@ MODULE OIOrder;
         IF ~mod.initialized THEN
           ProcessModule(mod.name); 
           INC(cnt)
-        END;
+        END ;
         mod := mod.next
       END
-    END;
+    END ;
     Leave("CompleteInfo")
   END CompleteInfo;
 
@@ -234,7 +234,7 @@ MODULE OIOrder;
     i := 0;
     REPEAT 
       y := x MOD 10H;
-      IF y < 10 THEN a[i] := CHR(y + 30H) ELSE a[i] := CHR(y + 37H) END;
+      IF y < 10 THEN a[i] := CHR(y + 30H) ELSE a[i] := CHR(y + 37H) END ;
       x := x DIV 10H; INC(i)
     UNTIL i = 8;
     REPEAT DEC(i); Texts.Write(W, a[i]) UNTIL i = 0
@@ -282,7 +282,7 @@ MODULE OIOrder;
       Texts.WriteLn(W);
 
       mod := mod.next
-    END;
+    END ;
     Texts.WriteString(W, "_eitable:"); Texts.WriteLn(W);
 
     Files.Register(F);
@@ -296,7 +296,7 @@ MODULE OIOrder;
     VAR i: INTEGER;
   BEGIN
     i := 0;
-    WHILE (i < (LEN(to) - 1)) & (from[i] # 0X) DO to[i] := from[i]; INC(i) END;
+    WHILE (i < (LEN(to) - 1)) & (from[i] # 0X) DO to[i] := from[i]; INC(i) END ;
     to[i] := 0X
   END CopyStr;
 
@@ -333,7 +333,7 @@ MODULE OIOrder;
         IF DEBUG THEN
           Out.Ln; Out.String("Argument "); Out.Int(i + 1, 0); 
           Out.String(": "); Out.String(arg);
-        END;
+        END ;
   
         IF (arg = "-o") THEN INC(i);
           IF i < argCount THEN
@@ -356,7 +356,7 @@ MODULE OIOrder;
             IF firstModuleName THEN
               firstModuleName := FALSE;
               DecodePath(importPath)
-            END;
+            END ;
             ProcessModule(moduleName);
             filePresent := TRUE
           ELSE
@@ -365,7 +365,7 @@ MODULE OIOrder;
           END
         ELSE
           i := argCount
-        END;
+        END ;
   
         INC(i)
       END (* WHILE *)
@@ -383,9 +383,9 @@ BEGIN
   ELSE
     Out.Ln; Out.String("Error: At least one module name required.");
     Usage (* never return *)
-  END;
+  END ;
 
-  IF DEBUG THEN Out.Ln; Out.String("Completed."); Out.Ln END;
+  IF DEBUG THEN Out.Ln; Out.String("Completed."); Out.Ln END ;
 
   SYS.Exit(result);
 END OIOrder.

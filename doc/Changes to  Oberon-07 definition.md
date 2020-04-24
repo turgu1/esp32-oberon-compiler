@@ -169,7 +169,7 @@ MODULE M;
     r : R; rp : RP;
 BEGIN
   p := i;              (* p receives the address of i  *)
-  i := p * i;          (* i receives i * i             *)
+  i := p^ * i;         (* i receives i * i             *)
   a := "Hello World!";
   ap := a;             (* ap receives the address of a *)
   c  := ap[6];         (* c receives character 'W'     *)

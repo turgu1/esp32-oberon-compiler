@@ -5,7 +5,7 @@ TYPE
     num: INTEGER;
     name: ARRAY 8 OF CHAR;
     next: Ptr
-  END;
+  END ;
 VAR 
   p, q: Ptr;
   r: Node;

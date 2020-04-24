@@ -2,10 +2,10 @@ MODULE Pattern14;
 TYPE
   R0 = RECORD
         a, b, c: INTEGER
-      END;
+      END ;
   R1 = RECORD (R0)
         d, e: INTEGER
-      END;
+      END ;
       
 VAR
   r0: R0;

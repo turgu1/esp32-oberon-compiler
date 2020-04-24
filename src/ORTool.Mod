@@ -1,8 +1,8 @@
-MODULE ORTool;  (*NW 18.2.2013*)
+MODULE ORTool;  (* NW 18.2.2013  GT 1.2.2020 *)
   IMPORT SYSTEM, Strings, extArgs, Files, Texts, ORB, Out, Config;
   VAR
-    Form: INTEGER;  (*result of ReadType*)
-    mnemo0, mnemo1: ARRAY 16, 4 OF CHAR;  (*mnemonics*)
+    Form: INTEGER;  (* result of ReadType *)
+    (* mnemo0, mnemo1: ARRAY 16, 4 OF CHAR;*)  (* mnemonics *)
     filename : ARRAY 255 OF CHAR;
     ext      : ARRAY 4 OF CHAR;
     res      : INTEGER;
@@ -21,12 +21,12 @@ MODULE ORTool;  (*NW 18.2.2013*)
     IF ref < 0 THEN Out.Char("^"); Out.Int(-ref, 1)
     ELSE Out.Int(ref, 1);
       Read(R, form); Out.String("  form = "); Out.Int(form, 1);
-      IF form = ORB.Pointer THEN ReadType(R)
-      ELSIF form = ORB.Array THEN
+      IF (form = ORB.Pointer) OR (form = ORB.CPointer) THEN ReadType(R)
+      ELSIF (form = ORB.Array) OR (form = ORB.CArray) THEN
         ReadType(R); Files.ReadNum(R, len); Files.ReadNum(R, size);
         Out.String("  len = "); Out.Int(len, 1);
         Out.String("  size = "); Out.Int(size, 1)
-      ELSIF form = ORB.Record THEN
+      ELSIF (form = ORB.Record) OR (form = ORB.CRecord) THEN
         ReadType(R);  (*base type*)
         Files.ReadNum(R, off); Out.String("  exno = "); Out.Int(off, 1); 
         Files.ReadNum(R, off); Out.String("  extlev = "); Out.Int(off, 1);
@@ -75,6 +75,15 @@ MODULE ORTool;  (*NW 18.2.2013*)
         Files.ReadString(R, name); Out.String(name); Out.Hex(k);
         Read(R, class); Out.Int(class, 3); (*sym file version*)
         IF class = Config.SmbVersionKey THEN
+          Read(R, class); IF class = 1 THEN Out.String(" CDECL Module") END ; (* cdecl flag *)
+          Read(R, class); 
+          IF class > 0 THEN
+            Out.Ln; Out.String("Imported Modules:");
+            WHILE class > 0 DO
+              Files.ReadString(R, name); Out.Char(" "); Out.String(name);
+              DEC(class)
+            END
+          END ;
           Out.Ln; Read(R, class);
           WHILE class # 0 DO
             Out.Int(class, 4); Files.ReadString(R, name); Out.Char(" "); Out.String(name);
@@ -101,6 +110,7 @@ MODULE ORTool;  (*NW 18.2.2013*)
   
 (* ---------------------------------------------------*)
 
+(*
   PROCEDURE WriteReg(r: INTEGER);
   BEGIN Out.Char(" ");
     IF r < 12 THEN Out.String(" R"); Out.Int(r MOD 10H, 1)
@@ -221,10 +231,11 @@ MODULE ORTool;  (*NW 18.2.2013*)
       END
     (* END *)
   END DecObj;
-
+*)
 BEGIN 
-  Out.String("ORTool 18.2.2013");
+  Out.String("ORTool 1.2.2020");
   Out.Ln;
+(*
   mnemo0[0] := "MOV";
   mnemo0[1] := "LSL";
   mnemo0[2] := "ASR";
@@ -262,4 +273,17 @@ BEGIN
       DecSym(filename)
     END
   END  
+*)
+
+  IF extArgs.count = 1 THEN
+    extArgs.Get(0, filename, res);
+    Strings.Extract(filename, Strings.Length(filename) - 3, 3, ext);
+    IF ext = "smb" THEN
+      DecSym(filename)
+    ELSE
+      Out.Ln;
+      Out.String("Only .smb files can be described.")
+    END
+  END  
+
 END ORTool.
