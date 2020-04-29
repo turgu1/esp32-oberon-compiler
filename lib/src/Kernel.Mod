@@ -1,7 +1,7 @@
 (* ESP32 Kernel Functions *)
 
 MODULE Kernel;
-  IMPORT SYSTEM, Out, Watchdog;
+  IMPORT SYSTEM, Out;
 
   CONST
     (* CPU Speed Control Registers *)
@@ -401,17 +401,14 @@ MODULE Kernel;
 
   PROCEDURE EnableWatchdog*;
   BEGIN 
-    Watchdog.Enable
   END EnableWatchdog;
 
   PROCEDURE DisableWatchdog*;
   BEGIN 
-    Watchdog.Disable
   END DisableWatchdog;
   
   PROCEDURE FeedWatchdog*;
   BEGIN 
-    SYSTEM.PUT(Watchdog.RTC_CNTL_WDTFEED_REG, Watchdog.RTC_CNTL_WDTFEED);
   END FeedWatchdog;
 
   (* ----- Internal Clock ----- *)

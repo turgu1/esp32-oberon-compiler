@@ -49,11 +49,13 @@ MATHO = $(BLDDIR)/math_support.o
 
 SRC = \
   Out.Mod \
-  Watchdog.Mod \
   Kernel.Mod \
   In.Mod \
   Math.Mod \
-  Strings.Mod
+  Strings.Mod \
+  ESP_Support.Mod \
+  ESP_Error.Mod \
+  ESP_System.Mod
 
 ARCHIVE = liboberonesp32.a
 

@@ -16,12 +16,13 @@ MODULE ORB;   (*NW 25.6.2014  / 1.3.2019  in Oberon-07*)
       SFunc* = 7; Mod*   = 8;
 
     (* form values *)
-      Byte*     =  1; Bool*     =  2; Char*    =  3; 
-      Short*    =  4; Int*      =  5; Real*    =  6; 
-      Set*      =  7; Pointer*  =  8; NilTyp*  =  9; 
-      NoTyp*    = 10; Proc*     = 11; String*  = 12; 
-      CProc*    = 13; CPointer* = 14; Array*   = 15; 
-      CArray*   = 16; Record*   = 17; CRecord* = 18;
+      Byte*     =  1; Bool*     =  2; Char*     =  3; 
+      ShortInt* =  4; Int*      =  5; LongInt*  =  6;
+      Real*     =  7; Set*      =  8; Pointer*  =  9;
+      CPointer* = 10; NilTyp*   = 11; NoTyp*    = 12; 
+      Proc*     = 13; String*   = 14; CProc*    = 15; 
+      Array*    = 16; CArray*   = 17; Record*   = 18; 
+      CRecord*  = 19;
       
   TYPE 
     Object* = POINTER TO ObjDesc;
@@ -84,6 +85,7 @@ MODULE ORB;   (*NW 25.6.2014  / 1.3.2019  in Oberon-07*)
     charType*,
     shortType*,
     intType*, 
+    longType*, 
     realType*, 
     setType*, 
     nilType*, 
@@ -481,19 +483,20 @@ MODULE ORB;   (*NW 25.6.2014  / 1.3.2019  in Oberon-07*)
   END enter;
   
 BEGIN
-  byteType  := type(Byte,   Int,    1);
-  boolType  := type(Bool,   Bool,   1);
-  charType  := type(Char,   Char,   1);
-  shortType := type(Short,  Int,    2);
-  intType   := type(Int,    Int,    4);
-  realType  := type(Real,   Real,   4);
-  setType   := type(Set,    Set,    4);
-  nilType   := type(NilTyp, NilTyp, 4);
-  noType    := type(NoTyp,  NoTyp,  4);
-  strType   := type(String, String, 8);
+  byteType  := type(Byte,     Int,    1);
+  boolType  := type(Bool,     Bool,   1);
+  charType  := type(Char,     Char,   1);
+  shortType := type(ShortInt, Int,    2);
+  intType   := type(Int,      Int,    4);
+  longType  := type(LongInt,  Int,    8);
+  realType  := type(Real,     Real,   4);
+  setType   := type(Set,      Set,    4);
+  nilType   := type(NilTyp,   NilTyp, 4);
+  noType    := type(NoTyp,    NoTyp,  4);
+  strType   := type(String,   String, 8);
     
   (*initialize universe with data types and in-line procedures;
-    LONGINT is synonym to INTEGER, LONGREAL to REAL.
+    LONGINT is *NOT* synonym to INTEGER, LONGREAL to REAL.
     LED, ADC, SBC; LDPSR, LDREG, REG, COND are not in language definition From RISC Compiler
     neither are NOT AND BOR XOR MIN MAX from the ESP32 Compiler *)
 
@@ -536,7 +539,7 @@ BEGIN
   enter("REAL",     Typ,   realType,   0);
   enter("SHORTINT", Typ,   shortType,  0);
   enter("INTEGER",  Typ,   intType,    0);
-  enter("LONGINT",  Typ,   intType,    0);
+  enter("LONGINT",  Typ,   longType,   0);
 
   topScope := NIL; OpenScope; topScope.next := system; universe := topScope;
   

@@ -27,7 +27,8 @@ SRCS = \
 	Pattern20.Mod \
 	Pattern21.Mod \
 	Pattern22.Mod \
-	Pattern23.Mod
+	Pattern23.Mod \
+	Pattern24.Mod
 
 #	Pattern13.Mod \
 

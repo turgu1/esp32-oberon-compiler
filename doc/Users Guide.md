@@ -67,11 +67,23 @@ An ESP32 Oberon program requires runtime support. The compiler is supplied with 
 
 ## Modules Initialization Sequence
 
-The application startup code is a piece of assembly language program that is called by the ESP32 bootstrap ROM. Once started, it is calling initialization code of each Oberon module in sequence. The order of these calls is important as some module may rely on other modules to be initialized prior to their own initialization code can be initiated.
+The application startup code is an assembly language function named `oberon_startup()` that must be called by an ESP-IDF C piece of code (usually the C main app function). You can find it in file `lib/init/init.S`. Once started, it calls the initialization code of each Oberon module in sequence. The order of these calls is important as some module may rely on other modules to be initialized prior to their own.
 
-The supplied `OIOrderESP32` application is responsible of generating a module initialization table that will allow for the proper sequencing of initialisation calls made to all modules at startup time.
+The supplied `OIOrderESP32` application is responsible of generating the module initialization table that will allow for the proper sequencing of initialisation calls made by `oberon_startup()`.
 
 (TBC)
+
+## Some type sizes and memory alignment
+
+| Type     | Size    | Alignment | Low Value            | High Value          |
+|----------|:-------:|:---------:|:--------------------:|:-------------------:|
+| BOOLEAN  | 8 bits  | Byte      |        FALSE         |      TRUE           |
+| CHAR     | 8 bits  | Byte      |          0X          |      0FFX           |
+| BYTE     | 8 bits  | Byte      |           0          |      255            |
+| SHORTINT | 16 bits | 2 Bytes   |           0          |     65535           |
+| INTEGER  | 32 bits | 4 bytes   |     -2147483648      |   2147483647        |
+| LONGINT  | 64 bits | 4 Bytes   | -9223372036854775807 | 9223372036854775807 |
+| SET      | 32 BITS | 4 Bytes   |          {}          |   {0 .. 31}         |
 
 ## Standard Module
 
@@ -81,7 +93,7 @@ The ESP32 Oberon Compiler is supplied with a variaty of modules for use by appli
 
 Support for:
 
-- Heap allocation through the `New` function.
+- Heap allocation through the `New` procedure.
 - Garbage collection
 - General timing functions
 - Error trap support
@@ -90,7 +102,7 @@ This module is currently being developped. The application program that requires
 
 ### Module Out
 
-This module implements the [Oakwood Guidelines](http://www.edm2.com/index.php/The_Oakwood_Guidelines_for_Oberon-2_Compiler_Developers) `Out` Module definition with some added/removed procedures. The procedure is using the UART0 serial port to transmit data sent by the users's application. By default, the connexion baud rate is set to 115K in the Open procedure called by the module initialization. This module, for now, uses active loops to synchronise with the *first in first out* (Fifo) output buffer. The Oakwood's `LongReal` procedure is not available. The following procedures have been added:
+This module implements part of the [Oakwood Guidelines](http://www.edm2.com/index.php/The_Oakwood_Guidelines_for_Oberon-2_Compiler_Developers) `Out` Module definition with some added/removed procedures. The procedure is using the ESP32 UART0 serial port to transmit data sent by the users's application. By default, the connexion baud rate is set to 115K in the Open procedure called by the module initialization. This module, for now, uses active loops to synchronise with the *first in first out* (Fifo) output buffer. The Oakwood's `LongReal` procedure is not available. The following procedures have been added:
 
 - `PROCEDURE SetBaudRate*(baudRate: INTEGER);` Change baud rate according to the value passed as a parameter. The following usual baud rate are supplied as constants:
 
@@ -128,7 +140,7 @@ END Out.
 
 ### Module In
 
-This module implements the [Oakwood Guidelines](http://www.edm2.com/index.php/The_Oakwood_Guidelines_for_Oberon-2_Compiler_Developers) `In` Module definition with some added/removed procedures. The procedure is using the UART0 serial port to receive data for the users's application. By default, the connexion baud rate is set to 115K in the Open procedure called by the module initialization. This module, for now, uses active loops to synchronise with the *first in first out* (Fifo) input buffer. The Oakwood's `LongReal` and `LongInt` procedures are not available. The following procedures have been added:
+This module implements part of the [Oakwood Guidelines](http://www.edm2.com/index.php/The_Oakwood_Guidelines_for_Oberon-2_Compiler_Developers) `In` Module definition with some added/removed procedures. The procedure is using the ESP32 UART0 serial port to receive data for the users's application. By default, the connexion baud rate is set to 115K in the Open procedure called by the module initialization. This module, for now, uses active loops to synchronise with the *first in first out* (Fifo) input buffer. The Oakwood's `LongReal` and `LongInt` procedures are not available. The following procedures have been added:
 
 - `PROCEDURE SetBaudRate*(baudRate: INTEGER);` Changes baud rate according to the value passed as a parameter. The following usual baud rate are supplied as constants in the Out module:
 
@@ -168,7 +180,7 @@ END In.
 
 ### Module Strings
 
-The module Strings provides a set of operations on strings, i.e., on string constants and character arrays, both of which contain the character 0X as a terminator.  All positions in strings start at 0. This module is implementing the [Oakwood Guidelines](http://www.edm2.com/index.php/The_Oakwood_Guidelines_for_Oberon-2_Compiler_Developers) Strings Module definition with some added procedures.
+The module Strings provides a set of operations on strings, i.e., on string constants and character arrays, both of which contain the character 0X as a terminator.  All positions in strings start at 0. This module implements the [Oakwood Guidelines](http://www.edm2.com/index.php/The_Oakwood_Guidelines_for_Oberon-2_Compiler_Developers) Strings Module definition with some added procedures.
 
 ```Pascal
 MODULE Strings;
@@ -232,7 +244,7 @@ END Math.
 
 ### $D+ (Debug On) and $D- (Debug OFF)
 
-The pragmas `$D+` and `$D-` can be put anywhere in the application source code inside comments. This will trigger the compiler to output code generator module `ORG` procedure calls during the compilation phase to the console. This trace is to help resolve issues with the compiler.
+The pragmas `$D+` and `$D-` can be put anywhere in the application source code inside comments. This will trigger the compiler to output code generator module `ORG` procedure calls during the compilation phase. This trace is to help resolve issues with the compiler.
 
 ### Source code as comments in assembler output
 

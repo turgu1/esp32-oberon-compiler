@@ -192,9 +192,12 @@ END P;
 
 (Not working. Still, a work in progress)
 
-## SHORTINT
+## SHORTINT, LONGINT
 
-As a new numerical type, SHORTINT allow for unsigned 16 bits values (0..65535). It has been added to get a complete range of one, two and four bytes variables. SHORTINT are aligned to 2-bytes boundaries in records.
+Two *new* number types are supported by OberonESP32:
+
+- numerical type `SHORTINT` allow for unsigned 16 bits values (0..65535). `SHORTINT` are aligned to 2-bytes boundaries in records.
+- numerical type `LONGINT` allow for signed 64 bits values (-9223372036854775807 .. 9223372036854775807). `LONGINT` are aligned to 4-bytes boundaries in records.
 
 ## CHAR vs ARRAY OF CHAR
 
