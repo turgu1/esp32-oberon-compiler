@@ -6,6 +6,7 @@ MODULE ORTool;  (* NW 18.2.2013  GT 1.2.2020 *)
     filename : ARRAY 255 OF CHAR;
     ext      : ARRAY 4 OF CHAR;
     res      : INTEGER;
+    ref      : INTEGER;
 
   PROCEDURE Read(VAR R: Files.Rider; VAR n: INTEGER);
     VAR b: BYTE;
@@ -15,7 +16,7 @@ MODULE ORTool;  (* NW 18.2.2013  GT 1.2.2020 *)
 
   PROCEDURE ReadType(VAR R: Files.Rider);
     VAR key, len, lev, size, off: INTEGER;
-      ref, mno, class, form, readonly: INTEGER;
+      mno, class, form, readonly: INTEGER;
       name, modname: ARRAY 32 OF CHAR;
   BEGIN Read(R, ref); Out.Char(" "); Out.Char("[");
     IF ref < 0 THEN Out.Char("^"); Out.Int(-ref, 1)
@@ -60,7 +61,7 @@ MODULE ORTool;  (* NW 18.2.2013  GT 1.2.2020 *)
   END ReadType;
 
   PROCEDURE DecSym*(VAR filename : ARRAY OF CHAR);  (*decode symbol file*)
-    VAR class, typno, k: INTEGER;
+    VAR class, typno, k, l: INTEGER;
       name: ARRAY 32 OF CHAR;
       F: Files.File; R: Files.Rider;
       S: Texts.Scanner;
@@ -94,7 +95,14 @@ MODULE ORTool;  (* NW 18.2.2013  GT 1.2.2020 *)
                 Out.String(" ->"); Out.Int(class, 4); Read(R, class)
               END ;
               Out.Char(")")
-            ELSIF (class = ORB.Const) OR (class = ORB.Var) THEN
+            ELSIF (class = ORB.Const) THEN
+              IF -ref = ORB.LongInt THEN
+                Files.ReadNum(R, k); Files.ReadNum(R, l); 
+                Out.Hex(l); Out.Char("H"); Out.Hex(k); Out.Char("H")
+              ELSE
+                Files.ReadNum(R, k); Out.Int(k, 5);  (*Reals, Strings!*)
+              END
+            ELSIF (class = ORB.Var) THEN
               Files.ReadNum(R, k); Out.Int(k, 5);  (*Reals, Strings!*)
             END ;
             Out.Ln;

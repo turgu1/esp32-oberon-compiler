@@ -45,7 +45,7 @@ OIOrderESP32: $(SRC)/ORTool.Mod $(OUT)/Texts.sym $(OUT)/Config.sym
 
 $(OUT)/Texts.sym: $(SRC)/Texts.Mod
 
-$(OUT)/ORS.sym: $(SRC)/ORS.Mod $(OUT)/Texts.sym
+$(OUT)/ORS.sym: $(SRC)/ORS.Mod $(OUT)/Texts.sym $(OUT)/SYS.sym
 
 $(OUT)/ORB.sym: $(SRC)/ORB.Mod $(OUT)/ORS.sym
 

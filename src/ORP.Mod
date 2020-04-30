@@ -411,10 +411,10 @@ MODULE ORP; (*N. Wirth 1.7.97 / 8.2.2020  Oberon compiler for ESP32 in Oberon-07
   PROCEDURE factor(VAR x: ORG.Item);
     VAR obj: ORB.Object; rx, callType: INTEGER;
   BEGIN (* sync *)
-    IF (sym < ORS.char) OR (sym > ORS.ident) THEN ORS.Mark("expression expected");
+    IF (sym < ORS.long) OR (sym > ORS.ident) THEN ORS.Mark("expression expected");
       REPEAT 
         ORS.Get(sym)
-      UNTIL (sym >= ORS.char) & (sym <= ORS.asm) OR (sym >= ORS.then)
+      UNTIL (sym >= ORS.long) & (sym <= ORS.asm) OR (sym >= ORS.then)
     END ;
     IF sym = ORS.ident THEN
       qualident(obj);  
@@ -1098,7 +1098,7 @@ MODULE ORP; (*N. Wirth 1.7.97 / 8.2.2020  Oberon compiler for ESP32 in Oberon-07
         IF (x.type.form = ORB.String) & (x.b = 2) THEN ORG.StrToChar(x) END ;
         ORB.NewObj(obj, id, ORB.Const); obj.expo := expo;
         IF x.mode = ORB.Const THEN 
-          obj.val := x.a; obj.lev := level; obj.type := x.type;
+          obj.val := x.a; obj.val1 := x.b; obj.lev := level; obj.type := x.type;
         ELSE ORS.Mark("expression not constant"); obj.type := ORB.intType
         END ;
         Check(ORS.semicolon, "; expected")

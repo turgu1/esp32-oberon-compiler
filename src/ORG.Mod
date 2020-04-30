@@ -2,7 +2,7 @@ MODULE ORG;
   (* N.Wirth, 16.4.2016 / 4.4.2017 / 31.5.2019  Oberon compiler; code generator for RISC*)
   (* G.Turcotte XX.X.2020 Version for the ESP32 processor chip *)
 
-  IMPORT SYSTEM, Files, Texts, ORS, ORB, Out, SYS, Config;
+  IMPORT SYSTEM, SYS, Files, Texts, ORS, ORB, Out, Config;
   
   (* Code generator for Oberon compiler for ESP32 processor.
      Procedural interface to Parser ORP; result in stream "CodeW".
@@ -1487,9 +1487,14 @@ MODULE ORG;
     ELSIF (y.class = ORB.Const) & (y.type.form = ORB.String) THEN
       eStr(" len:");
       x.b := y.lev  (* length *)
+    ELSIF (y.class = ORB.Const) & (y.type.form = ORB.Int) THEN
+      eStr(" lev:");
+      x.r := y.lev;  (* level *)
+      x.b := y.val1  (* 64 bits high word *)
     ELSE
       eStr(" lev:");
-      x.r := y.lev    (* level *)
+      x.r := y.lev;    (* level *)
+      x.b := 0
     END ;
     eInt(y.lev);
     IF (y.lev > 0) & (y.lev # curlev) & (y.class # ORB.Const) THEN 
@@ -1838,7 +1843,7 @@ MODULE ORG;
     END
   END Neg;
 
-  PROCEDURE UpdateReg(VAR x: Item);
+  PROCEDURE UpdateRegTo64(VAR x: Item);
     VAR lbl: INTEGER;
   BEGIN
     IF x.type # ORB.longType THEN
@@ -1850,7 +1855,7 @@ MODULE ORG;
       PutLabel(lbl);
       incR
     END
-  END UpdateReg;
+  END UpdateRegTo64;
 
   PROCEDURE UpdateTo64(VAR x, y: Item);
     PROCEDURE UpdateConst(VAR x: Item);
@@ -1862,9 +1867,8 @@ MODULE ORG;
     END UpdateConst;
 
     PROCEDURE UpdateOther(VAR x: Item);
-    VAR lbl: INTEGER;
     BEGIN
-      load(x); UpdateReg(x)
+      load(x); UpdateRegTo64(x)
     END UpdateOther;
 
     PROCEDURE ShiftReg(VAR x: Item);
@@ -1881,17 +1885,17 @@ MODULE ORG;
     ELSIF y.mode = ORB.Const THEN
       UpdateOther(x); UpdateConst(y);
     ELSIF y.mode # Reg THEN
-      IF x.mode # Reg THEN UpdateOther(x) ELSE UpdateReg(x) END ;
+      IF x.mode # Reg THEN UpdateOther(x) ELSE UpdateRegTo64(x) END ;
       UpdateOther(y)
     ELSE (* y.mode = Reg *)
-      IF x.mode # Reg THEN UpdateReg(y); UpdateOther(x) 
+      IF x.mode # Reg THEN UpdateRegTo64(y); UpdateOther(x) 
       ELSE (* both arguments are already in registers *)
         IF x.r < y.r THEN
-          IF x.type # ORB.longType THEN ShiftReg(y); UpdateReg(x) END ;
-          UpdateReg(y);
+          IF x.type # ORB.longType THEN ShiftReg(y); UpdateRegTo64(x) END ;
+          UpdateRegTo64(y);
         ELSE
-          IF y.type # ORB.longType THEN ShiftReg(x); UpdateReg(y) END ;
-          UpdateReg(x);
+          IF y.type # ORB.longType THEN ShiftReg(x); UpdateRegTo64(y) END ;
+          UpdateRegTo64(x);
         END
       END
     END
@@ -1905,9 +1909,7 @@ MODULE ORG;
       UpdateTo64(x, y);
       IF op = ORS.plus THEN
         IF (x.mode = ORB.Const) & (y.mode = ORB.Const) THEN
-          x.a := x.a + y.a;
-          x.b := x.b + y.b;
-          IF x.a < y.a THEN INC(x.b) END ; (* This doens't work *)
+          SYS.Int64Op(SYS.OP_ADD, x.a, x.b, y.a, y.b)
         ELSIF y.mode = ORB.Const THEN
           IF (y.a # 0) OR (y.b # 0) THEN 
             PutRI("movi", RH, y.a);      SetRcI(RH, -1, y.a, IMM);
@@ -1950,51 +1952,49 @@ MODULE ORG;
         END
       ELSE (*op = ORS.minus*)
         IF (x.mode = ORB.Const) & (y.mode = ORB.Const) THEN 
-          x.a := x.a - y.a;
-          x.b := x.b - y.b;
-          IF x.a < y.a THEN DEC(x.b) END (* This doesn't work... *)
+          SYS.Int64Op(SYS.OP_SUB, x.a, x.b, y.a, y.b)
         ELSIF y.mode = ORB.Const THEN
           IF (y.a # 0) OR (y.b # 0) THEN 
             PutRI("movi", RH, y.a);      SetRcI(RH, -1, y.a, IMM);
+            lbl := NextLabel();
+            PutBranchRR("bgeu", x.r, RH, lbl);
+            PutRRI("addi", x.r + 1, x.r + 1, -1);  ClearRc(x.r + 1);
+            PutLabel(lbl);
             PutRRR("sub", x.r, x.r, RH); ClearRc(x.r);
             IF (y.b >= -128) & (y.b < 128) THEN
               IF y.b # 0 THEN PutRRI("addi", x.r + 1, x.r + 1, -y.b); ClearRc(x.r + 1) END
             ELSE
               PutRI("movi", RH + 1, y.b);              SetRcI(RH + 1, -1, y.b, IMM);
               PutRRR("sub", x.r + 1, x.r + 1, RH + 1); ClearRc(x.r + 1)
-            END ;
-            lbl := NextLabel();
-            PutBranchRR("bgeu", x.r, RH, lbl);
-            PutRRI("addi", x.r + 1, x.r + 1, -1);  ClearRc(x.r + 1);
-            PutLabel(lbl)
+            END
           END
         ELSIF x.mode = ORB.Const THEN
           IF (x.a # 0) OR (x.b # 0) THEN 
             PutRI("movi", RH, x.a);      SetRcI(RH, -1, x.a, IMM);
+            lbl := NextLabel();
+            PutBranchRR("bgeu", y.r, RH, lbl);
+            PutRRI("addi", y.r + 1, y.r + 1, -1);  ClearRc(y.r + 1);
+            PutLabel(lbl);
             PutRRR("sub", y.r, y.r, RH); ClearRc(y.r);
             IF (x.b >= -128) & (x.b < 128) THEN
               IF x.b # 0 THEN PutRRI("addi", y.r + 1, y.r + 1, -x.b); ClearRc(y.r + 1) END
             ELSE
               PutRI("movi", RH + 1, x.b);              SetRcI(RH + 1, -1, x.b, IMM);
               PutRRR("sub", y.r + 1, y.r + 1, RH + 1); ClearRc(y.r + 1)
-            END ;
-            lbl := NextLabel();
-            PutBranchRR("bgeu", y.r, RH, lbl);
-            PutRRI("addi", y.r + 1, y.r + 1, -1);  ClearRc(y.r + 1);
-            PutLabel(lbl)
+            END
           END
         ELSE 
-          PutRRR("sub", RH - 4, x.r, y.r); ClearRc(RH - 4);
-          PutRRR("sub", RH - 3, x.r + 1, y.r + 1); ClearRc(RH - 3);
           lbl := NextLabel();
-          IF x.r > y.r THEN PutBranchRR("bgeu", y.r, x.r, lbl) ELSE PutBranchRR("bgeu", x.r, y.r, lbl) END ;
+          PutBranchRR("bgeu", x.r, y.r, lbl);
           PutRRI("addi", RH - 3, RH - 3, -1);  ClearRc(RH - 3);
           PutLabel(lbl);
+          PutRRR("sub", RH - 4, x.r, y.r); ClearRc(RH - 4);
+          PutRRR("sub", RH - 3, x.r + 1, y.r + 1); ClearRc(RH - 3);
           x.r := RH - 4;
           decR; decR
         END
       END
-    ELSE
+    ELSE (* 32 bits *)
       IF op = ORS.plus THEN
         IF (x.mode = ORB.Const) & (y.mode = ORB.Const) THEN
           x.a := x.a + y.a
@@ -2048,30 +2048,76 @@ MODULE ORG;
     VAR ex: INTEGER;
   BEGIN
     e("MulOp");
-    IF (x.mode = ORB.Const) & (y.mode = ORB.Const) THEN x.a := x.a * y.a
-    ELSIF (y.mode = ORB.Const) & (y.a >= 2) & (log2(y.a, ex) = 1) THEN 
-      load(x);
-      PutRRI("slli", x.r, x.r, ex); ClearRc(x.r);
-    ELSIF y.mode = ORB.Const THEN 
-      load(x); 
-      PutRI("movi", RH, y.a);       SetRcI(RH, -1, y.a, IMM);
-      PutRRR("mull", x.r, x.r, RH); ClearRc(x.r)
-    ELSIF (x.mode = ORB.Const) & (x.a >= 2) & (log2(x.a, ex) = 1) THEN 
-      load(y); 
-      PutRRI("slli", y.r, y.r, ex); ClearRc(y.r);
-      x.mode := Reg; 
-      x.r := y.r
-    ELSIF x.mode = ORB.Const THEN 
-      load(y); 
-      PutRI("movi", RH, x.a);       SetRcI(RH, -1, x.a, IMM);
-      PutRRR("mull", y.r, y.r, RH); ClearRc(y.r);
-      x.mode := Reg; 
-      x.r := y.r
+    IF (x.type = ORB.longType) OR (y.type = ORB.longType) THEN 
+      UpdateTo64(x, y);
+      IF (x.mode = ORB.Const) & (y.mode = ORB.Const) THEN
+        SYS.Int64Op(SYS.OP_MUL, x.a, x.b, y.a, y.b)
+      ELSIF y.mode = ORB.Const THEN
+        PutRI("movi", RH, y.a);                     SetRcI(RH, -1, y.a, IMM);
+        PutRI("movi", RH + 1, y.b);                 SetRcI(RH + 1, -1, y.b, IMM);
+        PutRI("movi", RH + 2, x.r);                 ClearRc(RH + 2);
+        PutRI("movi", RH + 3, x.r + 1);             ClearRc(RH + 3);
+        PutRRR("mull",   x.r,     RH,      RH + 2); ClearRc(x.r);
+        PutRRR("mulluh", x.r + 1, RH,      RH + 2); ClearRc(x.r + 1);
+        PutRRR("mull",   RH,      RH,      RH + 3); ClearRc(RH);
+        PutRRR("add",    x.r + 1, x.r + 1, RH    );
+        PutRRR("mull",   RH,      RH + 1,  RH + 2);
+        PutRRR("add",    x.r + 1, x.r + 1, RH    );
+      ELSIF x.mode = ORB.Const THEN
+        PutRI("movi", RH, x.a);                     SetRcI(RH, -1, x.a, IMM);
+        PutRI("movi", RH + 1, x.b);                 SetRcI(RH + 1, -1, x.b, IMM);
+        PutRI("movi", RH + 2, y.r);                 ClearRc(RH + 2);
+        PutRI("movi", RH + 3, y.r + 1);             ClearRc(RH + 3);
+        x.r := y.r; x.mode := Reg; x.type := ORB.longType;
+        PutRRR("mull",   x.r,     RH,      RH + 2); ClearRc(x.r);
+        PutRRR("mulluh", x.r + 1, RH,      RH + 2); ClearRc(x.r + 1);
+        PutRRR("mull",   RH,      RH,      RH + 3); ClearRc(RH);
+        PutRRR("add",    x.r + 1, x.r + 1, RH    );
+        PutRRR("mull",   RH,      RH + 1,  RH + 2);
+        PutRRR("add",    x.r + 1, x.r + 1, RH    );
+      ELSE
+        IF x.r < y.r THEN
+          PutRI("movi", RH, x.r);                   ClearRc(RH);
+          PutRI("movi", RH + 1, x.r + 1);           ClearRc(RH + 1);
+        ELSE
+          PutRI("movi", RH, y.r);                   ClearRc(RH);
+          PutRI("movi", RH + 1, y.r + 1);           ClearRc(RH + 1);
+          x.r := y.r;
+        END ;
+        PutRRR("mull",   x.r,     RH - 2,  RH    ); ClearRc(x.r);
+        PutRRR("mulluh", x.r + 1, RH - 2,  RH    ); ClearRc(x.r + 1);
+        PutRRR("mull",   RH - 2,  RH - 2,  RH + 1); ClearRc(RH);
+        PutRRR("add",    x.r + 1, x.r + 1, RH - 2);
+        PutRRR("mull",   RH - 2,  RH - 1,  RH    );
+        PutRRR("add",    x.r + 1, x.r + 1, RH - 2);
+        decR; decR
+      END
     ELSE 
-      load(x); load(y); 
-      PutRRR("mull", RH - 2, x.r, y.r); ClearRc(RH - 2);
-      x.r := RH - 2;
-      decR
+      IF (x.mode = ORB.Const) & (y.mode = ORB.Const) THEN x.a := x.a * y.a
+      ELSIF (y.mode = ORB.Const) & (y.a >= 2) & (log2(y.a, ex) = 1) THEN 
+        load(x);
+        PutRRI("slli", x.r, x.r, ex); ClearRc(x.r);
+      ELSIF y.mode = ORB.Const THEN 
+        load(x); 
+        PutRI("movi", RH, y.a);       SetRcI(RH, -1, y.a, IMM);
+        PutRRR("mull", x.r, x.r, RH); ClearRc(x.r)
+      ELSIF (x.mode = ORB.Const) & (x.a >= 2) & (log2(x.a, ex) = 1) THEN 
+        load(y); 
+        PutRRI("slli", y.r, y.r, ex); ClearRc(y.r);
+        x.mode := Reg; 
+        x.r := y.r
+      ELSIF x.mode = ORB.Const THEN 
+        load(y); 
+        PutRI("movi", RH, x.a);       SetRcI(RH, -1, x.a, IMM);
+        PutRRR("mull", y.r, y.r, RH); ClearRc(y.r);
+        x.mode := Reg; 
+        x.r := y.r
+      ELSE 
+        load(x); load(y); 
+        PutRRR("mull", RH - 2, x.r, y.r); ClearRc(RH - 2);
+        x.r := RH - 2;
+        decR
+      END
     END
   END MulOp;
 
@@ -2079,58 +2125,73 @@ MODULE ORG;
     VAR ex: INTEGER;
   BEGIN
     e("DivOp");
-    IF op = ORS.div THEN
-      IF (x.mode = ORB.Const) & (y.mode = ORB.Const) THEN
-        IF y.a > 0 THEN
-          x.a := x.a DIV y.a 
-        ELSE 
-          ORS.Mark("bad divisor") 
+    IF (x.type = ORB.longType) OR (y.type = ORB.longType) THEN 
+      UpdateTo64(x, y);
+      IF op = ORS.div THEN
+        IF (x.mode = ORB.Const) & (y.mode = ORB.Const) THEN
+          SYS.Int64Op(SYS.OP_DIV, x.a, x.b, y.a, y.b)
+        ELSE ORS.Mark("DIV not implemented for LONGINT")
         END
-      ELSIF (y.mode = ORB.Const) & (y.a >= 2) & (log2(y.a, ex) = 1) THEN 
-        load(x); 
-        PutRRI("srai", x.r, x.r, ex); ClearRc(x.r)
-      ELSIF y.mode = ORB.Const THEN
-        IF y.a > 0 THEN
-          load(x); 
-          PutRI("movi", RH, y.a);       SetRcI(RH, -1, y.a, IMM);
-          PutRRR("quos", x.r, x.r, RH); ClearRc(x.r);
-        ELSE
-          ORS.Mark("bad divisor") 
+      ELSE (* op = ORS.mod *)
+        IF (x.mode = ORB.Const) & (y.mode = ORB.Const) THEN
+          SYS.Int64Op(SYS.OP_MOD, x.a, x.b, y.a, y.b)
+        ELSE ORS.Mark("MOD not implemented for LONGINT")
         END
-      ELSE 
-        load(y);
-        IF check THEN Trap(EQ, TrZeroDiv); incR END ;
-        load(x); 
-        PutRRR("quos", RH - 2, x.r, y.r); ClearRc(RH - 2);
-        x.r := RH - 2;
-        decR
       END
-    ELSE (* op = ORS.mod *)
-      IF (x.mode = ORB.Const) & (y.mode = ORB.Const) THEN
-        IF y.a > 0 THEN 
-          x.a := x.a MOD y.a 
-        ELSE
-          ORS.Mark("bad modulus")
+    ELSE 
+      IF op = ORS.div THEN
+        IF (x.mode = ORB.Const) & (y.mode = ORB.Const) THEN
+          IF y.a > 0 THEN
+            x.a := x.a DIV y.a 
+          ELSE 
+            ORS.Mark("bad divisor") 
+          END
+        ELSIF (y.mode = ORB.Const) & (y.a >= 2) & (log2(y.a, ex) = 1) THEN 
+          load(x); 
+          PutRRI("srai", x.r, x.r, ex); ClearRc(x.r)
+        ELSIF y.mode = ORB.Const THEN
+          IF y.a > 0 THEN
+            load(x); 
+            PutRI("movi", RH, y.a);       SetRcI(RH, -1, y.a, IMM);
+            PutRRR("quos", x.r, x.r, RH); ClearRc(x.r);
+          ELSE
+            ORS.Mark("bad divisor") 
+          END
+        ELSE 
+          load(y);
+          IF check THEN Trap(EQ, TrZeroDiv); incR END ;
+          load(x); 
+          PutRRR("quos", RH - 2, x.r, y.r); ClearRc(RH - 2);
+          x.r := RH - 2;
+          decR
         END
-      ELSIF (y.mode = ORB.Const) & (y.a >= 2) & (log2(y.a, ex) = 1) THEN
-        load(x);
-        PutRI("movi", RH, y.a - 1);    SetRcI(RH, -1, y.a - 1, IMM);
-        PutRRR("and", x.r, x.r, RH);   ClearRc(x.r);
-      ELSIF y.mode = ORB.Const THEN
-        IF y.a > 0 THEN 
+      ELSE (* op = ORS.mod *)
+        IF (x.mode = ORB.Const) & (y.mode = ORB.Const) THEN
+          IF y.a > 0 THEN 
+            x.a := x.a MOD y.a 
+          ELSE
+            ORS.Mark("bad modulus")
+          END
+        ELSIF (y.mode = ORB.Const) & (y.a >= 2) & (log2(y.a, ex) = 1) THEN
           load(x);
-          PutRI("movi", RH, y.a);       SetRcI(RH, -1, y.a, IMM);
-          PutRRR("rems", x.r, x.r, RH); ClearRc(x.r);
+          PutRI("movi", RH, y.a - 1);    SetRcI(RH, -1, y.a - 1, IMM);
+          PutRRR("and", x.r, x.r, RH);   ClearRc(x.r);
+        ELSIF y.mode = ORB.Const THEN
+          IF y.a > 0 THEN 
+            load(x);
+            PutRI("movi", RH, y.a);       SetRcI(RH, -1, y.a, IMM);
+            PutRRR("rems", x.r, x.r, RH); ClearRc(x.r);
+          ELSE
+            ORS.Mark("bad modulus")
+          END
         ELSE
-          ORS.Mark("bad modulus")
+          load(x);
+          IF check THEN Trap(EQ, TrZeroDiv); incR END ;
+          load(y); 
+          PutRRR("rems", RH - 2, x.r, y.r); ClearRc(RH - 2);
+          x.r := RH - 2;
+          decR
         END
-      ELSE
-        load(x);
-        IF check THEN Trap(EQ, TrZeroDiv); incR END ;
-        load(y); 
-        PutRRR("rems", RH - 2, x.r, y.r); ClearRc(RH - 2);
-        x.r := RH - 2;
-        decR
       END
     END
   END DivOp;
@@ -2369,22 +2430,26 @@ MODULE ORG;
   VAR cond: INTEGER;
   BEGIN
     e("int relation");
-    CheckFreeRegs(2);
-    cond := relmap[op - ORS.eql];
-    load(x); 
-    IF y.mode = ORB.Const THEN
-      PutRI("movi", RH, y.a); SetRcI(RH, -1, y.a, IMM);
-      incR
+    IF (x.type = ORB.longType) OR (y.type = ORB.longType) THEN 
+      UpdateTo64(x, y);
     ELSE
-      IF (x.mode = Cond) OR (y.mode = Cond) THEN ORS.Mark("not implemented") END ;
-      load(y);
-      IF y.r = (RH-2) THEN
-        cond := cond + 100; (* arguments must be reversed *)
-      ELSIF y.r # (RH-1) THEN
-        ORS.Mark("Internal error: IntRelation");
-      END
-    END ;
-    SetCC(x, cond);
+      CheckFreeRegs(2);
+      cond := relmap[op - ORS.eql];
+      load(x); 
+      IF y.mode = ORB.Const THEN
+        PutRI("movi", RH, y.a); SetRcI(RH, -1, y.a, IMM);
+        incR
+      ELSE
+        IF (x.mode = Cond) OR (y.mode = Cond) THEN ORS.Mark("not implemented") END ;
+        load(y);
+        IF y.r = (RH - 2) THEN
+          cond := cond + 100; (* arguments must be reversed *)
+        ELSIF y.r # (RH - 1) THEN
+          ORS.Mark("Internal error: IntRelation");
+        END
+      END ;
+      SetCC(x, cond);
+    END
   END IntRelation;
 
   (* Reals are treated as integers for comparaison. Equality won't work if
@@ -2886,7 +2951,7 @@ MODULE ORG;
   (* The Esp32 architecture is using a windowing facility that shift
      registers on calls to minimize the need to push registers on the stack.
 
-     The compiler uses 4, 8 or 12 registers shifts to free registers
+     The compiler uses 4, 8 registers shifts to free registers
      for the next call, depending on the number of registers required to
      make de call (parameters) and the registers in use by the caller.
 
@@ -2895,7 +2960,6 @@ MODULE ORG;
       ------    ------   ----------   ----------
       call4       a4         a6           9
       call8       a8        a10           5
-      call12     a12        a14           1
 
     The following algorithm try to optimize the number of registers to save
     on stack if not enough free registers available, combined with the 

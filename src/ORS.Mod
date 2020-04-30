@@ -1,5 +1,5 @@
 MODULE ORS; (* NW 19.9.93 / 15.3.2017  Scanner in Oberon-07*)
-  IMPORT SYSTEM, Out, Texts;
+  IMPORT SYSTEM, SYS, Out, Texts;
 
 (* Oberon Scanner does lexical analysis. Input is Oberon-Text, output is
   sequence of symbols, i.e identifiers, numbers, strings, and special symbols.
@@ -207,16 +207,16 @@ MODULE ORS; (* NW 19.9.93 / 15.3.2017  Scanner in Oberon-07*)
     END ;
     RETURN x
   END Ten;
-
+(*
   PROCEDURE Number(VAR sym: INTEGER);
     CONST max = 2147483647 (* 2^31 - 1 *);
     VAR 
       i, k, e, n, s, h: INTEGER; x: REAL;
-      d: ARRAY 16 OF INTEGER;
+      d: ARRAY 21 OF INTEGER;
       negE: BOOLEAN;
   BEGIN ival := 0; i := 0; n := 0; k := 0;
     REPEAT
-      IF n < 16 THEN d[n] := ORD(ch) - 30H; INC(n) ELSE Mark("too many digits"); n := 0 END ;
+      IF n < 20 THEN d[n] := ORD(ch) - 30H; INC(n) ELSE Mark("too many digits"); n := 0 END ;
       GetCh()
     UNTIL (ch < "0") OR (ch > "9") & (ch < "A") OR (ch > "F");
     IF (ch = "H") OR (ch = "R") OR (ch = "X") THEN  (* hex *)
@@ -275,6 +275,63 @@ MODULE ORS; (* NW 19.9.93 / 15.3.2017  Scanner in Oberon-07*)
         INC(i)
       UNTIL i = n;
       sym := int; ival := k
+    END
+  END Number;
+*)
+  PROCEDURE Number(VAR sym: INTEGER);
+    VAR 
+      i, k, e, n, s, h: INTEGER; x: REAL;
+      d: ARRAY 22 OF CHAR;
+      negE: BOOLEAN;
+  BEGIN ival := 0; i := 0; n := 0; k := 0;
+    REPEAT
+      IF n < 21 THEN d[n] := ch; INC(n) ELSE Mark("too many digits"); n := 0 END ;
+      GetCh()
+    UNTIL (ch < "0") OR (ch > "9") & (ch < "A") OR (ch > "F");
+    d[n] := 0X;
+    IF (ch = "H") OR (ch = "R") OR (ch = "X") THEN  (* hex *)
+      IF ~SYS.StrToInt64(16, d, ival, ival1) THEN Mark("bad number") END ;
+      IF ch = "X" THEN sym := char;
+        IF ival >= 100H THEN Mark("illegal value"); ival := 0 END ; ival1 := 0
+      ELSIF ch = "R" THEN sym := real; rval := SYSTEM.VAL(REAL, ival); ival := 0; ival1 := 0
+      ELSIF ival1 # 0 THEN sym := long ELSE sym := int
+      END ;
+      GetCh()
+    ELSIF ch = "." THEN
+      GetCh();
+      IF ch = "." THEN (* double dot *) ch := 7FX;  (* decimal integer *)
+        IF ~SYS.StrToInt64(10, d, ival, ival1) THEN Mark("bad number")
+        ELSIF (ival1 = 0) & (ival < 0) THEN Mark("number too large"); ival := 0 END ;
+        IF ival1 # 0 THEN sym := long ELSE sym := int END
+      ELSE (* real number *) x := 0.0; e := 0;
+        REPEAT  (* integer part *) x := x * 10.0 + FLT(ORD(d[i]) - 30H); INC(i) UNTIL i = n;
+        WHILE (ch >= "0") & (ch <= "9") DO  (* fraction *)
+          x := x * 10.0 + FLT(ORD(ch) - 30H); DEC(e); GetCh()
+        END ;
+        IF (ch = "E") OR (ch = "D") THEN  (* scale factor *)
+          GetCh(); s := 0; 
+          IF ch = "-" THEN negE := TRUE; GetCh()
+          ELSE negE := FALSE;
+            IF ch = "+" THEN GetCh() END
+          END ;
+          IF (ch >= "0") & (ch <= "9") THEN
+            REPEAT s := s * 10 + ORD(ch) - 30H; GetCh()
+            UNTIL (ch < "0") OR (ch >"9");
+            IF negE THEN e := e - s ELSE e := e + s END
+          ELSE Mark("digit expected")
+          END
+        END ;
+        IF e < 0 THEN
+          IF e >= -maxExp THEN x := x / Ten(-e) ELSE x := 0.0 END
+        ELSIF e > 0 THEN
+          IF e <= maxExp THEN x := Ten(e) * x ELSE x := 0.0; Mark("too large") END
+        END ;
+        sym := real; rval := x
+      END
+    ELSE  (* decimal integer *)
+      IF ~SYS.StrToInt64(10, d, ival, ival1) THEN Mark("bad number")
+      ELSIF (ival1 = 0) & (ival < 0) THEN Mark("number too large"); ival := 0 END ;
+      IF ival1 # 0 THEN sym := long ELSE sym := int END
     END
   END Number;
 

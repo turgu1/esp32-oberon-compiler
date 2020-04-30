@@ -6,6 +6,7 @@
 #include <stdio.h>
 #include <stdlib.h> 
 #include <unistd.h> 
+#include <errno.h>
 
 #define OBERON_SOURCE_FILENAME "SYS.Mod"
 
@@ -16,17 +17,23 @@ union {
   OBNC_INTEGER i;
 } w;
 
+union {
+  int64_t i;
+  struct {
+    int32_t xlow;
+    int32_t xhigh;
+  };
+} num1, num2;
+
 void SYS__IntToReal_(OBNC_INTEGER i_, OBNC_REAL *r_)
 {
   w.i = i_; *r_ = w.f;
 }
 
-
 void SYS__RealToInt_(OBNC_REAL r_, OBNC_INTEGER *i_)
 {
   w.f = r_;  *i_ = w.i;
 }
-
 
 void SYS__Exit_(OBNC_INTEGER i_)
 {
@@ -73,6 +80,31 @@ OBNC_INTEGER SYS__Assembler_(const char fromFile_[], OBNC_INTEGER fromFile_len, 
   #endif
 }
 
+void SYS__Int64Op_(OBNC_INTEGER op_, OBNC_INTEGER *xlow_, OBNC_INTEGER *xhigh_, OBNC_INTEGER ylow_, OBNC_INTEGER yhigh_)
+{
+  num1.xlow  = * xlow_;
+  num1.xhigh = *xhigh_;
+  num2.xlow  =   ylow_;
+  num2.xhigh =  yhigh_;
+
+  if      (op_ == SYS__OP_ADD_) num1.i = num1.i + num2.i; 
+  else if (op_ == SYS__OP_SUB_) num1.i = num1.i - num2.i; 
+  else if (op_ == SYS__OP_MUL_) num1.i = num1.i * num2.i; 
+  else if (op_ == SYS__OP_DIV_) num1.i = num1.i / num2.i; 
+  else if (op_ == SYS__OP_MOD_) num1.i = num1.i % num2.i; 
+
+  *xlow_  = num1.xlow;
+  *xhigh_ = num1.xhigh;
+}
+
+int SYS__StrToInt64_(OBNC_INTEGER base_, const char str_[], OBNC_INTEGER str_len, OBNC_INTEGER *xlow_, OBNC_INTEGER *xhigh_)
+{
+  errno = 0;
+  num1.i = strtoll(str_, NULL, base_);
+  *xlow_  = num1.xlow;
+  *xhigh_ = num1.xhigh;
+  return errno == 0;
+}
 
 void SYS__Init(void)
 {

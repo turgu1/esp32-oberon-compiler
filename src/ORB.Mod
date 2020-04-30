@@ -39,7 +39,7 @@ MODULE ORB;   (*NW 25.6.2014  / 1.3.2019  in Oberon-07*)
       dsc*:   Object;
       type*:  Type;
       name*:  ORS.Ident;
-      val*:   INTEGER
+      val*, val1*: INTEGER (* for LONGINT, val1 is the highest 32 bits *)
     END ;
 
     ModDesc* = RECORD (ObjDesc) orgname*: ORS.Ident; cdecl: BOOLEAN END ;
@@ -310,7 +310,10 @@ MODULE ORB;   (*NW 25.6.2014  / 1.3.2019  in Oberon-07*)
             WHILE k # 0 DO typtab[k].base := t; Read(R, k) END
           ELSE
             IF class = Const THEN
-              IF obj.type.form = Real THEN Files.ReadInt(R, obj.val) ELSE Files.ReadNum(R, obj.val) END
+              IF obj.type.form = Real THEN Files.ReadInt(R, obj.val)
+              ELSE Files.ReadNum(R, obj.val); 
+                IF obj.type = longType THEN Files.ReadNum(R, obj.val1) END 
+              END
             ELSIF class = Var THEN Files.ReadNum(R, obj.val); obj.rdo := TRUE
             END
           END ;
@@ -439,7 +442,8 @@ MODULE ORB;   (*NW 25.6.2014  / 1.3.2019  in Oberon-07*)
         ELSIF obj.class = Const THEN
           IF (obj.type.form = Proc) OR (obj.type.form = CProc) THEN Files.WriteNum(R, obj.exno)
           ELSIF obj.type.form = Real THEN Files.WriteInt(R, obj.val)
-          ELSE Files.WriteNum(R, obj.val)
+          ELSE Files.WriteNum(R, obj.val);
+            IF obj.type = longType THEN Files.WriteNum(R, obj.val1) END
           END
         ELSIF obj.class = Var THEN Files.WriteNum(R, obj.val)
         END
