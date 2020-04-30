@@ -1848,10 +1848,10 @@ MODULE ORG;
   BEGIN
     IF x.type # ORB.longType THEN
       x.type := ORB.longType;
-      PutRI("movi", RH, 0);
+      PutRI("movi", RH, 0);          SetRcI(RH, -1, 0, IMM);
       lbl := NextLabel();
       PutBranchR("bgez", x.r, lbl);
-      PutRI("movi", RH, -1);
+      PutRI("movi", RH, -1);         SetRcI(RH, -1, -1, IMM);
       PutLabel(lbl);
       incR
     END
@@ -1873,8 +1873,10 @@ MODULE ORG;
 
     PROCEDURE ShiftReg(VAR x: Item);
     BEGIN
-      IF x.type = ORB.longType THEN PutRR("mov", x.r + 2, x.r + 1) END ;
-      PutRR("mov", x.r + 1, x.r);
+      IF x.type = ORB.longType THEN 
+        PutRR("mov", x.r + 2, x.r + 1); ClearRc(x.r + 2)
+      END ;
+      PutRR("mov", x.r + 1, x.r); ClearRc(x.r + 1);
       INC(x.r);
     END ShiftReg;
 
@@ -1955,7 +1957,7 @@ MODULE ORG;
           SYS.Int64Op(SYS.OP_SUB, x.a, x.b, y.a, y.b)
         ELSIF y.mode = ORB.Const THEN
           IF (y.a # 0) OR (y.b # 0) THEN 
-            PutRI("movi", RH, y.a);      SetRcI(RH, -1, y.a, IMM);
+            PutRI("movi", RH, y.a);                SetRcI(RH, -1, y.a, IMM);
             lbl := NextLabel();
             PutBranchRR("bgeu", x.r, RH, lbl);
             PutRRI("addi", x.r + 1, x.r + 1, -1);  ClearRc(x.r + 1);
@@ -2693,11 +2695,11 @@ MODULE ORG;
         ORS.Mark("inadmissible assignment")
       END ;
       lbl := NextLabel();
-      PutBranchR("loop", RH, lbl);    ClearRc(RH);
+      PutBranchR("loop", RH, lbl);      ClearRc(RH);
         PutRRI("l32i", RH + 1, y.r, 0); ClearRc(RH + 1);
-        PutRRI("addi", y.r, y.r, 4);  ClearRc(y.r);
+        PutRRI("addi", y.r, y.r, 4);    ClearRc(y.r);
         PutRRI("s32i", RH + 1, x.r, 0); ClearRc(RH + 1);
-        PutRRI("addi", x.r, x.r, 4);  ClearRc(x.r);
+        PutRRI("addi", x.r, x.r, 4);    ClearRc(x.r);
       PutLabel(lbl)
     END ;
     RH := FirstRH; UsedRegs := {}
@@ -2721,11 +2723,11 @@ MODULE ORG;
     loadStringAdr(y);
     PutRI("movi", RH, (y.b + 3) DIV 4); SetRcI(RH, -1, (y.b + 3) DIV 4, IMM);
     lbl := NextLabel();
-    PutBranchR("loop", RH, lbl);     ClearRc(RH);
+    PutBranchR("loop", RH, lbl);       ClearRc(RH);
       PutRRI("l32i", RH + 1,  y.r, 0); ClearRc(RH + 1);
-      PutRRI("addi", y.r, y.r, 4);   ClearRc(y.r);
+      PutRRI("addi", y.r, y.r, 4);     ClearRc(y.r);
       PutRRI("s32i", RH + 1,  x.r, 0); ClearRc(RH + 1);
-      PutRRI("addi", x.r, x.r, 4);   ClearRc(x.r);
+      PutRRI("addi", x.r, x.r, 4);     ClearRc(x.r);
     PutLabel(lbl);
     RH := FirstRH; UsedRegs := {}
    END CopyString;
