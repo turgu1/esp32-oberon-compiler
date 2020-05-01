@@ -15,6 +15,10 @@
 
 #define SYS__OP_MOD_ 5
 
+#define SYS__OP_ABS_ 6
+
+#define SYS__OP_NEG_ 7
+
 #define SYS__IntToReal_ src__SYS__IntToReal_
 void SYS__IntToReal_(OBNC_INTEGER i_, OBNC_REAL *r_);
 
@@ -27,8 +31,11 @@ void SYS__Exit_(OBNC_INTEGER i_);
 #define SYS__Assembler_ src__SYS__Assembler_
 OBNC_INTEGER SYS__Assembler_(const char fromFile_[], OBNC_INTEGER fromFile_len, const char toFile_[], OBNC_INTEGER toFile_len);
 
-#define SYS__Int64Op_ oberon__SYS__Int64Op_
-void SYS__Int64Op_(OBNC_INTEGER op_, OBNC_INTEGER *xlow_, OBNC_INTEGER *xhigh_, OBNC_INTEGER ylow_, OBNC_INTEGER yhigh_);
+#define SYS__Int64Op1_ oberon__SYS__Int64Op1_
+void SYS__Int64Op1_(OBNC_INTEGER op_, OBNC_INTEGER *xlow_, OBNC_INTEGER *xhigh_);
+
+#define SYS__Int64Op2_ oberon__SYS__Int64Op2_
+void SYS__Int64Op2_(OBNC_INTEGER op_, OBNC_INTEGER *xlow_, OBNC_INTEGER *xhigh_, OBNC_INTEGER ylow_, OBNC_INTEGER yhigh_);
 
 #define SYS__StrToInt64_ oberon__SYS__StrToInt64_
 int SYS__StrToInt64_(OBNC_INTEGER base_, const char str_[], OBNC_INTEGER str_len, OBNC_INTEGER *xlow_, OBNC_INTEGER *xhigh_);

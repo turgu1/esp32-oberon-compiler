@@ -80,7 +80,19 @@ OBNC_INTEGER SYS__Assembler_(const char fromFile_[], OBNC_INTEGER fromFile_len, 
   #endif
 }
 
-void SYS__Int64Op_(OBNC_INTEGER op_, OBNC_INTEGER *xlow_, OBNC_INTEGER *xhigh_, OBNC_INTEGER ylow_, OBNC_INTEGER yhigh_)
+void SYS__Int64Op1_(OBNC_INTEGER op_, OBNC_INTEGER *xlow_, OBNC_INTEGER *xhigh_)
+{
+  num1.xlow  = * xlow_;
+  num1.xhigh = *xhigh_;
+
+  if (op_ == SYS__OP_ABS_) num1.i = llabs(num1.i); 
+  else if (op_ == SYS__OP_NEG_) num1.i = -num1.i; 
+
+  *xlow_  = num1.xlow;
+  *xhigh_ = num1.xhigh;
+}
+
+void SYS__Int64Op2_(OBNC_INTEGER op_, OBNC_INTEGER *xlow_, OBNC_INTEGER *xhigh_, OBNC_INTEGER ylow_, OBNC_INTEGER yhigh_)
 {
   num1.xlow  = * xlow_;
   num1.xhigh = *xhigh_;

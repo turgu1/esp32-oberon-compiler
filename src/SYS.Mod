@@ -6,6 +6,8 @@ MODULE SYS;
     OP_MUL* = 3;
     OP_DIV* = 4;
     OP_MOD* = 5;
+    OP_ABS* = 6;
+    OP_NEG* = 7;
 
   PROCEDURE IntToReal*(i: INTEGER; VAR r: REAL);
   BEGIN
@@ -24,9 +26,13 @@ MODULE SYS;
   RETURN 1
   END Assembler;
 
-  PROCEDURE Int64Op*(op: INTEGER; VAR xlow, xhigh: INTEGER; ylow, yhigh: INTEGER);
+  PROCEDURE Int64Op1*(op: INTEGER; VAR xlow, xhigh: INTEGER);
   BEGIN
-  END Int64Op;
+  END Int64Op1;
+
+  PROCEDURE Int64Op2*(op: INTEGER; VAR xlow, xhigh: INTEGER; ylow, yhigh: INTEGER);
+  BEGIN
+  END Int64Op2;
 
   PROCEDURE StrToInt64*(base: INTEGER; str: ARRAY OF CHAR; VAR xlow, xhigh: INTEGER): BOOLEAN;
   BEGIN
