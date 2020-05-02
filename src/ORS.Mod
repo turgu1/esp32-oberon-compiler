@@ -289,20 +289,20 @@ MODULE ORS; (* NW 19.9.93 / 15.3.2017  Scanner in Oberon-07*)
       GetCh()
     UNTIL (ch < "0") OR (ch > "9") & (ch < "A") OR (ch > "F");
     d[n] := 0X;
-    IF (ch = "H") OR (ch = "R") OR (ch = "X") THEN  (* hex *)
+    IF (ch = "H") OR (ch = "R") OR (ch = "X") OR (ch = "L") THEN  (* hex *)
       IF ~SYS.StrToInt64(16, d, ival, ival1) THEN Mark("bad number") END ;
       IF ch = "X" THEN sym := char;
-        IF ival >= 100H THEN Mark("illegal value"); ival := 0 END ; ival1 := 0
+        IF (ival >= 100H) OR (ival1 # 0) THEN Mark("illegal value"); ival := 0 END ; ival1 := 0
       ELSIF ch = "R" THEN sym := real; rval := SYSTEM.VAL(REAL, ival); ival := 0; ival1 := 0
-      ELSIF ival1 # 0 THEN sym := long ELSE sym := int
+      ELSE IF (ival1 # 0) OR (ch = "L") THEN sym := long ELSE sym := int
       END ;
       GetCh()
     ELSIF ch = "." THEN
       GetCh();
       IF ch = "." THEN (* double dot *) ch := 7FX;  (* decimal integer *)
         IF ~SYS.StrToInt64(10, d, ival, ival1) THEN Mark("bad number")
-        ELSIF (ival1 = 0) & (ival < 0) THEN Mark("number too large"); ival := 0 END ;
-        IF ival1 # 0 THEN sym := long ELSE sym := int END
+        ELSE IF (ival1 # 0) OR (ival < 0) THEN sym := long ELSE sym := int END
+        END
       ELSE (* real number *) x := 0.0; e := 0;
         REPEAT  (* integer part *) x := x * 10.0 + FLT(ORD(d[i]) - 30H); INC(i) UNTIL i = n;
         WHILE (ch >= "0") & (ch <= "9") DO  (* fraction *)
@@ -330,8 +330,8 @@ MODULE ORS; (* NW 19.9.93 / 15.3.2017  Scanner in Oberon-07*)
       END
     ELSE  (* decimal integer *)
       IF ~SYS.StrToInt64(10, d, ival, ival1) THEN Mark("bad number")
-      ELSIF (ival1 = 0) & (ival < 0) THEN Mark("number too large"); ival := 0 END ;
-      IF ival1 # 0 THEN sym := long ELSE sym := int END
+      ELSE IF (ival1 # 0) OR (ival < 0)) THEN sym := long ELSE sym := int END 
+      END
     END
   END Number;
 

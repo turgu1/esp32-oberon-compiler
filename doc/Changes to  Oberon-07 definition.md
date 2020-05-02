@@ -197,7 +197,11 @@ END P;
 Two *new* number types are supported by OberonESP32:
 
 - numerical type `SHORTINT` allow for unsigned 16 bits values (0..65535). `SHORTINT` are aligned to 2-bytes boundaries in records.
-- numerical type `LONGINT` allow for signed 64 bits values (-9223372036854775807 .. 9223372036854775807). `LONGINT` are aligned to 4-bytes boundaries in records.
+- numerical type `LONGINT` allow for signed 64 bits values (-9223372036854775808 .. 9223372036854775807). `LONGINT` are aligned to 4-bytes boundaries in records.
+
+Constant LONGINT hexadecimal values can be declared with an "L" suffix instead of an "H" suffix. Hexadecimal constants declared using an "H" suffix with more than 8 significant hex digits are promoted to LONGINT. For example, 087654321H is an INTEGER, but 0187654321H is a LONGIINT.
+
+A decimal constant that is too large to fit as a positive INTEGER is automatically promoted to LONGINT by the compiler.
 
 ## CHAR vs ARRAY OF CHAR
 

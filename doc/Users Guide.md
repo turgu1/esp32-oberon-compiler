@@ -82,7 +82,7 @@ The supplied `OIOrderESP32` application is responsible of generating the module 
 | BYTE     | 8 bits  | Byte      |           0          |      255            |
 | SHORTINT | 16 bits | 2 Bytes   |           0          |     65535           |
 | INTEGER  | 32 bits | 4 bytes   |     -2147483648      |   2147483647        |
-| LONGINT  | 64 bits | 4 Bytes   | -9223372036854775807 | 9223372036854775807 |
+| LONGINT  | 64 bits | 4 Bytes   | -9223372036854775808 | 9223372036854775807 |
 | SET      | 32 BITS | 4 Bytes   |          {}          |   {0 .. 31}         |
 
 ## Standard Module
