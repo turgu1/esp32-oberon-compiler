@@ -294,7 +294,7 @@ MODULE ORS; (* NW 19.9.93 / 15.3.2017  Scanner in Oberon-07*)
       IF ch = "X" THEN sym := char;
         IF (ival >= 100H) OR (ival1 # 0) THEN Mark("illegal value"); ival := 0 END ; ival1 := 0
       ELSIF ch = "R" THEN sym := real; rval := SYSTEM.VAL(REAL, ival); ival := 0; ival1 := 0
-      ELSE IF (ival1 # 0) OR (ch = "L") THEN sym := long ELSE sym := int
+      ELSE IF (ival1 # 0) OR (ch = "L") THEN sym := long ELSE sym := int END
       END ;
       GetCh()
     ELSIF ch = "." THEN
@@ -330,7 +330,7 @@ MODULE ORS; (* NW 19.9.93 / 15.3.2017  Scanner in Oberon-07*)
       END
     ELSE  (* decimal integer *)
       IF ~SYS.StrToInt64(10, d, ival, ival1) THEN Mark("bad number")
-      ELSE IF (ival1 # 0) OR (ival < 0)) THEN sym := long ELSE sym := int END 
+      ELSE IF (ival1 # 0) OR (ival < 0) THEN sym := long ELSE sym := int END 
       END
     END
   END Number;

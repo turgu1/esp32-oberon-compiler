@@ -1,35 +1,14 @@
 (* ESP32 Kernel Functions *)
 
 MODULE Kernel;
-  IMPORT SYSTEM, Out;
+  IMPORT SYSTEM, Out, t := ESP_Timer;
 
   CONST
-    (* CPU Speed Control Registers *)
-    RTC_CNTL_CLK_CONF_REG    = 3FF48070H;
-    DPORT_CPU_PER_CONF_REG   = 3FF0003CH;
-
-    CLK_SEL_MASK             = 0E7FFFFFFH;
-    
-    CLK_XTAL                 = 00000000H;
-    CLK_PLL                  = 08000000H;
-    CLK_CK8M                 = 10000000H;
-    CLK_APLL                 = 18000000H;
-
-    TIMG0_T0CONFIG_REG       = 3FF5F000H;
-    TIMG0_T0LO_REG           = 3FF5F004H;
-    TIMG0_T0HI_REG           = 3FF5F008H;
-    TIMG0_T0UPDATE_REG       = 3FF5F00CH;
-    TIMG0_T0ALARMLO_REG      = 3FF5F010H;
-    TIMG0_T0ALARMHI_REG      = 3FF5F014H;
-    TIMG0_T0LOADLO_REG       = 3FF5F018H;
-    TIMG0_T0LOADHI_REG       = 3FF5F01CH;
-    TIMG0_T0LOAD_REG         = 3FF5F020H;
-
-    OneSecond*               = 1000000;
-    OneMinute*               = OneSecond * 60;
+    OneSecond* = 1000000;
+    OneMinute* = OneSecond * 60;
 
   TYPE
-    ClockTime* = RECORD low*, high*: INTEGER END ;
+    ClockTime* = LONGINT;
 (*
   CONST SectorLength* = 1024;
     timer = -64; spiData = -48; spiCtrl = -44;
@@ -415,9 +394,7 @@ MODULE Kernel;
 
   PROCEDURE GetTime*(VAR time: ClockTime);
   BEGIN
-    SYSTEM.PUT(TIMG0_T0UPDATE_REG, 0);
-    SYSTEM.GET(TIMG0_T0LO_REG, time.low);
-    SYSTEM.GET(TIMG0_T0HI_REG, time.high)
+    time := t.esp_timer_get_time()
   END GetTime;
 
   PROCEDURE GetElapseTime*(VAR fromTime: ClockTime): INTEGER;
@@ -426,79 +403,20 @@ MODULE Kernel;
       result: INTEGER;
   BEGIN 
     GetTime(time);
-    ASM
-        l32i a3, a1, 0         # a3 := address of fromTime
-        l32i a4, a1, 12        # a4 := time.high
-        l32i a5, a1, 8         # a5 := time.low
-        l32i a6, a3, 0         # a6 := fromTime.low
-        sub  a7, a5, a6        # a7 := time.low - fromTime.low 
-        bgeu a5, a7, 996$      # branch if no borrow
-        addi a4, a4, -1
-    996$:
-        l32i a5, a3, 4         # a5 := fromTime.high
-        beq a4, a5, 997$        # if time.high # fromTime.high then
-        movi a7, -1            #    overflow
-    997$:
-        s32i a7, a1, 16        # Save value in result
-    END ;
-  RETURN result
+    RETURN fromtime - time
   END GetElapseTime;
 
+  (* Not the best way to wait... duration in uSec *)
   PROCEDURE Wait*(duration: INTEGER);
     VAR
       time, target: ClockTime;
-      done: BOOLEAN;
   BEGIN
-    done := FALSE;
     GetTime(target);
-    ASM
-        l32i a3, a1, 12        # a3 := low
-        l32i a4, a1, 16        # a4 := high
-        l32i a5, a1, 0         # a5 := duration
-        add  a6, a3, a5        # a6 := low + wait_time
-        bgeu a6, a3, 998$      # branch if no overflow on high part
-        addi a4, a4, 1
-    998$:
-        s32i a6, a1, 12        # Save low
-        s32i a4, a1, 16        # Save high
-    END ;
+    target := time + duration;
     REPEAT
-      GetTime(time);
-      ASM
-          l32i a3, a1, 8       # a3 := high just read
-          l32i a4, a1, 16      # a4 := high target
-          bltu a3, a4, 999$    # Branch if High portion of the timer is still too small
-          l32i a3, a1, 4       # a3 := low just read
-          l32i a4, a1, 12      # a4 := low target
-          bltu a3, a4, 999$    # Branch if Low portion of the timer is still too small
-          movi a3, 1           # done := TRUE
-          s8i  a3, a1, 20
-      999$:
-      END
-    UNTIL done
+      GetTime(time)
+    UNTIL time >= target
   END Wait;
-
-  PROCEDURE InitTimer;
-    CONST
-      TIMER_CONFIG            = 0C0004000H;
-      TIMER_ENABLE_BIT        = 080000000H;
-      TIMER_ENABLE_CLR_MASQ   = 07FFFFFFFH;
-      TIMER_DIVIDER_BITS      = 01FFFE000H;
-      TIMER_DIVIDER_CLR_MASQ  = 0E0001FFFH;
-    VAR i: INTEGER;
-  BEGIN
-    (* Base tick is 80Mhz. Divider set to get 1Mhz Timer ticks : 80 *)
-    (* Disable Timer *)
-    SYSTEM.GET(TIMG0_T0CONFIG_REG, i);
-    i := AND(i, TIMER_ENABLE_CLR_MASQ);
-    SYSTEM.PUT(TIMG0_T0CONFIG_REG, i);
-    (* Set divider and enable-it *)
-    i := BOR(i, LSL(80, 13) + TIMER_ENABLE_BIT);
-    SYSTEM.PUT(TIMG0_T0CONFIG_REG, i);
-    SYSTEM.PUT(TIMG0_T0LOADLO_REG, 0);
-    SYSTEM.PUT(TIMG0_T0LOADHI_REG, 0);
-    SYSTEM.PUT(TIMG0_T0LOAD_REG,   0);
-  END InitTimer;
 
   (* ----- Processor Speed ----- *)
 
@@ -526,9 +444,7 @@ MODULE Kernel;
     SYSTEM.PUT(DPORT_CPU_PER_CONF_REG, 0);
   END SetCPUSpeed80Mhz;
 
-  (* Still not an interrupt handler. It is called through a call4
-     instruction *)
-  PROCEDURE [1] OberonSyscallHandler(tag: INTEGER; p1, p2: INTEGER);
+  PROCEDURE [IRAM] OberonSyscallHandler(tag: INTEGER; p1, p2: INTEGER);
     VAR adr, tg, num: INTEGER;
   BEGIN
     tg  := AND(tag, 255);

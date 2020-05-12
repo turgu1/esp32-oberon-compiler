@@ -55,7 +55,8 @@ SRC = \
   Strings.Mod \
   ESP_Support.Mod \
   ESP_Error.Mod \
-  ESP_System.Mod
+  ESP_System.Mod \
+  ESP_Timer.Mod
 
 ARCHIVE = liboberonesp32.a
 

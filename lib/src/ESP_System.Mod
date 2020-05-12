@@ -40,7 +40,7 @@ MODULE [CDECL] ESP_System;
 
     (* typedef enum esp_chip_model_t *)
     CHIP_ESP32*          =  1; (* ESP32 *)
-    CHIP_ESP32S2*        =  2; (* ESP32-S2 NOT SUPPORTED BY OberonSP32... *)
+    CHIP_ESP32S2*        =  2; (* ESP32-S2 NOT SUPPORTED BY OberonESP32... *)
 
     (* Chip feature flags, used in esp_chip_info_t (SET) *)
     CHIP_FEATURE_EMB_FLASH = 0; (* Chip has embedded flash memory *)
