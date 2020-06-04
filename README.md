@@ -21,16 +21,33 @@ The folder `test-baremetal` demonstrates the feasibility of independent coding f
 
 ### OBNC
 
-The OBNC Oberon-07 version 0.16.1 is used to build this compiler. The author is using it on both Linux and MacOs platforms without any major issue (Except for the SYSTEM.VAL() that needed to be replaced and some support functions. See the `SYS.*` files in the `src` folder). It must be built using the following commands and option (after having changed current folder to OBNC):
+The OBNC Oberon-07 version 0.16.1 is used to build this compiler. It is available from [this](https://miasap.se/obnc/) location. The author is using it on both Linux and MacOs platforms without any major issue (Except for the SYSTEM.VAL() that needed to be replaced and some support functions. See the `SYS.*` files in the `src` folder). It must be built using the following commands and option (after having extracted the source code to ~/Downloads/obnc-0.16.1). For example, on Linux Ubuntu:
 
 ```sh
+$ cd ~/Downloads/obnc-0.16.1
+$ sudo apt install libgc-dev libsdl1.2-dev
 $ ./build --c-real-type=float
-$ ./install
+$ sudo ./install
 ```
 
-(Both INTEGER and REAL must be set to 32bits. The compiler is verifying this aspect on startup.)
+On MaxOs, using homebrew:
 
-The OBNC Oberon-07 compiler is required with the extension libraries to parse command line arguments. Both are available from [this](https://miasap.se/obnc/) location.
+```sh
+$ cd ~/Downloads/obnc-0.16.1
+$ brew install libgc sdl
+$ ./build --c-real-type=float
+$ sudo ./install
+```
+
+(Both INTEGER and REAL must be set to 32bits. The compiler is verifying this aspect on startup. The option "--c-real-type=float" will do it)
+
+The OBNC extension libraries is also required to parse command line arguments. It is also available from [this](https://miasap.se/obnc/) location. Further instructions are included in the README file in the root directory of the package. The extension library can be built and installed using the following commands on Linux Ubuntu and MacOS (after having extracted the source code to ~/Downloads/obnc-libext-0.7.0):
+
+```sh
+$ cd ~/Downloads/obnc-libext-0.7.0
+$ ./build
+$ sudo ./install
+```
 
 ### ESP-IDF
 
