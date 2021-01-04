@@ -1,5 +1,9 @@
 # ESP32 Oberon-07 Compiler
 
+By lack of time, the development of the compiler is now stopped forever. If somebody wants to continue the development, please do.
+
+------
+
 This is an ongoing effort to build an ESP32 Oberon Compiler, using the Oberon-07 Compiler from [Project Oberon](http://www.projectoberon.com) by Niklaus Wirth and Jürg Gutknecht and some code from project [Oberon Extended](https://github.com/andreaspirklbauer/Oberon-extended) by Mr. Andreas Pirklbauer. Test cases are being designed in part using the [OberonC](https://github.com/lboasso) effort by Luca Boasso.
 
 The code is being ported to [OBNC](https://miasap.se/obnc/) and produces ELF object code through ESP32 assembly language generation. 
